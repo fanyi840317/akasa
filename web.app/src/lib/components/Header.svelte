@@ -8,7 +8,6 @@
 
 <header class="header">
   <div class="logo">2x.fan</div>
-  <div class="time">{currentTime.toLocaleTimeString()}</div>
   <nav class="nav">
     <a href="/">首页</a>
     <a href="/about">关于</a>

@@ -7,7 +7,7 @@
 <div class="layout">
   <Header />
   <main class="main">
-    <Map />
+    <!-- <Map /> -->
   </main>
   <Footer />
 </div>
