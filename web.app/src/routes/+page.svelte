@@ -1,2 +1,31 @@
-<h1>Welcome to 2x.fan</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+  import Header from '$lib/components/Header.svelte';
+  import Footer from '$lib/components/Footer.svelte';
+  import Map from '$lib/components/Map.svelte';
+</script>
+
+<div class="layout">
+  <Header />
+  <main class="main">
+    <Map />
+  </main>
+  <Footer />
+</div>
+
+<style>
+  .layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .main {
+    flex: 1;
+    position: relative;
+  }
+
+  :global(body) {
+    margin: 0;
+    padding: 0;
+  }
+</style>
