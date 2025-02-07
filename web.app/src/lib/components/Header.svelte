@@ -3,7 +3,11 @@
 	import { siteConfig } from "$lib/config/site.js";
 	import { page } from "$app/stores";
 	import { cn } from "$lib/utils.js";
+	import LanguageToggle from "./language-toggle.svelte";
+	import SettingsControls from "./settings-controls.svelte";
+	import { _ } from 'svelte-i18n';
 </script>
+
 
 <header
 	class="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur"
@@ -14,7 +18,7 @@
 	<a href="/" class="mr-6 flex items-center space-x-2">
 		<!-- <Icons.logo class="h-6 w-6" /> -->
 		<span class="hidden font-bold xl:inline-block">
-			{siteConfig.name}
+			{$_('site.name')}
 		</span>
 	</a>
 	<nav class="flex items-center gap-6 text-sm">
@@ -25,7 +29,7 @@
 				$page.url.pathname === "/docs" ? "text-foreground" : "text-foreground/60"
 			)}
 		>
-			Docs
+			{$_('site.docs')}
 		</a>
 		<a
 			href="/docs/components"
@@ -36,7 +40,7 @@
 					: "text-foreground/60"
 			)}
 		>
-			Components
+			{$_('site.components')}
 		</a>
 		<a
 			href="/themes"
@@ -45,7 +49,7 @@
 				$page.url.pathname.startsWith("/themes") ? "text-foreground" : "text-foreground/60"
 			)}
 		>
-			Themes
+			{$_('site.themes')}
 		</a>
 		<a
 			href="/examples"
@@ -56,7 +60,7 @@
 					: "text-foreground/60"
 			)}
 		>
-			Examples
+			{$_('site.examples')}
 		</a>
 
 		<a
@@ -66,7 +70,7 @@
 				$page.url.pathname.startsWith("/blocks") ? "text-foreground" : "text-foreground/60"
 			)}
 		>
-			Blocks
+			{$_('site.blocks')}
 		</a>
 		<a
 			href="/colors"
@@ -75,7 +79,7 @@
 				$page.url.pathname.startsWith("/colors") ? "text-foreground" : "text-foreground/60"
 			)}
 		>
-			Colors
+			{$_('site.colors')}
 		</a>
 	</nav>
 </div>
@@ -83,10 +87,18 @@
 			<!-- <div class="w-full flex-1 md:w-auto md:flex-none">
 				<CommandMenu />
 			</div> -->
-			<nav class="flex items-center">
-
-				<ModeToggle />
-			</nav>
+			
+			<SettingsControls />
 		</div>
 	</div>
+
 </header>
+
+<style>
+	.active {
+		@apply text-foreground;
+	}
+	a:not(.active) {
+		@apply text-foreground/60;
+	}
+</style>

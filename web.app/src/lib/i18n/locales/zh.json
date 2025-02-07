@@ -1,0 +1,32 @@
+{
+    "theme": {
+        "light": "明亮",
+        "dark": "暗黑",
+        "system": "系统"
+    },
+    "common": {
+        "changeTheme": "切换主题",
+        "changeLanguage": "切换语言"
+    },
+    "site": {
+        "name": "您的应用",
+        "docs": "文档",
+        "components": "组件",
+        "themes": "主题",
+        "examples": "示例",
+        "blocks": "区块",
+        "colors": "颜色"
+    },
+    "header": {
+        "home": "首页",
+        "about": "关于",
+        "contact": "联系",
+        "login": "登录",
+        "signup": "注册"
+    },
+    "footer": {
+        "copyright": "© 2024 您的公司。保留所有权利。",
+        "terms": "服务条款",
+        "privacy": "隐私政策"
+    }
+} 
