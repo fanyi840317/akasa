@@ -7,7 +7,7 @@
 <div class="layout">
   <Header />
   <main class="main">
-    <!-- <Map /> -->
+    <Map />
   </main>
   <Footer />
 </div>
@@ -21,8 +21,11 @@
 
   .main {
     flex: 1;
-    position: relative;
+    /* background-color: #f0f0f0; */
+    padding-top: -100px;
+    /* position: relative; */
   }
+
 
   :global(body) {
     margin: 0;
