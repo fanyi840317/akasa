@@ -6,8 +6,9 @@
 
 <div class="layout">
   <Header />
-  <main class="main">
+  <main class="flex-1 main">
     <Map />
+     
   </main>
   <Footer />
 </div>
@@ -18,14 +19,9 @@
     flex-direction: column;
     height: 100vh;
   }
-
-  .main {
-    flex: 1;
-    /* background-color: #f0f0f0; */
-    padding-top: -100px;
-    /* position: relative; */
+  .main{
+    padding: 100px;
   }
-
 
   :global(body) {
     margin: 0;
