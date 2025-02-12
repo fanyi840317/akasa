@@ -7,7 +7,7 @@
 <div class="layout">
   <Header />
   <main class="flex-1 main">
-    <Map />
+    <!-- <Map /> -->
      
   </main>
   <Footer />
