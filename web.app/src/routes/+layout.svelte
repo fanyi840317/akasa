@@ -10,5 +10,5 @@
 {#await waitLocale()}
 	<div>Loading...</div>
 {:then}
-	<slot />
+{@render children()}
 {/await}
