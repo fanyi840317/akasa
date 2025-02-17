@@ -23,10 +23,10 @@
 	</a>
 	<nav class="flex items-center gap-6 text-sm">
 		<a
-			href="/docs"
+			href="/events"
 			class={cn(
 				"hover:text-foreground/80 transition-colors",
-				$page.url.pathname === "/docs" ? "text-foreground" : "text-foreground/60"
+				$page.url.pathname === "/events" ? "text-foreground" : "text-foreground/60"
 			)}
 		>
 			{$_('site.docs')}
