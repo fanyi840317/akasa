@@ -9,13 +9,11 @@
         "changeLanguage": "切换语言"
     },
     "site": {
-        "name": "您的应用",
-        "docs": "文档",
-        "components": "组件",
-        "themes": "主题",
-        "examples": "示例",
-        "blocks": "区块",
-        "colors": "颜色"
+        "name": "X² 档案",
+        "events": "身边的神秘事件",
+        "cultivation": "修行实记",
+        "legacy": "数字遗产"
+
     },
     "header": {
         "home": "首页",

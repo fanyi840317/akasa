@@ -4,27 +4,4 @@
   import Map from '$lib/components/Map.svelte';
 </script>
 
-<div class="layout">
-  <Header />
-  <main class="flex-1 main">
-    <!-- <Map /> -->
-     
-  </main>
-  <Footer />
-</div>
-
-<style>
-  .layout {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-  .main{
-    padding: 100px;
-  }
-
-  :global(body) {
-    margin: 0;
-    padding: 0;
-  }
-</style>
+<div></div>

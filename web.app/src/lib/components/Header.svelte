@@ -29,29 +29,29 @@
 				$page.url.pathname === "/events" ? "text-foreground" : "text-foreground/60"
 			)}
 		>
-			{$_('site.docs')}
+			{$_('site.events')}
 		</a>
 		<a
-			href="/docs/components"
+			href="/cultivation"
 			class={cn(
 				"hover:text-foreground/80 transition-colors",
-				$page.url.pathname.startsWith("/docs/components")
+				$page.url.pathname.startsWith("/cultivation")
 					? "text-foreground"
 					: "text-foreground/60"
 			)}
 		>
-			{$_('site.components')}
+			{$_('site.cultivation')}
 		</a>
 		<a
-			href="/themes"
+			href="/legacy"
 			class={cn(
 				"hover:text-foreground/80 transition-colors",
-				$page.url.pathname.startsWith("/themes") ? "text-foreground" : "text-foreground/60"
+				$page.url.pathname.startsWith("/legacy") ? "text-foreground" : "text-foreground/60"
 			)}
 		>
-			{$_('site.themes')}
+			{$_('site.legacy')}
 		</a>
-		<a
+		<!-- <a
 			href="/examples"
 			class={cn(
 				"hover:text-foreground/80 transition-colors",
@@ -80,7 +80,7 @@
 			)}
 		>
 			{$_('site.colors')}
-		</a>
+		</a> -->
 	</nav>
 </div>
 		<div class="flex flex-1 items-center justify-between space-x-2 md:justify-end">

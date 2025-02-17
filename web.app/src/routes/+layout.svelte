@@ -5,6 +5,8 @@
 	import { waitLocale } from 'svelte-i18n';
 	import Loading from '$lib/components/Loading.svelte';
 	let { children } = $props();
+	import Header from '$lib/components/Header.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 </script>
 <ModeWatcher />
 
@@ -13,5 +15,25 @@
 		<Loading size="lg" />
 	</div>
 {:then}
-{@render children()}
+<div class="layout">
+	<Header />
+	<main class="flex-1 main">
+	   
+	{@render children()}
+	</main>
+	<Footer />
+  </div>
 {/await}
+
+<style>
+	.layout {
+	  display: flex;
+	  flex-direction: column;
+	  height: 100vh;
+	}
+  
+	:global(body) {
+	  margin: 0;
+	  padding: 0;
+	}
+  </style>

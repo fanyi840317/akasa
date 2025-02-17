@@ -9,13 +9,12 @@
         "changeLanguage": "Change language"
     },
     "site": {
-        "name": "Your App",
-        "docs": "Docs",
-        "components": "Components",
-        "themes": "Themes",
-        "examples": "Examples",
-        "blocks": "Blocks",
-        "colors": "Colors"
+        "name": "X² Mysteries",
+        "events": "Mysteries & Events",
+
+        "cultivation": "Cultivation",
+        "legacy": "Digital Legacy"
+
     },
     "header": {
         "home": "Home",
