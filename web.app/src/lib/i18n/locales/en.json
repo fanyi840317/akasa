@@ -5,16 +5,14 @@
         "system": "System"
     },
     "common": {
-        "changeTheme": "Change theme",
-        "changeLanguage": "Change language"
+        "changeTheme": "Change Theme",
+        "changeLanguage": "Change Language"
     },
     "site": {
-        "name": "X² Mysteries",
-        "events": "Mysteries & Events",
-
-        "cultivation": "Cultivation",
+        "name": "X² Archives",
+        "events": "Mysterious Events",
+        "cultivation": "Cultivation Records",
         "legacy": "Digital Legacy"
-
     },
     "header": {
         "home": "Home",
@@ -27,5 +25,17 @@
         "copyright": "© 2024 Your Company. All rights reserved.",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy"
+    },
+    "events": {
+        "mysterious": "Mysterious Events Around You",
+        "discover": "DISCOVER THE UNEXPLAINED YOU",
+        "categories": {
+            "urban": "Urban Legends",
+            "paranormal": "Paranormal Events",
+            "supernatural": "Supernatural",
+            "mysterious": "Mysterious",
+            "unexplained": "Unexplained",
+            "phenomena": "Phenomena"
+        }
     }
 } 

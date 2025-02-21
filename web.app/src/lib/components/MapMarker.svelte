@@ -17,7 +17,16 @@
   role="button"
   tabindex="0"
 >
-  <div class="marker-pin"></div>
+<!-- Start of Selection -->
+<svg class="w-4 h-4 mr-2 glow" fill="currentColor" viewBox="0 0 20 20">
+  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+</svg>
+<style>
+  .glow {
+    filter: drop-shadow(0 0 5px rgba(0, 255, 204, 0.7));
+  }
+</style>
+<!-- End of Selection -->
   <div class="marker-popup">
     <h3>{marker.name}</h3>
     <p>{marker.description}</p>
@@ -28,32 +37,13 @@
   .marker {
     cursor: pointer;
     position: relative;
-    width: 30px;
-    height: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
-  .marker-pin {
-    width: 0;
-    height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-top: 25px solid #ff4444;
-    position: relative;
+  .marker-icon {
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  }
-
-  .marker-pin::after {
-    content: '';
-    position: absolute;
-    top: -25px;
-    left: -15px;
-    width: 30px;
-    height: 25px;
-    background: linear-gradient(45deg, #ff4444 50%, #dd3333 50%);
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
   }
 
   .marker-popup {

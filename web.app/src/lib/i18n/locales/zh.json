@@ -26,5 +26,17 @@
         "copyright": "© 2024 您的公司。保留所有权利。",
         "terms": "服务条款",
         "privacy": "隐私政策"
+    },
+    "events": {
+        "mysterious": "身边的神秘事件",
+        "discover": "探索身边的未解之谜",
+        "categories": {
+            "urban": "都市传说",
+            "paranormal": "超自然现象",
+            "supernatural": "灵异事件",
+            "mysterious": "神秘事件",
+            "unexplained": "未解之谜",
+            "phenomena": "奇异现象"
+        }
     }
 } 
