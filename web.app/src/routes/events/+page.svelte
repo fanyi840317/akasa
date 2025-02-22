@@ -7,6 +7,9 @@
     import { theme } from '$lib/stores/theme';
     import { onMount } from 'svelte';
     import { get } from 'svelte/store';
+    import { Input } from "$lib/components/ui/input";
+    import { Button } from "$lib/components/ui/button";
+    import { PlusCircle, Search } from "lucide-svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -19,68 +22,50 @@
         { name: $_('events.categories.phenomena'), icon: "/icons/phenomena.svg", type: "phenomena" }
     ];
 
+    let searchQuery = '';
 
     onMount(() => {
       
     });
 </script>
 
-<div class="container flex flex-col min-h-screen">
-    <!-- 主要内容区域 -->
-    <main class="flex-1">
-        
-        <!-- 地图和标题区域 -->
-        <div class="relative h-[70vh] rounded-lg overflow-hidden">
-            <!-- 地图层 -->
-            <div class="absolute inset-0 z-10 rounded-lg">
-                <Map />
+<div class="container flex flex-col ">
+    <main class="flex-1 py-6">
+        <div class="flex justify-between items-center mb-4">
+            <div class="space-y-1">
+                <h1 class="text-3xl font-bold">{$_('site.events')}</h1>
+                <h2 class="text-sm text-muted-foreground">{$_('events.subtitle')}</h2>
             </div>
-            
-            <!-- 雷达图覆盖层 -->
-            <!-- <div class="absolute top-4 right-4 w-48 h-48 opacity-80">
-                <img src="/images/radar.svg" alt="radar" class="w-full h-full" />
-            </div> -->
-
-            <!-- 标题层 - 只在顶部添加渐变遮罩 -->
-            <div class="absolute inset-0 z-20 pointer-events-none">
-                <div class="h-1/2 bg-gradient-to-b from-black/50 to-transparent">
-                    <div class="container mx-auto px-4 py-16">
-                        <div class="max-w-2xl pointer-events-auto">
-                            <h1 class="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                                {$_('events.mysterious')}
-                            </h1>
-                            <p class="text-cyan-400/80 text-lg mb-8 drop-shadow-md">
-                                {$_('events.discover')}
-                            </p>
-                            <button class="bg-cyan-400/20 text-cyan-400 px-6 py-2 rounded-full 
-                                hover:bg-cyan-400/30 transition-colors backdrop-blur-sm">
-                                Discover More
-                            </button>
-                        </div>
-                    </div>
+            <Button variant="outline" class="gap-2">
+                <PlusCircle class="h-4 w-4" />
+                <span>{$_('events.share')}</span>
+            </Button>
+        </div>
+        <!-- 地图区域 -->
+        <div class="relative rounded-lg overflow-hidden h-[70vh]">
+            <div class="absolute top-4 right-4 z-10 w-64">
+                <div class="relative w-full">
+                    <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input placeholder="Search Location" class="bg-background/95 backdrop-blur pl-10" />
                 </div>
             </div>
-        </div>
-
-        <!-- 分类卡片网格 -->
-        <div class="mx-auto py-8">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div class="absolute top-4 left-4 z-20 w-64 flex flex-wrap gap-2">
                 {#each categories as category}
-                    <Card.Root>
-                        <Card.Header class="text-center p-6">
-                            <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-cyan-400/20 
-                                to-purple-400/20 rounded-full p-3 group-hover:from-cyan-400/30 
-                                group-hover:to-purple-400/30 transition-all">
-                                <img src={category.icon} alt={category.name} class="w-full h-full text-cyan-400" />
-                            </div>
-                            <Card.Title class="text-cyan-400 text-lg">
-                                {category.name}
-                            </Card.Title>
-                        </Card.Header>
-                    </Card.Root>
+                    <div class="bg-background/95 backdrop-blur p-2 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-accent/50 transition-colors">
+                        <div class="w-6 h-6 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full p-1 group-hover:from-cyan-400/30 group-hover:to-purple-400/30 transition-all">
+                            <img src={category.icon} alt={category.name} class="w-full h-full text-cyan-400" />
+                        </div>
+                        <span class="text-xs text-cyan-400">{category.name}</span>
+                    </div>
                 {/each}
             </div>
+            <Map />
         </div>
+        <!-- 事件列表区域 -->
+        <!-- <h1 class="text-3xl font-bold py-10">{$_('events.mysterious')}</h1>
+        <div class="mt-6 rounded-xl bg-background/40 backdrop-blur">
+            <EventList />
+        </div> -->
     </main>
 </div>
 

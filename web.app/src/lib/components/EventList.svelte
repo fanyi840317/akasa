@@ -1,5 +1,4 @@
 <script lang="ts">
-    // import { _ } from 'svelte-i18n';
     import * as Card from "$lib/components/ui/card";
 
     const events = [
@@ -33,28 +32,28 @@
     ];
 </script>
 
-<div class="p-6">
-    <div class="space-y-6">
+<div >
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {#each events as event}
-            <Card.Root class="event-card p-6 rounded-lg cursor-pointer">
-                <Card.Header>
-                    <Card.Title>
-                        <h3 class="text-xl font-bold text-cyan-400">{event.title}</h3>
-                        <span class="text-xs px-3 py-1 rounded-full bg-purple-900/50">{event.type}</span>
-                    </Card.Title>
-                </Card.Header>
-                <Card.Content>
-                    <p class="mt-3 text-gray-300">{event.description}</p>
-                    <div class="mt-4 flex justify-between text-sm text-gray-400">
-                        <span class="flex items-center">
-                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <Card.Root class="cursor-pointer hover:bg-accent/50 transition-colors flex items-start p-3 gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full p-2 flex-shrink-0">
+                    <svg class="w-full h-full text-cyan-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-cyan-400 text-sm font-medium mb-1">{event.title}</h3>
+                    <p class="text-gray-300 text-xs mb-2 line-clamp-2">{event.description}</p>
+                    <div class="flex items-center justify-between text-[10px] text-gray-400">
+                        <span class="flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                             </svg>
                             {event.location}
                         </span>
                         <span>{event.date}</span>
                     </div>
-                </Card.Content>
+                </div>
             </Card.Root>
         {/each}
     </div>

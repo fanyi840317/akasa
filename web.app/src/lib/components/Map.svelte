@@ -18,7 +18,7 @@
     map = new mapboxgl.Map({
       container,
       style: currentTheme === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
-      projection: 'mercator',
+  
       zoom: 8,
       center: [104.06, 30.67],
       pitch: 0,
@@ -26,20 +26,20 @@
     });
 
     // 添加3D和2D切换图标
-    const toggle3D2DControl = new mapboxgl.NavigationControl({
-      visualizePitch: true
-    });
-    map.addControl(toggle3D2DControl, 'top-right');
+    // const toggle3D2DControl = new mapboxgl.NavigationControl({
+    //   visualizePitch: true
+    // });
+    // map.addControl(toggle3D2DControl, 'top-right');
 
-    map.on('style.load', () => {
-      map.setFog({
-        color: 'rgb(186, 210, 235)',
-        'high-color': 'rgb(36, 92, 223)',
-        'horizon-blend': 0.02,
-        'space-color': 'rgb(11, 11, 25)',
-        'star-intensity': 0.6
-      });
-    });
+    // map.on('style.load', () => {
+    //   map.setFog({
+    //     color: 'rgb(186, 210, 235)',
+    //     'high-color': 'rgb(36, 92, 223)',
+    //     'horizon-blend': 0.02,
+    //     'space-color': 'rgb(11, 11, 25)',
+    //     'star-intensity': 0.6
+    //   });
+    // });
 
     // map.addControl(new mapboxgl.NavigationControl());
 
@@ -74,7 +74,6 @@
 </script>
 
 <div bind:this={container} class="mapContainer">
-  <div id="coords" class="coordinates-info"></div>
 </div>
 
 <style>
@@ -82,18 +81,6 @@
     width: 100%;
     height: 100%;
     position: relative;
-  }
-
-  .coordinates-info {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 14px;
-    z-index: 1000;
   }
 
   :global(.mapboxgl-ctrl-bottom-right) {
