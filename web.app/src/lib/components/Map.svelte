@@ -6,6 +6,7 @@
   import { markers } from '$lib/markers';
   import { mode } from 'mode-watcher'; // 引入主题存储
   import { get } from 'svelte/store';
+  import { goto } from '$app/navigation';
 
   let container: HTMLDivElement;
   let map: mapboxgl.Map;
@@ -48,7 +49,8 @@
       const marker = new mapboxgl.Marker({
         element: markerElement,
         anchor: 'bottom',
-        offset: [0, -15]
+        offset: [0, -15],
+        clickTolerance: 3
       })
         .setLngLat(markerData.coordinates)
         .addTo(map);
@@ -56,7 +58,15 @@
       mount(MapMarker, {
         target: markerElement,
         props: {
-          marker: markerData
+          marker: markerData,
+          onMarkerClick: (marker) => {
+            console.log('Marker click event received:', marker);
+            if (marker && marker.id) {
+              goto(`/events/${marker.id}`);
+            } else {
+              console.error('Invalid marker data:', marker);
+            }
+          }
         }
       });
     });

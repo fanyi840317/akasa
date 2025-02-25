@@ -1,19 +1,17 @@
 <script lang="ts">
   import type { Marker } from '$lib/markers';
-  import { createEventDispatcher } from 'svelte';
 
   export let marker: Marker;
-  const dispatch = createEventDispatcher();
-
-  function handleClick() {
-    dispatch('markerClick', marker);
-  }
+  export let onMarkerClick: (marker: Marker) => void;
 </script>
 
 <div 
   class="marker" 
-  on:click={handleClick}
-  on:keydown={(e) => e.key === 'Enter' && handleClick()}
+  on:click|stopPropagation={() => {
+    console.log('Marker clicked:', marker);
+    onMarkerClick(marker);
+  }}
+  on:keydown|stopPropagation={(e) => e.key === 'Enter' && onMarkerClick(marker)}
   role="button"
   tabindex="0"
 >
@@ -45,21 +43,20 @@
   .marker-icon {
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   }
-
   .marker-popup {
     display: none;
     position: absolute;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
     padding: 10px;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     white-space: nowrap;
     z-index: 1;
+    pointer-events: none;
   }
-
   .marker:hover .marker-popup {
     display: block;
   }
@@ -73,4 +70,4 @@
     margin: 0;
     font-size: 12px;
   }
-</style> 
+</style>

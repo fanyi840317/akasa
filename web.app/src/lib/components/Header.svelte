@@ -6,6 +6,8 @@
 	import LanguageToggle from "./language-toggle.svelte";
 	import SettingsControls from "./settings-controls.svelte";
 	import { _ } from 'svelte-i18n';
+	import { Button } from "$lib/components/ui/button";
+	import { User } from "lucide-svelte";
 </script>
 
 <header
@@ -57,7 +59,15 @@
 	</nav>
 </div>
 		<div class="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-			<SettingsControls />
+			<div class="flex items-center gap-2">
+				
+				<SettingsControls />
+
+				<Button variant="ghost" class="gap-2 hover:bg-accent/50 transition-colors">
+					<User class="h-4 w-4" />
+					<span>{$_('site.login')}</span>
+				</Button>
+			</div>
 		</div>
 	</div>
 </header>
