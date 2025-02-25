@@ -4,27 +4,51 @@
   import 'mapbox-gl/dist/mapbox-gl.css';
   import MapMarker from './MapMarker.svelte';
   import { markers } from '$lib/markers';
-  import { mode } from 'mode-watcher'; // 引入主题存储
+  import { mode } from 'mode-watcher';
   import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
+  import { getUserLocation } from '$lib/services/location';
 
   let container: HTMLDivElement;
   let map: mapboxgl.Map;
 
   mapboxgl.accessToken = 'pk.eyJ1IjoiZmFueWk4NDAzMTciLCJhIjoiY202cDE4OW9wMHZxMzJscTBtbW82NDNxdCJ9.90mwfIpA62nmCY0_C7IkUw';
 
-  onMount(() => {
-    const currentTheme = get(mode); // 获取当前主题
+  onMount(async () => {
+    // 获取用户位置
+    try {
+      const userLocation = await getUserLocation();
+      map = new mapboxgl.Map({
+        container,
+        style: get(mode) === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
+        zoom: 8,
+        center: [userLocation.longitude, userLocation.latitude],
+        pitch: 0,
+        antialias: true
+      });
 
-    map = new mapboxgl.Map({
-      container,
-      style: currentTheme === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
-  
-      zoom: 8,
-      center: [104.06, 30.67],
-      pitch: 0,
-      antialias: true
-    });
+      // 添加用户位置标记
+      const userMarkerElement = document.createElement('div');
+      userMarkerElement.className = 'user-location-marker';
+      new mapboxgl.Marker({
+        element: userMarkerElement,
+        anchor: 'center'
+      })
+        .setLngLat([userLocation.longitude, userLocation.latitude])
+        .addTo(map);
+    } catch (error) {
+      console.error('获取位置信息失败:', error);
+      // 如果获取位置失败，使用默认位置
+      map = new mapboxgl.Map({
+        container,
+        style: get(mode) === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
+        zoom: 8,
+        center: [104.06, 30.67],
+        pitch: 0,
+        antialias: true
+      });
+    }
+
 
     // 添加3D和2D切换图标
     // const toggle3D2DControl = new mapboxgl.NavigationControl({
@@ -96,4 +120,52 @@
   :global(.mapboxgl-ctrl-bottom-right) {
     display: none;
   }
-</style> 
+
+  :global(.user-location-marker) {
+    width: 15px;
+    height: 15px;
+    background-color: rgb(37, 99, 235);
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+    cursor: pointer;
+    position: relative;
+  }
+  :global(.user-location-marker::after) {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(37, 99, 235, 0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse-scale 2s infinite;
+  }
+  @keyframes pulse-scale {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    70% {
+      transform: translate(-50%, -50%) scale(18);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0;
+    }
+  }
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6);
+    }
+    70% {
+      box-shadow: 0 0 0 100px rgba(37, 99, 235, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+    }
+  }
+</style>

@@ -31,6 +31,7 @@
   import WitnessList from "$lib/components/WitnessList.svelte";
   import { mockComments } from "$lib/data/mock-comments";
   import EvidenceList from "$lib/components/EvidenceList.svelte";
+  import { getUserLocation } from "$lib/services/location";
   // 从模拟数据中获取事件
   const event = mockEvents.find((e) => e.id === $page.params.id);
   if (!event) throw new Error("Event not found");
@@ -82,6 +83,22 @@
   // 申请表单状态
   let showJoinForm = false;
 
+  // 用户位置信息
+  let userLocation = {
+    city: '',
+    region: '',
+    latitude: 0,
+    longitude: 0
+  };
+
+  onMount(async () => {
+    try {
+      userLocation = await getUserLocation();
+    } catch (error) {
+      console.error('获取位置信息失败:', error);
+    }
+  });
+
   // 处理申请提交
   function handleJoinSubmit(data) {
     // console.log('提交申请:', { eventId: event.id, ...data });
@@ -127,6 +144,9 @@
           <div class="flex items-center gap-2">
             <MapPin class="w-5 h-5" />
             <span>{event.location.name}</span>
+            {#if userLocation.city}
+              <span class="ml-2">(距您所在的{userLocation.city}{userLocation.region})</span>
+            {/if}
           </div>
         </div>
 

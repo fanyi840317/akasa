@@ -9,7 +9,8 @@
     import { get } from 'svelte/store';
     import { Input } from "$lib/components/ui/input";
     import { Button } from "$lib/components/ui/button";
-    import { PlusCircle, Search } from "lucide-svelte";
+    import { PlusCircle, Search, MapPin } from "lucide-svelte";
+    import { getUserLocation } from '$lib/services/location';
 
     let { data }: { data: PageData } = $props();
 
@@ -23,15 +24,35 @@
     ];
 
     let searchQuery = '';
+    let map: any;
 
     onMount(() => {
       
     });
+
+    async function locateUser() {
+        try {
+            const userLocation = await getUserLocation();
+            const mapComponent = document.querySelector('div[data-map]');
+            if (mapComponent) {
+                const mapInstance = (mapComponent as any).__svelte?.type?.instance;
+                if (mapInstance?.map) {
+                    mapInstance.map.flyTo({
+                        center: [userLocation.longitude, userLocation.latitude],
+                        zoom: 12,
+                        duration: 2000
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('定位失败:', error);
+        }
+    }
 </script>
 
 <div class="relative w-full" style="height: calc(100vh - 9.6rem)">
     <div class="absolute inset-0">
-        <Map />
+        <Map data-map />
     </div>
     <div class="absolute top-4 left-4 z-20 w-64 space-y-4">
         <div class="bg-background/95 backdrop-blur p-4 rounded-lg">
@@ -54,12 +75,17 @@
         </div>
     </div>
     <div class="absolute top-4 right-4 z-20 space-y-4">
-        <div class="backdrop-blur rounded-lg w-80">
-                <div class="relative w-full">
+        <div class="bg-background/95  backdrop-blur rounded-lg w-80">
+            <div class="relative w-full flex gap-2 p-4 ">
+                <div class="relative flex-1">
                     <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input placeholder="Search Location" class="pl-10" />
                 </div>
+                <Button variant="outline" size="icon" on:click={locateUser} class="shrink-0">
+                    <MapPin class="h-4 w-4" />
+                </Button>
             </div>
+        </div>
         <div class="bg-background/95 backdrop-blur rounded-lg w-80" >
             <div class="p-4 mb-20">
                 <h2 class="text-lg font-semibold mb-6">{$_('events.latest')}</h2>
