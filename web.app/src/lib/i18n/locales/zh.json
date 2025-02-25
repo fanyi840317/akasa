@@ -1,42 +1,48 @@
 {
-    "theme": {
-        "light": "明亮",
-        "dark": "暗黑",
-        "system": "系统"
-    },
-    "common": {
-        "changeTheme": "切换主题",
-        "changeLanguage": "切换语言"
-    },
-    "site": {
-        "name": "X² 档案",
-        "events": "身边的神秘事件",
-        "cultivation": "修行实记",
-        "legacy": "数字遗产"
-
-    },
-    "header": {
-        "home": "首页",
-        "about": "关于",
-        "contact": "联系",
-        "login": "登录",
-        "signup": "注册"
-    },
-    "footer": {
-        "copyright": "© 2024 您的公司。保留所有权利。",
-        "terms": "服务条款",
-        "privacy": "隐私政策"
-    },
-    "events": {
-        "mysterious": "身边的神秘事件",
-        "discover": "探索身边的未解之谜",
-        "categories": {
-            "urban": "都市传说",
-            "paranormal": "超自然现象",
-            "supernatural": "灵异事件",
-            "mysterious": "神秘事件",
-            "unexplained": "未解之谜",
-            "phenomena": "奇异现象"
-        }
+  "site": {
+    "name": "AKASA",
+    "events": "事件",
+    "cultivation": "修炼",
+    "legacy": "传承",
+    "login": "登录"
+  },
+  "common": {
+    "changeTheme": "切换主题",
+    "changeLanguage": "切换语言"
+  },
+  "theme": {
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
+  },
+  "events": {
+    "subtitle": "探索未知的奥秘",
+    "share": "分享",
+    "latest": "最新事件",
+    "evidence": "证据",
+    "submit_evidence": "提交证据",
+    "timeline": "时间线",
+    "witnesses": "目击者",
+    "submit_witness": "提交目击信息",
+    "credibility": "可信度",
+    "evidence_strength": "证据强度",
+    "witness_credibility": "目击者可信度",
+    "investigators": "调查员",
+    "join_investigation": "加入调查",
+    "join_investigation_description": "请填写以下信息以申请加入调查",
+    "hot_events": "热门事件",
+    "categories": {
+      "urban": "都市传说",
+      "paranormal": "超自然",
+      "supernatural": "灵异",
+      "mysterious": "神秘事件",
+      "unexplained": "未解之谜",
+      "phenomena": "奇异现象"
     }
-} 
+  },
+  "footer": {
+    "copyright": "版权所有",
+    "terms": "使用条款",
+    "privacy": "隐私政策"
+  }
+}

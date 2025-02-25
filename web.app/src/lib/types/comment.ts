@@ -19,4 +19,8 @@ export interface Reply {
   content: string;
   createdAt: Date;
   likes: number;
+  user: {
+    name: string;
+    avatar: string;
+  };
 }
