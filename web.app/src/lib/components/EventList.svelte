@@ -3,7 +3,6 @@
     import { Button } from "$lib/components/ui/button";
     import type { Event } from '$lib/types/event';
     import { mockEvents } from '$lib/data/mock-events';
-    import { getUserLocation } from '$lib/services/location';
     import { onMount } from 'svelte';
     import Badge from "./ui/badge/badge.svelte";
 
@@ -32,17 +31,6 @@
         return `${distance}公里`;
     }
 
-    onMount(async () => {
-        try {
-            const location = await getUserLocation();
-            userLocation = {
-                latitude: location.latitude,
-                longitude: location.longitude
-            };
-        } catch (error) {
-            console.error('获取位置信息失败:', error);
-        }
-    });
 </script>
 
 <div>

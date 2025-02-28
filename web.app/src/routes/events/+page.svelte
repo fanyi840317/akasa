@@ -10,7 +10,7 @@
     import { Input } from "$lib/components/ui/input";
     import { Button } from "$lib/components/ui/button";
     import { PlusCircle, Search, MapPin } from "lucide-svelte";
-    import { getUserLocation } from '$lib/services/location';
+    import { writable } from 'svelte/store';
 
     let { data }: { data: PageData } = $props();
 
@@ -26,33 +26,49 @@
     let searchQuery = '';
     let map: any;
 
-    onMount(() => {
-      
-    });
+    // 新增一个可写的 store 来存储搜索结果
+    const searchResults = writable([]);
 
-    async function locateUser() {
-        try {
-            const userLocation = await getUserLocation();
-            const mapComponent = document.querySelector('div[data-map]');
-            if (mapComponent) {
-                const mapInstance = (mapComponent as any).__svelte?.type?.instance;
-                if (mapInstance?.map) {
-                    mapInstance.map.flyTo({
-                        center: [userLocation.longitude, userLocation.latitude],
-                        zoom: 12,
-                        duration: 2000
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('定位失败:', error);
+    // 搜索位置的函数
+    function searchLocation() {
+        if (!data.events) return;
+        const results = data.events.filter(event => 
+            event.location.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        searchResults.set(results);
+        updateMapLocation(searchQuery);
+    }
+
+    // 处理回车事件
+    function handleKeyPress(event: KeyboardEvent) {
+        if (event.key === 'Enter') {
+            searchLocation();
         }
     }
+
+    // 更新地图位置的函数
+    async function updateMapLocation(location: string) {
+        const response = await fetch(`https://api.example.com/geocode?address=${encodeURIComponent(location)}`);
+        const data = await response.json();
+        if (data && data.results && data.results.length > 0) {
+            const { lat, lng } = data.results[0].geometry.location;
+            map.setCenter([lng, lat]);
+        } else {
+            console.error('未找到该位置');
+        }
+    }
+
+    onMount(() => {
+        // 初始化地图
+        // map = ...; // 初始化地图对象
+    });
+
+    
 </script>
 
-<div class="relative w-full" style="height: calc(100vh - 9.6rem)">
+<div class="relative w-full h-[100%]">
     <div class="absolute inset-0">
-        <Map data-map />
+        <Map latitude={data.location.latitude} longitude={data.location.longitude} />
     </div>
     <div class="absolute top-4 left-4 z-20 w-64 space-y-4">
         <div class="bg-background/95 backdrop-blur p-4 rounded-lg">
@@ -79,9 +95,14 @@
             <div class="relative w-full flex gap-2 p-4 ">
                 <div class="relative flex-1">
                     <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Search Location" class="pl-10" />
+                    <Input 
+                        placeholder="Search Location" 
+                        class="pl-10" 
+                        bind:value={searchQuery} 
+                        onkeypress={handleKeyPress}
+                    />
                 </div>
-                <Button variant="outline" size="icon" on:click={locateUser} class="shrink-0">
+                <Button variant="outline" size="icon" class="shrink-0" onclick={searchLocation}>
                     <MapPin class="h-4 w-4" />
                 </Button>
             </div>
@@ -89,7 +110,7 @@
         <div class="bg-background/95 backdrop-blur rounded-lg w-80" >
             <div class="p-4 mb-20">
                 <h2 class="text-lg font-semibold mb-6">{$_('events.latest')}</h2>
-                <EventList />
+                <EventList {searchResults} />
             </div>
         </div>
     </div>

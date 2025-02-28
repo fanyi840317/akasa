@@ -7,9 +7,12 @@
 	let { children } = $props();
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { Toaster } from "$lib/components/ui/sonner";
+	import { auth } from '$lib/stores/auth';
+	import { onMount } from 'svelte';
 </script>
 <ModeWatcher />
-
+<Toaster />
 {#await waitLocale()}
 	<div class="min-h-screen flex items-center justify-center">
 		<Loading size="lg" />

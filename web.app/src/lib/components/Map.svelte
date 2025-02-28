@@ -3,50 +3,38 @@
   import mapboxgl from 'mapbox-gl';
   import 'mapbox-gl/dist/mapbox-gl.css';
   import MapMarker from './MapMarker.svelte';
-  import { markers } from '$lib/markers';
   import { mode } from 'mode-watcher';
   import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
-  import { getUserLocation } from '$lib/services/location';
+
+  export let longitude = 104.06;
+  export let latitude = 30.67;
+  export let showUserLocation = true;
 
   let container: HTMLDivElement;
   let map: mapboxgl.Map;
 
   mapboxgl.accessToken = 'pk.eyJ1IjoiZmFueWk4NDAzMTciLCJhIjoiY202cDE4OW9wMHZxMzJscTBtbW82NDNxdCJ9.90mwfIpA62nmCY0_C7IkUw';
 
-  onMount(async () => {
-    // 获取用户位置
-    try {
-      const userLocation = await getUserLocation();
-      map = new mapboxgl.Map({
-        container,
-        style: get(mode) === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
-        zoom: 8,
-        center: [userLocation.longitude, userLocation.latitude],
-        pitch: 0,
-        antialias: true
-      });
+  onMount(() => {
+    map = new mapboxgl.Map({
+      container,
+      style: get(mode) === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
+      zoom: 8,
+      center: [longitude, latitude],
+      pitch: 0,
+      antialias: true
+    });
 
-      // 添加用户位置标记
+    if (showUserLocation) {
       const userMarkerElement = document.createElement('div');
       userMarkerElement.className = 'user-location-marker';
       new mapboxgl.Marker({
         element: userMarkerElement,
         anchor: 'center'
       })
-        .setLngLat([userLocation.longitude, userLocation.latitude])
+        .setLngLat([longitude, latitude])
         .addTo(map);
-    } catch (error) {
-      console.error('获取位置信息失败:', error);
-      // 如果获取位置失败，使用默认位置
-      map = new mapboxgl.Map({
-        container,
-        style: get(mode) === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
-        zoom: 8,
-        center: [104.06, 30.67],
-        pitch: 0,
-        antialias: true
-      });
     }
 
 
@@ -68,32 +56,32 @@
 
     // map.addControl(new mapboxgl.NavigationControl());
 
-    markers.forEach(markerData => {
-      const markerElement = document.createElement('div');
-      const marker = new mapboxgl.Marker({
-        element: markerElement,
-        anchor: 'bottom',
-        offset: [0, -15],
-        clickTolerance: 3
-      })
-        .setLngLat(markerData.coordinates)
-        .addTo(map);
+    // markers.forEach(markerData => {
+    //   const markerElement = document.createElement('div');
+    //   const marker = new mapboxgl.Marker({
+    //     element: markerElement,
+    //     anchor: 'bottom',
+    //     offset: [0, -15],
+    //     clickTolerance: 3
+    //   })
+    //     .setLngLat(markerData.coordinates)
+    //     .addTo(map);
 
-      mount(MapMarker, {
-        target: markerElement,
-        props: {
-          marker: markerData,
-          onMarkerClick: (marker) => {
-            console.log('Marker click event received:', marker);
-            if (marker && marker.id) {
-              goto(`/events/${marker.id}`);
-            } else {
-              console.error('Invalid marker data:', marker);
-            }
-          }
-        }
-      });
-    });
+    //   mount(MapMarker, {
+    //     target: markerElement,
+    //     props: {
+    //       marker: markerData,
+    //       onMarkerClick: (marker) => {
+    //         console.log('Marker click event received:', marker);
+    //         if (marker && marker.id) {
+    //           goto(`/events/${marker.id}`);
+    //         } else {
+    //           console.error('Invalid marker data:', marker);
+    //         }
+    //       }
+    //     }
+    //   });
+    // });
 
     // 监听模式变化
     const unsubscribe = mode.subscribe(currentMode => {

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { siteConfig } from "$lib/config/site.js";
 	import { _ } from 'svelte-i18n';
 </script>
 

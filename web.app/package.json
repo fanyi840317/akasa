@@ -18,8 +18,10 @@
 		"bits-ui": "1.0.0-next.87",
 		"clsx": "^2.1.1",
 		"lucide-svelte": "^0.474.0",
+		"mode-watcher": "^0.5.1",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
+		"svelte-sonner": "^0.3.28",
 		"tailwind-merge": "^3.0.1",
 		"tailwind-variants": "^0.3.1",
 		"tailwindcss": "^3.4.17",
@@ -29,9 +31,9 @@
 	},
 	"dependencies": {
 		"@vercel/analytics": "^1.5.0",
+		"appwrite": "14.0.1",
 		"cesium": "^1.125.0",
 		"mapbox-gl": "^3.9.4",
-		"mode-watcher": "^0.5.1",
 		"svelte-i18n": "^4.0.1",
 		"svelte-radix": "^2.0.1"
 	}

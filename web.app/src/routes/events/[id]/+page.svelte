@@ -31,7 +31,6 @@
   import WitnessList from "$lib/components/WitnessList.svelte";
   import { mockComments } from "$lib/data/mock-comments";
   import EvidenceList from "$lib/components/EvidenceList.svelte";
-  import { getUserLocation } from "$lib/services/location";
   // 从模拟数据中获取事件
   const event = mockEvents.find((e) => e.id === $page.params.id);
   if (!event) throw new Error("Event not found");
@@ -92,11 +91,7 @@
   };
 
   onMount(async () => {
-    try {
-      userLocation = await getUserLocation();
-    } catch (error) {
-      console.error('获取位置信息失败:', error);
-    }
+  
   });
 
   // 处理申请提交

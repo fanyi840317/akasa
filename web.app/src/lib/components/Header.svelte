@@ -1,6 +1,5 @@
 <script lang="ts">
 	import ModeToggle from "./mode-toggle.svelte";
-	import { siteConfig } from "$lib/config/site.js";
 	import { page } from "$app/stores";
 	import { cn } from "$lib/utils.js";
 	import LanguageToggle from "./language-toggle.svelte";
@@ -8,6 +7,8 @@
 	import { _ } from 'svelte-i18n';
 	import { Button } from "$lib/components/ui/button";
 	import { User } from "lucide-svelte";
+	import { goto } from "$app/navigation";
+	import UserAvatar from "./user-avatar.svelte";
 </script>
 
 <header
@@ -63,10 +64,8 @@
 				
 				<SettingsControls />
 
-				<Button variant="ghost" class="gap-2 hover:bg-accent/50 transition-colors">
-					<User class="h-4 w-4" />
-					<span>{$_('site.login')}</span>
-				</Button>
+				<UserAvatar />
+				
 			</div>
 		</div>
 	</div>
