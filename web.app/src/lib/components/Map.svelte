@@ -7,8 +7,10 @@
   import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
 
-  export let longitude = 104.06;
-  export let latitude = 30.67;
+  export let locationData = {
+    longitude: 104.06,
+    latitude: 30.67
+  };
   export let showUserLocation = true;
 
   let container: HTMLDivElement;
@@ -21,7 +23,7 @@
       container,
       style: get(mode) === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
       zoom: 8,
-      center: [longitude, latitude],
+      center: [locationData.longitude, locationData.latitude],
       pitch: 0,
       antialias: true
     });
@@ -33,65 +35,9 @@
         element: userMarkerElement,
         anchor: 'center'
       })
-        .setLngLat([longitude, latitude])
+        .setLngLat([locationData.longitude, locationData.latitude])
         .addTo(map);
     }
-
-
-    // 添加3D和2D切换图标
-    // const toggle3D2DControl = new mapboxgl.NavigationControl({
-    //   visualizePitch: true
-    // });
-    // map.addControl(toggle3D2DControl, 'top-right');
-
-    // map.on('style.load', () => {
-    //   map.setFog({
-    //     color: 'rgb(186, 210, 235)',
-    //     'high-color': 'rgb(36, 92, 223)',
-    //     'horizon-blend': 0.02,
-    //     'space-color': 'rgb(11, 11, 25)',
-    //     'star-intensity': 0.6
-    //   });
-    // });
-
-    // map.addControl(new mapboxgl.NavigationControl());
-
-    // markers.forEach(markerData => {
-    //   const markerElement = document.createElement('div');
-    //   const marker = new mapboxgl.Marker({
-    //     element: markerElement,
-    //     anchor: 'bottom',
-    //     offset: [0, -15],
-    //     clickTolerance: 3
-    //   })
-    //     .setLngLat(markerData.coordinates)
-    //     .addTo(map);
-
-    //   mount(MapMarker, {
-    //     target: markerElement,
-    //     props: {
-    //       marker: markerData,
-    //       onMarkerClick: (marker) => {
-    //         console.log('Marker click event received:', marker);
-    //         if (marker && marker.id) {
-    //           goto(`/events/${marker.id}`);
-    //         } else {
-    //           console.error('Invalid marker data:', marker);
-    //         }
-    //       }
-    //     }
-    //   });
-    // });
-
-    // 监听模式变化
-    const unsubscribe = mode.subscribe(currentMode => {
-      map.setStyle(currentMode === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11');
-    });
-
-    return () => {
-      map.remove();
-      unsubscribe();
-    };
   });
 </script>
 

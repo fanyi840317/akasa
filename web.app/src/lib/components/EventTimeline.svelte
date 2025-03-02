@@ -37,7 +37,13 @@
               {#if event.evidence.find(e => e.id === evidenceId)}
                 {@const evidence = event.evidence.find(e => e.id === evidenceId)}
                 <div class="flex flex-col rounded-lg overflow-hidden bg-secondary hover:shadow-lg transition-all duration-300 relative">
-             
+                  <div class="absolute top-2 left-2 z-10 flex items-center gap-2">
+                    <Avatar class="w-8 h-8 border-2 border-background">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${evidence?.submittedBy}`} />
+                      <AvatarFallback>{evidence?.submittedBy[0]?.toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span class="text-xs font-medium text-background/90 drop-shadow-md">{evidence?.submittedBy}</span>
+                  </div>
                   <div class="aspect-video">
                     {#if evidence?.type === 'image'}
                       <img src={evidence.url} alt={evidence.description} class="w-full h-full object-cover" />
@@ -48,16 +54,9 @@
                   <Badge variant="secondary" class="bg-background/80 absolute top-2 right-2">
                     {evidence?.verificationStatus ? '已验证' : '待验证'}
                   </Badge>
-                  <div class="flex items-center gap-2 py-2 px-2">
-                    <Avatar class="w-6 h-6">
-                      {#if item.submitter?.avatar}
-                        <AvatarImage src={item.submitter.avatar} alt={item.submitter.name} />
-                      {/if}
-                      <AvatarFallback>{item.submitter?.name?.[0] ?? '?'}</AvatarFallback>
-                    </Avatar>
-                    <span class="text-xs">{evidence?.description ?? '未知提交者'}</span>
+                  <div class="p-3">
+                    <p class="text-sm text-muted-foreground line-clamp-2">{evidence?.description}</p>
                   </div>
-                
                 </div>
               {/if}
             {/each}

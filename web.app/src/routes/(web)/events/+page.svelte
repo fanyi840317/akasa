@@ -9,7 +9,43 @@
     import { get } from 'svelte/store';
     import { Input } from "$lib/components/ui/input";
     import { Button } from "$lib/components/ui/button";
-    import { PlusCircle, Search, MapPin } from "lucide-svelte";
+    import { PlusCircle, Search, MapPin, Image, Loader2, ChevronRight, ChevronLeft } from "lucide-svelte";
+    import { auth } from "$lib/stores/auth";
+    import { goto } from "$app/navigation";
+    import { base } from '$app/paths';
+    import CreateEventForm from './(create-event)/CreateEventForm.svelte';
+
+    import { Textarea } from "$lib/components/ui/textarea";
+    import { Label } from "$lib/components/ui/label";
+    import { databases } from "$lib/appwrite";
+    import { ID } from "appwrite";
+    import StepWindow from "$lib/components/StepWindow.svelte";
+
+    let showStepWindow = writable(false);
+    
+    let loading = false;
+    let title = "";
+    let description = "";
+    let location = "";
+    let imageFile: File | null = null;
+    let imagePreview: string | null = null;
+    let currentStep = 0;
+    const totalSteps = 3;
+
+    const steps = [
+        { title: $_('events.create.step1_title'), description: $_('events.create.step1_desc') },
+        { title: $_('events.create.step2_title'), description: $_('events.create.step2_desc') },
+        { title: $_('events.create.step3_title'), description: $_('events.create.step3_desc') }
+    ];
+
+    // 处理分享按钮点击事件
+    function handleShare() {
+        if (!$auth.user) {
+            goto(`${base}/login`);
+            return;
+        }
+        $showStepWindow = true;
+    }
     import { writable } from 'svelte/store';
 
     let { data }: { data: PageData } = $props();
@@ -31,11 +67,11 @@
 
     // 搜索位置的函数
     function searchLocation() {
-        if (!data.events) return;
-        const results = data.events.filter(event => 
-            event.location.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        searchResults.set(results);
+        // if (!data.events) return;
+        // const results = data.events.filter(event => 
+        //     event.location.toLowerCase().includes(searchQuery.toLowerCase())
+        // );
+        // searchResults.set(results);
         updateMapLocation(searchQuery);
     }
 
@@ -62,8 +98,6 @@
         // 初始化地图
         // map = ...; // 初始化地图对象
     });
-
-    
 </script>
 
 <div class="relative w-full h-[100%]">
@@ -74,7 +108,7 @@
         <div class="bg-background/95 backdrop-blur p-4 rounded-lg">
             <h1 class="text-xl font-bold">{$_('site.events')}</h1>
             <h2 class="text-sm text-muted-foreground mb-4">{$_('events.subtitle')}</h2>
-            <Button variant="outline" class="w-full gap-2">
+            <Button variant="outline" class="w-full gap-2" onclick={handleShare}>
                 <PlusCircle class="h-4 w-4" />
                 <span>{$_('events.share')}</span>
             </Button>
@@ -83,7 +117,7 @@
             {#each categories as category}
                 <div class="bg-background/95 backdrop-blur p-2 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-accent/50 transition-colors">
                     <div class="w-6 h-6 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full p-1 group-hover:from-cyan-400/30 group-hover:to-purple-400/30 transition-all">
-                        <img src={category.icon} alt={category.name} class="w-full h-full text-cyan-400" />
+                        <img src="{base}{category.icon}" alt="{category.name}" class="w-full h-full text-cyan-400" />
                     </div>
                     <span class="text-xs text-primary">{category.name}</span>
                 </div>
@@ -110,21 +144,12 @@
         <div class="bg-background/95 backdrop-blur rounded-lg w-80" >
             <div class="p-4 mb-20">
                 <h2 class="text-lg font-semibold mb-6">{$_('events.latest')}</h2>
-                <EventList {searchResults} />
+                <EventList/>
             </div>
         </div>
     </div>
+    
+ 
 </div>
 
-<style>
-    :global(body) {
-        margin: 0;
-        padding: 0;
-        background: #0a0a0f;
-        color: white;
-    }
-
-    :global(.mapboxgl-ctrl-bottom-right) {
-        display: none;
-    }
-</style>
+<CreateEventForm showStepWindow={$showStepWindow} onClose={()=>{$showStepWindow = false}} ></CreateEventForm>

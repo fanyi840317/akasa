@@ -17,10 +17,8 @@
   let loading = false;
 
   onMount(async () => {
-    console.log(account.get())
-    console.log($auth.user)
     if ($auth.user) {
-      await goto('/');
+      await goto(`${base}/`);
     }
   });
 
@@ -31,7 +29,7 @@
       await account.createEmailPasswordSession(email, password);
       const user = await account.get();
       auth.setUser(user);
-      await goto('/');
+      await goto(`${base}/`);
     } catch (e: any) {
       toast.error(e.message || $_('auth.login_failed'));
     } finally {
@@ -133,7 +131,7 @@
 
     <div class="text-center text-sm">
       <span class="text-muted-foreground">{$_('auth.no_account')}</span>
-      <a href="/register" class="text-primary hover:underline ml-1">
+      <a href="{base}/register" class="text-primary hover:underline ml-1">
         {$_('auth.register')}  
       </a>
     </div>

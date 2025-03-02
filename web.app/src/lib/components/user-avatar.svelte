@@ -5,6 +5,7 @@
 	import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "$lib/components/ui/dropdown-menu";
 	import { Avatar, AvatarFallback, AvatarImage } from "$lib/components/ui/avatar";
 	import { auth } from '$lib/stores/auth';
+    import { base } from "$app/paths";
 
 	function handleLogout() {
 		auth.logout();
@@ -16,7 +17,7 @@
 		<DropdownMenuTrigger>
 			<Avatar class="h-8 w-8 cursor-pointer">
 				<AvatarImage src={$auth.user.prefs?.avatar} alt={$auth.user.name} />
-				<AvatarFallback><User class="h-4 w-4" /></AvatarFallback>
+				<AvatarFallback>{$auth.user.name[0]}</AvatarFallback>
 			</Avatar>
 		</DropdownMenuTrigger>
 		<DropdownMenuContent align="end">
@@ -29,7 +30,7 @@
 		</DropdownMenuContent>
 	</DropdownMenu>
 {:else}
-	<Button variant="ghost" href="/login" class="gap-2 hover:bg-accent/50 transition-colors">
+	<Button variant="ghost" href="{base}/login" class="gap-2 hover:bg-accent/50 transition-colors">
 		<User class="h-4 w-4" />
 		<span>{$_('site.login')}</span>
 	</Button>

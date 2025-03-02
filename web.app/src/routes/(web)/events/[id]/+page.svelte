@@ -31,6 +31,7 @@
   import WitnessList from "$lib/components/WitnessList.svelte";
   import { mockComments } from "$lib/data/mock-comments";
   import EvidenceList from "$lib/components/EvidenceList.svelte";
+    import { base } from "$app/paths";
   // 从模拟数据中获取事件
   const event = mockEvents.find((e) => e.id === $page.params.id);
   if (!event) throw new Error("Event not found");
@@ -106,7 +107,7 @@
 <div class="relative w-full h-[60vh] mb-8">
   <div class="absolute inset-0">
     <img
-      src={event.coverImage}
+      src={base}{event.coverImage}
       alt={event.title}
       class="w-full h-full object-cover"
     />
@@ -241,7 +242,7 @@
           <div class="flex items-center w-full justify-between">
             <div class="flex items-center gap-2">
               <Avatar class="w-10 h-10 ring-2 ring-primary/20">
-                <AvatarImage src={creator.avatar} alt={creator.name} />
+                <AvatarImage src={base}/{creator.avatar} alt={creator.name} />
                 <AvatarFallback>{creator.name.slice(0, 2)}</AvatarFallback>
               </Avatar>
               <div class="space-y-1">
@@ -379,7 +380,7 @@
           variant="outline"
           size="sm"
           class="gap-1"
-          on:click={() => (showJoinForm = true)}
+          onclick={() => (showJoinForm = true)}
         >
           <UserPlus class="w-4 h-4" />
           {$_("events.join_investigation")}
@@ -437,7 +438,7 @@
             <div class="flex gap-3">
               <div class="w-16 h-16 rounded-lg overflow-hidden bg-muted">
                 <img
-                  src={hotEvent.image}
+                  src={base}{hotEvent.image}
                   alt={hotEvent.title}
                   class="w-full h-full object-cover"
                 />

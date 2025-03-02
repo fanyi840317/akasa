@@ -59,7 +59,7 @@
       <h2 class="text-2xl font-semibold">评论</h2>
       <span class="text-sm text-muted-foreground">({comments.length})</span>
     </div>
-    <Button variant="ghost" size="sm" class="gap-2" on:click={toggleOrder}>
+    <Button variant="ghost" size="sm" class="gap-2" onclick={toggleOrder}>
       <ArrowUpDown class="h-4 w-4" />
       {isDescending ? '最新' : '最早'}
     </Button>
@@ -82,7 +82,7 @@
       </div>
       {#if isInputFocused || newComment}
         <div class="mt-4 flex justify-end">
-          <Button on:click={handleSubmit} class="submit-button">发表评论</Button>
+          <Button onclick={handleSubmit} class="submit-button">发表评论</Button>
         </div>
       {/if}
     </div>
@@ -144,8 +144,8 @@
                 <Pagination.Item>
                   <Pagination.Ellipsis />
                 </Pagination.Item>
-              {:else}
-                <Pagination.Item isVisible={currentPage === page.value}>
+              {:else if currentPage === page.value}
+                <Pagination.Item>
                   <Pagination.Link {page} isActive={currentPage === page.value}>
                     {page.value}
                   </Pagination.Link>

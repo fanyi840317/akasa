@@ -9,6 +9,7 @@
 	import { User } from "lucide-svelte";
 	import { goto } from "$app/navigation";
 	import UserAvatar from "./user-avatar.svelte";
+	import { base } from "$app/paths";
 </script>
 
 <header
@@ -17,15 +18,15 @@
 	<div class="container flex h-14 max-w-screen-2xl items-center">
 		
 <div class="mr-4 hidden md:flex">
-	<a href="/" class="mr-6 flex items-center space-x-2">
-		<!-- <Icons.logo class="h-6 w-6" /> -->
+	<a href="{base}/" class="mr-6 flex items-center space-x-2">
+		<img src="{base}/images/logo_02.png" alt="{$_('site.name')}" class="h-6 w-6" />
 		<span class="hidden font-bold xl:inline-block">
 			{$_('site.name')}
 		</span>
 	</a>
 	<nav class="flex items-center gap-6 text-sm">
 		<a
-			href="/events"
+			href="{base}/events"
 			class={cn(
 				"transition-colors py-1 hover:text-foreground",
 				$page.url.pathname.startsWith("/events") 
@@ -36,7 +37,7 @@
 			{$_('site.events')}
 		</a>
 		<a
-			href="/cultivation"
+			href="{base}/cultivation"
 			class={cn(
 				"transition-colors py-1 hover:text-foreground",
 				$page.url.pathname.startsWith("/cultivation")
@@ -47,7 +48,7 @@
 			{$_('site.cultivation')}
 		</a>
 		<a
-			href="/legacy"
+			href="{base}/legacy"
 			class={cn(
 				"transition-colors py-1 hover:text-foreground",
 				$page.url.pathname.startsWith("/legacy") 

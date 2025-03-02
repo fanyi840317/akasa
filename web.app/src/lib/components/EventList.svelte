@@ -5,6 +5,7 @@
     import { mockEvents } from '$lib/data/mock-events';
     import { onMount } from 'svelte';
     import Badge from "./ui/badge/badge.svelte";
+    import { base } from "$app/paths";
 
     const events = mockEvents;
     let showAll = false;
@@ -38,7 +39,7 @@
         {#each displayEvents as event}
             <Card.Root class="cursor-pointer hover:bg-accent/50 transition-colors flex items-start p-3 gap-3">
                     <div class="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    <img src={event.image} alt={event.title} class="w-full h-full object-cover" />
+                    <img src={base}{event.image} alt={event.title} class="w-full h-full object-cover" />
                 </div>
                     <div class="flex-1 min-w-0 relative">
                     <div class="flex justify-between items-start mb-1">

@@ -5,6 +5,7 @@ export interface Comment {
   content: string;
   createdAt: Date;
   likes: number;
+  isLiked: boolean;
   replies: Reply[];
   user?: {
     name: string;

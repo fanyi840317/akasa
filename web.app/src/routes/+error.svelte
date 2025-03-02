@@ -4,7 +4,7 @@
   import { _ } from 'svelte-i18n';
 </script>
 
-<div class="h-[100%] flex items-center justify-center bg-background">
+<div class="h-[100vh] flex items-center justify-center bg-background">
   <div class="text-center space-y-6 p-4">
     <h1 class="text-6xl font-bold text-primary mb-4">{$page.status}</h1>
     <p class="text-xl text-muted-foreground mb-6">

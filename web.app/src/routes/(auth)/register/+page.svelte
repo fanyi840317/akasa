@@ -10,6 +10,7 @@
 	import { ID } from 'appwrite';
 	import { toast } from 'svelte-sonner';
 	import { base } from '$app/paths';
+	import { auth } from '$lib/stores/auth';
 
 	let username = '';
 	let email = '';
@@ -24,8 +25,10 @@
 			await account.create(ID.unique(), email, password, username);
 			// 创建成功后自动登录
 			await account.createEmailPasswordSession(email, password);
+			const user = await account.get();
+			auth.setUser(user);
 			// 跳转到首页
-			await goto('/');
+			await goto(`${base}/`);
 		} catch (e: any) {
 			toast.error(e.message || $_('auth.register_failed'));
 		} finally {
@@ -131,7 +134,7 @@
 		</form>
 		<div class="mt-4 text-center text-sm text-muted-foreground">
 			{$_('auth.already_have_account')}
-			<a href="/login" class="underline hover:text-primary">
+			<a href="{base}/login" class="underline hover:text-primary">
 				{$_('auth.login')}
 			</a>
 		</div>
