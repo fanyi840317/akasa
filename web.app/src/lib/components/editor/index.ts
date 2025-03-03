@@ -1,2 +1,2 @@
-export { default as BlockSuiteEditor } from './BlockSuiteEditor.svelte';
-export { default as RichTextEditor } from './RichTextEditor.svelte';
+export { default as Editor } from './editor.svelte';
+export { Editor as EditorType } from '@tiptap/core';

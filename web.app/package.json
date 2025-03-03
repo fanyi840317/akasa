@@ -31,23 +31,34 @@
 		"vite": "^5.4.11"
 	},
 	"dependencies": {
-		"@blocksuite/editor": "^0.10.0",
-		"@blocksuite/blocks": "^0.19.5",
-		"@blocksuite/store": "^0.19.5",
 		"@blocksuite/block-std": "^0.19.5",
+		"@blocksuite/blocks": "^0.19.5",
+		"@blocksuite/editor": "^0.10.0",
+		"@blocksuite/store": "^0.19.5",
 		"@tiptap/core": "^2.11.5",
+		"@tiptap/extension-bubble-menu": "^2.11.5",
+		"@tiptap/extension-color": "^2.11.5",
+		"@tiptap/extension-highlight": "^2.11.5",
+		"@tiptap/extension-horizontal-rule": "^2.11.5",
 		"@tiptap/extension-image": "^2.11.5",
+		"@tiptap/extension-link": "^2.11.5",
 		"@tiptap/extension-placeholder": "^2.11.5",
 		"@tiptap/extension-task-item": "^2.11.5",
 		"@tiptap/extension-task-list": "^2.11.5",
+		"@tiptap/extension-text-style": "^2.11.5",
+		"@tiptap/extension-underline": "^2.11.5",
 		"@tiptap/pm": "^2.11.5",
 		"@tiptap/starter-kit": "^2.11.5",
 		"@tiptap/suggestion": "^2.11.5",
 		"@vercel/analytics": "^1.5.0",
+		"ai": "^4.1.47",
 		"appwrite": "14.0.1",
 		"cesium": "^1.125.0",
 		"mapbox-gl": "^3.9.4",
 		"svelte-i18n": "^4.0.1",
-		"svelte-radix": "^2.0.1"
+		"svelte-moveable": "^0.45.0",
+		"svelte-radix": "^2.0.1",
+		"tippy.js": "^6.3.7",
+		"tiptap-markdown": "^0.8.10"
 	}
 }
