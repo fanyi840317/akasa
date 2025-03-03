@@ -3,12 +3,6 @@
 	import { _ } from 'svelte-i18n';
 	import { base } from '$app/paths';
 
-    export const ssr = true;
-    export const prerender = true;
-    export const trailingSlash = 'never';
-    export const layoutConfig = {
-        reset: true
-    };
 </script>
 <div class="min-h-screen flex flex-col">
   <div class="flex justify-center items-center p-16">

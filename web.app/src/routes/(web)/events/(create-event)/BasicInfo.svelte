@@ -2,35 +2,36 @@
     import { _ } from 'svelte-i18n';
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
-    import { type EditorType, Editor } from "$lib/components/editor";
+    import { browser } from '$app/environment';
+    import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
     import { cn } from "$lib/utils.js";
     import { fade } from 'svelte/transition';
+    import { writable } from 'svelte/store';
     
     export let title = "";
     export let description = "";
-    let editor: EditorType;
     let titleFocused = false;
-    let descriptionFocused = false;
     
-    function handleEditorChange() {
-        if (editor) {
-            description = editor.getHTML();
-        }
+    let localStorageContent = '';
+    
+    if (browser) {
+        localStorageContent = localStorage.getItem('event_description') || '';
+        description = localStorageContent;
     }
     
-    function handleEditorFocus() {
-        descriptionFocused = true;
-    }
+    const content = writable(description);
     
-    function handleEditorBlur() {
-        descriptionFocused = false;
-    }
+    content.subscribe((value) => {
+        if (!browser) return;
+        description = value;
+        localStorage.setItem('event_description', value);
+    });
 </script>
 
-<div class="notion-page max-w-4xl mx-auto px-4 py-10 md:py-16 md:px-0">
-    <div class="space-y-1">
+<div class="notion-page max-w-5xl mx-auto px-4 py-6 md:py-8 md:px-0">
+    <div class="space-y-2">
         <!-- Notion-style title field -->
-        <div class="relative group">
+        <div class="relative group px-6 mb-10">
             <input 
                 type="text" 
                 id="title" 
@@ -39,7 +40,7 @@
                 on:focus={() => titleFocused = true} 
                 on:blur={() => titleFocused = false}
                 class={cn(
-                    "w-full px-0 py-1 text-4xl font-bold border-0 focus:outline-none focus:ring-0 bg-transparent transition-colors",
+                    "w-full px-0 py-2 text-4xl font-bold border-0 focus:outline-none focus:ring-0 bg-transparent transition-colors",
                     !title ? "text-gray-400" : "text-gray-800"
                 )}
             />
@@ -49,32 +50,13 @@
                 </div>
             {/if}
         </div>
-
-        <!-- Light divider -->
-        <div class="h-px w-full bg-gray-200 my-4"></div>
         
-        <!-- Notion-style editor -->
-        <div class="notion-editor relative group {descriptionFocused ? 'is-focused' : ''}">
-            <div class="relative">
-                <Editor
-                    bind:editor
-                    defaultValue={description}
-                    onUpdate={handleEditorChange}
-                    on:focus={handleEditorFocus}
-                    on:blur={handleEditorBlur}
-                    class="min-h-[70vh] border-0 bg-transparent prose prose-sm sm:prose-base transition-colors"
-                >
-                    <div class="p-1 text-base text-gray-400">
-                        {$_('events.create.description_placeholder') || '输入"/"查看命令菜单...'}
-                    </div>
-                </Editor>
-                
-                {#if !description && !descriptionFocused}
-                    <div class="absolute right-2 top-4 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Click to edit
-                    </div>
-                {/if}
-            </div>
+        <!-- Notion-style editor with ShadEditor -->
+        <div class="notion-editor relative group">
+            <ShadEditor showToolbar={false}
+                    class="min-h-[80vh] border-0" 
+                    content={$content}
+                />
         </div>
     </div>
 </div>
@@ -92,22 +74,4 @@
         transition: background-color 100ms ease-in;
     }
     
-    .notion-editor:hover {
-        background-color: rgba(55, 53, 47, 0.03);
-    }
-    
-    .notion-editor.is-focused {
-        background-color: transparent;
-    }
-    
-    /* Remove the default prose max-width constraint */
-    :global(.notion-editor .prose) {
-        max-width: none;
-    }
-    
-    /* Style the editor placeholder text */
-    :global(.notion-editor .ProseMirror p.is-editor-empty:first-child::before) {
-        color: rgba(55, 53, 47, 0.4);
-        font-style: normal;
-    }
 </style>

@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { Button } from "$lib/components/ui/button";
   import { Label } from "$lib/components/ui/label";
-  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "$lib/components/ui/select";
+  import { Select, SelectContent, SelectItem, SelectTrigger } from "$lib/components/ui/select";
   import { Switch } from "$lib/components/ui/switch";
   import { Moon, Sun, Globe } from "lucide-svelte";
 
@@ -39,7 +39,7 @@
         <Label>{$_('settings.theme')}</Label>
         <p class="text-sm text-muted-foreground">{$_('settings.theme_desc')}</p>
       </div>
-      <Button variant="outline" size="icon" on:click={toggleTheme}>
+      <Button variant="outline" size="icon" onclick={toggleTheme}>
         {#if darkMode}
           <Moon class="h-5 w-5" />
         {:else}
@@ -83,7 +83,7 @@
           <Switch
             id="email-notifications"
             checked={emailNotifications}
-            on:change={handleNotificationChange}
+            onchange={handleNotificationChange}
           />
         </div>
         <div class="flex items-center justify-between">
@@ -96,7 +96,7 @@
           <Switch
             id="push-notifications"
             checked={pushNotifications}
-            on:change={handleNotificationChange}
+            onchange={handleNotificationChange}
           />
         </div>
       </div>

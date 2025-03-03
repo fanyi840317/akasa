@@ -29,7 +29,7 @@
 
 {#if true}
 <div transition:fade={{ duration: 200 }}>
-  <div class="w-full h-screen max-w-none m-0 fixed top-0 left-0 bg-background/95 backdrop-blur-sm z-[1000]" transition:fly={{ y: 20, duration: 300 }}>
+  <div class="w-full h-screen max-w-none m-0 fixed top-0 left-0 bg-background z-[1000]" transition:fly={{ y: 20, duration: 300 }}>
     <div class="flex items-center justify-between px-6 py-4 border-b">
       <h2 class="text-lg font-semibold">{steps[currentStep]?.title || ''}</h2>
       <Button variant="ghost" size="icon" class="-mr-2" onclick={closeWind}>
