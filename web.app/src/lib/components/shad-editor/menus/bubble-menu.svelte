@@ -99,7 +99,13 @@
 				}
 			]
 		},
-		maxWidth: 'calc(100vw - 16px)'
+		maxWidth: 'calc(100vw - 16px)',
+		onShow: (instance) => {
+			// 强制Tippy更新位置，解决第一次显示位置问题
+			setTimeout(() => {
+				instance.popperInstance?.update();
+			}, 0);
+		}
 	}}
 >
 	<FontSize {editor} {toolTipProps} />

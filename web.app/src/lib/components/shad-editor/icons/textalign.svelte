@@ -41,7 +41,13 @@
 			</Tooltip.Root>
 		</Tooltip.Provider>
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="w-40">
+	<DropdownMenu.Content 
+		class="w-40" 
+		sideOffset={5}
+		align="start"
+		avoidCollisions={true}
+		portalProps={{ disabled: true, to: undefined }}
+	>
 		<DropdownMenu.Item
 			onclick={() => editor.chain().focus().setTextAlign('left').run()}
 			closeOnSelect={false}
