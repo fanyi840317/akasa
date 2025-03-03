@@ -40,7 +40,13 @@
 			</Tooltip.Root>
 		</Tooltip.Provider>
 	</Popover.Trigger>
-	<Popover.Content class="bg-popover shadow-lg *:my-2">
+	<Popover.Content 
+		class="bg-popover shadow-lg *:my-2"
+		sideOffset={5}
+		align="start"
+		avoidCollisions={true}
+		portalProps={{ disabled: true, to: undefined }}
+	>
 		<div class="flex items-center justify-between">
 			<h1 class="text-xl font-bold">Link</h1>
 			<Popover.Close>
