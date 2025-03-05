@@ -18,21 +18,20 @@
     import { onMount } from "svelte";
     import Card from "$lib/components/ui/card/card.svelte";
 
-    let { children } = $props();
+    // let {children}= $props();
 
     // 控制右侧面板状态
     let showRightPanel = $state(false);
-    let rightPaneAPI: PaneAPI;
-    let collapsed = false;
+    let leftPaneAPI: PaneAPI;
+    // let collapsed = false;
 
     // 切换右侧面板显示状态
     function toggleRightPanel() {
-        if (collapsed) {
-            rightPaneAPI.expand();
-        } else if (!showRightPanel) {
-            showRightPanel = true;
-        } else {
-            rightPaneAPI.collapse();
+        showRightPanel = !showRightPanel;
+        if(showRightPanel){
+            leftPaneAPI.expand();
+        }else{
+            leftPaneAPI.collapse();
         }
     }
 
@@ -47,7 +46,7 @@
     <!-- 使用PaneGroup组件在最外层，以实现动态调整大小 -->
     <PaneGroup direction="horizontal">
         <!-- 主内容区域，包含Sidebar.Provider -->
-        <Pane defaultSize={70} order={1}>
+        <Pane defaultSize={100} order={1} collapsedSize={40} collapsible={true} bind:pane={leftPaneAPI} >
             <Sidebar.Provider>
                 <LeftSidebar collapsible="icon" side="left" />
                 <Sidebar.Inset>
@@ -89,40 +88,25 @@
                         </div>
                     </header>
                     <div class="flex flex-1 p-4">
-                        {@render children()}
+                        <slot></slot>
                     </div>
                 </Sidebar.Inset>
             </Sidebar.Provider>
         </Pane>
+        {#if showRightPanel}
             <Resizable.Handle withHandle />
-
-            <!-- 使用 PaneResizer -->
+            <!-- 右侧面板 -->
             <Pane
                 class="bg-card h-full relative"
                 defaultSize={0}
+                minSize={60}
                 order={2}
-                collapsedSize={0}
-                collapsible={true}
-                minSize={30}
-                bind:pane={rightPaneAPI}
-                onCollapse={() => (collapsed = true)}
-                onExpand={() => (collapsed = false)}
             >
-                <!-- 分享面板，使用 order 属性保持顺序 -->
-                <div class="h-full w-[30%] bg-card" transition:fly={{ duration: 300, x: 300, easing: (t) => t * (2 - t) }}>
-                    <!-- 分享面板内容 -->
-                    <div class="p-4">
-                        <h2 class="text-2xl font-bold mb-4">分享面板</h2>
-                        <p>分享面板的内容</p>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onclick={closeRightPanel}
-                        >
-                            <CloseIcon class="h-5 w-5" />
-                        </Button>
-                    </div>
+                <!-- 分享面板内容 -->
+                <div class="h-full w-full bg-card" transition:fly={{ duration: 300, x: 300, easing: (t) => t * (2 - t) }}>
+                    <slot name="leftPane"></slot>
                 </div>
             </Pane>
+        {/if}
     </PaneGroup>
 </div>

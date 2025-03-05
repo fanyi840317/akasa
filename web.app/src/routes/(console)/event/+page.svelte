@@ -132,7 +132,7 @@
     });
 </script>
 
-<div class="relative w-full h-[100%]" bind:this={containerRef}>
+<div class="relative w-full h-[100%]  " bind:this={containerRef}>
     <div class="absolute inset-0">
         <Map locationData={data.location} />
     </div>
