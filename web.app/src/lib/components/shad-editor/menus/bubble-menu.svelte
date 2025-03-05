@@ -76,11 +76,12 @@
 
 <BubbleMenu
 	{editor}
-	class="flex h-fit w-fit items-center gap-1 rounded-md border bg-background/90 p-0.5 backdrop-blur-md"
+	class="flex h-fit w-fit items-center gap-1 rounded-md border bg-background/90 p-0.5 backdrop-blur-md z-100 shadow-md"
 	{shouldShow}
 	pluginKey="bubble-menu"
 	updateDelay={100}
 	tippyOptions={{
+		zIndex: 9999,
 		popperOptions: {
 			placement: 'top-start',
 			modifiers: [

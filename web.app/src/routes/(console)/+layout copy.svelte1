@@ -1,0 +1,121 @@
+<script lang="ts">
+    import { fade, fly, slide } from "svelte/transition";
+    // import type { Snippet } from 'svelte';
+    import type { LayoutData } from "./$types";
+    import * as Sidebar from "$lib/components/ui/sidebar";
+    import { Separator } from "$lib/components/ui/separator";
+    import * as Breadcrumb from "$lib/components/ui/breadcrumb";
+    import LeftSidebar from "$lib/components/console/left-sidebar.svelte";
+    import NotionSidePanel from "$lib/components/NotionSidePanel.svelte";
+    import * as Resizable from "$lib/components/ui/resizable";
+    import { Button } from "$lib/components/ui/button";
+    import { Share2, X as CloseIcon } from "lucide-svelte";
+    import "./map-panel.css";
+    import { onMount } from "svelte";
+    import Card from "$lib/components/ui/card/card.svelte";
+    import { ID } from "appwrite";
+
+    // let { data, children }: { data: LayoutData, children: Snippet } = $props();
+    let { children } = $props();
+
+    // 控制右侧面板的显示状态
+    let showRightPanel = $state(false);
+
+    // 切换右侧面板显示状态
+    function toggleRightPanel() {
+        showRightPanel = !showRightPanel;
+        console.log("切换面板状态:", showRightPanel);
+    }
+
+    // 关闭右侧面板
+    function closeRightPanel() {
+        showRightPanel = false;
+    }
+</script>
+
+<!-- 添加外层包装div来控制溢出 -->
+<div class="fixed inset-0 overflow-hidden">
+    <!-- 使用PaneGroup组件在最外层，以实现动态调整大小 -->
+    <Resizable.PaneGroup direction="horizontal">
+        <!-- 主内容区域，包含Sidebar.Provider -->
+        <Resizable.Pane defaultSize={70} order={1}>
+            <Sidebar.Provider>
+                <LeftSidebar collapsible="icon" side="left" />
+                <Sidebar.Inset>
+                    <header
+                        class="flex h-16 shrink-0 items-center gap-2 justify-between"
+                    >
+                        <div class="flex items-center gap-2 px-4">
+                            <Sidebar.Trigger class="-ml-1" />
+                            <Separator
+                                orientation="vertical"
+                                class="mr-2 h-4"
+                            />
+                            <Breadcrumb.Root>
+                                <Breadcrumb.List>
+                                    <Breadcrumb.Item class="hidden md:block">
+                                        <Breadcrumb.Link href="#"
+                                            >Building Your Application</Breadcrumb.Link
+                                        >
+                                    </Breadcrumb.Item>
+                                    <Breadcrumb.Separator
+                                        class="hidden md:block"
+                                    />
+                                    <Breadcrumb.Item>
+                                        <Breadcrumb.Page
+                                            >Data Fetching</Breadcrumb.Page
+                                        >
+                                    </Breadcrumb.Item>
+                                </Breadcrumb.List>
+                            </Breadcrumb.Root>
+                        </div>
+                        <div class="pr-4">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onclick={toggleRightPanel}
+                            >
+                                <Share2 class="h-5 w-5" />
+                            </Button>
+                        </div>
+                    </header>
+                    <div class="flex flex-1 p-4">
+                        {@render children()}
+                    </div>
+                </Sidebar.Inset>
+                <!-- <Sidebar.Root side="right">
+                <NotionSidePanel />
+            </Sidebar.Root> -->
+            </Sidebar.Provider>
+        </Resizable.Pane>
+        {#if showRightPanel}
+        <Resizable.Handle withHandle />
+         
+                <!-- 使用 PaneResizer -->
+                <Resizable.Pane 
+                    class="bg-card h-full relative"
+                    defaultSize={30}
+                    order={2}
+                >
+                   <!-- 分享面板，使用 order 属性保持顺序 -->
+            <div class="h-full w-[30%] bg-card" transition:fade={{ duration: 300 }} >
+            <!-- transition:fly={{ duration: 300, x: 300, easing: (t) => t * (2 - t) }} -->
+        <!-- > -->
+            <!-- 分享面板内容 -->   
+            <div class="p-4">
+                <h2 class="text-2xl font-bold mb-4">分享面板</h2>
+                <p>分享面板的内容</p>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onclick={closeRightPanel}
+                >
+                    <CloseIcon class="h-5 w-5" />
+                </Button>
+            </div>
+            
+        </div>
+            </Resizable.Pane>
+        {/if}
+    </Resizable.PaneGroup>
+</div>

@@ -23,8 +23,8 @@
 		<DropdownMenuContent align="end">
 			<DropdownMenuLabel>{$auth.user.name}</DropdownMenuLabel>
 			<DropdownMenuSeparator />
-			<a href="/profile"><DropdownMenuItem>{$_('profile.personal_info')}</DropdownMenuItem></a>
-			<DropdownMenuItem href="/profile/settings">{$_('profile.settings')}</DropdownMenuItem>
+			<a href="{base}/profile"><DropdownMenuItem>{$_('profile.personal_info')}</DropdownMenuItem></a>
+			<a href="{base}/profile/settings"><DropdownMenuItem>{$_('profile.settings')}</DropdownMenuItem></a>
 			<DropdownMenuSeparator />
 			<DropdownMenuItem onclick={handleLogout}>{$_('site.logout')}</DropdownMenuItem>
 		</DropdownMenuContent>

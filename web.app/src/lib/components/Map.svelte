@@ -38,6 +38,15 @@
         .setLngLat([locationData.longitude, locationData.latitude])
         .addTo(map);
     }
+
+    const unsubscribe = mode.subscribe(currentMode => {
+      map.setStyle(currentMode === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11');
+    });
+
+    return () => {
+      map.remove();
+      unsubscribe();
+    };
   });
 </script>
 
@@ -49,6 +58,8 @@
     width: 100%;
     height: 100%;
     position: relative;
+    border-radius: 0.75rem;
+    overflow: hidden;
   }
 
   :global(.mapboxgl-ctrl-bottom-right) {

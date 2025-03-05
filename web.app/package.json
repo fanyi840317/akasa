@@ -46,6 +46,7 @@
 		"lowlight": "^3.3.0",
 		"lucide-svelte": "^0.474.0",
 		"mode-watcher": "^0.5.1",
+		"paneforge": "0.0.6",
 		"svelte": "^5.0.0",
 		"svelte-awesome-color-picker": "^3.1.4",
 		"svelte-check": "^4.0.0",

@@ -116,7 +116,7 @@
             </Card.Content>
         </Card.Root>
         
-        <div class="flex flex-wrap gap-2">
+        <!-- <div class="flex flex-wrap gap-2">
             {#each categories as category}
                 <Card.Root class="p-2 flex items-center gap-2 cursor-pointer hover:bg-accent/50 transition-colors border-none shadow-sm backdrop-blur-sm">
                     <div class="w-6 h-6 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full p-1 group-hover:from-cyan-400/30 group-hover:to-purple-400/30 transition-all">
@@ -125,7 +125,7 @@
                     <span class="text-xs text-primary">{category.name}</span>
                 </Card.Root>
             {/each}
-        </div>
+        </div> -->
     </div>
     <div class="absolute top-4 right-4 z-20 space-y-4">
         <Card.Root class="w-80 backdrop-blur-sm border-none shadow-lg">
