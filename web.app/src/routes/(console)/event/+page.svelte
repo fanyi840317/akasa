@@ -31,6 +31,8 @@
     let imagePreview: string | null = null;
     let currentStep = 0;
     const totalSteps = 3;
+    let containerWidth = 0;
+    let containerRef: HTMLElement;
 
     const steps = [
         { title: $_('events.create.step1_title'), description: $_('events.create.step1_desc') },
@@ -64,6 +66,8 @@
 
     // 新增一个可写的 store 来存储搜索结果
     const searchResults = writable([]);
+    // 新增一个可写的 store 来存储是否为移动视图
+    let isMobileView = $state(false);
 
     // 搜索位置的函数
     function searchLocation() {
@@ -94,16 +98,45 @@
         }
     }
 
+    // 监听容器宽度变化
+    function updateContainerWidth() {
+        if (containerRef) {
+            containerWidth = containerRef.clientWidth;
+            console.log(containerWidth);
+            isMobileView = containerWidth < 600;
+            console.log(isMobileView)
+        }
+    }
+
     onMount(() => {
         // 初始化地图
         // map = ...; // 初始化地图对象
+        
+        // 初始化容器宽度
+        updateContainerWidth();
+        
+        // 设置ResizeObserver监听容器宽度变化
+        const resizeObserver = new ResizeObserver(() => {
+            updateContainerWidth();
+        });
+        
+        if (containerRef) {
+            resizeObserver.observe(containerRef);
+        }
+        
+        return () => {
+            if (containerRef) {
+                resizeObserver.unobserve(containerRef);
+            }
+        };
     });
 </script>
 
-<div class="relative w-full h-[100%]">
+<div class="relative w-full h-[100%]" bind:this={containerRef}>
     <div class="absolute inset-0">
         <Map locationData={data.location} />
     </div>
+    {#if !isMobileView}
     <div class="absolute top-4 left-4 z-20 w-64 space-y-4">
         <Card.Root class="backdrop-blur-sm border-none shadow-lg">
             <Card.Content class="p-4">
@@ -115,8 +148,7 @@
                 </Button>
             </Card.Content>
         </Card.Root>
-        
-        <!-- <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-2">
             {#each categories as category}
                 <Card.Root class="p-2 flex items-center gap-2 cursor-pointer hover:bg-accent/50 transition-colors border-none shadow-sm backdrop-blur-sm">
                     <div class="w-6 h-6 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full p-1 group-hover:from-cyan-400/30 group-hover:to-purple-400/30 transition-all">
@@ -125,8 +157,10 @@
                     <span class="text-xs text-primary">{category.name}</span>
                 </Card.Root>
             {/each}
-        </div> -->
+        </div>
     </div>
+    
+    {/if}
     <div class="absolute top-4 right-4 z-20 space-y-4">
         <Card.Root class="w-80 backdrop-blur-sm border-none shadow-lg">
             <Card.Content class="p-4">
@@ -146,16 +180,14 @@
                 </div>
             </Card.Content>
         </Card.Root>
-        
-        <Card.Root class="w-80 backdrop-blur-sm border-none shadow-lg">
+        {#if !isMobileView}
+        <Card.Root class={`w-80 backdrop-blur-sm border-none shadow-lg`}>
             <Card.Content class="p-4">
                 <h2 class="text-lg font-semibold mb-6">{$_('events.latest')}</h2>
                 <EventList/>
             </Card.Content>
         </Card.Root>
-    </div>
-    
- 
-</div>
+        {/if}
+    </div></div>
 
 <NotionEventCreator isOpen={$showCreatePanel} onClose={()=>{$showCreatePanel = false}} />

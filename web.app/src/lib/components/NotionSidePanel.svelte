@@ -16,7 +16,7 @@
   
   <!-- Right side panel -->
   <div 
-    class="absolute top-0 right-0 h-full w-full sm:w-[550px] lg:w-[650px] bg-background" 
+    class="absolute top-0 right-0 h-full w-full sm:w-[550px] lg:w-[1250px] bg-background" 
     transition:fly={{ x: 300, duration: 200, opacity: 1 }}
   >
     <div class="flex h-full flex-col">
