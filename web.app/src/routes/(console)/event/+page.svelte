@@ -1,129 +1,155 @@
 <script lang="ts">
-    import type { PageData } from './$types';
-    import Map from '$lib/components/Map.svelte';
-    import EventList from '$lib/components/EventList.svelte';
-    import { _ } from 'svelte-i18n';
-    import * as Card from "$lib/components/ui/card";
-    import { theme } from '$lib/stores/theme';
-    import { onMount } from 'svelte';
-    import { get } from 'svelte/store';
-    import { Input } from "$lib/components/ui/input";
-    import { Button } from "$lib/components/ui/button";
-    import { PlusCircle, Search, MapPin, Image, Loader2, ChevronRight, ChevronLeft } from "lucide-svelte";
-    import { auth } from "$lib/stores/auth";
+    import type { PageData } from "./$types";
+    import { onMount } from "svelte";
+    import { get } from "svelte/store";
+    import { writable } from "svelte/store";
+    import { fade, fly, slide } from "svelte/transition";
+    import { _ } from "svelte-i18n";
     import { goto } from "$app/navigation";
-    import { base } from '$app/paths';
-    import NotionEventCreator from '../../(console)/event/(create-event)/NotionEventCreator.svelte';
-
-    import { Textarea } from "$lib/components/ui/textarea";
-    import { Label } from "$lib/components/ui/label";
+    import { base } from "$app/paths";
+    import { auth } from "$lib/stores/auth";
+    import { theme } from "$lib/stores/theme";
     import { databases } from "$lib/appwrite";
     import { ID } from "appwrite";
+    import Map from "$lib/components/Map.svelte";
+    import EventList from "$lib/components/EventList.svelte";
     import StepWindow from "$lib/components/StepWindow.svelte";
+    import NotionEventCreator from "../../(console)/event/(create-event)/NotionEventCreator.svelte";
+    import * as Card from "$lib/components/ui/card";
+    import { Input } from "$lib/components/ui/input";
+    import { Button } from "$lib/components/ui/button";
+    import { Textarea } from "$lib/components/ui/textarea";
+    import { Label } from "$lib/components/ui/label";
+    import HeaderPage from "$lib/components/console/header-page.svelte";
+    import {
+        PlusCircle,
+        Search,
+        MapPin,
+        Image,
+        Loader2,
+        ChevronRight,
+        ChevronLeft,
+    } from "lucide-svelte";
 
-    let showCreatePanel = writable(false);
-    
+    import { Pane, Splitpanes } from "svelte-splitpanes";
+
+    let { data }: { data: PageData } = $props();
     let loading = false;
     let title = "";
     let description = "";
     let location = "";
     let imageFile: File | null = null;
     let imagePreview: string | null = null;
+
     let currentStep = 0;
-    const totalSteps = 3;
     let containerWidth = 0;
     let containerRef: HTMLElement;
+    let isMobileView = $state(false);
+    let searchQuery = "";
+    let map: any;
+    let splitRatio = $state(1);
+    let showCreateEvent = $state(false);
+
+    const totalSteps = 3;
+    const searchResults = writable([]);
 
     const steps = [
-        { title: $_('events.create.step1_title'), description: $_('events.create.step1_desc') },
-        { title: $_('events.create.step2_title'), description: $_('events.create.step2_desc') },
-        { title: $_('events.create.step3_title'), description: $_('events.create.step3_desc') }
+        {
+            title: $_("events.create.step1_title"),
+            description: $_("events.create.step1_desc"),
+        },
+        {
+            title: $_("events.create.step2_title"),
+            description: $_("events.create.step2_desc"),
+        },
+        {
+            title: $_("events.create.step3_title"),
+            description: $_("events.create.step3_desc"),
+        },
     ];
 
-    // 处理分享按钮点击事件
+    const categories = [
+        {
+            name: $_("events.categories.urban"),
+            icon: "/icons/urban.svg",
+            type: "urban",
+        },
+        {
+            name: $_("events.categories.paranormal"),
+            icon: "/icons/paranormal.svg",
+            type: "paranormal",
+        },
+        {
+            name: $_("events.categories.supernatural"),
+            icon: "/icons/supernatural.svg",
+            type: "supernatural",
+        },
+        {
+            name: $_("events.categories.mysterious"),
+            icon: "/icons/mysterious.svg",
+            type: "mysterious",
+        },
+        {
+            name: $_("events.categories.unexplained"),
+            icon: "/icons/unexplained.svg",
+            type: "unexplained",
+        },
+        {
+            name: $_("events.categories.phenomena"),
+            icon: "/icons/phenomena.svg",
+            type: "phenomena",
+        },
+    ];
+
     function handleShare() {
         if (!$auth.user) {
             goto(`${base}/login`);
             return;
         }
-        $showCreatePanel = true;
+        showCreateEvent = !showCreateEvent;
     }
-    import { writable } from 'svelte/store';
 
-    let { data }: { data: PageData } = $props();
-
-    const categories = [
-        { name: $_('events.categories.urban'), icon: "/icons/urban.svg", type: "urban" },
-        { name: $_('events.categories.paranormal'), icon: "/icons/paranormal.svg", type: "paranormal" },
-        { name: $_('events.categories.supernatural'), icon: "/icons/supernatural.svg", type: "supernatural" },
-        { name: $_('events.categories.mysterious'), icon: "/icons/mysterious.svg", type: "mysterious" },
-        { name: $_('events.categories.unexplained'), icon: "/icons/unexplained.svg", type: "unexplained" },
-        { name: $_('events.categories.phenomena'), icon: "/icons/phenomena.svg", type: "phenomena" }
-    ];
-
-    let searchQuery = '';
-    let map: any;
-
-    // 新增一个可写的 store 来存储搜索结果
-    const searchResults = writable([]);
-    // 新增一个可写的 store 来存储是否为移动视图
-    let isMobileView = $state(false);
-
-    // 搜索位置的函数
     function searchLocation() {
-        // if (!data.events) return;
-        // const results = data.events.filter(event => 
-        //     event.location.toLowerCase().includes(searchQuery.toLowerCase())
-        // );
-        // searchResults.set(results);
         updateMapLocation(searchQuery);
     }
 
-    // 处理回车事件
     function handleKeyPress(event: KeyboardEvent) {
-        if (event.key === 'Enter') {
+        if (event.key === "Enter") {
             searchLocation();
         }
     }
 
-    // 更新地图位置的函数
     async function updateMapLocation(location: string) {
-        const response = await fetch(`https://api.example.com/geocode?address=${encodeURIComponent(location)}`);
+        const response = await fetch(
+            `https://api.example.com/geocode?address=${encodeURIComponent(location)}`,
+        );
         const data = await response.json();
         if (data && data.results && data.results.length > 0) {
             const { lat, lng } = data.results[0].geometry.location;
             map.setCenter([lng, lat]);
         } else {
-            console.error('未找到该位置');
+            console.error("未找到该位置");
         }
     }
 
-    // 监听容器宽度变化
     function updateContainerWidth() {
         if (containerRef) {
             containerWidth = containerRef.clientWidth;
-            console.log(containerWidth);
             isMobileView = containerWidth < 600;
-            console.log(isMobileView)
         }
     }
 
     onMount(() => {
-        // 初始化地图
-        // map = ...; // 初始化地图对象
-        
-        // 初始化容器宽度
         updateContainerWidth();
-        
-        // 设置ResizeObserver监听容器宽度变化
+
         const resizeObserver = new ResizeObserver(() => {
             updateContainerWidth();
         });
-        
+
         if (containerRef) {
             resizeObserver.observe(containerRef);
         }
-        
+
         return () => {
             if (containerRef) {
                 resizeObserver.unobserve(containerRef);
@@ -132,62 +158,196 @@
     });
 </script>
 
-<div class="relative w-full h-[100%]  " bind:this={containerRef}>
-    <div class="absolute inset-0">
-        <Map locationData={data.location} />
-    </div>
-    {#if !isMobileView}
-    <div class="absolute top-4 left-4 z-20 w-64 space-y-4">
-        <Card.Root class="backdrop-blur-sm border-none shadow-lg">
-            <Card.Content class="p-4">
-                <h1 class="text-xl font-bold">{$_('site.events')}</h1>
-                <h2 class="text-sm text-muted-foreground mb-4">{$_('events.subtitle')}</h2>
-                <Button variant="outline" class="w-full gap-2" onclick={handleShare}>
-                    <PlusCircle class="h-4 w-4" />
-                    <span>{$_('events.share')}</span>
-                </Button>
-            </Card.Content>
-        </Card.Root>
-        <div class="flex flex-wrap gap-2">
-            {#each categories as category}
-                <Card.Root class="p-2 flex items-center gap-2 cursor-pointer hover:bg-accent/50 transition-colors border-none shadow-sm backdrop-blur-sm">
-                    <div class="w-6 h-6 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full p-1 group-hover:from-cyan-400/30 group-hover:to-purple-400/30 transition-all">
-                        <img src="{base}{category.icon}" alt="{category.name}" class="w-full h-full text-cyan-400" />
+<Splitpanes theme="my-theme" class="h-[calc(100vh-4rem)] w-full">
+    <Pane class="flex-1 w-full">
+        <HeaderPage title="event" class="w-full h-full flex flex-col">
+              <div class="relative flex-1 w-full h-full" bind:this={containerRef}>
+                    <div class="absolute inset-0 w-full h-full">
+                        <Map locationData={data.location} />
                     </div>
-                    <span class="text-xs text-primary">{category.name}</span>
-                </Card.Root>
-            {/each}
-        </div>
-    </div>
-    
-    {/if}
-    <div class="absolute top-4 right-4 z-20 space-y-4">
-        <Card.Root class="w-80 backdrop-blur-sm border-none shadow-lg">
-            <Card.Content class="p-4">
-                <div class="relative w-full flex gap-2">
-                    <div class="relative flex-1">
-                        <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input 
-                            placeholder="Search Location" 
-                            class="pl-10" 
-                            bind:value={searchQuery} 
-                            onkeypress={handleKeyPress}
-                        />
+                    {#if !isMobileView}
+                        <div
+                            class="absolute top-4 left-4 z-20 w-64 space-y-4"
+                            transition:fly={{ x: -200, duration: 300, opacity: 1 }}
+                        >
+                            <Card.Root
+                                class="backdrop-blur-sm border-none shadow-lg"
+                            >
+                                <Card.Content class="p-4">
+                                    <h1 class="text-xl font-bold">
+                                        {$_("site.events")}
+                                    </h1>
+                                    <h2 class="text-sm text-muted-foreground mb-4">
+                                        {$_("events.subtitle")}
+                                    </h2>
+                                    <Button
+                                        variant="outline"
+                                        class="w-full gap-2"
+                                        onclick={handleShare}
+                                    >
+                                        <PlusCircle class="h-4 w-4" />
+                                        <span>{$_("events.share")}</span>
+                                    </Button>
+                                </Card.Content>
+                            </Card.Root>
+                            <div
+                                class="flex flex-wrap gap-2"
+                                transition:slide={{ duration: 200 }}
+                            >
+                                {#each categories as category}
+                                    <Card.Root
+                                        class="p-2 flex items-center gap-2 cursor-pointer hover:bg-accent/50 transition-colors border-none shadow-sm backdrop-blur-sm"
+                                    >
+                                        <div
+                                            class="w-6 h-6 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full p-1 group-hover:from-cyan-400/30 group-hover:to-purple-400/30 transition-all"
+                                        >
+                                            <img
+                                                src="{base}{category.icon}"
+                                                alt={category.name}
+                                                class="w-full h-full text-cyan-400"
+                                            />
+                                        </div>
+                                        <span class="text-xs text-primary"
+                                            >{category.name}</span
+                                        >
+                                    </Card.Root>
+                                {/each}
+                            </div>
+                        </div>
+                    {/if}
+                    <div
+                        class="absolute top-4 right-4 z-20 space-y-4"
+                        transition:slide={{ duration: 200 }}
+                    >
+                        <Card.Root
+                            class="w-80 backdrop-blur-sm border-none shadow-lg"
+                        >
+                            <Card.Content class="p-4">
+                                <div class="relative w-full flex gap-2">
+                                    <div class="relative flex-1">
+                                        <Search
+                                            class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                                        />
+                                        <Input
+                                            placeholder="Search Location"
+                                            class="pl-10"
+                                            bind:value={searchQuery}
+                                            onkeypress={handleKeyPress}
+                                        />
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        class="shrink-0"
+                                        onclick={searchLocation}
+                                    >
+                                        <MapPin class="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </Card.Content>
+                        </Card.Root>
+                        {#if !isMobileView}
+                            <div
+                                class="w-80"
+                                transition:fly={{
+                                    x: 200,
+                                    duration: 300,
+                                    opacity: 1,
+                                }}
+                            >
+                                <Card.Root>
+                                    <Card.Content class="p-4">
+                                        <h2 class="text-lg font-semibold mb-6">
+                                            {$_("events.latest")}
+                                        </h2>
+                                        <EventList />
+                                    </Card.Content>
+                                </Card.Root>
+                            </div>
+                        {/if}
                     </div>
-                    <Button variant="outline" size="icon" class="shrink-0" onclick={searchLocation}>
-                        <MapPin class="h-4 w-4" />
-                    </Button>
                 </div>
-            </Card.Content>
-        </Card.Root>
-        {#if !isMobileView}
-        <Card.Root class={`w-80 backdrop-blur-sm border-none shadow-lg`}>
-            <Card.Content class="p-4">
-                <h2 class="text-lg font-semibold mb-6">{$_('events.latest')}</h2>
-                <EventList/>
-            </Card.Content>
-        </Card.Root>
-        {/if}
-    </div></div>
+        </HeaderPage>
+    </Pane>
+    {#if showCreateEvent}
+        <Pane size={70}>
+            <div class="flex h-full flex-col bg-card overflow-hidden">
+                <!-- Header with buttons -->
+                <div
+                    class="flex items-center justify-between px-4 py-2 border-b flex-shrink-0"
+                >
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        class="h-6 w-6"
+                        onclick={() => {
+                            showCreateEvent = false;
+                        }}
+                    >
+                        <div class="flex items-center">
+                            <ChevronRight class="h-3 w-3 -mr-3" />
+                            <ChevronRight class="h-3 w-3" />
+                        </div>
+                    </Button>
 
-<NotionEventCreator isOpen={$showCreatePanel} onClose={()=>{$showCreatePanel = false}} />
+                    <!-- Footer content moved to header right -->
+                    <div class="flex items-center gap-2">
+                        <!-- <slot name="footer" /> -->
+                    </div>
+                </div>
+
+                <!-- Content area -->
+                <div class="flex-1 overflow-y-auto">
+                    <div class="p-6">
+                        <NotionEventCreator />
+                    </div>
+                </div>
+            </div>
+        </Pane>
+    {/if}
+</Splitpanes>
+
+<style global>
+    .splitpanes.my-theme {
+        height: 100%;
+        
+        .splitpanes__pane {
+            background-color: none;
+            overflow: hidden;
+        }
+        .splitpanes__splitter {
+            background-color: #ccc;
+            position: relative;
+            &:before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 0;
+                transition: opacity 0.4s;
+                background-color: rgba(255, 0, 0, 0.3);
+                opacity: 0;
+                z-index: 1;
+            }
+            &:hover:before {
+                opacity: 1;
+            }
+            &.splitpanes__splitter__active {
+                z-index: 2; /* Fix an issue of overlap fighting with a near hovered splitter */
+            }
+        }
+    }
+    .my-theme {
+        &.splitpanes--vertical > .splitpanes__splitter:before {
+            left: -30px;
+            right: -30px;
+            height: 100%;
+            cursor: col-resize;
+        }
+        &.splitpanes--horizontal > .splitpanes__splitter:before {
+            top: -30px;
+            bottom: -30px;
+            width: 100%;
+            cursor: row-resize;
+        }
+    }
+</style>

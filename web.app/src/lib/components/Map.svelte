@@ -60,6 +60,7 @@
     position: relative;
     border-radius: 0.75rem;
     overflow: hidden;
+    display: block;
   }
 
   :global(.mapboxgl-ctrl-bottom-right) {

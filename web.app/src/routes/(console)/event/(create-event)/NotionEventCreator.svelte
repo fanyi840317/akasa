@@ -1,16 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { Button } from "$lib/components/ui/button";
-  import NotionSidePanel from "$lib/components/NotionSidePanel.svelte";
   import { Input } from "$lib/components/ui/input";
   import { browser } from '$app/environment';
   import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
   import { cn } from "$lib/utils.js";
   import { writable } from 'svelte/store';
   import { Loader2, Image, Calendar, MapPin, Tag, Share2,Save } from "lucide-svelte";
-  
-  export let isOpen = false;
-  export let onClose = () => {};
   
   // Event data
   let title = "";
@@ -77,9 +73,6 @@
       tags = [];
       coverImage = null;
       imagePreview = null;
-      
-      // Close panel
-      onClose();
     } catch (error) {
       console.error("Error submitting event:", error);
     } finally {
@@ -88,10 +81,9 @@
   }
 </script>
 
-<NotionSidePanel isOpen={isOpen} title={$_('events.create.title')} {onClose}>
-  <div class="space-y-8">
-    <!-- Cover image section -->
-     <div class="px-6 space-y-8">
+<div class="space-y-8">
+  <!-- Cover image section -->
+  <div class="px-6 space-y-8">
     {#if imagePreview}
       <div class="relative group">
         <img src={imagePreview} alt="Cover" class="w-full h-48 object-cover rounded-lg" />
@@ -181,30 +173,27 @@
       {/if}
     </div>
   </div>
-    <!-- Description editor - Notion style -->
-    <div class="notion-editor relative group">
-      <ShadEditor 
-        showToolbar={false}
-        class="min-h-[300px] border-0 focus:outline-none" 
-        content={$content}
-      />
-    </div>
+  <!-- Description editor - Notion style -->
+  <div class="notion-editor relative group">
+    <ShadEditor 
+      showToolbar={false}
+      class="min-h-[300px] border-0 focus:outline-none" 
+      content={$content}
+    />
   </div>
   
-  <svelte:fragment slot="footer">
-    <div class="flex items-center justify-end gap-2">
-      <Button 
+  <!-- <div class="flex items-center justify-end gap-2 px-6">
+    <Button 
       variant="ghost" size="icon" 
-        onclick={submitEvent} 
-        disabled={loading || !title} 
-        class={!title ? "opacity-50 cursor-not-allowed" : ""}
-      >
-        {#if loading}
-          <Loader2 class="h-4 w-4 animate-spin" />
-        {:else}
-          <Save class="h-4 w-4" />
-        {/if}
-      </Button>
-    </div>
-  </svelte:fragment>
-</NotionSidePanel>
+      onclick={submitEvent} 
+      disabled={loading || !title} 
+      class={!title ? "opacity-50 cursor-not-allowed" : ""}
+    >
+      {#if loading}
+        <Loader2 class="h-4 w-4 animate-spin" />
+      {:else}
+        <Save class="h-4 w-4" />
+      {/if}
+    </Button>
+  </div> -->
+</div>
