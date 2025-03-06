@@ -40,6 +40,7 @@
 
 <script lang="ts">
 	import { cn } from "$lib/utils.js";
+	import { createEventDispatcher } from "svelte";
 
 	let {
 		class: className,
@@ -51,6 +52,10 @@
 		children,
 		...restProps
 	}: ButtonProps = $props();
+
+	const dispatch = createEventDispatcher<{
+		click: MouseEvent;
+	}>();
 </script>
 
 {#if href}
@@ -59,6 +64,7 @@
 		class={cn(buttonVariants({ variant, size }), className)}
 		{href}
 		{...restProps}
+		on:click
 	>
 		{@render children?.()}
 	</a>
@@ -68,6 +74,7 @@
 		class={cn(buttonVariants({ variant, size }), className)}
 		{type}
 		{...restProps}
+		on:click
 	>
 		{@render children?.()}
 	</button>

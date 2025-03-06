@@ -16,10 +16,10 @@
   
   <!-- Right side panel -->
   <div 
-    class="absolute top-0 right-0 h-full w-full sm:w-[550px] lg:w-[1250px] bg-background" 
+    class="absolute top-0 right-0 h-full w-full sm:w-[550px] lg:w-[650px] bg-background" 
     transition:fly={{ x: 300, duration: 200, opacity: 1 }}
   >
-    <div class="flex h-full flex-col">
+    <div class="flex h-[100%] w-[100%] flex-col">
       <!-- Header with buttons -->
       <div class="flex items-center justify-between px-4 py-2 border-b">
         <Button variant="ghost" size="icon" class="h-6 w-6" onclick={onClose}>

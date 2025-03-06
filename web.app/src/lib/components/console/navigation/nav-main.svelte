@@ -1,24 +1,26 @@
 <script lang="ts">
-	import * as Collapsible from "$lib/components/ui/collapsible";
-	import * as Sidebar from "$lib/components/ui/sidebar";
-	import ChevronRight from "lucide-svelte/icons/chevron-right";
+    import * as Collapsible from "$lib/components/ui/collapsible";
+    import * as Sidebar from "$lib/components/ui/sidebar";
+    import ChevronRight from "lucide-svelte/icons/chevron-right";
 
-	let {
-		items,
-	}: {
-		items: {
-			title: string;
-			url: string;
-			// This should be `Component` after lucide-svelte updates types
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			icon: any;
-			isActive?: boolean;
-			items?: {
-				title: string;
-				url: string;
-			}[];
-		}[];
-	} = $props();
+    /**
+     * 主导航菜单组件
+     * 显示平台主要功能区域的导航链接
+     */
+    let {
+        items,
+    }: {
+        items: {
+            title: string;
+            url: string;
+            icon: any;
+            isActive?: boolean;
+            items?: {
+                title: string;
+                url: string;
+            }[];
+        }[];
+    } = $props();
 </script>
 
 <Sidebar.Group>
@@ -34,7 +36,7 @@
 							{/snippet}
 							{#snippet child({ props })}
 								<a href={mainItem.url} {...props}>
-									<mainItem.icon />
+									<svelte:component this={mainItem.icon} class="h-4 w-4" />
 									<span>{mainItem.title}</span>
 								</a>
 							{/snippet}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import BadgeCheck from "lucide-svelte/icons/badge-check";
+ 	import BadgeCheck from "lucide-svelte/icons/badge-check";
 	import Bell from "lucide-svelte/icons/bell";
 	import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
 	import CreditCard from "lucide-svelte/icons/credit-card";
@@ -11,16 +11,19 @@
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 	import { useSidebar } from "$lib/components/ui/sidebar/index.js";
 
-	let {
-		user,
-	}: {
-		user: {
-			name: string;
-			email: string;
-			avatar: string;
-		};
-	} = $props();
-
+    /**
+     * 用户导航组件
+     * 显示当前用户信息和简单的用户菜单
+     */
+    let {
+        user,
+    }: {
+        user: {
+            name: string;
+            email: string;
+            avatar: string;
+        };
+    } = $props();
 	const sidebar = useSidebar();
 </script>
 

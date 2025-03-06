@@ -72,6 +72,7 @@
 		"mapbox-gl": "^3.9.4",
 		"svelte-i18n": "^4.0.1",
 		"svelte-moveable": "^0.45.0",
-		"svelte-radix": "^2.0.1"
+		"svelte-radix": "^2.0.1",
+		"svelte-splitpanes": "^8.0.9"
 	}
 }
