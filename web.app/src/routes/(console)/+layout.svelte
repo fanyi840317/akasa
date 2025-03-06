@@ -17,8 +17,13 @@
     } from "lucide-svelte";
     import { onMount } from "svelte";
     import Card from "$lib/components/ui/card/card.svelte";
+    import { auth } from '$lib/stores/auth';
 
-    // let {children}= $props();
+    let { data } = $props();
+    let user = $derived(data.user);
+
+    // 如果需要响应式地获取最新的用户状态，可以使用：
+    // $: user = $auth.user;
 
     // 控制右侧面板状态
     let showRightPanel = $state(false);
@@ -109,4 +114,23 @@
             </Pane>
         {/if}
     </PaneGroup>
+</div>
+
+<div class="min-h-screen flex flex-col">
+    <header class="border-b">
+        <div class="container mx-auto p-4">
+            <div class="flex justify-between items-center">
+                <div>Console</div>
+                <div>
+                    {#if user}
+                        <span class="mr-2">{user.name}</span>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 container mx-auto p-4">
+        <slot />
+    </main>
 </div>

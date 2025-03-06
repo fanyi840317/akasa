@@ -3,22 +3,27 @@ import { injectAnalytics } from '@vercel/analytics/sveltekit';
 import { getLocationData } from '$lib/services/location';
 import { init } from 'svelte-i18n';
 import { auth } from '$lib/stores/auth';
-import { account } from '$lib/appwrite';
-import { base } from '$app/paths';
-import { goto } from '$app/navigation';
- 
+import { get } from 'svelte/store';
+import type { LayoutLoad } from './$types';
+
 injectAnalytics({ mode: dev ? 'development' : 'production' });
 
 // 初始化位置和语言设置
-export const load = async ({ url }) => {
-
+export const load: LayoutLoad = async ({ url }) => {
+    // 初始化认证
     await auth.init();
+    
     const locationData = await getLocationData();
     init({
         fallbackLocale: 'en',
         initialLocale: locationData.country === 'CN' ? 'zh' : 'en',
     });
+
+    // 获取 auth store 的当前状态
+    const { user } = get(auth);
+
     return {
         location: locationData,
+        user
     };
 };
