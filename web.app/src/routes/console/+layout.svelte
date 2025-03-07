@@ -24,60 +24,6 @@
     }
 </script>
 
-<!-- {@render children()} -->
+{@render children()}
 
-<!-- <Shell child={children} title="" ></Shell> -->
-<Sidebar.Provider>
-    <Sidebar.Root collapsible={c1} >
-        <Sidebar.Header />
-        <Sidebar.Content>
-            <Sidebar.Group />
-            <div>sssssssss</div>
-            <Sidebar.Group />
-        </Sidebar.Content>
-        <Sidebar.Footer />
-    </Sidebar.Root>
-    <Sidebar.Root collapsible={c2} variant="inset">
-        <Sidebar.Header />
-        <Sidebar.Content>
-            <Sidebar.Group />
-            <div>sssssssss</div>
-            <Sidebar.Group />
-        </Sidebar.Content>
-        <Sidebar.Footer />
-    </Sidebar.Root>
-    <Sidebar.Inset>
-        <header
-            class="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4"
-        >
-            <Sidebar.Trigger class="-ml-1" />
-            <Button on:click={c1Click}>open1</Button>
-            <Button
-                on:click={() => {
-                    c2 = "offcanvas";
-                }}>open2</Button
-            >
-            <Button
-                on:click={() => {
-                    c2 = "none";
-                }}>open3</Button
-            >
-        </header>
-        <div class="flex flex-1 flex-col gap-4 p-4">
-            {#each Array.from({ length: 24 }) as _, index (index)}
-                <div
-                    class="bg-muted/50 aspect-video h-12 w-full rounded-lg"
-                ></div>
-            {/each}
-        </div>
-    </Sidebar.Inset>
-    <Sidebar.Root collapsible={c3}>
-        <Sidebar.Header />
-        <Sidebar.Content>
-            <Sidebar.Group />
-            <div class="">sssssssss</div>
-            <Sidebar.Group />
-        </Sidebar.Content>
-        <Sidebar.Footer />
-    </Sidebar.Root>
-</Sidebar.Provider>
+

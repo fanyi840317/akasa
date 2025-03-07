@@ -13,7 +13,7 @@
     // 控制台组件
     import { 
         Header as HeaderPage, 
-        Map, 
+        // Map, 
         SearchBox,
         NotionCard 
     } from '$lib/components/console';
@@ -147,7 +147,7 @@
                         {/if}
                     {/snippet}
                 </HeaderPage>
-                <Map locationData={data.location} />
+                <!-- <Map locationData={data.location} /> -->
                 <!-- 搜索框 -->
                 <div 
                     bind:this={searchBoxEl}

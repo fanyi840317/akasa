@@ -24,4 +24,3 @@
     <div></div>
 {/snippet}
 
-<Shell child={children} actions={actions} ></Shell>
