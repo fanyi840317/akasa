@@ -8,20 +8,28 @@
     /**
      * 控制台页面头部组件 - 提供标题、面包屑和页面布局容器
      * @param {any} ref - 组件引用
-     * @param {string} title - 页面标题
+     * @param {{ name: string; path: string; }[]} titles - 页面标题数组
+     * @param {Snippet} actions - 右侧操作区域
+     * @param {Snippet} children - 子内容
      */
     let {
         ref = $bindable(null),
-        title,
+        titles = [] as { name: string; path: string; }[],
         children = undefined,
         actions = undefined,
         ...restProps
     } = $props<{
         ref?: any;
-        title: string;
+        titles?: { name: string; path: string; }[];
         children?: Snippet;
         actions?: Snippet;
     }>();
+
+    // 定义面包屑项的数组
+    let breadcrumbItems = [
+        { name: "首页", path: "/" },
+        ...titles
+    ];
 </script>
 
 <header class="flex h-16 shrink-0 items-center gap-2 justify-between">
@@ -30,9 +38,11 @@
         <Separator orientation="vertical" class="mr-2 h-4" />
         <Breadcrumb.Root>
             <Breadcrumb.List>
-                <Breadcrumb.Item>
-                    <Breadcrumb.Page>{title}</Breadcrumb.Page>
-                </Breadcrumb.Item>
+                {#each breadcrumbItems as item}
+                    <Breadcrumb.Item>
+                        <a href={item.path}>{item.name}</a>
+                    </Breadcrumb.Item>
+                {/each}
             </Breadcrumb.List>
         </Breadcrumb.Root>
     </div>
@@ -41,6 +51,3 @@
         {@render actions?.()}
     </div>
 </header>
-<div class="flex flex-1 w-full h-full p-0">
-    {@render children?.()}
-</div>

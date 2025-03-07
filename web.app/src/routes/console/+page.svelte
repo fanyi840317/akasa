@@ -1,22 +1,27 @@
 <script lang="ts">
-    /**
-     * 控制台首页
-     * 提供Notion风格的主仪表板界面
-     */
-    import { Header, PageContent, NotionCard } from "$lib/components/console";
-    import { Button } from "$lib/components/ui/button";
-    import { ChartBar, Calendar, Clock, FileText } from "lucide-svelte";
+    import type { PageData } from './$types';
 
-    
+    let { data }: { data: PageData } = $props();
+    import {Shell} from "$lib/components/console";
+    import * as Sidebar from "$lib/components/ui/sidebar";
+    import NavSidebar from "$lib/components/console/navigation/sidebar.svelte";
+    import { Button } from '$lib/components/ui/button';
+    import { PlusCircle } from 'lucide-svelte';
 </script>
 
-<Header title="Dashboard" />
 
-<PageContent>
-    
-</PageContent>
+{#snippet actions()}
+<Button 
+        variant="secondary" 
+        size="sm" 
+        class="map-control-button"
+    >
+        <PlusCircle class="h-4 w-4 mr-2" />
 
+    </Button>
+{/snippet}
+{#snippet children()}
+    <div></div>
+{/snippet}
 
-
-
-
+<Shell child={children} actions={actions} ></Shell>

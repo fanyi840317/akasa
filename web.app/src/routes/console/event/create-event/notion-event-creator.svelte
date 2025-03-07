@@ -6,7 +6,7 @@
   import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
   import { cn } from "$lib/utils.js";
   import { writable } from 'svelte/store';
-  import { Loader2, Image, Calendar, MapPin, Tag, Share2,Save } from "lucide-svelte";
+  import { Loader2, Image, Calendar, MapPin, Tag, Share2, Save } from "lucide-svelte";
   
   // Event data
   let title = "";
@@ -173,6 +173,7 @@
       {/if}
     </div>
   </div>
+  
   <!-- Description editor - Notion style -->
   <div class="notion-editor relative group">
     <ShadEditor 
@@ -181,19 +182,4 @@
       content={$content}
     />
   </div>
-  
-  <!-- <div class="flex items-center justify-end gap-2 px-6">
-    <Button 
-      variant="ghost" size="icon" 
-      onclick={submitEvent} 
-      disabled={loading || !title} 
-      class={!title ? "opacity-50 cursor-not-allowed" : ""}
-    >
-      {#if loading}
-        <Loader2 class="h-4 w-4 animate-spin" />
-      {:else}
-        <Save class="h-4 w-4" />
-      {/if}
-    </Button>
-  </div> -->
-</div>
+</div> 
