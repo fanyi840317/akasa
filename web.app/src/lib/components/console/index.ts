@@ -8,7 +8,6 @@ export { default as Shell } from './layout/shell.svelte';
 export { default as Header } from './layout/header.svelte';
 export { default as PageContainer } from './layout/page-container.svelte';
 export { default as PageContent } from './layout/page-content.svelte';
-export { default as MapView } from './layout/map-view.svelte';
 
 // 导航组件
 export { default as Sidebar } from './navigation/sidebar.svelte';

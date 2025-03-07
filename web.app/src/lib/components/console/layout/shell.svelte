@@ -14,9 +14,11 @@
    * @param {Snippet} footer - 底部区域
    * @param {{ name: string; path: string; }[]} titles - 页面标题数组
    * @param {boolean} showLeftSidebar - 是否显示左侧导航栏
+   * @param {boolean} showLeftContent - 是否显示左侧内容区域 
    * @param {boolean} showRightSidebar - 是否显示右侧边栏
-   * @param {'none' | 'icon' | 'offcanvas'} leftSidebarMode - 左侧边栏模式
+   * @param {'none' | 'icon' | 'offcanvas'} leftSidebarMode - 左侧导航栏模式
    * @param {'none' | 'icon' | 'offcanvas'} rightSidebarMode - 右侧边栏模式
+   * @param {'none' | 'icon' | 'offcanvas'} leftContentMode - 左侧内容区域的模式
    * @param {string} contentClass - 主内容区域额外的样式类
    * @param {boolean} showHeader - 是否显示头部区域
    * @param {boolean} showFooter - 是否显示底部区域
@@ -29,9 +31,11 @@
     rightView = undefined,
     footer = undefined,
     showLeftSidebar = true,
+    showLeftContent = true,
     showRightSidebar = false,
     leftSidebarMode = "icon",
     rightSidebarMode = "icon",
+    leftContentMode = "icon",
     contentClass = "",
     showHeader = true,
     showFooter = false,
@@ -43,9 +47,11 @@
     rightView?: Snippet;
     footer?: Snippet;
     showLeftSidebar?: boolean;
+    showLeftContent?: boolean;
     showRightSidebar?: boolean;
     leftSidebarMode?: 'none' | 'icon' | 'offcanvas';
     rightSidebarMode?: 'none' | 'icon' | 'offcanvas';
+    leftContentMode?: 'none' | 'icon' | 'offcanvas';
     contentClass?: string;
     showHeader?: boolean;
     showFooter?: boolean;
@@ -56,15 +62,13 @@
   });
 </script>
 
-<Sidebar.Provider>
-  <!-- 左侧导航栏 -->
-  {#if showLeftSidebar}
-    <NavSidebar collapsible={leftSidebarMode} side="left" />
-  {/if}
+<Sidebar.Provider open={showLeftContent}>
+  <!-- 导航栏 - NavSidebar 不需要我们管理 -->
+  <NavSidebar collapsible="icon" />
   
   <!-- 左侧内容区域 -->
   {#if leftView}
-    <Sidebar.Root collapsible="icon" side="left">
+    <Sidebar.Root collapsible={leftContentMode}>
       {@render leftView()}
     </Sidebar.Root>
   {/if}
@@ -75,9 +79,7 @@
       <Header {titles} {actions} />
     {/if}
     
-    <main class="h-full overflow-auto {contentClass}">
-      {@render child()}
-    </main>
+    {@render child()}
     
     {#if showFooter && footer}
       <footer class="border-t mt-auto">
@@ -87,18 +89,16 @@
   </Sidebar.Inset>
   
   <!-- 右侧内容区域 -->
-  {#if showRightSidebar && rightView}
-    <Sidebar.Root collapsible={rightSidebarMode} side="right">
+  {#if rightView}
+    <Sidebar.Root 
+      collapsible={showRightSidebar ? rightSidebarMode : "none"} 
+      side="right"
+    >
       {@render rightView()}
     </Sidebar.Root>
   {/if}
 </Sidebar.Provider>
 
 <style>
-  /* 确保内容区域可以滚动且占满可用空间 */
-  main {
-    min-height: calc(100vh - var(--header-height, 64px) - var(--footer-height, 0px));
-    display: flex;
-    flex-direction: column;
-  }
+
 </style>
