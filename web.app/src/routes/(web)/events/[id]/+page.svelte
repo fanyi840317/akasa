@@ -23,14 +23,14 @@
   } from "lucide-svelte";
   import { mockEvents } from "$lib/data/mock-events";
   import { mockUsers } from "$lib/data/mock-users";
-  import Comments from "$lib/components/Comments.svelte";
-  import EventTimeline from "$lib/components/EventTimeline.svelte";
-  import JoinInvestigationForm from "$lib/components/JoinInvestigationForm.svelte";
+  import Comments from "$lib/components/comments.svelte";
+  import EventTimeline from "$lib/components/event-timeline.svelte";
+  import JoinInvestigationForm from "$lib/components/join-investigation-form.svelte";
   import * as Dialog from "$lib/components/ui/dialog";
   import * as Tabs from "$lib/components/ui/tabs";
-  import WitnessList from "$lib/components/WitnessList.svelte";
+  import WitnessList from "$lib/components/witness-list.svelte";
   import { mockComments } from "$lib/data/mock-comments";
-  import EvidenceList from "$lib/components/EvidenceList.svelte";
+  import EvidenceList from "$lib/components/evidence-list.svelte";
     import { base } from "$app/paths";
   // 从模拟数据中获取事件
   const event = mockEvents.find((e) => e.id === $page.params.id);
@@ -96,7 +96,7 @@
   });
 
   // 处理申请提交
-  function handleJoinSubmit(data) {
+  function handleJoinSubmit() {
     // console.log('提交申请:', { eventId: event.id, ...data });
     // TODO: 实现申请提交逻辑
     showJoinForm = false;

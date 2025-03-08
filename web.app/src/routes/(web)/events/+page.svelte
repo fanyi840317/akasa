@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { PageData } from './$types';
-    import Map from '$lib/components/Map.svelte';
-    import EventList from '$lib/components/EventList.svelte';
+    import Map from '$lib/components/map.svelte';
+    import EventList from '$lib/components/event-list.svelte';
     import { _ } from 'svelte-i18n';
     import * as Card from "$lib/components/ui/card";
     import { theme } from '$lib/stores/theme';
@@ -13,13 +13,12 @@
     import { auth } from "$lib/stores/auth";
     import { goto } from "$app/navigation";
     import { base } from '$app/paths';
-    import NotionEventCreator from '../../(console)/event/(create-event)/NotionEventCreator.svelte';
 
     import { Textarea } from "$lib/components/ui/textarea";
     import { Label } from "$lib/components/ui/label";
     import { databases } from "$lib/appwrite";
     import { ID } from "appwrite";
-    import StepWindow from "$lib/components/StepWindow.svelte";
+    // import StepWindow from "$lib/components/StepWindow.svelte";
 
     let showCreatePanel = writable(false);
     
@@ -158,4 +157,4 @@
  
 </div>
 
-<NotionEventCreator isOpen={$showCreatePanel} onClose={()=>{$showCreatePanel = false}} />
+<!-- <NotionEventCreator isOpen={$showCreatePanel} onClose={()=>{$showCreatePanel = false}} /> -->
