@@ -8,16 +8,23 @@
     
     // Sidebar 配置选项
     let {
-        collapsible = "icon" as "icon" | "none" | "offcanvas",
-        side = "left" as "left" | "right"
-    } = $props();
+        collapsible = 'none',
+        collapsed = $bindable(false),
+        side = "left" as "left" | "right",
+        class: className = ''
+    } = $props<{
+        collapsible?: 'none' | 'icon' | 'full';
+        collapsed?: boolean;
+        side?: "left" | "right";
+        class?: string;
+    }>();
     
     // 从数据源或存储中获取导航数据
     import { navData } from "$lib/data/navigation-data";
     import { Footer } from "$lib/components/ui/sheet";
 </script>
 
-<Sidebar.Root {collapsible} {side}  variant="inset" >
+<Sidebar.Root {collapsible} {side}  variant="inset">
     <Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
