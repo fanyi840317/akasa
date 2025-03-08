@@ -1,7 +1,7 @@
 import { dev } from '$app/environment';
 import { injectAnalytics } from '@vercel/analytics/sveltekit';
 import { getLocationData } from '$lib/services/location';
-import { init } from 'svelte-i18n';
+import initI18n from '$lib/i18n';
 import { auth } from '$lib/stores/auth';
 import { get } from 'svelte/store';
 import type { LayoutLoad } from './$types';
@@ -14,10 +14,9 @@ export const load: LayoutLoad = async ({ url }) => {
     await auth.init();
     
     const locationData = await getLocationData();
-    init({
-        fallbackLocale: 'en',
-        initialLocale: locationData.country === 'CN' ? 'zh' : 'en',
-    });
+    
+    // 初始化 i18n
+    initI18n(locationData.country);
 
     // 获取 auth store 的当前状态
     const { user } = get(auth);

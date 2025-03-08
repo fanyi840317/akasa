@@ -17,7 +17,7 @@ const config = {
 			"@/*": "./path/to/lib/*",
 		  },
 		  paths: {
-			  base: '/web'
+			  base: ''
 		  }
 	}
 };

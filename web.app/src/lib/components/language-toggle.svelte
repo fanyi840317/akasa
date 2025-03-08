@@ -7,8 +7,7 @@
 	// 定义支持的语言
 	const languages = [
 		{ code: 'en', label: 'English' },
-		{ code: 'zh', label: '中文' },
-		{ code: 'ja', label: '日本語' }
+		{ code: 'zh', label: '中文' }
 	];
 
 	function setLanguage(lang: string) {

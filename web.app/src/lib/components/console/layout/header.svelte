@@ -38,10 +38,13 @@
         <Separator orientation="vertical" class="mr-2 h-4" />
         <Breadcrumb.Root>
             <Breadcrumb.List>
-                {#each breadcrumbItems as item}
+                {#each breadcrumbItems as item, index}
                     <Breadcrumb.Item>
                         <a href={item.path}>{item.name}</a>
                     </Breadcrumb.Item>
+                    {#if index < breadcrumbItems.length - 1}
+                        <Breadcrumb.Separator />
+                    {/if}
                 {/each}
             </Breadcrumb.List>
         </Breadcrumb.Root>

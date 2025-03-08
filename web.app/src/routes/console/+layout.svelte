@@ -14,14 +14,7 @@
      * 提供整个控制台应用的基础布局结构
      */
     let { data, children }: { data: LayoutData; children: Snippet } = $props();
-    let c1 = $state<"none" | "icon" | "offcanvas">("icon");
-    let c2 = $state<"none" | "icon" | "offcanvas">("icon");
-    let c3 = $state<"none" | "icon" | "offcanvas">("none");
 
-    function c1Click() {
-        c2 = "icon";
-        // sidebar.toggle();
-    }
 </script>
 
 {@render children()}

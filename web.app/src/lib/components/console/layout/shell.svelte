@@ -5,7 +5,8 @@
   import NavSidebar from "$lib/components/console/navigation/sidebar.svelte";
   import Header from "$lib/components/console/layout/header.svelte";
   import { fly, slide, fade } from "svelte/transition";
-    import { Collapsible } from "bits-ui";
+  import { Collapsible } from "bits-ui";
+  import * as Resizable from "$lib/components/ui/resizable";
 
   /**
    * 控制台主外壳组件 - 提供整体布局骨架
@@ -51,39 +52,42 @@
   let sidebarWidthIcon = 56;
   let sidebarWidth = 256;
 
-  
   // 监听sidebarCollapsed变化
   $effect(() => {
     if (sidebarCollapsed !== undefined) {
       // alert(`侧边栏状态已变更为: ${sidebarCollapsed ? '折叠' : '展开'}`);
     }
   });
-  
-	import { useSidebar } from "$lib/components/ui/sidebar/index.js";
 
-	onMount(()=>{
-		alert(useSidebar().state);
-	})
+  import { useSidebar } from "$lib/components/ui/sidebar/index.js";
+  import ResizableHandle from "$lib/components/ui/resizable/resizable-handle.svelte";
+
+  onMount(() => {
+    alert(useSidebar().state);
+  });
 </script>
-  <!-- 左侧内容区域 -->
-  {#if leftView && showLeftView}
-  <div
-    class="bg-muted backdrop-blur-sm h-full absolute z-10 transition-[width,transform] duration-300 ease-in-out border-r shadow-lg overflow-hidden"
-    style="left: {sidebarCollapsed ? sidebarWidth : sidebarWidthIcon}px; width: 400px;"
-    in:fly|local={{ x: -sidebarWidth, duration: 200 }}
-    out:fly|local={{ x: -sidebarWidth, duration: 200 }}
-  >
-    {@render leftView()}
+
+<!-- 左侧内容区域 -->
+{#if leftView && showLeftView}
+  <div class="absolute z-10 h-full w-full">
+    <div class="fixed inset-0 bg-card/20 backdrop-blur-sm"  
+    transition:fade={{ duration: 200 }}
+    on:click={() => showLeftView = false}></div>
+    <div
+      class="bg-muted backdrop-blur-sm h-full absolute transition-[width,transform] duration-300 ease-in-out border-r shadow-lg overflow-hidden"
+      style="left: {sidebarCollapsed ? sidebarWidth : sidebarWidth}px; width: 400px;"
+      in:fly|local={{ x: -sidebarWidth, duration: 200 }}
+      out:fly|local={{ x: -sidebarWidth, duration: 200 }}
+    >
+      {@render leftView()}
+    </div>
   </div>
+ 
 {/if}
 
 <Sidebar.Provider open={showRightView} style="--sidebar-width: {400}px">
   <Sidebar.Provider open={sidebarCollapsed}>
-  
-    <NavSidebar 
-      collapsible="icon" 
-      class=""
-    />
+    <NavSidebar collapsible="icon" class="" />
 
     <!-- 主内容区域 -->
     <Sidebar.Inset>
@@ -102,9 +106,10 @@
   </Sidebar.Provider>
 
   <!-- 右侧内容区域 -->
+
   <Sidebar.Root side="right">
     {#if rightView && showRightView}
-      {@render rightView()}
+    {@render rightView()}
     {/if}
   </Sidebar.Root>
 </Sidebar.Provider>

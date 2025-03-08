@@ -23,6 +23,9 @@ importers:
       mapbox-gl:
         specifier: ^3.9.4
         version: 3.9.4
+      paneforge:
+        specifier: 1.0.0-next.4
+        version: 1.0.0-next.4(svelte@5.18.0)
       svelte-i18n:
         specifier: ^4.0.1
         version: 4.0.1(svelte@5.18.0)
@@ -141,9 +144,6 @@ importers:
       mode-watcher:
         specifier: ^0.5.1
         version: 0.5.1(svelte@5.18.0)
-      paneforge:
-        specifier: 0.0.6
-        version: 0.0.6(svelte@5.18.0)
       svelte:
         specifier: ^5.0.0
         version: 5.18.0
@@ -1844,11 +1844,6 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.1.2:
-    resolution: {integrity: sha512-b+CiXQCNMUGe0Ri64S9SXFcP9hogjAJ2Rd6GdVxhPLRm7mhGaM7VgOvCAJ1ZshfHbqVDI3uqTI5C8/GaKuLI7g==}
-    engines: {node: ^18 || >=20}
-    hasBin: true
-
   next-tick@1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
 
@@ -1895,10 +1890,10 @@ packages:
   pako@2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
 
-  paneforge@0.0.6:
-    resolution: {integrity: sha512-jYeN/wdREihja5c6nK3S5jritDQ+EbCqC5NrDo97qCZzZ9GkmEcN5C0ZCjF4nmhBwkDKr6tLIgz4QUKWxLXjAw==}
+  paneforge@1.0.0-next.4:
+    resolution: {integrity: sha512-xB7iqIx6sT+XDRx/Eps+lddN3X7zRy8RIqXXFimGuFF6d+3s4YoXrk8SdNwEK5U/mqwupeKX0BbSfy0z9W9feA==}
     peerDependencies:
-      svelte: ^4.0.0 || ^5.0.0-next.1
+      svelte: ^5.20.0
 
   path-key@3.1.1:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
@@ -4037,8 +4032,6 @@ snapshots:
 
   nanoid@3.3.8: {}
 
-  nanoid@5.1.2: {}
-
   next-tick@1.1.0: {}
 
   node-fetch@2.6.7:
@@ -4067,10 +4060,10 @@ snapshots:
 
   pako@2.1.0: {}
 
-  paneforge@0.0.6(svelte@5.18.0):
+  paneforge@1.0.0-next.4(svelte@5.18.0):
     dependencies:
-      nanoid: 5.1.2
       svelte: 5.18.0
+      svelte-toolbelt: 0.7.1(svelte@5.18.0)
 
   path-key@3.1.1: {}
 

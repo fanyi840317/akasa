@@ -1,0 +1,18 @@
+{
+    "common": {
+        "comingSoon": "Coming Soon",
+        "contactUs": "Contact Us",
+        "days": "Days",
+        "hours": "Hours",
+        "minutes": "Minutes",
+        "seconds": "Seconds",
+        "brand": "Mystery Events",
+        "changeLanguage": "Change Language"
+    },
+    "home": {
+        "title": "Exploring Mysterious Events Around Us",
+        "subtitle": "Explore the Unknown, Uncover the Truth, Journey into the World of Mystery",
+        "description": "We are collecting and organizing mysterious events happening around us, building a professional exploration platform. Stay tuned for exciting content!",
+        "emailSubject": "Mystery Events - Contact Us"
+    }
+} 

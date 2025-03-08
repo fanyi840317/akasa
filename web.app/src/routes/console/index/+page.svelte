@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { PageData } from "./$types";
-    import { base } from "$app/paths";
 
     let { data }: { data: PageData } = $props();
     import { Shell } from "$lib/components/console";
@@ -10,8 +9,6 @@
     import { PlusCircle, PanelLeft } from "lucide-svelte";
     import { fly } from "svelte/transition";
     import * as Resizable from "$lib/components/ui/resizable";
-    import { Pane, Splitpanes } from "svelte-splitpanes";
-    
 
     // 控制左侧内容区域显示的状态
     let showLeftContent = $state(true);
@@ -70,74 +67,7 @@
         <div>这里是右侧视图内容</div>
     </div>
 {/snippet}
-
-<style>
-  :global(.splitpanes__splitter) {
-    background-color: transparent !important;
-    position: relative;
-    margin: 0 -8px;
-    width: 16px !important;
-    border: none !important;
-  }
-
-  :global(.splitpanes__splitter:hover) {
-    background-color: hsl(var(--muted)) !important;
-  }
-
-  :global(.splitpanes__splitter:active) {
-    background-color: hsl(var(--accent)) !important;
-  }
-
-  :global(.splitpanes__splitter::before) {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    height: 32px;
-    width: 2px;
-    background-color: hsl(var(--muted-foreground) / 0.3);
-  }
-
-  :global(.splitpanes__splitter::after) {
-    display: none !important;
-  }
-
-  :global(.splitpanes--vertical > .splitpanes__splitter) {
-    border-left: none !important;
-  }
-
-  :global(.splitpanes__splitter:hover::before) {
-    background-color: hsl(var(--muted-foreground) / 0.5);
-  }
-</style>
-
-<Splitpanes class="w-screen h-screen fixed top-0 left-0 z-50 overflow-hidden !bg-transparent">
-    <Pane minSize={40} size={100} class="!bg-transparent">
-        <iframe 
-        src="{base}/console/index" 
-        title="控制台主页面"
-        class="w-full h-full border-none"
-    />
-    </Pane>
-    {#if showRightSidebar && rightView}
-      <Pane size={0} class="!bg-transparent">
-        {@render rightView()}
-      </Pane>
-    {/if}
-</Splitpanes>
-
-
-<!-- <Sidebar.Provider open={showRightSidebar}>
-    <NavSidebar />
-    <main>
-      <Sidebar.Trigger />
-      <div>
-        {@render actions()}
-      </div>
-    </main>
-  </Sidebar.Provider> -->
-<!--   
+  
   <Shell 
     {actions} 
     {child} 
@@ -146,4 +76,4 @@
     showLeftView={showLeftContent}
     showRightView={showRightSidebar}
     titles={[{ name: "控制台", path: "/console" }]}
-/> -->
+/>
