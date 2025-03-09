@@ -115,8 +115,7 @@
 <Splitpanes class="w-screen h-screen fixed top-0 left-0 z-50 overflow-hidden !bg-transparent">
     <Pane minSize={40} size={100} class="!bg-transparent">
         <iframe 
-        src="{base}/console/index" 
-        title="控制台主页面"
+        src="{base}/console/home" 
         class="w-full h-full border-none"
     />
     </Pane>

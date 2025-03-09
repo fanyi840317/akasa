@@ -7,6 +7,7 @@ import Map from "lucide-svelte/icons/map";
 import Send from "lucide-svelte/icons/send";
 import Settings2 from "lucide-svelte/icons/settings-2";
 import SquareTerminal from "lucide-svelte/icons/square-terminal";
+import Activity from "lucide-svelte/icons/activity";
 import type { NavItem, Project, User } from "$lib/components/console/types";
 
 /**
@@ -22,60 +23,46 @@ export const navData = {
   
   navMain: [
     {
-      title: "Playground",
-      url: "#",
+      title: "控制台",
+      url: "/console/home",
       icon: SquareTerminal,
       isActive: true,
+    },
+    {
+      title: "事件管理",
+      url: "/console/events",
+      icon: Activity,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "事件列表",
+          url: "/console/events/list",
         },
         {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
+          title: "事件分析",
+          url: "/console/events/analysis",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Map",
-      url: "/event",
+      title: "地图",
+      url: "/console/map",
       icon: Map,
     },
     {
-      title: "Analytics",
-      url: "#",
+      title: "数据统计",
+      url: "/console/analytics",
       icon: ChartPie,
     },
   ] as NavItem[],
   
   navSecondary: [
     {
-      title: "Documentation",
+      title: "文档",
       url: "#",
       icon: BookOpen,
     },
     {
-      title: "Settings",
+      title: "设置",
       url: "#",
       icon: Settings2,
     },
