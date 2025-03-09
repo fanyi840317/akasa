@@ -6,6 +6,7 @@
     import { onMount, onDestroy } from "svelte";
     import { _, locale } from 'svelte-i18n';
     import LanguageToggle from "$lib/components/language-toggle.svelte";
+    import { setMode } from "mode-watcher";
 
     const data = $props();
 
@@ -46,6 +47,8 @@
 
     onMount(() => {
         console.log('onMount executed');
+        // 设置深色模式
+        setMode("dark")
         // 立即执行一次
         updateCountdown();
         // 设置定时器，每秒更新一次
@@ -73,61 +76,61 @@
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(0,0,0,0))]" />
     <div class="absolute inset-0 bg-grid-white/10" style="mask-image: radial-gradient(circle at 50% 50%, black, transparent);" />
     
-    <div class="container mx-auto px-4 relative">
+    <div class="container mx-auto px-4 sm:px-6 py-8 sm:py-12 relative">
         <div class="max-w-2xl mx-auto text-center">
             <!-- 状态标签 -->
-            <Badge variant="outline" class="mb-8 text-sm py-1 px-4">
-                <Clock class="w-4 h-4 mr-2 animate-pulse" />
+            <Badge variant="outline" class="mb-6 sm:mb-8 text-xs sm:text-sm py-1 px-3 sm:px-4">
+                <Clock class="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 animate-pulse" />
                 {$_('common.comingSoon')}
             </Badge>
 
             <!-- 标题 -->
-            <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/50 tracking-wider">
+            <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/50 tracking-wider">
                 {$_('home.title')}
             </h1>
 
             <!-- 副标题 -->
-            <p class="text-xl md:text-2xl text-muted-foreground mb-8 tracking-wide">
+            <p class="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-6 sm:mb-8 tracking-wide">
                 {$_('home.subtitle')}
             </p>
 
             <!-- 预告文本 -->
-            <p class="text-muted-foreground mb-12 max-w-xl mx-auto tracking-wide leading-relaxed">
+            <p class="text-sm sm:text-base text-muted-foreground mb-8 sm:mb-12 max-w-xl mx-auto tracking-wide leading-relaxed">
                 {$_('home.description')}
             </p>
 
             <!-- 联系按钮 -->
             <div class="flex justify-center">
-                <Button size="lg" class="gap-2 tracking-widest" on:click={() => window.location.href = `mailto:x2.helsing@outlook.com?subject=${$_('home.emailSubject')}`}>
+                <Button size="lg" class="gap-1.5 sm:gap-2 tracking-widest text-sm sm:text-base" on:click={() => window.location.href = `mailto:x2.helsing@outlook.com?subject=${$_('home.emailSubject')}`}>
                     {$_('common.contactUs')}
-                    <ArrowRight class="w-4 h-4" />
+                    <ArrowRight class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </Button>
             </div>
 
             <!-- 倒计时 -->
-            <div class="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-md mx-auto">
-                <div class="bg-card p-4 rounded-lg border">
-                    <div class="text-2xl font-bold">{days}</div>
-                    <div class="text-sm text-muted-foreground tracking-wider">{$_('common.days')}</div>
+            <div class="mt-12 sm:mt-16 mb-20 sm:mb-32 grid grid-cols-4 gap-1.5 sm:gap-4 max-w-md mx-auto text-[0.7rem] sm:text-base">
+                <div class="bg-card p-2 sm:p-4 rounded-lg border">
+                    <div class="text-base sm:text-2xl font-bold">{days}</div>
+                    <div class="text-[0.6rem] sm:text-sm text-muted-foreground tracking-wider">{$_('common.days')}</div>
                 </div>
-                <div class="bg-card p-4 rounded-lg border">
-                    <div class="text-2xl font-bold">{hours}</div>
-                    <div class="text-sm text-muted-foreground tracking-wider">{$_('common.hours')}</div>
+                <div class="bg-card p-2 sm:p-4 rounded-lg border">
+                    <div class="text-base sm:text-2xl font-bold">{hours}</div>
+                    <div class="text-[0.6rem] sm:text-sm text-muted-foreground tracking-wider">{$_('common.hours')}</div>
                 </div>
-                <div class="bg-card p-4 rounded-lg border">
-                    <div class="text-2xl font-bold">{minutes}</div>
-                    <div class="text-sm text-muted-foreground tracking-wider">{$_('common.minutes')}</div>
+                <div class="bg-card p-2 sm:p-4 rounded-lg border">
+                    <div class="text-base sm:text-2xl font-bold">{minutes}</div>
+                    <div class="text-[0.6rem] sm:text-sm text-muted-foreground tracking-wider">{$_('common.minutes')}</div>
                 </div>
-                <div class="bg-card p-4 rounded-lg border">
-                    <div class="text-2xl font-bold">{seconds}</div>
-                    <div class="text-sm text-muted-foreground tracking-wider">{$_('common.seconds')}</div>
+                <div class="bg-card p-2 sm:p-4 rounded-lg border">
+                    <div class="text-base sm:text-2xl font-bold">{seconds}</div>
+                    <div class="text-[0.6rem] sm:text-sm text-muted-foreground tracking-wider">{$_('common.seconds')}</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 底部版权信息 -->
-    <div class="absolute bottom-4 left-0 right-0 text-center text-sm text-muted-foreground">
+    <div class="absolute bottom-6 sm:bottom-8 left-0 right-0 text-center text-xs sm:text-sm text-muted-foreground">
         &copy; 2024 {$_('common.brand')}. All rights reserved.
     </div>
 </div>
