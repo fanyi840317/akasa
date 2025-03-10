@@ -42,6 +42,7 @@
 		"autoprefixer": "^10.4.20",
 		"bits-ui": "1.0.0-next.87",
 		"clsx": "^2.1.1",
+		"embla-carousel-svelte": "^8.5.2",
 		"katex": "^0.16.21",
 		"lowlight": "^3.3.0",
 		"lucide-svelte": "^0.474.0",
