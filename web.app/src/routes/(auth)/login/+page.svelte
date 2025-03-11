@@ -4,9 +4,7 @@
   import { Label } from '$lib/components/ui/label';
   import { Card } from '$lib/components/ui/card';
   import { _ } from 'svelte-i18n';
-  import { goto } from '$app/navigation';
   import { Github, Mail, Lock, Loader2 } from 'lucide-svelte';
-  import { account } from '$lib/appwrite';
   import { auth } from '$lib/stores/auth';
   import { base } from '$app/paths';
   import { toast } from 'svelte-sonner';
@@ -23,17 +21,9 @@
     loading = true;
 
     try {
-      await account.createEmailPasswordSession(email, password);
-      const user = await account.get();
-      auth.setUser(user);
-      // 如果有returnUrl参数，则重定向到该页面，否则重定向到首页
-      if (returnUrl) {
-        await goto(`${base}${returnUrl}`);
-      } else {
-        await goto(`${base}/`);
-      }
+      await auth.login(email, password, returnUrl);
     } catch (e: any) {
-      toast.error(e.message || $_('auth.login_failed'));
+      // 错误已在auth store中处理，这里不需要额外处理
     } finally {
       loading = false;
     }

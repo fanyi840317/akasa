@@ -5,10 +5,15 @@ import { auth } from '$lib/stores/auth';
 import { base } from '$app/paths';
 
 export const load: PageLoad = async ({ url }) => {
-    // 检查用户是否已登录
-    const { user } = get(auth);
+    // 初始化认证状态
+    await auth.init();
     
-    // 如果用户未登录，重定向到登录页面，并携带当前路径作为参数
+    // 获取用户信息
+    const { user } = get(auth);
+
+    console.log(user);
+    
+    // 如果用户未登录，重定向到登录页面
     if (!user) {
         const returnUrl = encodeURIComponent(url.pathname);
         throw redirect(302, `${base}/login?returnUrl=${returnUrl}`);

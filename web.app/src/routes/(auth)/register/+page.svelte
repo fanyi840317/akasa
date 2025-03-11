@@ -6,31 +6,26 @@
 	import { _ } from 'svelte-i18n';
 	import { Github, Mail, Lock, User, Loader2 } from "lucide-svelte";
 	import { goto } from '$app/navigation';
-	import { account } from '$lib/appwrite';
-	import { ID } from 'appwrite';
 	import { toast } from 'svelte-sonner';
 	import { base } from '$app/paths';
 	import { auth } from '$lib/stores/auth';
+	import { page } from '$app/stores';
 
 	let username = '';
 	let email = '';
 	let password = '';
 	let loading = false;
 
+	// 获取returnUrl参数
+	const returnUrl = $page.data.returnUrl;
+
 	async function handleSubmit() {
 		loading = true;
 
 		try {
-			// 创建用户账号
-			await account.create(ID.unique(), email, password, username);
-			// 创建成功后自动登录
-			await account.createEmailPasswordSession(email, password);
-			const user = await account.get();
-			auth.setUser(user);
-			// 跳转到首页
-			await goto(`${base}/`);
+			await auth.register(email, password, username, returnUrl);
 		} catch (e: any) {
-			toast.error(e.message || $_('auth.register_failed'));
+			// 错误已在auth store中处理，这里不需要额外处理
 		} finally {
 			loading = false;
 		}
@@ -132,9 +127,9 @@
 				</Button>
 			</div>
 		</form>
-		<div class="mt-4 text-center text-sm text-muted-foreground">
-			{$_('auth.already_have_account')}
-			<a href="{base}/login" class="underline hover:text-primary">
+		<div class="text-center text-sm">
+			<span class="text-muted-foreground">{$_('auth.have_account')}</span>
+			<a href="{base}/login" class="text-primary hover:underline ml-1">
 				{$_('auth.login')}
 			</a>
 		</div>

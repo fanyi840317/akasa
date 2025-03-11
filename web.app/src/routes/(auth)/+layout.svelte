@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
 	import { base } from '$app/paths';
-
 </script>
 <div class="min-h-screen flex flex-col">
   <div class="flex justify-center items-center p-16">

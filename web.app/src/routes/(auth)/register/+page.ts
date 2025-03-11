@@ -13,6 +13,6 @@ export const load: PageLoad = async ({ fetch, parent, url }) => {
   
   // 返回页面需要的数据，包括returnUrl
   return {
-    title: '登录 - Akasa'
+    title: '注册 - Akasa'
   };
 };
