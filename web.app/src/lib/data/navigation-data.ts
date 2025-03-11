@@ -8,40 +8,50 @@ import Send from "lucide-svelte/icons/send";
 import Settings2 from "lucide-svelte/icons/settings-2";
 import SquareTerminal from "lucide-svelte/icons/square-terminal";
 import Activity from "lucide-svelte/icons/activity";
-import type { NavItem, Project, User } from "$lib/components/console/types";
+import { 
+  Bell,
+  Shield,
+  Palette,
+  Globe,
+  KeyRound,
+  CreditCard,
+  HelpCircle,
+  User as UserIcon,
+  Inbox,
+  Home,
+  Heart,
+  Bookmark,
+  MessageSquare
+} from "lucide-svelte";
+
+import type { NavItem, PersonalItem, User } from "../../routes/console/components/types";
 
 /**
  * 应用导航数据配置
  * 采用Notion风格的组织结构和命名惯例
  */
-export const navData = {
+export const navData: {
+  user: User;
+  navMain: NavItem[];
+  navSecondary: NavItem[];
+  personalItems: PersonalItem[];
+} = {
   user: {
     name: "shadcn",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
-  } as User,
+  },
   
   navMain: [
     {
-      title: "控制台",
-      url: "/console/home",
+      title: "主页",
+      url: "/console",
       icon: SquareTerminal,
-      isActive: true,
     },
     {
-      title: "事件管理",
+      title: "神秘事件",
       url: "/console/events",
-      icon: Activity,
-      items: [
-        {
-          title: "事件列表",
-          url: "/console/events/list",
-        },
-        {
-          title: "事件分析",
-          url: "/console/events/analysis",
-        },
-      ],
+      icon: Activity
     },
     {
       title: "地图",
@@ -49,40 +59,47 @@ export const navData = {
       icon: Map,
     },
     {
-      title: "数据统计",
-      url: "/console/analytics",
-      icon: ChartPie,
-    },
-  ] as NavItem[],
+      title: "收件箱",
+      icon: Inbox,
+      onClickAction:"leftView",
+      clickOnly: true,
+      unread: 3
+    }
+  ],
   
   navSecondary: [
     {
-      title: "文档",
+      title: "反馈",
+      size: "sm",
       url: "#",
       icon: BookOpen,
     },
     {
       title: "设置",
-      url: "#",
+      size: "sm",
       icon: Settings2,
+      url: "/console/settings",
+      clickOnly: true,
+      onClickAction: "modal",
     },
-  ] as NavItem[],
+  ],
   
-  projects: [
+  personalItems: [
     {
-      name: "Genesis",
-      url: "#",
-      color: "sky",
+      title: "关注的人",
+      icon: Heart,
+      url: "/console/following"
     },
     {
-      name: "Explorer",
-      url: "#",
-      color: "violet",
+      title: "收藏",
+      icon: Bookmark,
+      url: "/console/bookmarks"
     },
     {
-      name: "Playground",
-      url: "#",
-      color: "amber",
-    },
-  ] as Project[],
+      title: "调查组",
+      icon: MessageSquare,
+      url: "/console/teams",
+      badge: 5
+    }
+  ],
 };

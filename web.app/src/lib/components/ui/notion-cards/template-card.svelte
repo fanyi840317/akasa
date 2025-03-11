@@ -22,14 +22,14 @@
     }
 
     .icon-container {
-        @apply h-8 w-8 text-muted-foreground;
+        @apply h-8 w-8 text-gray-500 ;
     }
 </style>
 
-<a href={url} class="notion-card group">
+<div class="notion-card group">
     <div class="notion-card-image">
         <div class="absolute inset-0 flex items-center justify-center bg-card/50">
-            <svelte:component this={icon} class="icon-container" />
+            <svelte:component this={icon} class="icon-container " />
         </div>
     </div>
     <div class="notion-card-content">
@@ -43,4 +43,4 @@
             <p class="text-sm text-muted-foreground line-clamp-2">{description}</p>
         {/if}
     </div>
-</a> 
+</div> 

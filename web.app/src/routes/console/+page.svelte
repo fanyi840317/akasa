@@ -1,148 +1,188 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
-    import { base } from "$app/paths";
-
-    let { data }: { data: PageData } = $props();
-    import { Shell } from "$lib/components/console";
-    import * as Sidebar from "$lib/components/ui/sidebar";
-    import NavSidebar from "$lib/components/console/navigation/sidebar.svelte";
     import { Button } from "$lib/components/ui/button";
-    import { PlusCircle, PanelLeft } from "lucide-svelte";
-    import { fly } from "svelte/transition";
-    import * as Resizable from "$lib/components/ui/resizable";
-    import { Pane, Splitpanes } from "svelte-splitpanes";
-    
+    import { TemplateCard, DatabaseCard, PageCard } from "$lib/components/ui/notion-cards";
+    import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
+    // import type { PersonalItem } from "./components/types";
+    import { 
+        LayoutTemplate,
+        CalendarClock,
+        BookOpen,
+        Map,
+        Activity,
+        Users,
+        MoreHorizontal,
+        Table,
+        FileText,
+        Kanban,
+        X
+    } from "lucide-svelte";
+    import { getContext } from 'svelte';
+    import type { Snippet } from "svelte";
 
-    // 控制左侧内容区域显示的状态
-    let showLeftContent = $state(true);
-    let showRightSidebar = $state(true);
-    // 切换左侧内容区域的函数
-    function toggleLeftContent() {
-        showLeftContent = !showLeftContent;
+    type CardColor = "blue" | "green" | "purple" | "amber";
+
+    type ShellContext = {
+        showRightView: boolean;
+        setShowRightView: (value: boolean) => void;
+        setTemplate: (template: any) => void;
+        // setLeftViewItem: (item: PersonalItem | null) => void;
     }
+
+    const { setShowRightView, setTemplate } = getContext<ShellContext>('shell');
+    
+    let showRightView = $state(false);
+    let showLeftView = $state(false);
+    let selectedTemplate = $state<typeof templates[0] | null>(null);
+    // let leftViewItem = $state<PersonalItem | null>(null);
+
+    function handleTemplateClick(template: typeof templates[0]) {
+        setTemplate(template);
+        setShowRightView(true);
+    }
+
+    function handleCloseRightView() {
+        showRightView = false;
+        selectedTemplate = null;
+    }
+
+    // function handleLeftViewChange(item: PersonalItem | null) {
+    //     console.log('Page: Left view item changed:', item);
+    //     leftViewItem = item;
+    //     showLeftView = !!item;
+    // }
+
+    // 特色模板
+    const templates = [
+        {
+            title: "事件管理",
+            subtitle: "By Akasa",
+            description: "管理和追踪神秘事件",
+            icon: Activity,
+            url: "/console/events/list",
+            color: "blue" as CardColor
+        },
+        {
+            title: "会议记录",
+            subtitle: "By Akasa",
+            description: "团队会议和调查记录",
+            icon: CalendarClock,
+            url: "/console/meetings",
+            color: "purple" as CardColor
+        },
+        {
+            title: "知识库",
+            subtitle: "By Akasa",
+            description: "事件资料与研究档案",
+            icon: BookOpen,
+            url: "/console/wiki",
+            color: "amber" as CardColor
+        }
+    ];
+
+    // 数据库
+    const databases = [
+        {
+            title: "事件列表",
+            description: "所有神秘事件的追踪记录",
+            icon: Table,
+            url: "/console/events",
+            views: ["表格", "看板", "日历"],
+            lastEdited: "2小时前",
+            color: "blue" as CardColor
+        },
+        {
+            title: "调查任务",
+            description: "实地调查任务分配与进度",
+            icon: Kanban,
+            url: "/console/tasks",
+            views: ["看板", "列表", "时间轴"],
+            lastEdited: "1小时前",
+            color: "purple" as CardColor
+        }
+    ];
+
+    // 最近页面
+    const recentPages = [
+        {
+            title: "3月工作计划",
+            icon: FileText,
+            url: "/console/pages/march-plan",
+            lastEdited: "昨天",
+            coverImage: "https://images.unsplash.com/photo-1707343843437-caacff5cfa74",
+            color: "blue" as CardColor
+        },
+        {
+            title: "调查指南",
+            icon: BookOpen,
+            emoji: "📚",
+            url: "/console/pages/guide",
+            lastEdited: "2天前",
+            color: "amber" as CardColor
+        },
+        {
+            title: "团队会议记录",
+            icon: CalendarClock,
+            url: "/console/pages/meeting-notes",
+            lastEdited: "3天前",
+            color: "purple" as CardColor
+        }
+    ];
 </script>
 
-{#snippet actions()}
-    <div class="flex gap-2">
-        <Button
-            variant="secondary"
-            size="sm"
-            class="map-control-button"
-            on:click={() => {
-                showLeftContent = !showLeftContent;
-            }}
-        >
-            <PlusCircle class="h-4 w-4 mr-2" />
-            <span>{showLeftContent ? "隐藏" : "显示"}左侧内容</span>
-        </Button>
 
-        <Button
-            variant="outline"
-            data-sidebar="trigger"
-            size="sm"
-            on:click={() => {
-                showRightSidebar = !showRightSidebar;
-            }}
-        >
-            <PanelLeft class="h-4 w-4 mr-2" />
-            <span>{showRightSidebar ? "隐藏" : "显示"}右侧内容</span>
-        </Button>
+<ScrollArea class="h-[calc(100vh-1rem)]">
+    <div class="max-w-5xl mx-auto px-8 py-10 space-y-16">
+        <!-- 欢迎信息 -->
+        <div class="space-y-1">
+            <h1 class="text-4xl font-medium tracking-tight">早上好呀，翼范</h1>
+            <p class="text-base text-muted-foreground">开始探索神秘事件</p>
+        </div>
+
+        <!-- 特色模板 -->
+        <div class="space-y-5">
+            <div class="flex items-center justify-between">
+                <h2 class="text-sm font-medium text-muted-foreground/80">特色模板</h2>
+                <Button variant="ghost" size="sm">
+                    <MoreHorizontal class="h-4 w-4" />
+                </Button>
+            </div>
+            <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {#each templates as template}
+                    <button class="text-left" on:click={() => handleTemplateClick(template)}>
+                        <TemplateCard {...template} />
+                    </button>
+                {/each}
+            </div>
+        </div>
+
+        <!-- 数据库 -->
+        <div class="space-y-5">
+            <div class="flex items-center justify-between">
+                <h2 class="text-sm font-medium text-muted-foreground/80">数据库</h2>
+                <Button variant="ghost" size="sm">
+                    <MoreHorizontal class="h-4 w-4" />
+                </Button>
+            </div>
+            <div class="grid gap-4 grid-cols-1 lg:grid-cols-2">
+                {#each databases as database}
+                    <DatabaseCard {...database} />
+                {/each}
+            </div>
+        </div>
+
+        <!-- 最近页面 -->
+        <div class="space-y-5">
+            <div class="flex items-center justify-between">
+                <h2 class="text-sm font-medium text-muted-foreground/80">最近页面</h2>
+                <Button variant="ghost" size="sm">
+                    <MoreHorizontal class="h-4 w-4" />
+                </Button>
+            </div>
+            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {#each recentPages as page}
+                    <PageCard {...page} />
+                {/each}
+            </div>
+        </div>
     </div>
-{/snippet}
-
-{#snippet child()}
-    <div class="p-4">
-        <h2 class="text-2xl font-bold mb-4">控制台</h2>
-        <p>这里是主内容区域</p>
-    </div>
-{/snippet}
-
-{#snippet leftView()}
-    <div class="p-4">
-        <h3 class="text-lg font-semibold mb-4">左侧内容</h3>
-        <div>这里是左侧视图内容</div>
-    </div>
-{/snippet}
-
-{#snippet rightView()}
-    <div class="p-4 w-[600px]" in:fly={{ x: 200, duration: 500 }}>
-        <h3 class="text-lg font-semibold mb-4">右侧内容</h3>
-        <div>这里是右侧视图内容</div>
-    </div>
-{/snippet}
-
-<style>
-  :global(.splitpanes__splitter) {
-    background-color: transparent !important;
-    position: relative;
-    margin: 0 -8px;
-    width: 16px !important;
-    border: none !important;
-  }
-
-  :global(.splitpanes__splitter:hover) {
-    background-color: hsl(var(--muted)) !important;
-  }
-
-  :global(.splitpanes__splitter:active) {
-    background-color: hsl(var(--accent)) !important;
-  }
-
-  :global(.splitpanes__splitter::before) {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    height: 32px;
-    width: 2px;
-    background-color: hsl(var(--muted-foreground) / 0.3);
-  }
-
-  :global(.splitpanes__splitter::after) {
-    display: none !important;
-  }
-
-  :global(.splitpanes--vertical > .splitpanes__splitter) {
-    border-left: none !important;
-  }
-
-  :global(.splitpanes__splitter:hover::before) {
-    background-color: hsl(var(--muted-foreground) / 0.5);
-  }
-</style>
-
-<Splitpanes class="w-screen h-screen fixed top-0 left-0 z-50 overflow-hidden !bg-transparent">
-    <Pane minSize={40} size={100} class="!bg-transparent">
-        <iframe 
-        src="{base}/console/home" 
-        class="w-full h-full border-none"
-    />
-    </Pane>
-    {#if showRightSidebar && rightView}
-      <Pane size={0} class="!bg-transparent">
-        {@render rightView()}
-      </Pane>
-    {/if}
-</Splitpanes>
-
-
-<!-- <Sidebar.Provider open={showRightSidebar}>
-    <NavSidebar />
-    <main>
-      <Sidebar.Trigger />
-      <div>
-        {@render actions()}
-      </div>
-    </main>
-  </Sidebar.Provider> -->
-<!--   
-  <Shell 
-    {actions} 
-    {child} 
-    {leftView}
-    {rightView}
-    showLeftView={showLeftContent}
-    showRightView={showRightSidebar}
-    titles={[{ name: "控制台", path: "/console" }]}
-/> -->
+</ScrollArea>

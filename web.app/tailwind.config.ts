@@ -6,6 +6,9 @@ const config: Config = {
 	darkMode: ["class"],
 	content: ["./src/**/*.{html,js,svelte,ts}"],
 	safelist: ["dark"],
+	fontFamily: {
+        sans: ['Geist', '-apple-system', 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC', 'sans-serif'],
+      },
 	theme: {
 		container: {
 			center: true,

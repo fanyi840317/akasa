@@ -7,20 +7,17 @@
   import { goto } from '$app/navigation';
   import { Github, Mail, Lock, Loader2 } from 'lucide-svelte';
   import { account } from '$lib/appwrite';
-  import { onMount } from 'svelte';
   import { auth } from '$lib/stores/auth';
   import { base } from '$app/paths';
   import { toast } from 'svelte-sonner';
+  import { page } from '$app/stores';
 
   let email = '';
   let password = '';
   let loading = false;
-
-  onMount(async () => {
-    if ($auth.user) {
-      await goto(`${base}/`);
-    }
-  });
+  
+  // 获取returnUrl参数
+  const returnUrl = $page.data.returnUrl;
 
   async function handleSubmit() {
     loading = true;
@@ -29,7 +26,12 @@
       await account.createEmailPasswordSession(email, password);
       const user = await account.get();
       auth.setUser(user);
-      await goto(`${base}/`);
+      // 如果有returnUrl参数，则重定向到该页面，否则重定向到首页
+      if (returnUrl) {
+        await goto(`${base}${returnUrl}`);
+      } else {
+        await goto(`${base}/`);
+      }
     } catch (e: any) {
       toast.error(e.message || $_('auth.login_failed'));
     } finally {

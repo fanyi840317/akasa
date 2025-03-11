@@ -3,8 +3,22 @@
     import * as Card from "$lib/components/ui/card";
     import { Button } from "$lib/components/ui/button";
     import { Input } from "$lib/components/ui/input";
-    import { Search, Filter, Plus } from "lucide-svelte";
+    import { Search, Filter, Plus, X } from "lucide-svelte";
     import { fly } from "svelte/transition";
+    import { getContext } from 'svelte';
+    import { ScrollArea } from "$lib/components/ui/scroll-area";
+    import type { Snippet } from "svelte";
+    import type { PersonalItem } from "$lib/components/console/types";
+    import { Activity } from "lucide-svelte";
+
+    type ShellContext = {
+        showRightView: boolean;
+        setShowRightView: (value: boolean) => void;
+        setTemplate: (template: any) => void;
+        setLeftViewItem: (item: PersonalItem | null) => void;
+    }
+
+    const { setShowRightView, setTemplate } = getContext<ShellContext>('shell');
 
     // 模拟事件数据
     let events = $state([
@@ -36,8 +50,51 @@
 
     let searchQuery = $state("");
     let showFilters = $state(false);
+
+    // 事件详情数据
+    const eventDetail = {
+        title: "外星人目击事件",
+        subtitle: "调查中",
+        description: "在新墨西哥州发现疑似外星人痕迹，目前正在进行实地调查...",
+        color: "blue" as const,
+        // icon: Activity
+    };
+
+    function handleEventClick(event: typeof eventDetail) {
+        setTemplate(event);
+        setShowRightView(true);
+    }
 </script>
 
+<!-- 默认内容 -->
+<div>
+    <ScrollArea class="h-[calc(100vh-1rem)]">
+        <div class="max-w-5xl mx-auto px-8 py-10 space-y-8">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-semibold">事件列表</h1>
+                <Button>新建事件</Button>
+            </div>
+            
+            <!-- 事件列表 -->
+            <div class="space-y-4">
+                <button 
+                    class="w-full p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors text-left"
+                    on:click={() => handleEventClick(eventDetail)}
+                >
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <h3 class="font-medium">{eventDetail.title}</h3>
+                            <p class="text-sm text-muted-foreground">{eventDetail.description}</p>
+                        </div>
+                        <div class="text-xs text-muted-foreground">2小时前更新</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </ScrollArea>
+</div>
+
+<!-- 提供 actions snippet -->
 {#snippet actions()}
     <div class="flex items-center gap-2">
         <div class="relative">
@@ -60,92 +117,9 @@
     </div>
 {/snippet}
 
-{#snippet child()}
-    <div class="p-6">
-        <Card.Root>
-            <Card.Header>
-                <Card.Title>事件列表</Card.Title>
-                <Card.Description>
-                    查看和管理所有神秘事件
-                </Card.Description>
-            </Card.Header>
-            <Card.Content>
-                <div class="rounded-md border">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b bg-muted/50">
-                                <th class="p-3 text-left">事件名称</th>
-                                <th class="p-3 text-left">地点</th>
-                                <th class="p-3 text-left">日期</th>
-                                <th class="p-3 text-left">状态</th>
-                                <th class="p-3 text-left">浏览量</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {#each events as event}
-                                <tr class="border-b">
-                                    <td class="p-3">
-                                        <a href="/console/events/{event.id}" class="hover:underline">
-                                            {event.title}
-                                        </a>
-                                    </td>
-                                    <td class="p-3">{event.location}</td>
-                                    <td class="p-3">{event.date}</td>
-                                    <td class="p-3">
-                                        <span class="inline-flex items-center rounded-full px-2 py-1 text-xs" 
-                                            class:bg-yellow-100={event.status === "调查中"}
-                                            class:text-yellow-800={event.status === "调查中"}
-                                            class:bg-green-100={event.status === "已结案"}
-                                            class:text-green-800={event.status === "已结案"}
-                                            class:bg-gray-100={event.status === "待处理"}
-                                            class:text-gray-800={event.status === "待处理"}>
-                                            {event.status}
-                                        </span>
-                                    </td>
-                                    <td class="p-3">{event.views}</td>
-                                </tr>
-                            {/each}
-                        </tbody>
-                    </table>
-                </div>
-            </Card.Content>
-        </Card.Root>
-    </div>
-{/snippet}
-
+<!-- 提供 rightView snippet -->
 {#snippet rightView()}
-    {#if showFilters}
-        <div class="p-4 w-[300px]" in:fly={{ x: 200, duration: 300 }}>
-            <h3 class="text-lg font-semibold mb-4">筛选条件</h3>
-            <div class="space-y-4">
-                <div class="grid gap-2">
-                    <label class="text-sm font-medium">状态</label>
-                    <select class="w-full rounded-md border p-2">
-                        <option value="">全部</option>
-                        <option value="调查中">调查中</option>
-                        <option value="已结案">已结案</option>
-                        <option value="待处理">待处理</option>
-                    </select>
-                </div>
-                <div class="grid gap-2">
-                    <label class="text-sm font-medium">日期范围</label>
-                    <Input type="date" class="w-full" />
-                    <Input type="date" class="w-full" />
-                </div>
-                <Button class="w-full">应用筛选</Button>
-            </div>
-        </div>
+    {#if selectedTemplate}
+        <!-- 右侧面板内容 -->
     {/if}
 {/snippet}
-
-<Shell 
-    {child}
-    {actions}
-    {rightView}
-    showRightView={showFilters}
-    titles={[
-        { name: "控制台", path: "/console" },
-        { name: "事件管理", path: "/console/events" },
-        { name: "事件列表", path: "/console/events/list" }
-    ]}
-/> 

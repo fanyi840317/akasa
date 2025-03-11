@@ -2,11 +2,16 @@
   import { onMount } from "svelte";
   import type { Snippet } from "svelte";
   import * as Sidebar from "$lib/components/ui/sidebar";
-  import NavSidebar from "$lib/components/console/navigation/sidebar.svelte";
-  import Header from "$lib/components/console/layout/header.svelte";
+  import NavSidebar from "./sidebar.svelte";
+  import Header from "./header.svelte";
   import { fly, slide, fade } from "svelte/transition";
   import { Collapsible } from "bits-ui";
   import * as Resizable from "$lib/components/ui/resizable";
+  import { page } from "$app/stores";
+  import type { NavItem, User } from "./types";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import { ScrollArea } from "$lib/components/ui/scroll-area";
+  import { Separator } from "$lib/components/ui/separator";
 
   /**
    * 控制台主外壳组件 - 提供整体布局骨架
@@ -23,6 +28,8 @@
    * @param {string} contentClass - 主内容区域额外的样式类
    * @param {boolean} showHeader - 是否显示头部区域
    * @param {boolean} showFooter - 是否显示底部区域
+   * @param {Snippet} dialogView - 对话框内容区域
+   * @param {User} user - 用户信息
    */
   let {
     child,
@@ -31,10 +38,13 @@
     leftView = undefined,
     rightView = undefined,
     footer = undefined,
-    showLeftView = true,
+    dialogView = undefined,
+    showLeftView = false,
     showRightView = false,
     showHeader = true,
     showFooter = false,
+    onLeftViewChange = (item: NavItem | null) => {},
+    user = undefined,
   } = $props<{
     child: Snippet;
     titles?: { name: string; path: string }[];
@@ -42,28 +52,46 @@
     leftView?: Snippet;
     rightView?: Snippet;
     footer?: Snippet;
+    dialogView?: Snippet;
     showLeftView?: boolean;
     showRightView?: boolean;
     showHeader?: boolean;
     showFooter?: boolean;
+    onLeftViewChange?: (item: NavItem | null) => void;
+    user?: User;
   }>();
 
   let sidebarCollapsed = $state(true);
   let sidebarWidthIcon = 56;
   let sidebarWidth = 256;
+  let selectedItem = $state<string | null>(null);
+  let showDialog = $state(false);
+  let dialogItem = $state<NavItem | null>(null);
 
-  // 监听sidebarCollapsed变化
   $effect(() => {
-    if (sidebarCollapsed !== undefined) {
-      // alert(`侧边栏状态已变更为: ${sidebarCollapsed ? '折叠' : '展开'}`);
+    const currentPath = $page.url.pathname;
+    if (currentPath) {
+      selectedItem = currentPath;
     }
   });
 
-  import { useSidebar } from "$lib/components/ui/sidebar/index.js";
-  import ResizableHandle from "$lib/components/ui/resizable/resizable-handle.svelte";
+  function handleNavAction(item: NavItem | null, action?: string) {
+    console.log('Nav action:', item, action);
+    
+    // 处理左侧视图变更
+    if (!action || action === 'leftView') {
+      showLeftView = !!item;
+      onLeftViewChange(item);
+    }
+    
+    // 处理模态框显示
+    if (item && item.onClickAction === 'modal') {
+      dialogItem = item;
+      showDialog = true;
+    }
+  }
 
   onMount(() => {
-    alert(useSidebar().state);
   });
 </script>
 
@@ -78,7 +106,7 @@
     tabindex="0"></div>
     <div
       class="bg-muted backdrop-blur-sm h-full absolute transition-[width,transform] duration-300 ease-in-out border-r shadow-lg overflow-hidden"
-      style="left: {sidebarCollapsed ? sidebarWidth : sidebarWidth}px; width: 400px;"
+      style="left: {sidebarCollapsed ? sidebarWidthIcon : sidebarWidth}px; width: 400px;"
       in:fly|local={{ x: -sidebarWidth, duration: 200 }}
       out:fly|local={{ x: -sidebarWidth, duration: 200 }}
     >
@@ -88,9 +116,21 @@
  
 {/if}
 
+<!-- Dialog组件 -->
+{#if showDialog && dialogView}
+  <Dialog.Root bind:open={showDialog}>
+    {@render dialogView()}
+  </Dialog.Root>
+{/if}
+
 <Sidebar.Provider open={showRightView} style="--sidebar-width: {400}px">
-  <Sidebar.Provider open={sidebarCollapsed}>
-    <NavSidebar collapsible="icon" class="" />
+  <Sidebar.Provider open={sidebarCollapsed} style="--sidebar-width: {sidebarWidth}px">
+    <NavSidebar 
+      collapsible="icon" 
+      selectedItem={$page.url.pathname}
+      onNavItemClick={(item) => handleNavAction(item)}
+      user={user}
+    />
 
     <!-- 主内容区域 -->
     <Sidebar.Inset>
@@ -116,3 +156,4 @@
     {/if}
   </Sidebar.Root>
 </Sidebar.Provider>
+<!-- -->
