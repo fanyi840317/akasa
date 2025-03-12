@@ -11,6 +11,7 @@
 	import { onMount } from "svelte";
 	import { base } from "$app/paths";
 	import { goto } from "$app/navigation";
+    import { fade } from "svelte/transition";
 	// onMount(async () => {
 	// 	//test
 	// 	goto(base + "/events/BasicInfo");
@@ -20,9 +21,11 @@
 <ModeWatcher />
 <Toaster />
 {#await waitLocale()}
-	<div class="min-h-screen flex items-center justify-center">
+	<div in:fade={{ duration: 200 }} class="min-h-screen flex items-center justify-center">
 		<Loading size="lg" />
 	</div>
 {:then}
-	{@render children()}
+	<div out:fade={{ duration: 300 }}>
+		{@render children()}
+	</div>
 {/await}

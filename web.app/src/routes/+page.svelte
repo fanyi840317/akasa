@@ -24,7 +24,7 @@
     function updateCountdown() {
         const now = new Date();
         const difference = targetDate.getTime() - now.getTime();
-        console.log('updateCountdown running, difference:', difference);
+        // console.log('updateCountdown running, difference:', difference);
 
         if (difference <= 0) {
             // 如果已经到期
@@ -33,7 +33,7 @@
             minutes = '00';
             seconds = '00';
             if (timer) clearInterval(timer);
-            console.log('Countdown finished');
+            // console.log('Countdown finished');
             return;
         }
 
@@ -42,26 +42,26 @@
         hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
         minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
         seconds = Math.floor((difference % (1000 * 60)) / 1000).toString().padStart(2, '0');
-        console.log('Updated times:', { days, hours, minutes, seconds });
+        // console.log('Updated times:', { days, hours, minutes, seconds });
     }
 
     onMount(() => {
-        console.log('onMount executed');
+        // console.log('onMount executed');
         // 设置深色模式
         setMode("dark")
         // 立即执行一次
         updateCountdown();
         // 设置定时器，每秒更新一次
         timer = setInterval(updateCountdown, 1000);
-        console.log('Timer set:', timer);
+        // console.log('Timer set:', timer);
     });
 
     onDestroy(() => {
-        console.log('onDestroy executed');
+        // console.log('onDestroy executed');
         // 清理定时器
         if (timer) {
             clearInterval(timer);
-            console.log('Timer cleared');
+            // console.log('Timer cleared');
         }
     });
 </script>
@@ -101,7 +101,7 @@
 
             <!-- 联系按钮 -->
             <div class="flex justify-center">
-                <Button size="lg" class="gap-1.5 sm:gap-2 tracking-widest text-sm sm:text-base" on:click={() => window.location.href = `mailto:x2.helsing@outlook.com?subject=${$_('home.emailSubject')}`}>
+                <Button size="lg" class="gap-1.5 sm:gap-2 tracking-widest text-sm sm:text-base" onclick={() => window.location.href = `mailto:x2.helsing@outlook.com?subject=${$_('home.emailSubject')}`}>
                     {$_('common.contactUs')}
                     <ArrowRight class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </Button>

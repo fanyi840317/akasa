@@ -5,16 +5,19 @@ import initI18n from '$lib/i18n';
 import { auth } from '$lib/stores/auth';
 import { get } from 'svelte/store';
 import type { LayoutLoad } from './$types';
+import utils from '$lib/components/shad-editor/custom/utils';
+import { account } from '$lib/appwrite';
 
 injectAnalytics({ mode: dev ? 'development' : 'production' });
 
 // 初始化位置和语言设置
-export const load: LayoutLoad = async ({ url }) => {
-    // 初始化认证
+export const ssr = false;
+export const load: LayoutLoad = async ({ url, route }) => {
+    // 避免在每次导航时都重新初始化认证
     await auth.init();
     
     const locationData = await getLocationData();
-    
+
     // 初始化 i18n
     initI18n(locationData.country);
 

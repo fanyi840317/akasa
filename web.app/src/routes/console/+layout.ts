@@ -1,14 +1,11 @@
-import type { PageLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
-import { get } from 'svelte/store';
 import { auth } from '$lib/stores/auth';
+import { redirect } from '@sveltejs/kit';
+import type { LayoutLoad } from './$types';
 import { base } from '$app/paths';
+import { get } from 'svelte/store';
 
-export const load: PageLoad = async ({ url }) => {
-    // 初始化认证状态
-    await auth.init();
-    
-    // 获取用户信息
+export const load = (async ({ url, route }) => {
+
     const { user } = get(auth);
 
     console.log(user);
@@ -16,7 +13,7 @@ export const load: PageLoad = async ({ url }) => {
     // 如果用户未登录，重定向到登录页面
     if (!user) {
         const returnUrl = encodeURIComponent(url.pathname);
-        throw redirect(302, `${base}/login?returnUrl=${returnUrl}`);
+        throw redirect(302, `${base}/login?redirect=${returnUrl}`);
     }
     
     // 构建用户信息对象，用于传递给nav-user组件
@@ -31,4 +28,5 @@ export const load: PageLoad = async ({ url }) => {
         title: '控制台',
         user: userInfo
     };
-};
+    
+}) satisfies LayoutLoad;

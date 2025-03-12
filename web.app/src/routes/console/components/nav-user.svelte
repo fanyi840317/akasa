@@ -10,6 +10,10 @@
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 	import { useSidebar } from "$lib/components/ui/sidebar/index.js";
+	import { auth } from "$lib/stores/auth";
+	import { goto } from "$app/navigation";
+	import { base } from "$app/paths";
+	import { page } from "$app/stores";
 
     /**
      * 用户导航组件
@@ -25,6 +29,12 @@
         };
     } = $props();
 	const sidebar = useSidebar();
+
+	function handleLogout() {
+		auth.logout();
+		const returnUrl = encodeURIComponent($page.url.pathname);
+		goto(`${base}/login?returnUrl=${returnUrl}`);
+	}
 </script>
 
 <Sidebar.Menu>
@@ -90,7 +100,7 @@
 					</DropdownMenu.Item>
 				</DropdownMenu.Group>
 				<DropdownMenu.Separator />
-				<DropdownMenu.Item>
+				<DropdownMenu.Item onclick={handleLogout}>
 					<LogOut />
 					Log out
 				</DropdownMenu.Item>

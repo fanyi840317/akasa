@@ -4,28 +4,11 @@ import { base } from '$app/paths';
 import { auth } from '$lib/stores/auth';
 import { get } from 'svelte/store';
 
-export const load: LayoutLoad = async ({ url }) => {
-  // 先初始化auth store
-  await auth.init();
-  // 获取用户信息
-  const { user } = get(auth);
-  
-  // 获取当前路径
-  const path = url.pathname;
-  const returnUrl = url.searchParams.get('returnUrl');
-  
-  // 如果用户已登录且正在访问登录或注册页面，重定向到returnUrl或首页
-  // 精确匹配路径并检查重定向目标是否不同
-  if (user && (path === `${base}/login` || path === `${base}/register`)) {
-    const redirectPath = returnUrl ? `${base}${returnUrl}` : `${base}/`;
-    if (redirectPath !== path) {
-        console.log(redirectPath);
-      throw redirect(302, redirectPath);
-    }
+export const load: LayoutLoad = async ({ parent, url }) => {
+  const { user } = await parent();
+
+  // 只有当用户已登录且当前路径是登录或注册页面时才重定向
+  if (user && (url.pathname === '/login' || url.pathname === '/register')) {
+      throw redirect(303, '/console');
   }
-  
-  // 返回页面需要的数据
-  return {
-    user
-  };
 };
