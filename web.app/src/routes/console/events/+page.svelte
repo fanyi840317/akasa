@@ -1,19 +1,5 @@
 <script lang="ts">
     import type { PageData } from "./$types";
-    import { Button } from "$lib/components/ui/button";
-    import {
-        Card,
-        CardContent,
-        CardFooter,
-        CardHeader,
-        CardTitle,
-    } from "$lib/components/ui/card";
-    import {
-        Pagination,
-        PaginationContent,
-        PaginationItem,
-        PaginationLink,
-    } from "$lib/components/ui/pagination";
     import { Input } from "$lib/components/ui/input";
     import {
         Search,
@@ -25,6 +11,7 @@
     } from "lucide-svelte";
     import EventCard from "$lib/components/notion-cards/event-card.svelte";
     import TagNav from "$lib/components/nav/tag-nav.svelte";
+    import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
 
     let { data }: { data: PageData } = $props();
 
@@ -119,53 +106,55 @@
     }
 </script>
 
-<div class="container mx-auto p-16 space-y-10">
-    <!-- 页面标题和搜索栏 -->
-    <div
-        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-    >
-        <div>
-            <h1 class="text-2xl font-bold mb-2">活动与事件</h1>
-            <p class="text-muted-foreground">发现并参与各种精彩活动</p>
-        </div>
-        <div class="flex items-center gap-2 w-full md:w-auto">
-            <div class="relative w-full md:w-[300px]">
-                <Search
-                    class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
-                />
-                <Input
-                    type="search"
-                    placeholder="搜索活动..."
-                    class="pl-8"
-                    bind:value={searchQuery}
-                />
+<ScrollArea class="h-[calc(100vh-1rem)]">
+    <div class="container mx-auto p-16 space-y-10">
+        <!-- 页面标题和搜索栏 -->
+        <div
+            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+        >
+            <div>
+                <h1 class="text-2xl font-bold mb-2">活动与事件</h1>
+                <p class="text-muted-foreground">发现并参与各种精彩活动</p>
+            </div>
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <div class="relative w-full md:w-[300px]">
+                    <Search
+                        class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
+                    />
+                    <Input
+                        type="search"
+                        placeholder="搜索活动..."
+                        class="pl-8"
+                        bind:value={searchQuery}
+                    />
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- 分类标签 -->
-    <TagNav bind:selectedId={selectedCategory} items={categories} />
+        <!-- 分类标签 -->
+        <TagNav bind:selectedId={selectedCategory} items={categories} />
 
-    <div class="space-y-4">
-        <!-- 精选模板区域 -->
-        <div class="flex items-center gap-2 px-2 text-muted-foreground">
-            <Star class="h-3 w-3 " />
-            <span class="text-xs">精选模板</span>
+        <div class="space-y-4">
+            <!-- 精选模板区域 -->
+            <div class="flex items-center gap-2 px-2 text-muted-foreground">
+                <Star class="h-3 w-3 " />
+                <span class="text-xs">精选模板</span>
+            </div>
+
+            <!-- 事件卡片网格 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                {#each events as event}
+                    <EventCard
+                        title={event.title}
+                        image={event.image}
+                        tags={event.tags}
+                        rating={event.rating}
+                    />
+                {/each}
+            </div>
         </div>
 
-        <!-- 事件卡片网格 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
-            {#each events as event}
-                <EventCard
-                    title={event.title}
-                    image={event.image}
-                    tags={event.tags}
-                    rating={event.rating}
-                />
-            {/each}
-        </div>
+        <!-- 分页控件 -->
+        <div class="flex justify-center mt-8"></div>
     </div>
-
-    <!-- 分页控件 -->
-    <div class="flex justify-center mt-8"></div>
-</div>
+</ScrollArea>
