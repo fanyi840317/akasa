@@ -33,7 +33,7 @@
 	function handleLogout() {
 		auth.logout();
 		const returnUrl = encodeURIComponent($page.url.pathname);
-		goto(`${base}/login?returnUrl=${returnUrl}`);
+		goto(`${base}/login?redirect=${returnUrl}`);
 	}
 </script>
 
