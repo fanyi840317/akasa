@@ -80,7 +80,7 @@
     
     // 处理左侧视图变更
     if (!action || action === 'leftView') {
-      showLeftView = !!item;
+      showLeftView = !showLeftView;
       onLeftViewChange(item);
     }
     
@@ -106,7 +106,7 @@
     tabindex="0"></div>
     <div
       class="bg-muted backdrop-blur-sm h-full absolute transition-[width,transform] duration-300 ease-in-out border-r shadow-lg overflow-hidden"
-      style="left: {sidebarCollapsed ? sidebarWidthIcon : sidebarWidth}px; width: 400px;"
+      style="left: {sidebarCollapsed ? sidebarWidth : sidebarWidth}px; width: 400px;"
       in:fly|local={{ x: -sidebarWidth, duration: 200 }}
       out:fly|local={{ x: -sidebarWidth, duration: 200 }}
     >

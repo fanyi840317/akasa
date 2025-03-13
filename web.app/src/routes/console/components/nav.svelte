@@ -3,9 +3,6 @@
     import { goto } from "$app/navigation";
     import type { NavItem } from "./types";
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-    import * as Dialog from "$lib/components/ui/dialog";
-    import { ScrollArea } from "$lib/components/ui/scroll-area";
-    import { Separator } from "$lib/components/ui/separator";
     import { Badge } from "$lib/components/ui/badge";
     import ChevronRight from "lucide-svelte/icons/chevron-right";
     import type { ComponentProps } from "svelte";

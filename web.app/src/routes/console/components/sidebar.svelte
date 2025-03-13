@@ -42,7 +42,7 @@
     });
 </script>
 
-<Sidebar.Root {collapsible} {side}>
+<Sidebar.Root {collapsible} {side} variant="inset">
     <Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
