@@ -122,47 +122,11 @@
     }
 </script>
 
-<div class="container mx-auto p-16 space-y-10 flex flex-col h-[calc(100vh-1rem)]">
-    <!-- 页面标题和搜索栏 -->
-    <div
-        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-    >
-        <div>
-            <h1 class="text-2xl font-bold mb-2">活动与事件</h1>
-            <p class="text-muted-foreground">发现并参与各种精彩活动</p>
-        </div>
-        <div class="flex items-center gap-2 w-full md:w-auto">
-            <div class="relative w-full md:w-[300px]">
-                <Search
-                    class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
-                />
-                <Input
-                    type="search"
-                    placeholder="搜索活动..."
-                    class="pl-8"
-                    bind:value={searchQuery}
-                />
-            </div>
-        </div>
-    </div>
-
-    <!-- 分类标签 -->
-    <div class="flex flex-wrap gap-2">
-        {#each categories as category}
-            <Badge
-                variant={selectedCategory === category.id
-                    ? "default"
-                    : "outline"}
-                class="cursor-pointer"
-                onclick={() => handleCategoryClick(category.id)}
-            >
-                {category.name}
-            </Badge>
-        {/each}
-    </div>
-
+<div class="w-full h-screen overflow-hidden">
     <!-- 地图容器 -->
-    <div class="flex-1 w-full rounded-lg overflow-hidden border border-border">
-        <Map events={events} />
+    <div class="absolute inset-0 z-0">
+        <Map />
     </div>
+    <!-- 黑雾蒙层 -->
+    <div class="absolute inset-0 z-10 pointer-events-none" style="background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.9) 100%)"></div>
 </div>

@@ -80,7 +80,6 @@
     width: 100%;
     height: 100%;
     position: relative;
-    border-radius: 0.75rem;
     overflow: hidden;
     display: block;
   }
@@ -90,16 +89,16 @@
   }
 
   :global(.mapboxgl-map) {
-    border-radius: 0.75rem;
+    /* border-radius: 0.75rem; */
   }
   
   :global(.mapboxgl-canvas-container),
   :global(.mapboxgl-canvas) {
-    border-radius: 0.75rem;
+    /* border-radius: 0.75rem; */
   }
   
   :global(.mapboxgl-ctrl-attrib) {
-    border-top-left-radius: 0.5rem;
+    /* border-top-left-radius: 0.5rem; */
     background-color: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(4px);
     font-family: 'Inter', sans-serif;
