@@ -46,6 +46,7 @@ export const navData: {
     {
       title: "主页",
       url: "/console",
+      state: "disabled",
       icon: SquareTerminal,
     },
     {
@@ -62,6 +63,7 @@ export const navData: {
       title: "收件箱",
       icon: Inbox,
       onClickAction:"leftView",
+      state: "disabled",
       clickOnly: true,
       unread: 3
     }
@@ -78,6 +80,7 @@ export const navData: {
       title: "设置",
       size: "sm",
       icon: Settings2,
+      state: "disabled",
       url: "/console/settings",
       clickOnly: true,
       onClickAction: "modal",
@@ -88,15 +91,18 @@ export const navData: {
     {
       title: "关注的人",
       icon: Heart,
+      state: "disabled",
       url: "/console/following"
     },
     {
       title: "收藏",
       icon: Bookmark,
+      state: "disabled",
       url: "/console/bookmarks"
     },
     {
       title: "调查组",
+      state: "disabled",
       icon: MessageSquare,
       url: "/console/teams",
       badge: 5

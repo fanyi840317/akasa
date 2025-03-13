@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Button } from "$lib/components/ui/button";
-    import { TemplateCard, DatabaseCard, PageCard } from "$lib/components/ui/notion-cards";
+    import { TemplateCard, DatabaseCard, PageCard } from "$lib/components/notion-cards";
     import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
     // import type { PersonalItem } from "./components/types";
     import { 

@@ -43,6 +43,10 @@
 
     // 处理导航项点击
     function handleItemClick(item: NavItem) {
+        // 如果项目状态为disabled，不执行任何操作
+        if (item.state === "disabled") {
+            return;
+        }
 
         if (item.clickOnly) {
             // 统一使用onNavItemClick处理所有交互，包括leftView和modal
@@ -66,8 +70,8 @@
 
     // 判断项目是否激活
     function isActive(item: NavItem): boolean {
-        // 如果设置了clickOnly属性，则不进行激活状态显示
-        if (item.clickOnly) {
+        // 如果设置了clickOnly属性或状态为disabled，则不进行激活状态显示
+        if (item.clickOnly || item.state === "disabled") {
             return false;
         }
         if (item.url) {
@@ -113,7 +117,7 @@
                         item,
                     ) || selectedItem === item.url)
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                        : ''}"
+                        : ''} {item.state === 'disabled' ? 'opacity-50 cursor-not-allowed' : ''}"
                 >
                     <div
                         class="flex items-center justify-between w-full group-data-[collapsible=icon]:justify-center"
