@@ -2,13 +2,6 @@
     import type { PageData } from "./$types";
     import { Button } from "$lib/components/ui/button";
     import {
-        Card,
-        CardContent,
-        CardFooter,
-        CardHeader,
-        CardTitle,
-    } from "$lib/components/ui/card";
-    import {
         Pagination,
         PaginationContent,
         PaginationItem,
@@ -16,7 +9,9 @@
     } from "$lib/components/ui/pagination";
     import { Input } from "$lib/components/ui/input";
     import { Badge } from "$lib/components/ui/badge";
-    import { Search, Filter, Calendar, MapPin, Users, Star } from "lucide-svelte";
+    import { _ } from 'svelte-i18n';
+    import { Search, Filter, Calendar, MapPin, Users, Star, PlusCircle, Share2 } from "lucide-svelte";
+    import * as Card from "$lib/components/ui/card";
     import {
         Avatar,
         AvatarImage,
@@ -130,12 +125,30 @@
     function getStaggerDelay(i: number) {
         return i * 50; // 每个元素延迟50ms
     }
+
+
 </script>
 
 <div class="w-full h-screen overflow-hidden">
-    <!-- 标题容器 -->
-    <div class="absolute top-4 left-4 z-20 bg-black/50 p-4 rounded-lg">
-        <h1 class="text-2xl font-bold text-white/70">活动地图</h1>
+
+
+    <div class="absolute top-14 left-14 z-20 w-64 space-y-4">
+        <Card.Root class="backdrop-blur-sm border-none shadow-lg bg-gradient-to-r from-transparent via-background/30 to-transparent">
+            <Card.Content class="p-4">
+                <h1 class="text-xl font-bold">{$_('site.events')}</h1>
+                <h2 class="text-sm text-muted-foreground mb-4">{$_('events.subtitle')}</h2>
+            </Card.Content>
+        </Card.Root>
+    </div>
+
+    <!-- 右上角搜索框 -->
+    <div class="absolute top-14 right-14 z-20 w-80 flex gap-2">
+        <Button variant="ghost" class="hover:bg-background/40">
+            <Search class="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" class="hover:bg-background/40">
+            <Share2 class="h-4 w-4" />
+        </Button>
     </div>
     
     <!-- 地图容器 -->
