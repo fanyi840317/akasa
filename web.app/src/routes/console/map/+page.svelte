@@ -9,8 +9,17 @@
     } from "$lib/components/ui/pagination";
     import { Input } from "$lib/components/ui/input";
     import { Badge } from "$lib/components/ui/badge";
-    import { _ } from 'svelte-i18n';
-    import { Search, Filter, Calendar, MapPin, Users, Star, PlusCircle, Share2 } from "lucide-svelte";
+    import { _ } from "svelte-i18n";
+    import {
+        Search,
+        Filter,
+        Calendar,
+        MapPin,
+        Users,
+        Star,
+        PlusCircle,
+        Share2,
+    } from "lucide-svelte";
     import * as Card from "$lib/components/ui/card";
     import {
         Avatar,
@@ -19,13 +28,28 @@
     } from "$lib/components/ui/avatar";
     import Map from "$lib/components/map.svelte";
     import * as HoverCard from "$lib/components/ui/hover-card";
-    // 导入Svelte动画模块
     import { fade, fly, scale, slide } from "svelte/transition";
     import { flip } from "svelte/animate";
     import { quintOut } from "svelte/easing";
-    import {EventList} from "./components';
+    import { EventList } from "../components/index.js";
+    import CategoryList from "../components/category-list.svelte";
+    import * as Drawer from "$lib/components/ui/drawer";
+    import { Label } from "$lib/components/ui/label";
+    import { Textarea } from "$lib/components/ui/textarea";
 
     let { data }: { data: PageData } = $props();
+
+    // 地点分类数据
+    const placeCategories = [
+        { id: "atm", name: "ATMs", count: 12 },
+        { id: "bus", name: "Bus Stops", count: 24 },
+        { id: "cafe", name: "Cafés", count: 3 },
+        { id: "emergency", name: "Emergencies", count: 5 },
+        { id: "museum", name: "Museums", count: 8 },
+        { id: "parking", name: "Parkings", count: 15 },
+        { id: "restaurant", name: "Restaurants", count: 32 },
+        { id: "sport", name: "Sport Centers", count: 6 },
+    ];
 
     // 模拟事件数据
     const events = [
@@ -37,7 +61,7 @@
             image: "/images/31.03_banner-373x373.jpg",
             tags: ["摄影", "工作坊"],
             attendees: 24,
-            rating: 4.5
+            rating: 4.5,
         },
         {
             id: 2,
@@ -47,7 +71,7 @@
             image: "/images/31.04_banner-373x373.jpg",
             tags: ["户外", "徒步"],
             attendees: 36,
-            rating: 4.8
+            rating: 4.8,
         },
         {
             id: 3,
@@ -57,7 +81,7 @@
             image: "/images/31.05_banner-373x373.jpg",
             tags: ["艺术", "绘画"],
             attendees: 18,
-            rating: 4.2
+            rating: 4.2,
         },
         {
             id: 4,
@@ -67,7 +91,7 @@
             image: "/images/33.04_banner-373x373.jpg",
             tags: ["音乐", "演出"],
             attendees: 120,
-            rating: 4.7
+            rating: 4.7,
         },
         {
             id: 5,
@@ -77,7 +101,7 @@
             image: "/images/33.05_banner-373x373.jpg",
             tags: ["科技", "展览"],
             attendees: 85,
-            rating: 4.4
+            rating: 4.4,
         },
         {
             id: 6,
@@ -87,26 +111,22 @@
             image: "/images/31.03_banner-373x373.jpg",
             tags: ["美食", "文化"],
             attendees: 150,
-            rating: 4.6
+            rating: 4.6,
         },
     ];
 
-    // 分类标签
-    const categories = [
-        { id: "all", name: "全部" },
-        { id: "photography", name: "摄影" },
-        { id: "outdoor", name: "户外" },
-        { id: "art", name: "艺术" },
-        { id: "music", name: "音乐" },
-        { id: "tech", name: "科技" },
-        { id: "food", name: "美食" },
-    ];
-
-    let selectedCategory = "all";
+    let selectedCategory = "cafe";
     let searchQuery = "";
     let currentPage = 1;
     const itemsPerPage = 6;
     const totalPages = Math.ceil(events.length / itemsPerPage);
+
+    // 创建事件相关状态
+    let showCreateDrawer = $state(false);
+    let eventTitle = $state("");
+    let eventDescription = $state("");
+    let eventLocation = $state("");
+    let eventDate = $state("");
 
     function handleCategoryClick(categoryId: string) {
         selectedCategory = categoryId;
@@ -122,42 +142,110 @@
         });
     }
 
-    // 为卡片内容元素添加交错动画的延迟函数
     function getStaggerDelay(i: number) {
-        return i * 50; // 每个元素延迟50ms
+        return i * 50;
     }
 
+    function getCategoryTransform(index: number, total: number) {
+        const verticalSpacing = 60; // 每个项目之间的垂直间距
+        return `translate(0, ${index * verticalSpacing}px)`;
+    }
 
+    function handleCreateEvent() {
+        // 处理创建事件的逻辑
+        console.log({
+            title: eventTitle,
+            description: eventDescription,
+            location: eventLocation,
+            date: eventDate
+        });
+        showCreateDrawer = false;
+        // 重置表单
+        eventTitle = "";
+        eventDescription = "";
+        eventLocation = "";
+        eventDate = "";
+    }
 </script>
 
 <div class="w-full h-screen overflow-hidden">
+    <!-- 左侧分类列表 -->
+    <div class="absolute left-16 top-[180px] z-20">
+        <CategoryList
+            categories={placeCategories}
+            {selectedCategory}
+            onCategoryClick={handleCategoryClick}
+        />
+    </div>
 
-
-    <div class="absolute top-14 left-14 z-20 w-64 space-y-4">
-        <Card.Root class="backdrop-blur-sm border-none shadow-lg bg-gradient-to-r from-transparent via-background/30 to-transparent">
-            <Card.Content class="p-4">
-                <h1 class="text-xl font-bold">{$_('site.events')}</h1>
-                <h2 class="text-sm text-muted-foreground mb-4">{$_('events.subtitle')}</h2>
-            </Card.Content>
-        </Card.Root>
+    <div class="absolute top-14 left-14 z-20 p-4 ">
+        <h1 class="text-3xl font-bold mb-2">{$_('site.events')}</h1>
+        <h2 class="text-sm text-muted-foreground">{$_('events.subtitle')}</h2>
     </div>
 
     <!-- 右上角搜索框 -->
-    <div class="absolute top-14 right-14 z-20 flex gap-12">
-       
-        <Search class="h-5 w-5 font-bold" stroke-width="2.5" />
-        <Share2 class="h-5 w-5 font-bold" stroke-width="2.5" />
-
+    <div class="absolute top-16 right-14 z-20 flex items-center gap-4">
+        <Button variant="ghost" size="icon">
+            <Search class="h-5 w-5" />
+        </Button>
+        <Button variant="ghost" size="icon">
+            <MapPin class="h-5 w-5" />
+        </Button>
+        <Button variant="secondary" size="icon" onclick={() => showCreateDrawer = true}>
+            <PlusCircle class="h-5 w-5 hover:bg-background/20"/>
+        </Button>
     </div>
-    
+
     <!-- 地图容器 -->
     <div class="absolute inset-0 z-0">
         <Map />
     </div>
     <!-- 黑雾蒙层 -->
-    <div class="absolute inset-0 z-10 pointer-events-none" style="background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.9) 100%)"></div>
-    
+    <div
+        class="absolute inset-0 z-10 pointer-events-none"
+        style="background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.9) 100%)"
+    ></div>
+
     <!-- 底部事件展示区域 -->
-     
-    <EventList {events} />
+    <div class=" absolute bottom-10 left-0 right-0 z-20 mx-10 px-14">
+        <EventList class="" {events} />
+    </div>
+
+    
 </div>
+<!-- 创建事件抽屉 -->
+<Drawer.Root open={showCreateDrawer} onOpenChange={(open) => showCreateDrawer = open}>
+    <Drawer.Content class="p-6 pt-10">
+        <Drawer.Header>
+            <Drawer.Title>创建新事件</Drawer.Title>
+            <Drawer.Description>在地图上添加一个新的事件</Drawer.Description>
+        </Drawer.Header>
+        <div class="space-y-4 py-4">
+            <div class="space-y-2">
+                <Label for="title">事件标题</Label>
+                <Input id="title" bind:value={eventTitle} placeholder="输入事件标题" />
+            </div>
+            <div class="space-y-2">
+                <Label for="description">事件描述</Label>
+                <Textarea
+                    id="description"
+                    bind:value={eventDescription}
+                    placeholder="描述这个事件..."
+                    class="min-h-[100px]"
+                />
+            </div>
+            <div class="space-y-2">
+                <Label for="location">地点</Label>
+                <Input id="location" bind:value={eventLocation} placeholder="选择事件地点" />
+            </div>
+            <div class="space-y-2">
+                <Label for="date">日期</Label>
+                <Input id="date" type="date" bind:value={eventDate} />
+            </div>
+        </div>
+        <Drawer.Footer>
+            <Button variant="outline" onclick={() => showCreateDrawer = false}>取消</Button>
+            <Button onclick={handleCreateEvent}>创建事件</Button>
+        </Drawer.Footer>
+    </Drawer.Content>
+</Drawer.Root>

@@ -14,5 +14,9 @@ export { default as NavUser } from './nav-user.svelte';
 // 元素组件
 export { default as SearchBox } from '../../../lib/components/search-box.svelte';
 
+// 事件组件
+export { default as EventList } from './event-list.svelte'
+export { default as EventCard } from './event-card.svelte'
+
 // 类型导出
 export * from './types';

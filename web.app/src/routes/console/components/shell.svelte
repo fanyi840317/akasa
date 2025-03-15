@@ -100,8 +100,8 @@
   <div class="absolute z-10 h-full w-full">
     <div class="fixed inset-0 bg-card/20 backdrop-blur-sm"  
     transition:fade={{ duration: 200 }}
-    on:click={() => showLeftView = false}
-    on:keydown={(e) => e.key === 'Escape' && (showLeftView = false)}
+    onclick={() => showLeftView = false}
+    onkeydown={(e) => e.key === 'Escape' && (showLeftView = false)}
     role="button"
     tabindex="0"></div>
     <div

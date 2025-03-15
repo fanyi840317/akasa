@@ -74,4 +74,5 @@
 		<Nav items={navData.navSecondary} {onNavItemClick}></Nav>
         <NavUser {user} />
     </Sidebar.Footer>
+    <Sidebar.Rail />
 </Sidebar.Root>
