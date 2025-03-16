@@ -1,6 +1,8 @@
 <script lang="ts">
     import type { PageData } from "./$types";
     import { Button } from "$lib/components/ui/button";
+    import type { ShellContext } from "../components/types";
+
     import {
         Pagination,
         PaginationContent,
@@ -37,6 +39,7 @@
     import CategoryList from "../components/category-list.svelte";
     import { Separator } from "$lib/components/ui/separator";
     import { Textarea } from "$lib/components/ui/textarea";
+    import { getContext } from "svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -138,6 +141,7 @@
         { label: "截止日期", value: eventDate || "未设置", icon: false }
     ];
 
+    const { setShowRightView, setTemplate } = getContext<ShellContext>('shell');
     function handleCategoryClick(categoryId: string) {
         selectedCategory = categoryId;
         currentPage = 1;
@@ -161,15 +165,16 @@
         return `translate(0, ${index * verticalSpacing}px)`;
     }
 
-    function handleCreateEvent(event) {
+    function handleCreateEvent() {
         // 处理创建事件的逻辑
-        console.log(event.detail);
-        showCreatePanel = false;
+        // console.log(event.detail);
+        // showCreatePanel = false;
         // 重置表单
         eventTitle = "";
         eventDescription = "";
         eventLocation = "";
         eventDate = "";
+        setShowRightView(true)
     }
 
     function handleClosePanel() {
@@ -216,57 +221,76 @@
     ></div>
 
     <!-- 底部事件展示区域 -->
-    <div class=" absolute bottom-10 left-0 right-0 z-20 mx-10 px-14">
+    <div class=" absolute bottom-6 left-0 right-0 z-20 mx-6 px-14">
         <EventList class="" {events} />
     </div>
 </div>
 
-<!-- 使用 NotionPanel 组件 -->
-<NotionPanel 
-    open={showCreatePanel}
-    title={eventTitle}
-    icon={PlusCircle}
-    iconColor="bg-blue-500"
-    width="50%"
-    properties={eventProperties}
-    on:close={handleClosePanel}
-    on:save={handleCreateEvent}
->
-    <div slot="extra" class="space-y-4">
-        <!-- 项目描述 -->
+{#snippet contentView()}
+    <div class="p-6 space-y-6">
+        <!-- 标题区域 -->
+         
+        <div class="space-y-2">
+        <input
+                    type="text"
+                    placeholder="无标题"
+                    class="text-2xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50 focus:ring-0"
+                    bind:value={eventTitle}
+                />
+            <Separator class="my-4" />
+        </div>
+
+
+        <!-- 属性区域 -->
         <div class="space-y-4">
-            <h3 class="text-lg font-medium">About project</h3>
-            <div class="p-2 rounded-md border border-dashed border-muted-foreground/30 text-muted-foreground">
-                Provide an overview of the project
+            <h3 class="text-sm font-medium text-muted-foreground">属性</h3>
+            
+            <!-- 状态选择器 -->
+            <div class="flex items-center justify-between">
+                <span class="text-sm">状态</span>
+                <div class="flex items-center gap-2">
+                    <div class="px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-xs flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+                        <span>{eventStatus}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 位置输入 -->
+            <div class="flex items-center justify-between">
+                <span class="text-sm">位置</span>
+                <input
+                    type="text"
+                    placeholder="添加位置"
+                    class="text-sm bg-transparent border-none text-right outline-none placeholder:text-muted-foreground/50 focus:ring-0 w-1/2"
+                    bind:value={eventLocation}
+                />
+            </div>
+
+            <!-- 日期选择器 -->
+            <div class="flex items-center justify-between">
+                <span class="text-sm">日期</span>
+                <input
+                    type="date"
+                    class="text-sm bg-transparent border-none text-right outline-none focus:ring-0"
+                    bind:value={eventDate}
+                />
             </div>
         </div>
-        
-        <!-- 待办事项 -->
-        <div class="space-y-4">
-            <h3 class="text-lg font-medium">Action items</h3>
-            <div class="flex items-center gap-2">
-                <input type="checkbox" class="rounded" />
-                <span class="text-muted-foreground">待办事项</span>
-            </div>
+
+        <!-- 描述区域 -->
+        <div class="space-y-2">
+            <Textarea
+                placeholder="添加描述..."
+                class="min-h-24 resize-none bg-transparent border-none focus:ring-0 text-sm placeholder:text-muted-foreground/50"
+                bind:value={eventDescription}
+            />
         </div>
-        
-        <!-- 文档 -->
-        <div class="space-y-4">
-            <h3 class="text-lg font-medium">Documents</h3>
-            <div class="space-y-2">
-                <button class="w-full flex items-center gap-3 p-3 rounded-md border hover:bg-muted/30 transition-colors">
-                    <img src="/icons/google-drive.svg" alt="Google Drive" class="w-6 h-6" />
-                    <span>嵌入 Google Drive</span>
-                </button>
-                <button class="w-full flex items-center gap-3 p-3 rounded-md border hover:bg-muted/30 transition-colors">
-                    <img src="/icons/pdf.svg" alt="PDF" class="w-6 h-6" />
-                    <span>嵌入 PDF</span>
-                </button>
-                <button class="w-full flex items-center gap-3 p-3 rounded-md border hover:bg-muted/30 transition-colors">
-                    <img src="/icons/figma.svg" alt="Figma" class="w-6 h-6" />
-                    <span>嵌入 Figma</span>
-                </button>
-            </div>
-        </div>
+        <!-- 按钮区域 -->
+      
     </div>
+{/snippet}
+<!-- 底部分页栏 -->
+<NotionPanel  open= {showCreatePanel} showBackdrop={false}
+ width={46} maxWidth={60}  {contentView} on:close={handleClosePanel}>
 </NotionPanel>

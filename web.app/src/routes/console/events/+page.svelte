@@ -1,25 +1,23 @@
 <script lang="ts">
     import type { PageData } from "./$types";
+    import { Input } from "$lib/components/ui/input";
     import { Button } from "$lib/components/ui/button";
     import {
-        Card,
-        CardContent,
-        CardFooter,
-        CardHeader,
-        CardTitle,
-    } from "$lib/components/ui/card";
-    import {
-        Pagination,
-        PaginationContent,
-        PaginationItem,
-        PaginationLink,
-    } from "$lib/components/ui/pagination";
-    import { Input } from "$lib/components/ui/input";
-    import { Badge } from "$lib/components/ui/badge";
-    import { Search, Filter, Calendar, MapPin, Users, Star } from "lucide-svelte";
+        Search,
+        Filter,
+        Calendar,
+        MapPin,
+        Users,
+        Star,
+    } from "lucide-svelte";
     import EventCard from "$lib/components/notion-cards/event-card.svelte";
+    import TagNav from "$lib/components/nav/tag-nav.svelte";
+    import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
+    import ShareButton from "$lib/components/share/share-button.svelte";
+    import SharePanel from "$lib/components/share/share-panel.svelte";
 
     let { data }: { data: PageData } = $props();
+    let showSharePanel = $state(false);
 
     // 模拟事件数据
     const events = [
@@ -81,7 +79,7 @@
             image: "/images/31.03_banner-373x373.jpg",
             tags: ["美食", "文化"],
             attendees: 150,
-            rating: 4.6
+            rating: 4.6,
         },
     ];
 
@@ -102,11 +100,6 @@
     const itemsPerPage = 6;
     const totalPages = Math.ceil(events.length / itemsPerPage);
 
-    function handleCategoryClick(categoryId: string) {
-        selectedCategory = categoryId;
-        currentPage = 1;
-    }
-
     function formatDate(dateString: string) {
         const date = new Date(dateString);
         return date.toLocaleDateString("zh-CN", {
@@ -117,14 +110,15 @@
     }
 </script>
 
+<ScrollArea class="h-[calc(100vh-1rem)]">
 <div class="container mx-auto p-16 space-y-10">
     <!-- 页面标题和搜索栏 -->
     <div
         class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
     >
         <div>
-            <h1 class="text-2xl font-bold mb-2">活动与事件</h1>
-            <p class="text-muted-foreground">发现并参与各种精彩活动</p>
+                <h1 class="text-3xl font-bold mb-2">活动与事件</h1>
+                <p class="text-sm text-muted-foreground">发现并参与各种精彩活动</p>
         </div>
         <div class="flex items-center gap-2 w-full md:w-auto">
             <div class="relative w-full md:w-[300px]">
@@ -142,18 +136,13 @@
     </div>
 
     <!-- 分类标签 -->
-    <div class="flex flex-wrap gap-2">
-        {#each categories as category}
-            <Badge
-                variant={selectedCategory === category.id
-                    ? "default"
-                    : "outline"}
-                class="cursor-pointer"
-                onclick={() => handleCategoryClick(category.id)}
-            >
-                {category.name}
-            </Badge>
-        {/each}
+        <TagNav bind:selectedId={selectedCategory} items={categories} />
+
+        <div class="space-y-4">
+            <!-- 精选模板区域 -->
+            <div class="flex items-center gap-2 px-2 text-muted-foreground">
+                <Star class="h-3 w-3 " />
+                <span class="text-xs">精选模板</span>
     </div>
 
     <!-- 事件卡片网格 -->
@@ -166,9 +155,13 @@
                 rating={event.rating}
             />
         {/each}
+            </div>
     </div>
 
     <!-- 分页控件 -->
-    <div class="flex justify-center mt-8">
+        <div class="flex justify-center mt-8"></div>
     </div>
+    <div class="fixed bottom-20 right-4">
+        <ShareButton on:click={() => (showSharePanel = true)} />
 </div>
+</ScrollArea>

@@ -45,27 +45,15 @@ opts={{
 }}
 class={cn("p-4 relative", className)}
 >
+<div class="absolute -left-20 top-0 bottom-0 w-[30%] bg-gradient-to-r from-background via-background/50 to-transparent z-10 pointer-events-none" />
+<div class="absolute -right-20 top-0 bottom-0 w-[30%] bg-gradient-to-l from-background via-background/50 to-transparent z-10 pointer-events-none" />
 <Carousel.Content class="-ml-4">
     {#each events as event, i (event.id)}
         <Carousel.Item class="md:basis-1/2 lg:basis-1/4 pl-4">
-            <HoverCard.Root>
-                <HoverCard.Trigger>
                     <EventCard {event} {formatDate} />
-                </HoverCard.Trigger>
-                <HoverCard.Content
-                    sideOffset={-100}
-                    class="w-[400px] p-0"
-                >
-                    <EventCardHover
-                        {event}
-                        {formatDate}
-                        {getStaggerDelay}
-                    />
-                </HoverCard.Content>
-            </HoverCard.Root>
         </Carousel.Item>
     {/each}
 </Carousel.Content>
-<Carousel.Previous class="backdrop-blur-sm bg-gradient-to-r from-transparent via-background/30 to-transparent" />
-<Carousel.Next class="backdrop-blur-sm bg-gradient-to-r from-transparent via-background/30 to-transparent" />
+<Carousel.Previous class="z-20" />
+<Carousel.Next class="z-20" />
 </Carousel.Root>

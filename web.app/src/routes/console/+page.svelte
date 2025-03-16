@@ -2,6 +2,7 @@
     import { Button } from "$lib/components/ui/button";
     import { TemplateCard, DatabaseCard, PageCard } from "$lib/components/notion-cards";
     import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
+    import type { ShellContext } from "./components/types";
     // import type { PersonalItem } from "./components/types";
     import { 
         LayoutTemplate,
@@ -21,12 +22,7 @@
 
     type CardColor = "blue" | "green" | "purple" | "amber";
 
-    type ShellContext = {
-        showRightView: boolean;
-        setShowRightView: (value: boolean) => void;
-        setTemplate: (template: any) => void;
-        // setLeftViewItem: (item: PersonalItem | null) => void;
-    }
+  
 
     const { setShowRightView, setTemplate } = getContext<ShellContext>('shell');
     

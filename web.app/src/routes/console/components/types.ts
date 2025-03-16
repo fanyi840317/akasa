@@ -39,7 +39,12 @@ export interface NavItem {
   metadata?: Record<string, any>;               // 自定义元数据
 }
 
-
+export type ShellContext = {
+  showRightView: boolean;
+  setShowRightView: (value: boolean) => void;
+  setTemplate: (template: any) => void;
+  // setLeftViewItem: (item: PersonalItem | null) => void;
+};
 
 // 用户类型
 export interface User {
