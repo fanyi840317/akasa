@@ -2,6 +2,7 @@
     import type { PageData } from "./$types";
     import { Button } from "$lib/components/ui/button";
     import type { ShellContext } from "../components/types";
+    import { EventDetail } from "./components/index.js";
 
     import {
         Pagination,
@@ -221,76 +222,21 @@
     ></div>
 
     <!-- 底部事件展示区域 -->
-    <div class=" absolute bottom-6 left-0 right-0 z-20 mx-6 px-14">
+    <div class="absolute bottom-6 left-0 right-0 z-20 mx-auto max-w-[1200px] px-14">
         <EventList class="" {events} />
     </div>
 </div>
-
 {#snippet contentView()}
-    <div class="p-6 space-y-6">
-        <!-- 标题区域 -->
-         
-        <div class="space-y-2">
-        <input
-                    type="text"
-                    placeholder="无标题"
-                    class="text-2xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50 focus:ring-0"
-                    bind:value={eventTitle}
-                />
-            <Separator class="my-4" />
-        </div>
-
-
-        <!-- 属性区域 -->
-        <div class="space-y-4">
-            <h3 class="text-sm font-medium text-muted-foreground">属性</h3>
-            
-            <!-- 状态选择器 -->
-            <div class="flex items-center justify-between">
-                <span class="text-sm">状态</span>
-                <div class="flex items-center gap-2">
-                    <div class="px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-xs flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-                        <span>{eventStatus}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 位置输入 -->
-            <div class="flex items-center justify-between">
-                <span class="text-sm">位置</span>
-                <input
-                    type="text"
-                    placeholder="添加位置"
-                    class="text-sm bg-transparent border-none text-right outline-none placeholder:text-muted-foreground/50 focus:ring-0 w-1/2"
-                    bind:value={eventLocation}
-                />
-            </div>
-
-            <!-- 日期选择器 -->
-            <div class="flex items-center justify-between">
-                <span class="text-sm">日期</span>
-                <input
-                    type="date"
-                    class="text-sm bg-transparent border-none text-right outline-none focus:ring-0"
-                    bind:value={eventDate}
-                />
-            </div>
-        </div>
-
-        <!-- 描述区域 -->
-        <div class="space-y-2">
-            <Textarea
-                placeholder="添加描述..."
-                class="min-h-24 resize-none bg-transparent border-none focus:ring-0 text-sm placeholder:text-muted-foreground/50"
-                bind:value={eventDescription}
-            />
-        </div>
-        <!-- 按钮区域 -->
-      
-    </div>
+<EventDetail
+bind:eventTitle
+bind:eventDescription
+bind:eventLocation
+bind:eventDate
+bind:eventStatus
+/>
 {/snippet}
 <!-- 底部分页栏 -->
-<NotionPanel  open= {showCreatePanel} showBackdrop={false}
- width={46} maxWidth={60}  {contentView} on:close={handleClosePanel}>
+<NotionPanel open={showCreatePanel} showBackdrop={false} {contentView}
+ width={40} maxWidth={60} on:close={handleClosePanel}>
+
 </NotionPanel>

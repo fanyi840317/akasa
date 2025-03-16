@@ -13,7 +13,7 @@
 {#each categories as category, i}
     <a
         href="#"
-        class="block px-4 py-2 mb-2 flex items-center justify-between gap-4 transition-all transform hover:scale-[1.2] origin-left {selectedCategory ===
+        class="block px-4 py-2 mb-2 flex items-center justify-between gap-4 transition-transform hover:-translate-y-2 hover:shadow-lg {selectedCategory ===
         category.id
             ? 'bg-background/10'
             : 'hover:bg-background/20'}"

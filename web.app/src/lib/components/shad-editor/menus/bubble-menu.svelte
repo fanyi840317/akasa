@@ -76,12 +76,11 @@
 
 <BubbleMenu
 	{editor}
-	class="flex h-fit w-fit items-center gap-1 rounded-md border bg-background/90 p-0.5 backdrop-blur-md z-100 shadow-md"
+	class="flex h-fit w-fit items-center gap-1 rounded-md border bg-background/90 p-0.5 backdrop-blur-md"
 	{shouldShow}
 	pluginKey="bubble-menu"
 	updateDelay={100}
 	tippyOptions={{
-		zIndex: 9999,
 		popperOptions: {
 			placement: 'top-start',
 			modifiers: [
@@ -100,13 +99,7 @@
 				}
 			]
 		},
-		maxWidth: 'calc(100vw - 16px)',
-		onShow: (instance) => {
-			// 强制Tippy更新位置，解决第一次显示位置问题
-			setTimeout(() => {
-				instance.popperInstance?.update();
-			}, 0);
-		}
+		maxWidth: 'calc(100vw - 16px)'
 	}}
 >
 	<FontSize {editor} {toolTipProps} />
