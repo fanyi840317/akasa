@@ -19,6 +19,8 @@
         Star,
         PlusCircle,
         Share2,
+        Check,
+        X,
     } from "lucide-svelte";
     import * as Card from "$lib/components/ui/card";
     import {
@@ -31,10 +33,9 @@
     import { fade, fly, scale, slide } from "svelte/transition";
     import { flip } from "svelte/animate";
     import { quintOut } from "svelte/easing";
-    import { EventList } from "../components/index.js";
+    import { EventList, NotionPanel } from "../components/index.js";
     import CategoryList from "../components/category-list.svelte";
-    import * as Drawer from "$lib/components/ui/drawer";
-    import { Label } from "$lib/components/ui/label";
+    import { Separator } from "$lib/components/ui/separator";
     import { Textarea } from "$lib/components/ui/textarea";
 
     let { data }: { data: PageData } = $props();
@@ -54,7 +55,7 @@
     // 模拟事件数据
     const events = [
         {
-            id: 1,
+            id: "1",
             title: "摄影工作坊",
             location: "上海市",
             date: "2023-12-15",
@@ -64,7 +65,7 @@
             rating: 4.5,
         },
         {
-            id: 2,
+            id: "2",
             title: "户外徒步活动",
             location: "杭州市",
             date: "2023-12-20",
@@ -74,7 +75,7 @@
             rating: 4.8,
         },
         {
-            id: 3,
+            id: "3",
             title: "创意绘画课程",
             location: "北京市",
             date: "2023-12-25",
@@ -84,7 +85,7 @@
             rating: 4.2,
         },
         {
-            id: 4,
+            id: "4",
             title: "音乐节",
             location: "成都市",
             date: "2023-12-30",
@@ -94,7 +95,7 @@
             rating: 4.7,
         },
         {
-            id: 5,
+            id: "5",
             title: "科技展览",
             location: "深圳市",
             date: "2024-01-05",
@@ -104,7 +105,7 @@
             rating: 4.4,
         },
         {
-            id: 6,
+            id: "6",
             title: "美食节",
             location: "广州市",
             date: "2024-01-10",
@@ -122,11 +123,20 @@
     const totalPages = Math.ceil(events.length / itemsPerPage);
 
     // 创建事件相关状态
-    let showCreateDrawer = $state(false);
+    let showCreatePanel = $state(false);
     let eventTitle = $state("");
     let eventDescription = $state("");
     let eventLocation = $state("");
     let eventDate = $state("");
+    let eventStatus = $state("未开始");
+
+    // 事件属性
+    let eventProperties = [
+        { label: "状态", value: "未开始", icon: true, color: "bg-gray-400" },
+        { label: "负责人", value: "空白", icon: true, color: "bg-gray-200" },
+        { label: "优先级", value: "空白", icon: true, color: "bg-gray-400" },
+        { label: "截止日期", value: eventDate || "未设置", icon: false }
+    ];
 
     function handleCategoryClick(categoryId: string) {
         selectedCategory = categoryId;
@@ -151,20 +161,19 @@
         return `translate(0, ${index * verticalSpacing}px)`;
     }
 
-    function handleCreateEvent() {
+    function handleCreateEvent(event) {
         // 处理创建事件的逻辑
-        console.log({
-            title: eventTitle,
-            description: eventDescription,
-            location: eventLocation,
-            date: eventDate
-        });
-        showCreateDrawer = false;
+        console.log(event.detail);
+        showCreatePanel = false;
         // 重置表单
         eventTitle = "";
         eventDescription = "";
         eventLocation = "";
         eventDate = "";
+    }
+
+    function handleClosePanel() {
+        showCreatePanel = false;
     }
 </script>
 
@@ -191,7 +200,7 @@
         <Button variant="ghost" size="icon">
             <MapPin class="h-5 w-5" />
         </Button>
-        <Button variant="secondary" size="icon" onclick={() => showCreateDrawer = true}>
+        <Button variant="secondary" size="icon" onclick={() => showCreatePanel = true}>
             <PlusCircle class="h-5 w-5 hover:bg-background/20"/>
         </Button>
     </div>
@@ -210,42 +219,54 @@
     <div class=" absolute bottom-10 left-0 right-0 z-20 mx-10 px-14">
         <EventList class="" {events} />
     </div>
-
-    
 </div>
-<!-- 创建事件抽屉 -->
-<Drawer.Root open={showCreateDrawer} onOpenChange={(open) => showCreateDrawer = open}>
-    <Drawer.Content class="p-6 pt-10">
-        <Drawer.Header>
-            <Drawer.Title>创建新事件</Drawer.Title>
-            <Drawer.Description>在地图上添加一个新的事件</Drawer.Description>
-        </Drawer.Header>
-        <div class="space-y-4 py-4">
-            <div class="space-y-2">
-                <Label for="title">事件标题</Label>
-                <Input id="title" bind:value={eventTitle} placeholder="输入事件标题" />
-            </div>
-            <div class="space-y-2">
-                <Label for="description">事件描述</Label>
-                <Textarea
-                    id="description"
-                    bind:value={eventDescription}
-                    placeholder="描述这个事件..."
-                    class="min-h-[100px]"
-                />
-            </div>
-            <div class="space-y-2">
-                <Label for="location">地点</Label>
-                <Input id="location" bind:value={eventLocation} placeholder="选择事件地点" />
-            </div>
-            <div class="space-y-2">
-                <Label for="date">日期</Label>
-                <Input id="date" type="date" bind:value={eventDate} />
+
+<!-- 使用 NotionPanel 组件 -->
+<NotionPanel 
+    open={showCreatePanel}
+    title={eventTitle}
+    icon={PlusCircle}
+    iconColor="bg-blue-500"
+    width="50%"
+    properties={eventProperties}
+    on:close={handleClosePanel}
+    on:save={handleCreateEvent}
+>
+    <div slot="extra" class="space-y-4">
+        <!-- 项目描述 -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-medium">About project</h3>
+            <div class="p-2 rounded-md border border-dashed border-muted-foreground/30 text-muted-foreground">
+                Provide an overview of the project
             </div>
         </div>
-        <Drawer.Footer>
-            <Button variant="outline" onclick={() => showCreateDrawer = false}>取消</Button>
-            <Button onclick={handleCreateEvent}>创建事件</Button>
-        </Drawer.Footer>
-    </Drawer.Content>
-</Drawer.Root>
+        
+        <!-- 待办事项 -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-medium">Action items</h3>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" class="rounded" />
+                <span class="text-muted-foreground">待办事项</span>
+            </div>
+        </div>
+        
+        <!-- 文档 -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-medium">Documents</h3>
+            <div class="space-y-2">
+                <button class="w-full flex items-center gap-3 p-3 rounded-md border hover:bg-muted/30 transition-colors">
+                    <img src="/icons/google-drive.svg" alt="Google Drive" class="w-6 h-6" />
+                    <span>嵌入 Google Drive</span>
+                </button>
+                <button class="w-full flex items-center gap-3 p-3 rounded-md border hover:bg-muted/30 transition-colors">
+                    <img src="/icons/pdf.svg" alt="PDF" class="w-6 h-6" />
+                    <span>嵌入 PDF</span>
+                </button>
+                <button class="w-full flex items-center gap-3 p-3 rounded-md border hover:bg-muted/30 transition-colors">
+                    <img src="/icons/figma.svg" alt="Figma" class="w-6 h-6" />
+                    <span>嵌入 Figma</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</NotionPanel>
