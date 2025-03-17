@@ -44,7 +44,7 @@ class={cn("p-4 relative", className)}
     style="mask-image: linear-gradient(to right, transparent 0%, hsl(var(--foreground)) 8%, hsl(var(--foreground)) 92%, transparent 100%); -webkit-mask-image: linear-gradient(to right, transparent 0%, hsl(var(--foreground)) 8%, hsl(var(--foreground)) 92%, transparent 100%);"
 >
     {#each events as event, i (event.id)}
-        <Carousel.Item class="md:basis-1/2 lg:basis-1/4 pl-4">
+        <Carousel.Item class="md:basis-1/2 lg:basis-1/4 pl-0">
                     <EventCard {event} {formatDate} />
         </Carousel.Item>
     {/each}

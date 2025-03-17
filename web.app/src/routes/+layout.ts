@@ -5,8 +5,6 @@ import initI18n from '$lib/i18n';
 import { auth } from '$lib/stores/auth';
 import { get } from 'svelte/store';
 import type { LayoutLoad } from './$types';
-import utils from '$lib/components/shad-editor/custom/utils';
-import { account } from '$lib/appwrite';
 
 injectAnalytics({ mode: dev ? 'development' : 'production' });
 

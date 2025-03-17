@@ -228,11 +228,6 @@
 </div>
 {#snippet contentView()}
 <EventDetail
-bind:eventTitle
-bind:eventDescription
-bind:eventLocation
-bind:eventDate
-bind:eventStatus
 />
 {/snippet}
 <!-- 底部分页栏 -->

@@ -1,33 +1,84 @@
 <script lang="ts">
     import { Separator } from "$lib/components/ui/separator";
-    import ShadEditor from "$lib/components/shad-editor/shad-editor.svelte";
-    import type { Content } from '@tiptap/core';
-    import type { Editor } from '@tiptap/core';
     import { Avatar, AvatarFallback, AvatarImage } from "$lib/components/ui/avatar";
     import { Badge } from "$lib/components/ui/badge";
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
+    import { browser } from "$app/environment";
+    import { writable } from "svelte/store";
+    import { AffineEditorContainer } from '@blocksuite/presets';
+    import { Doc, Schema, DocCollection } from '@blocksuite/store';
+    import { AffineSchemas } from '@blocksuite/blocks';
+    import '@blocksuite/presets/themes/affine.css';
+
+    // 组件属性类型定义
+    interface Props {
+        eventTitle?: string;
+        eventLocation?: string;
+        eventDate?: string;
+        eventStatus?: string;
+        creator?: {
+            name: string;
+            avatar: string;
+        };
+    }
 
     // 组件属性
-    export let eventTitle = "";
-    export let eventDescription: Content = {
-        type: 'doc',
-        content: [
-            {
-                type: 'paragraph',
-                content: []
-            }
-        ]
-    };
-    export let eventLocation = "";
-    export let eventDate = "";
-    export let eventStatus = "未开始";
-    export let creator = {
-        name: "范一",
-        avatar: "https://github.com/shadcn.png"
-    };
+    let {
+        eventTitle = "",
+        eventLocation = "",
+        eventDate = "",
+        eventStatus = "未开始",
+        creator = {
+            name: "范一",
+            avatar: "https://github.com/shadcn.png"
+        }
+    }: Props = $props();
 
-    let editor: Editor;
     let titleInput: HTMLInputElement;
+    let editorContainer: HTMLDivElement;
+    let editor: AffineEditorContainer;
+    let collection: DocCollection;
+
+    onMount(async () => {
+        // 初始化编辑器
+        const schema = new Schema().register(AffineSchemas);
+        collection = new DocCollection({ schema });
+        collection.meta.initialize();
+
+        // 创建文档
+        const doc = collection.createDoc({ id: 'event-doc' });
+        
+        // 初始化文档结构
+        await doc.load();
+        const pageBlockId = doc.addBlock('affine:page', {});
+        doc.addBlock('affine:surface', {}, pageBlockId);
+        const noteId = doc.addBlock('affine:note', {}, pageBlockId);
+        doc.addBlock('affine:paragraph', {}, noteId);
+
+        // 创建编辑器实例
+        editor = new AffineEditorContainer();
+        editor.doc = doc;
+
+        // 将编辑器挂载到容器
+        if (editorContainer && editor) {
+            editorContainer.appendChild(editor as unknown as Node);
+        }
+
+        // 自动聚焦到标题输入框
+        if (titleInput && !eventTitle) {
+            titleInput.focus();
+            titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
+        }
+    });
+
+    onDestroy(() => {
+        if (editor) {
+            editor.remove?.();
+        }
+        if (collection) {
+            (collection as any).dispose?.();
+        }
+    });
 
     // 自动聚焦函数
     const autofocus = (node: HTMLInputElement) => {
@@ -36,15 +87,6 @@
             destroy: () => {}
         };
     };
-
-    onMount(() => {
-        // 自动聚焦到标题输入框
-        if (titleInput && !eventTitle) {
-            titleInput.focus();
-            // 将光标移动到文本末尾
-            titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
-        }
-    });
 </script>
 
 <div class="space-y-6">
@@ -57,18 +99,19 @@
             bind:value={eventTitle}
             use:autofocus
         />
-        <div class="flex items-center gap-2">
+        <Separator class="my-4" />
+    </div>
+
+    <!-- 属性区域 -->
+    <div class="px-6 space-y-4">
+        <div class="flex gap-2">
+            <span class="text-sm text-muted-foreground">创作者</span>
             <Avatar class="h-6 w-6">
                 <AvatarImage src={creator.avatar} alt={creator.name} />
                 <AvatarFallback>{creator.name[0]}</AvatarFallback>
             </Avatar>
             <span class="text-sm text-muted-foreground">{creator.name}</span>
         </div>
-        <Separator class="my-4" />
-    </div>
-
-    <!-- 属性区域 -->
-    <div class="px-6 space-y-4">
         <div class="flex gap-2">
             <!-- 状态标签 -->
             <div class="flex items-center group hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-1.5 cursor-pointer">
@@ -109,15 +152,10 @@
     </div>
 
     <!-- 描述区域 -->
-    <div>
-        <ShadEditor
-            bind:content={eventDescription}
-            bind:editor={editor}
-            class="min-h-24 border-none"
-            showToolbar={false}
-            showAllMenus={true}
-            editable={true}
+    <div class="px-6">
+        <div 
+            bind:this={editorContainer} 
+            class="min-h-[300px] w-full rounded-lg border bg-background px-4 py-2 focus-within:ring-1 focus-within:ring-primary"
         />
     </div>
-    <!-- 按钮区域 -->
 </div>

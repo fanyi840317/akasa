@@ -24,7 +24,6 @@
   import { mockEvents } from "$lib/data/mock-events";
   import { mockUsers } from "$lib/data/mock-users";
   import Comments from "$lib/components/comments.svelte";
-  import EventTimeline from "$lib/components/event-timeline.svelte";
   import JoinInvestigationForm from "$lib/components/join-investigation-form.svelte";
   import * as Dialog from "$lib/components/ui/dialog";
   import * as Tabs from "$lib/components/ui/tabs";
