@@ -2,14 +2,7 @@
     import { createEventDispatcher, type Snippet } from "svelte";
     import { fade, fly } from "svelte/transition";
     import { Button } from "$lib/components/ui/button";
-    import { Separator } from "$lib/components/ui/separator";
-    import {
-        Avatar,
-        AvatarFallback,
-        AvatarImage,
-    } from "$lib/components/ui/avatar";
-    import { Textarea } from "$lib/components/ui/textarea";
-    import { X, Share2, Check, PlusCircle, Minimize, Maximize } from "lucide-svelte";
+    import { X, PlusCircle, Minimize, Maximize } from "lucide-svelte";
     import * as Resizable from "$lib/components/ui/resizable/index.js";
 
     const dispatch = createEventDispatcher();
