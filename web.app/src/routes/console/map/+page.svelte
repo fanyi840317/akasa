@@ -3,43 +3,16 @@
     import { Button } from "$lib/components/ui/button";
     import type { ShellContext } from "../components/types";
     import { EventDetail } from "./components/index.js";
-
-    import {
-        Pagination,
-        PaginationContent,
-        PaginationItem,
-        PaginationLink,
-    } from "$lib/components/ui/pagination";
-    import { Input } from "$lib/components/ui/input";
-    import { Badge } from "$lib/components/ui/badge";
+    
     import { _ } from "svelte-i18n";
     import {
         Search,
-        Filter,
-        Calendar,
         MapPin,
-        Users,
-        Star,
         PlusCircle,
-        Share2,
-        Check,
-        X,
     } from "lucide-svelte";
-    import * as Card from "$lib/components/ui/card";
-    import {
-        Avatar,
-        AvatarImage,
-        AvatarFallback,
-    } from "$lib/components/ui/avatar";
     import Map from "$lib/components/map.svelte";
-    import * as HoverCard from "$lib/components/ui/hover-card";
-    import { fade, fly, scale, slide } from "svelte/transition";
-    import { flip } from "svelte/animate";
-    import { quintOut } from "svelte/easing";
     import { EventList, NotionPanel } from "../components/index.js";
     import CategoryList from "../components/category-list.svelte";
-    import { Separator } from "$lib/components/ui/separator";
-    import { Textarea } from "$lib/components/ui/textarea";
     import { getContext } from "svelte";
 
     let { data }: { data: PageData } = $props();
@@ -139,10 +112,10 @@
         { label: "状态", value: "未开始", icon: true, color: "bg-gray-400" },
         { label: "负责人", value: "空白", icon: true, color: "bg-gray-200" },
         { label: "优先级", value: "空白", icon: true, color: "bg-gray-400" },
-        { label: "截止日期", value: eventDate || "未设置", icon: false }
+        { label: "截止日期", value: eventDate || "未设置", icon: false },
     ];
 
-    const { setShowRightView, setTemplate } = getContext<ShellContext>('shell');
+    const { setShowRightView, setTemplate } = getContext<ShellContext>("shell");
     function handleCategoryClick(categoryId: string) {
         selectedCategory = categoryId;
         currentPage = 1;
@@ -175,7 +148,7 @@
         eventDescription = "";
         eventLocation = "";
         eventDate = "";
-        setShowRightView(true)
+        setShowRightView(true);
     }
 
     function handleClosePanel() {
@@ -193,9 +166,9 @@
         />
     </div>
 
-    <div class="absolute top-14 left-14 z-20 p-4 ">
-        <h1 class="text-3xl font-bold mb-2">{$_('site.events')}</h1>
-        <h2 class="text-sm text-muted-foreground">{$_('events.subtitle')}</h2>
+    <div class="absolute top-14 left-14 z-20 p-4">
+        <h1 class="text-3xl font-bold mb-2">{$_("site.events")}</h1>
+        <h2 class="text-sm text-muted-foreground">{$_("events.subtitle")}</h2>
     </div>
 
     <!-- 右上角搜索框 -->
@@ -206,8 +179,12 @@
         <Button variant="ghost" size="icon">
             <MapPin class="h-5 w-5" />
         </Button>
-        <Button variant="secondary" size="icon" onclick={() => showCreatePanel = true}>
-            <PlusCircle class="h-5 w-5 hover:bg-background/20"/>
+        <Button
+            variant="secondary"
+            size="icon"
+            onclick={() => (showCreatePanel = true)}
+        >
+            <PlusCircle class="h-5 w-5 hover:bg-background/20" />
         </Button>
     </div>
 
@@ -222,16 +199,21 @@
     ></div>
 
     <!-- 底部事件展示区域 -->
-    <div class="absolute bottom-6 left-0 right-0 z-20 mx-auto max-w-[1200px] px-14">
+    <div
+        class="absolute bottom-6 left-0 right-0 z-20 mx-auto max-w-[1200px] px-14"
+    >
         <EventList class="" {events} />
     </div>
 </div>
 {#snippet contentView()}
-<EventDetail
-/>
+    <EventDetail />
 {/snippet}
 <!-- 底部分页栏 -->
-<NotionPanel open={showCreatePanel} showBackdrop={false} {contentView}
- width={40} maxWidth={60} on:close={handleClosePanel}>
-
-</NotionPanel>
+<NotionPanel
+    open={showCreatePanel}
+    showBackdrop={false}
+    {contentView}
+    width={40}
+    maxWidth={60}
+    on:close={handleClosePanel}
+></NotionPanel>

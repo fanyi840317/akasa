@@ -11,10 +11,7 @@
     import { onMount, onDestroy } from "svelte";
     import { browser } from "$app/environment";
     import { writable } from "svelte/store";
-    import { AffineEditorContainer } from "@blocksuite/presets";
-    import { Doc, Schema, DocCollection } from "@blocksuite/store";
-    import { AffineSchemas } from "@blocksuite/blocks";
-    import "@blocksuite/presets/themes/affine.css";
+    import AffineEditor from "$lib/components/editor/affine-editor.svelte";
 
     // 组件属性类型定义
     interface Props {
@@ -41,41 +38,8 @@
     }: Props = $props();
 
     let titleInput: HTMLInputElement;
-    let editorContainer: HTMLDivElement;
-    let editor: AffineEditorContainer;
-    let collection: DocCollection;
 
-    onMount(async () => {
-        // 初始化编辑器
-        const schema = new Schema().register(AffineSchemas);
-        collection = new DocCollection({ schema });
-        collection.meta.initialize();
-
-        // 创建文档
-        const doc = collection.createDoc({ id: "event-doc" });
-
-        // 初始化文档结构
-        await doc.load();
-        const pageBlockId = doc.addBlock("affine:page", {});
-        // doc.addBlock('affine:surface', {}, pageBlockId);
-        const noteId = doc.addBlock("affine:note", {}, pageBlockId);
-        doc.addBlock("affine:paragraph", {}, noteId);
-
-        // 创建编辑器实例
-        editor = new AffineEditorContainer();
-        editor.doc = doc;
-
-        // 配置编辑器
-        editor.slots.docLinkClicked.on(({ docId }) => {
-            const target = collection.getDoc(docId) as Doc;
-            editor.doc = target;
-        });
-
-        // 将编辑器挂载到容器
-        if (editorContainer && editor) {
-            editorContainer.appendChild(editor as unknown as Node);
-        }
-
+    onMount(() => {
         // 自动聚焦到标题输入框
         if (titleInput && !eventTitle) {
             titleInput.focus();
@@ -83,15 +47,6 @@
                 titleInput.value.length,
                 titleInput.value.length,
             );
-        }
-    });
-
-    onDestroy(() => {
-        if (editor) {
-            editor.remove?.();
-        }
-        if (collection) {
-            (collection as any).dispose?.();
         }
     });
 
@@ -107,18 +62,19 @@
 <ScrollArea class="h-[calc(100vh-4rem)]">
     <div class="space-y-6">
         <!-- 标题区域 -->
-        <div class="px-6 pt-6 space-y-2">
-            <Input
-                type="text"
-                placeholder="无标题"
-                class="text-4xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50 focus:ring-0"
-                bind:value={eventTitle}
-            />
-            <Separator class="my-4" />
-        </div>
+        
 
         <!-- 属性区域 -->
         <div class="px-6 space-y-4">
+            <div class="px-6 pt-6 space-y-2">
+                <Input
+                    type="text"
+                    placeholder="无标题"
+                    class="text-4xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50 focus:ring-0"
+                    bind:value={eventTitle}
+                />
+                <Separator class="my-4" />
+            </div>
             <div class="flex gap-2">
                 <span class="text-sm text-muted-foreground">创作者</span>
                 <Avatar class="h-6 w-6">
@@ -170,18 +126,7 @@
 
         <!-- 描述区域 -->
         <div class="px-6">
-            <div bind:this={editorContainer} class="h-full w-full" />
+            <AffineEditor docId="event-doc" />
         </div>
     </div>
 </ScrollArea>
-
-<style>
-    :root {
-        --affine-background-color: #160303;
-        --affine-text-color: #333;
-    }
-
-    .affine-page-root-block-container {
-        @apply bg-background;
-    }
-</style>
