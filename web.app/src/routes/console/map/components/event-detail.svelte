@@ -45,6 +45,7 @@
     let editor: AffineEditorContainer;
     let collection: DocCollection;
 
+
     onMount(async () => {
         // 初始化编辑器
         const schema = new Schema().register(AffineSchemas);
@@ -177,11 +178,132 @@
 
 <style>
     :root {
-        --affine-background-color: #160303;
-        --affine-text-color: #333;
+        --affine-theme-mode: dark;
+
+        --affine-popover-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
+            0px 3px 16px -6px rgba(24, 39, 75, 0.04);
+        --affine-font-h-1: 28px;
+        --affine-font-h-2: 26px;
+        --affine-font-h-3: 24px;
+        --affine-font-h-4: 22px;
+        --affine-font-h-5: 20px;
+        --affine-font-h-6: 18px;
+        --affine-font-base: 16px;
+        --affine-font-sm: 14px;
+        --affine-font-xs: 12px;
+        --affine-line-height: calc(1em + 8px);
+        --affine-z-index-modal: 1000;
+        --affine-z-index-popover: 1000;
+        --affine-font-family: Avenir Next, Poppins, apple-system,
+            BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC,
+            Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
+            Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        --affine-font-number-family: Roboto Mono, apple-system,
+            BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC,
+            Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
+            Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        --affine-font-code-family: Space Mono, Consolas, Menlo, Monaco, Courier,
+            monospace, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma,
+            PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
+            Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        --affine-paragraph-space: 8px;
+        --affine-popover-radius: 10px;
+        --affine-zoom: 1;
+        --affine-scale: calc(1 / var(--affine-zoom));
+
+        --affine-brand-color: rgb(84, 56, 255);
+        --affine-primary-color: rgb(118, 95, 254);
+        --affine-secondary-color: rgb(144, 150, 245);
+        --affine-tertiary-color: rgb(30, 30, 30);
+        --affine-hover-color: rgba(255, 255, 255, 0.1);
+        --affine-icon-color: rgb(168, 168, 160);
+        --affine-border-color: rgb(57, 57, 57);
+        --affine-divider-color: rgb(114, 114, 114);
+        --affine-placeholder-color: rgb(62, 62, 63);
+        --affine-quote-color: rgb(100, 95, 130);
+        --affine-link-color: rgb(185, 191, 227);
+        --affine-edgeless-grid-color: rgb(49, 49, 49);
+        --affine-success-color: rgb(77, 213, 181);
+        --affine-warning-color: rgb(255, 123, 77);
+        --affine-error-color: rgb(212, 140, 130);
+        --affine-processing-color: rgb(195, 215, 255);
+        --affine-text-emphasis-color: rgb(208, 205, 220);
+        --affine-text-primary-color: rgb(234, 234, 234);
+        --affine-text-secondary-color: rgb(156, 156, 160);
+        --affine-text-disable-color: rgb(119, 117, 125);
+        --affine-black-10: rgba(255, 255, 255, 0.1);
+        --affine-black-30: rgba(255, 255, 255, 0.3);
+        --affine-black-50: rgba(255, 255, 255, 0.5);
+        --affine-black-60: rgba(255, 255, 255, 0.6);
+        --affine-black-80: rgba(255, 255, 255, 0.8);
+        --affine-black-90: rgba(255, 255, 255, 0.9);
+        --affine-black: rgb(255, 255, 255);
+        --affine-white-10: rgba(0, 0, 0, 0.1);
+        --affine-white-30: rgba(0, 0, 0, 0.3);
+        --affine-white-50: rgba(0, 0, 0, 0.5);
+        --affine-white-60: rgba(0, 0, 0, 0.6);
+        --affine-white-80: rgba(0, 0, 0, 0.8);
+        --affine-white-90: rgba(0, 0, 0, 0.9);
+        --affine-white: rgb(0, 0, 0);
+        --affine-background-code-block: rgb(41, 44, 51);
+        --affine-background-tertiary-color: rgb(30, 30, 30);
+        --affine-background-processing-color: rgb(255, 255, 255);
+        --affine-background-error-color: rgb(255, 255, 255);
+        --affine-background-warning-color: rgb(255, 255, 255);
+        --affine-background-success-color: rgb(255, 255, 255);
+        --affine-background-primary-color: rgb(20, 20, 20);
+        --affine-background-hover-color: rgb(47, 47, 47);
+        --affine-background-secondary-color: rgb(32, 32, 32);
+        --affine-background-modal-color: rgba(0, 0, 0, 0.8);
+        --affine-background-overlay-panel-color: rgb(30, 30, 30);
+        --affine-tag-blue: rgb(10, 84, 170);
+        --affine-tag-green: rgb(55, 135, 79);
+        --affine-tag-teal: rgb(33, 145, 138);
+        --affine-tag-white: rgb(84, 84, 84);
+        --affine-tag-purple: rgb(59, 38, 141);
+        --affine-tag-red: rgb(139, 63, 63);
+        --affine-tag-pink: rgb(194, 132, 132);
+        --affine-tag-yellow: rgb(187, 165, 61);
+        --affine-tag-orange: rgb(231, 161, 58);
+        --affine-tag-gray: rgb(41, 41, 41);
+        --affine-palette-yellow: rgb(255, 232, 56);
+        --affine-palette-orange: rgb(255, 175, 56);
+        --affine-palette-tangerine: rgb(255, 99, 31);
+        --affine-palette-red: rgb(252, 63, 85);
+        --affine-palette-magenta: rgb(255, 56, 179);
+        --affine-palette-purple: rgb(182, 56, 255);
+        --affine-palette-navy: rgb(59, 37, 204);
+        --affine-palette-blue: rgb(79, 144, 255);
+        --affine-palette-green: rgb(16, 203, 134);
+        --affine-palette-grey: rgb(153, 153, 153);
+        --affine-palette-white: rgb(255, 255, 255);
+        --affine-palette-black: rgb(0, 0, 0);
+    }
+    .embed-card-modal-mask {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        z-index: 10001;
     }
 
-    .affine-page-root-block-container {
-        @apply bg-background;
+    .embed-card-modal-wrapper {
+        flex-direction: column;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        z-index: 10002;
+        width: 305px;
+        height: max-content;
+        padding: 12px;
+        gap: 12px;
+        border-radius: 8px;
+        font-size: var(--affine-font-xs);
+        line-height: 20px;
     }
 </style>
