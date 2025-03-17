@@ -1,0 +1,5 @@
+@import '@blocksuite/presets/themes/affine.css';
+
+:root {
+    --affine-background-color: #f0f0f0;
+  }

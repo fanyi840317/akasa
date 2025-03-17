@@ -59,6 +59,12 @@
         editor = new AffineEditorContainer();
         editor.doc = doc;
 
+        // 配置编辑器
+        editor.slots.docLinkClicked.on(({ docId }) => {
+            const target = collection.getDoc(docId) as Doc;
+            editor.doc = target;
+        });
+
         // 将编辑器挂载到容器
         if (editorContainer && editor) {
             editorContainer.appendChild(editor as unknown as Node);
@@ -155,7 +161,7 @@
     <div class="px-6">
         <div 
             bind:this={editorContainer} 
-            class="min-h-[300px] w-full rounded-lg border bg-background px-4 py-2 focus-within:ring-1 focus-within:ring-primary"
+            class="h-full w-full"
         />
     </div>
 </div>
