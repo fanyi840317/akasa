@@ -13,9 +13,16 @@
     import Map from "$lib/components/map.svelte";
     import { EventList, NotionPanel } from "../components/index.js";
     import CategoryList from "../components/category-list.svelte";
-    import { getContext } from "svelte";
+    import { getContext, setContext } from "svelte";
+    import { writable } from "svelte/store";
+    import { initEditor } from "$lib/components/editor/affine-editor";
+    import type { AppState } from "$lib/components/editor/affine-editor";
 
     let { data }: { data: PageData } = $props();
+    
+    // 初始化编辑器状态并设置为context
+    // const appState = writable<AppState>(initEditor());
+    // setContext("appState", appState);
 
     // 地点分类数据
     const placeCategories = [

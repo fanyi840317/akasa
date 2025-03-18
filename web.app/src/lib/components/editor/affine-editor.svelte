@@ -3,12 +3,16 @@
     import { getContext } from "svelte";
     import type { Writable } from "svelte/store";
     import type { AppState } from "./affine-editor";
+    import { initEditor } from "./affine-editor";
+    import { cn } from "$lib/utils.js";
     import "@blocksuite/presets/themes/affine.css";
 
+    let { docId = 'page1', class: className = '' } = $props();
     const appState = getContext<Writable<AppState>>("appState");
     let editorContainer: HTMLDivElement;
 
     onMount(() => {
+        
         const unsubscribe = appState.subscribe(({ editor }) => {
             if (editorContainer && editor) {
                 editorContainer.innerHTML = "";
@@ -21,9 +25,10 @@
         };
     });
 </script>
+
+<div bind:this={editorContainer} class={cn("editor-container", className)}></div>
+
 <style>
-    :root{
-        
+    :root {
     }
 </style>
-<div bind:this={editorContainer} class="editor-container"></div>

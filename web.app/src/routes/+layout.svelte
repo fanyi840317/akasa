@@ -8,14 +8,18 @@
 	import Header from "$lib/components/header.svelte";
 	import Footer from "$lib/components/footer.svelte";
 	import { Toaster } from "$lib/components/ui/sonner";
-	import { onMount } from "svelte";
+	import { onMount, setContext } from "svelte";
 	import { base } from "$app/paths";
 	import { goto } from "$app/navigation";
     import { fade } from "svelte/transition";
+    import { writable } from "svelte/store";
+    import { initEditor, type AppState } from "$lib/components/editor/affine-editor";
 	// onMount(async () => {
 	// 	//test
 	// 	goto(base + "/events/BasicInfo");
 	// });
+	const appState = writable<AppState>(initEditor());
+	setContext('appState', appState);
 </script>
 
 <ModeWatcher />

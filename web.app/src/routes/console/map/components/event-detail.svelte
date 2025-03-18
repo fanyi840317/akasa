@@ -40,8 +40,6 @@
     }: Props = $props();
 
     let titleInput: HTMLInputElement;
-    const appState = writable<AppState>(initEditor());
-    setContext("appState", appState);
 
     onMount(async () => {
         // 自动聚焦到标题输入框

@@ -12,12 +12,12 @@ export class test extends AffineEditorContainer {
     
 }
 
-export function initEditor() {
+export function initEditor(docId: string = 'page1') {
   const schema = new Schema().register(AffineSchemas);
   const collection = new DocCollection({ schema });
   collection.meta.initialize();
 
-  const doc = collection.createDoc({ id: 'page1' });
+  const doc = collection.createDoc({ id: docId });
   doc.load(() => {
     const pageBlockId = doc.addBlock('affine:page', {});
     doc.addBlock('affine:surface', {}, pageBlockId);
