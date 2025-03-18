@@ -9,5 +9,5 @@
 </script>
 
 <div class="flex p-6 w-full h-[90vh] bg-card">
-    <AffineEditor docId="event-doc" class="flex w-full h-full" />
+    <AffineEditor docId="event-doc" />
 </div>

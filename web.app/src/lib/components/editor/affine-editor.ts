@@ -8,9 +8,9 @@ export interface AppState {
   collection: DocCollection;
 }
 
-export class test extends AffineEditorContainer {
+// export class test extends AffineEditorContainer {
     
-}
+// }
 
 export function initEditor(docId: string = 'page1') {
   const schema = new Schema().register(AffineSchemas);
@@ -25,8 +25,8 @@ export function initEditor(docId: string = 'page1') {
     doc.addBlock('affine:paragraph', {}, noteId);
   });
 
-  const editor = new PageEditor();
-  editor.style.backgroundColor = '#f5f5f5';
+  const editor = new AffineEditorContainer();
+ 
   editor.doc = doc;
 //   editor.slots.docLinkClicked.on(({ docId }) => {
 //     const target = <Doc>collection.getDoc(docId);

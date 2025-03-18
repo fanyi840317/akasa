@@ -35,6 +35,7 @@
 		"@blocksuite/blocks": "0.15.0-canary-202406291027-8aed732",
 		"@blocksuite/presets": "0.15.0-canary-202406291027-8aed732",
 		"@blocksuite/store": "0.15.0-canary-202406291027-8aed732",
+		"@toeverything/theme": "^1.1.13",
 		"@vercel/analytics": "^1.5.0",
 		"ai": "^4.1.47",
 		"appwrite": "14.0.1",
