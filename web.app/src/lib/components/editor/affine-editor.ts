@@ -26,7 +26,15 @@ export function initEditor(docId: string = 'page1') {
   });
 
   const editor = new AffineEditorContainer();
- 
+  
+  // Apply custom styles
+  editor.setAttribute('style', `
+    --affine-editor-background: #ffffff;
+    --affine-text-primary-color: #333333;
+    --affine-text-secondary-color: #666666;
+    --affine-border-color: #e0e0e0;
+  `);
+  
   editor.doc = doc;
 //   editor.slots.docLinkClicked.on(({ docId }) => {
 //     const target = <Doc>collection.getDoc(docId);

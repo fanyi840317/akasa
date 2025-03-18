@@ -5,8 +5,7 @@
     import type { AppState } from "./affine-editor";
     import { initEditor } from "./affine-editor";
     import { cn } from "$lib/utils.js";
-    import "@blocksuite/presets/themes/affine.css";
-    // import './affine-editor.css'
+    import './affine-editor.css'
 
     let { docId = 'page1', class: className = '' } = $props();
     const appState = getContext<Writable<AppState>>("appState");
@@ -27,5 +26,5 @@
     });
 </script>
 
-<div bind:this={editorContainer} class={cn("editor-container", className)}></div>
+<div bind:this={editorContainer} class={cn("w-[40vh]", className)}></div>
 
