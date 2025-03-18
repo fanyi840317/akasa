@@ -8,10 +8,12 @@
     import { Badge } from "$lib/components/ui/badge";
     import { ScrollArea } from "$lib/components/ui/scroll-area";
     import { Input } from "$lib/components/ui/input";
-    import { onMount, onDestroy } from "svelte";
+    import { onMount, onDestroy, setContext } from "svelte";
     import { browser } from "$app/environment";
     import { writable } from "svelte/store";
     import AffineEditor from "$lib/components/editor/affine-editor.svelte";
+    import { initEditor } from "$lib/components/editor/affine-editor";
+    import type { AppState } from "$lib/components/editor/affine-editor";
 
     // 组件属性类型定义
     interface Props {
@@ -38,8 +40,10 @@
     }: Props = $props();
 
     let titleInput: HTMLInputElement;
+    const appState = writable<AppState>(initEditor());
+    setContext("appState", appState);
 
-    onMount(() => {
+    onMount(async () => {
         // 自动聚焦到标题输入框
         if (titleInput && !eventTitle) {
             titleInput.focus();
@@ -62,7 +66,6 @@
 <ScrollArea class="h-[calc(100vh-4rem)]">
     <div class="space-y-6">
         <!-- 标题区域 -->
-        
 
         <!-- 属性区域 -->
         <div class="px-6 space-y-4">
