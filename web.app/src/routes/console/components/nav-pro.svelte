@@ -1,76 +1,107 @@
-<script lang="ts">
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
-	import { useSidebar } from "$lib/components/ui/sidebar/context.svelte.js";
-	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-	import Ellipsis from "@lucide/svelte/icons/ellipsis";
-	import Folder from "@lucide/svelte/icons/folder";
-	import Forward from "@lucide/svelte/icons/forward";
-	import Trash2 from "@lucide/svelte/icons/trash-2";
-
-	let {
-		projects,
-	}: {
-		projects: {
-			name: string;
-			url: string;
-			// This should be `Component` after @lucide/svelte updates types
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			icon: any;
-		}[];
-	} = $props();
-
-	const sidebar = useSidebar();
+<script lang="ts" module>
+	// This is sample data.
+	const data = {
+		changes: [
+			{
+				file: "README.md",
+				state: "M",
+			},
+			{
+				file: "routes/+page.svelte",
+				state: "U",
+			},
+			{
+				file: "routes/+layout.svelte",
+				state: "M",
+			},
+		],
+		tree: [
+			["lib", ["components", "button.svelte", "card.svelte"], "utils.ts"],
+			[
+				"routes",
+				["hello", "+page.svelte", "+page.ts"],
+				"+page.svelte",
+				"+page.server.ts",
+				"+layout.svelte",
+			],
+			["static", "favicon.ico", "svelte.svg"],
+			"eslint.config.js",
+			".gitignore",
+			"svelte.config.js",
+			"tailwind.config.js",
+			"package.json",
+			"README.md",
+		],
+	};
 </script>
 
-<Sidebar.Group class="group-data-[collapsible=icon]:hidden">
-	<Sidebar.GroupLabel>Projects</Sidebar.GroupLabel>
-	<Sidebar.Menu>
-		{#each projects as item (item.name)}
-			<Sidebar.MenuItem>
-				<Sidebar.MenuButton>
-					{#snippet child({ props })}
-						<a href={item.url} {...props}>
-							<item.icon />
-							<span>{item.name}</span>
-						</a>
-					{/snippet}
-				</Sidebar.MenuButton>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger>
-						{#snippet child({ props })}
-							<Sidebar.MenuAction showOnHover {...props}>
-								<Ellipsis />
-								<span class="sr-only">More</span>
-							</Sidebar.MenuAction>
-						{/snippet}
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content
-						class="w-48 rounded-lg"
-						side={sidebar.isMobile ? "bottom" : "right"}
-						align={sidebar.isMobile ? "end" : "start"}
-					>
-						<DropdownMenu.Item>
-							<Folder class="text-muted-foreground" />
-							<span>View Project</span>
-						</DropdownMenu.Item>
-						<DropdownMenu.Item>
-							<Forward class="text-muted-foreground" />
-							<span>Share Project</span>
-						</DropdownMenu.Item>
-						<DropdownMenu.Separator />
-						<DropdownMenu.Item>
-							<Trash2 class="text-muted-foreground" />
-							<span>Delete Project</span>
-						</DropdownMenu.Item>
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
-			</Sidebar.MenuItem>
-		{/each}
-		<Sidebar.MenuItem>
-			<Sidebar.MenuButton class="text-sidebar-foreground/70">
-				<Ellipsis class="text-sidebar-foreground/70" />
-				<span>More</span>
-			</Sidebar.MenuButton>
-		</Sidebar.MenuItem>
-	</Sidebar.Menu>
+<script lang="ts">
+	import * as Collapsible from "$lib/components/ui/collapsible/index.js";
+	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	import ChevronRight from "@lucide/svelte/icons/chevron-right";
+	import File from "@lucide/svelte/icons/file";
+	import Folder from "@lucide/svelte/icons/folder";
+	import type { ComponentProps } from "svelte";
+
+	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+</script>
+
+<Sidebar.Group >
+	<Sidebar.GroupLabel>个人</Sidebar.GroupLabel>
+	<Sidebar.GroupContent>
+		<Sidebar.Menu>
+				
+		</Sidebar.Menu>
+		<Sidebar.Menu>
+			{#each data.tree as item, index (index)}
+				{@render Tree({ item })}
+			{/each}
+		</Sidebar.Menu>
+	</Sidebar.GroupContent>
+	<Sidebar.GroupLabel>团队</Sidebar.GroupLabel>
+	<Sidebar.GroupContent>
+		<Sidebar.Menu>
+			{#each data.tree as item, index (index)}
+				{@render Tree({ item })}
+			{/each}
+		</Sidebar.Menu>
+	</Sidebar.GroupContent>
 </Sidebar.Group>
+
+<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
+{#snippet Tree({ item }: { item: string | any[] })}
+	{@const [name, ...items] = Array.isArray(item) ? item : [item]}
+	{#if !items.length}
+		<Sidebar.MenuButton
+			isActive={name === "button.svelte"}
+			class="data-[active=true]:bg-transparent"
+		>
+			<File />
+			{name}
+		</Sidebar.MenuButton>
+	{:else}
+		<Sidebar.MenuItem>
+			<Collapsible.Root
+				class="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+				open={name === "lib" || name === "components"}
+			>
+				<Collapsible.Trigger>
+					{#snippet child({ props })}
+						<Sidebar.MenuButton {...props}>
+							<ChevronRight className="transition-transform" />
+							<Folder />
+							{name}
+						</Sidebar.MenuButton>
+					{/snippet}
+				</Collapsible.Trigger>
+				<Collapsible.Content>
+					<Sidebar.MenuSub>
+						{#each items as subItem, index (index)}
+							{@render Tree({ item: subItem })}
+						{/each}
+					</Sidebar.MenuSub>
+				</Collapsible.Content>
+			</Collapsible.Root>
+		</Sidebar.MenuItem>
+	{/if}
+{/snippet}

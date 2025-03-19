@@ -1,8 +1,10 @@
 <script lang="ts">
     import * as Sidebar from "$lib/components/ui/sidebar";
+    import {ScrollArea }from "$lib/components/ui/scroll-area";
     import Nav from "./nav.svelte";
     import NavUser from "./nav-user.svelte";
-	import Command from "lucide-svelte/icons/command";
+    import NavPro from "./nav-pro.svelte";
+    import Command from "lucide-svelte/icons/command";
     import type { NavItem, User } from "./types";
     import { page } from "$app/stores";
     
@@ -66,10 +68,14 @@
 	</Sidebar.Header>
 	
 	<Sidebar.Content>
-		<Nav items={navData.navMain} label="Platform" {selectedItem} {onNavItemClick} />
-		<Nav items={navData.personalItems} label="个人" {selectedItem} {onNavItemClick} />
-	</Sidebar.Content>
-	
+            <Nav items={navData.navMain} label="Platform" {selectedItem} {onNavItemClick} />
+            <!-- <Nav items={navData.personalItems} label="个人" {selectedItem} {onNavItemClick} /> -->
+           
+        <ScrollArea>
+            <NavPro />
+        </ScrollArea>
+    </Sidebar.Content>
+    
     <Sidebar.Footer>
 		<Nav items={navData.navSecondary} {onNavItemClick}></Nav>
         <NavUser {user} />
