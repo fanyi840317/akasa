@@ -35,9 +35,6 @@ importers:
       mapbox-gl:
         specifier: ^3.9.4
         version: 3.10.0
-      paneforge:
-        specifier: 1.0.0-next.4
-        version: 1.0.0-next.4(svelte@5.23.1)
       svelte-i18n:
         specifier: ^4.0.1
         version: 4.0.1(svelte@5.23.1)
@@ -84,6 +81,9 @@ importers:
       mode-watcher:
         specifier: ^0.5.1
         version: 0.5.1(svelte@5.23.1)
+      paneforge:
+        specifier: 1.0.0-next.4
+        version: 1.0.0-next.4(svelte@5.23.1)
       svelte:
         specifier: ^5.0.0
         version: 5.23.1

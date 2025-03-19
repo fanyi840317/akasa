@@ -3,7 +3,6 @@
 	import ChevronLeft from "@lucide/svelte/icons/chevron-left";
 	import { buttonVariants } from "$lib/components/ui/button/index.js";
 	import { cn } from "$lib/utils.js";
-
 	let {
 		ref = $bindable(null),
 		class: className,
@@ -13,7 +12,7 @@
 </script>
 
 {#snippet Fallback()}
-	<ChevronLeft class="size-4" />
+	<ChevronLeft />
 {/snippet}
 
 <RangeCalendarPrimitive.PrevButton
@@ -23,6 +22,6 @@
 		"size-7 bg-transparent p-0 opacity-50 hover:opacity-100",
 		className
 	)}
-	children={children || Fallback}
 	{...restProps}
+	children={children || Fallback}
 />

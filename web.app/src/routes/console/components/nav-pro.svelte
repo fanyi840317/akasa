@@ -46,6 +46,7 @@
 	import type { ComponentProps } from "svelte";
 	import { Input } from "$lib/components/ui/input";
 	import { Button } from "$lib/components/ui/button";
+    import { goto } from "$app/navigation";
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 	let showDialog = $state(false);
@@ -59,25 +60,13 @@
 </script>
 
 <Sidebar.Group >
-	<Sidebar.GroupLabel>Projects</Sidebar.GroupLabel>
-		<Sidebar.GroupAction title="Add Project" onclick={() => showDialog = true}>
+	<Sidebar.GroupLabel>私人</Sidebar.GroupLabel>
+		<Sidebar.GroupAction title="Add Project" onclick={() => {goto("/console/events/new")}}>
 			
 			<PlusCircle /> <span class="sr-only">Add Project</span>
 		</Sidebar.GroupAction>
 	<Sidebar.GroupContent>
-		<!-- <Sidebar.GroupLabel>Projects</Sidebar.GroupLabel>
-		<Sidebar.GroupAction title="Add Project">
-		  <Plus /> <span class="sr-only">Add Project</span>
-		</Sidebar.GroupAction>
-		<Sidebar.Menu>
-			<Sidebar.MenuButton class="flex items-center justify-between w-full">
-				<span>私人</span>
-				<button onclick={() => showDialog = true}>
-					<PlusCircle class="h-4 w-4" />
-				</button>
-			</Sidebar.MenuButton>
-		</Sidebar.Menu> -->
-
+<!-- 
 		<Dialog.Root bind:open={showDialog}>
 			<Dialog.Content>
 				<Dialog.Header>
@@ -90,23 +79,23 @@
 					</div>
 				</div>
 				<Dialog.Footer>
-					<Button type="submit" onclick={handleCreateFolder}>创建</Button>
+					<Button type="submit" size="sm" onclick={handleCreateFolder}>button</Button>
 				</Dialog.Footer>
 			</Dialog.Content>
-		</Dialog.Root>
-		<Sidebar.Menu>
+		</Dialog.Root>-->
+		<!-- <Sidebar.Menu>
 			{#each data.tree as item, index (index)}
 				{@render Tree({ item })}
 			{/each}
-		</Sidebar.Menu>
+		</Sidebar.Menu>  -->
 	</Sidebar.GroupContent>
 	<Sidebar.GroupLabel>团队</Sidebar.GroupLabel>
 	<Sidebar.GroupContent>
-		<Sidebar.Menu>
+		<!-- <Sidebar.Menu>
 			{#each data.tree as item, index (index)}
 				{@render Tree({ item })}
 			{/each}
-		</Sidebar.Menu>
+		</Sidebar.Menu> -->
 	</Sidebar.GroupContent>
 </Sidebar.Group>
 
