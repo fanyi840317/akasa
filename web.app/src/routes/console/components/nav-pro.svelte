@@ -38,20 +38,62 @@
 <script lang="ts">
 	import * as Collapsible from "$lib/components/ui/collapsible/index.js";
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	import * as Dialog from "$lib/components/ui/dialog/index.js";
 	import ChevronRight from "@lucide/svelte/icons/chevron-right";
 	import File from "@lucide/svelte/icons/file";
 	import Folder from "@lucide/svelte/icons/folder";
+	import PlusCircle from "@lucide/svelte/icons/plus-circle";
 	import type { ComponentProps } from "svelte";
+	import { Input } from "$lib/components/ui/input";
+	import { Button } from "$lib/components/ui/button";
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+	let showDialog = $state(false);
+	let folderName = "";
+
+	function handleCreateFolder() {
+		// TODO: 实现创建文件夹的逻辑
+		showDialog = false;
+		folderName = "";
+	}
 </script>
 
 <Sidebar.Group >
-	<Sidebar.GroupLabel>个人</Sidebar.GroupLabel>
+	<Sidebar.GroupLabel>Projects</Sidebar.GroupLabel>
+		<Sidebar.GroupAction title="Add Project" onclick={() => showDialog = true}>
+			
+			<PlusCircle /> <span class="sr-only">Add Project</span>
+		</Sidebar.GroupAction>
 	<Sidebar.GroupContent>
+		<!-- <Sidebar.GroupLabel>Projects</Sidebar.GroupLabel>
+		<Sidebar.GroupAction title="Add Project">
+		  <Plus /> <span class="sr-only">Add Project</span>
+		</Sidebar.GroupAction>
 		<Sidebar.Menu>
-				
-		</Sidebar.Menu>
+			<Sidebar.MenuButton class="flex items-center justify-between w-full">
+				<span>私人</span>
+				<button onclick={() => showDialog = true}>
+					<PlusCircle class="h-4 w-4" />
+				</button>
+			</Sidebar.MenuButton>
+		</Sidebar.Menu> -->
+
+		<Dialog.Root bind:open={showDialog}>
+			<Dialog.Content>
+				<Dialog.Header>
+					<Dialog.Title>新建文件夹</Dialog.Title>
+					<Dialog.Description>请输入新文件夹的名称</Dialog.Description>
+				</Dialog.Header>
+				<div class="grid gap-4 py-4">
+					<div class="grid grid-cols-4 items-center gap-4">
+						<Input id="name" bind:value={folderName} placeholder="文件夹名称" class="col-span-4" />
+					</div>
+				</div>
+				<Dialog.Footer>
+					<Button type="submit" onclick={handleCreateFolder}>创建</Button>
+				</Dialog.Footer>
+			</Dialog.Content>
+		</Dialog.Root>
 		<Sidebar.Menu>
 			{#each data.tree as item, index (index)}
 				{@render Tree({ item })}
