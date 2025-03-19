@@ -26,5 +26,5 @@
     });
 </script>
 
-<div bind:this={editorContainer} class={cn("w-[40vh]", className)}></div>
+<div bind:this={editorContainer} class={cn("w-full", className)}></div>
 

@@ -25,15 +25,9 @@ export function initEditor(docId: string = 'page1') {
     doc.addBlock('affine:paragraph', {}, noteId);
   });
 
-  const editor = new AffineEditorContainer();
+  const editor = new PageEditor();
   
-  // Apply custom styles
-  editor.setAttribute('style', `
-    --affine-editor-background: #ffffff;
-    --affine-text-primary-color: #333333;
-    --affine-text-secondary-color: #666666;
-    --affine-border-color: #e0e0e0;
-  `);
+  // Apply custom style
   
   editor.doc = doc;
 //   editor.slots.docLinkClicked.on(({ docId }) => {

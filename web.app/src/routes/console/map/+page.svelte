@@ -17,6 +17,7 @@
     import { writable } from "svelte/store";
     import { initEditor } from "$lib/components/editor/affine-editor";
     import type { AppState } from "$lib/components/editor/affine-editor";
+    import { goto } from "$app/navigation";
 
     let { data }: { data: PageData } = $props();
     
@@ -189,7 +190,7 @@
         <Button
             variant="secondary"
             size="icon"
-            onclick={() => (showCreatePanel = true)}
+            onclick={() => (goto("/console/events/new"))}
         >
             <PlusCircle class="h-5 w-5 hover:bg-background/20" />
         </Button>

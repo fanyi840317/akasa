@@ -45,14 +45,8 @@ export const navData: {
   navMain: [
     {
       title: "主页",
-      url: "/console",
-      state: "disabled",
-      icon: SquareTerminal,
-    },
-    {
-      title: "神秘事件",
       url: "/console/events",
-      icon: Activity
+      icon: SquareTerminal,
     },
     {
       title: "地图",
