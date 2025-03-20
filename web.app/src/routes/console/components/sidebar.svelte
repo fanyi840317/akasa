@@ -7,6 +7,8 @@
     import Command from "lucide-svelte/icons/command";
     import type { NavItem, User } from "./types";
     import { page } from "$app/stores";
+    import * as Card from "$lib/components/ui/card";
+    import { Button } from "$lib/components/ui/button";
     
     // Sidebar 配置选项
     let {
@@ -70,10 +72,30 @@
 	<Sidebar.Content>
             <Nav items={navData.navMain} label="Platform" {selectedItem} {onNavItemClick} />
             <!-- <Nav items={navData.personalItems} label="个人" {selectedItem} {onNavItemClick} /> -->
-           
+           <Sidebar.Separator></Sidebar.Separator>
         <ScrollArea>
             <NavPro />
         </ScrollArea>
+        <Card.Root class="shadow-none my-2 mx-2">
+			<form>
+				<Card.Header class="p-4 pb-0">
+					<Card.Title class="text-sm">分享身边的神秘事件</Card.Title>
+					<Card.Description>
+						记录和分享你遇到的神秘事件，让更多人了解这个世界的未知面
+					</Card.Description>
+				</Card.Header>
+				<Card.Content class="grid gap-2.5 p-4">
+					<Button
+						class="bg-sidebar-primary text-sidebar-primary-foreground w-full shadow-none"
+						size="sm" onclick={() => {
+							goto("/console/events/new");
+						}}
+					>
+						分享事件
+					</Button>
+				</Card.Content>
+			</form>
+		</Card.Root>
     </Sidebar.Content>
     
     <Sidebar.Footer>

@@ -46,9 +46,13 @@
 	import type { ComponentProps } from "svelte";
 	import { Input } from "$lib/components/ui/input";
 	import { Button } from "$lib/components/ui/button";
-    import { goto } from "$app/navigation";
+	import { goto } from "$app/navigation";
+    import * as Card from "$lib/components/ui/card";
 
-	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+	let {
+		ref = $bindable(null),
+		...restProps
+	}: ComponentProps<typeof Sidebar.Root> = $props();
 	let showDialog = $state(false);
 	let folderName = "";
 
@@ -59,44 +63,76 @@
 	}
 </script>
 
-<Sidebar.Group >
+<Dialog.Root bind:open={showDialog}>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>新建文件夹</Dialog.Title>
+			<Dialog.Description>请输入新文件夹的名称</Dialog.Description>
+		</Dialog.Header>
+		<div class="grid gap-4 py-4">
+			<div class="grid grid-cols-4 items-center gap-4">
+				<Input
+					id="name"
+					bind:value={folderName}
+					placeholder="文件夹名称"
+					class="col-span-4"
+				/>
+			</div>
+		</div>
+		<Dialog.Footer>
+			<Button type="submit" size="sm" onclick={handleCreateFolder}
+				>button</Button
+			>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
+
+<Sidebar.Group>
 	<Sidebar.GroupLabel>私人</Sidebar.GroupLabel>
-		<Sidebar.GroupAction title="Add Project" onclick={() => {goto("/console/events/new")}}>
-			
-			<PlusCircle /> <span class="sr-only">Add Project</span>
-		</Sidebar.GroupAction>
-	<Sidebar.GroupContent>
-<!-- 
-		<Dialog.Root bind:open={showDialog}>
-			<Dialog.Content>
-				<Dialog.Header>
-					<Dialog.Title>新建文件夹</Dialog.Title>
-					<Dialog.Description>请输入新文件夹的名称</Dialog.Description>
-				</Dialog.Header>
-				<div class="grid gap-4 py-4">
-					<div class="grid grid-cols-4 items-center gap-4">
-						<Input id="name" bind:value={folderName} placeholder="文件夹名称" class="col-span-4" />
-					</div>
-				</div>
-				<Dialog.Footer>
-					<Button type="submit" size="sm" onclick={handleCreateFolder}>button</Button>
-				</Dialog.Footer>
-			</Dialog.Content>
-		</Dialog.Root>-->
-		<!-- <Sidebar.Menu>
-			{#each data.tree as item, index (index)}
-				{@render Tree({ item })}
-			{/each}
-		</Sidebar.Menu>  -->
-	</Sidebar.GroupContent>
-	<Sidebar.GroupLabel>团队</Sidebar.GroupLabel>
+	<Sidebar.GroupAction
+		title="Add Project"
+		onclick={() => {
+			// goto("/console/events/new");
+			showDialog = true;
+		}}
+	>
+		<PlusCircle /> <span class="sr-only">Add Project</span>
+	</Sidebar.GroupAction>
 	<Sidebar.GroupContent>
 		<!-- <Sidebar.Menu>
-			{#each data.tree as item, index (index)}
-				{@render Tree({ item })}
-			{/each}
+			<Sidebar.MenuItem>
+				<Collapsible.Root
+					class="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+					open={name === "lib" || name === "components"}
+				>
+					<Collapsible.Trigger>
+						{#snippet child({ props })}
+							<Sidebar.MenuButton {...props}>
+								<ChevronRight className="transition-transform" />
+								<Folder />
+								{name}
+							</Sidebar.MenuButton>
+						{/snippet}
+					</Collapsible.Trigger>
+					<Collapsible.Content>
+						<Sidebar.MenuSub>
+							{#each items as subItem, index (index)}
+								{@render Tree({ item: subItem })}
+							{/each}
+						</Sidebar.MenuSub>
+					</Collapsible.Content>
+				</Collapsible.Root>
+			</Sidebar.MenuItem>
 		</Sidebar.Menu> -->
+		<Sidebar.Menu>
+			{#each data.tree as item, index (index)}
+				{@render Tree({ item })}
+			{/each}
+		</Sidebar.Menu> 
+		
+		
 	</Sidebar.GroupContent>
+	
 </Sidebar.Group>
 
 <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
