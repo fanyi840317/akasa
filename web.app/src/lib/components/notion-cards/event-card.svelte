@@ -22,7 +22,7 @@
     }
 
     .event-card-image {
-        @apply relative h-48 overflow-hidden rounded-lg mb-2;
+        @apply relative h-56 overflow-hidden rounded-lg mb-2;
     }
 
     .event-card-image img {

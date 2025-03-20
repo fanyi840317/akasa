@@ -33,7 +33,7 @@
     });
 
     setContext('shell', {
-        showRightView,
+        showRightView:Boolean,
         setShowRightView: (value: boolean) => showRightView = value,
         setTemplate: (template: any) => {
             selectedTemplate = template;

@@ -45,14 +45,8 @@ export const navData: {
   navMain: [
     {
       title: "主页",
-      url: "/console",
-      state: "disabled",
-      icon: SquareTerminal,
-    },
-    {
-      title: "神秘事件",
       url: "/console/events",
-      icon: Activity
+      icon: SquareTerminal,
     },
     {
       title: "地图",
@@ -89,23 +83,36 @@ export const navData: {
   
   personalItems: [
     {
-      title: "关注的人",
-      icon: Heart,
-      state: "disabled",
-      url: "/console/following"
-    },
-    {
-      title: "收藏",
+      title: "我的事件档案",
       icon: Bookmark,
       state: "disabled",
+      items: [
+        {
+          title: "我的事件",
+          icon: Bookmark,
+          state: "disabled",
+          url: "/console/bookmarks"
+        },
+        {
+          title: "我的收藏",
+          icon: Bookmark,
+          state: "disabled",
+          url: "/console/bookmarks"
+        },
+        {
+          title: "我关注的",
+          icon: Bookmark,
+          state: "disabled",
+          url: "/console/bookmarks"
+        }
+      ],
       url: "/console/bookmarks"
     },
     {
-      title: "调查组",
+      title: "我的收藏",
+      icon: Bookmark,
       state: "disabled",
-      icon: MessageSquare,
-      url: "/console/teams",
-      badge: 5
+      url: "/console/bookmarks"
     }
   ],
 };

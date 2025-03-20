@@ -1,10 +1,14 @@
 <script lang="ts">
     import * as Sidebar from "$lib/components/ui/sidebar";
+    import {ScrollArea }from "$lib/components/ui/scroll-area";
     import Nav from "./nav.svelte";
     import NavUser from "./nav-user.svelte";
-	import Command from "lucide-svelte/icons/command";
+    import NavPro from "./nav-pro.svelte";
+    import Command from "lucide-svelte/icons/command";
     import type { NavItem, User } from "./types";
     import { page } from "$app/stores";
+    import * as Card from "$lib/components/ui/card";
+    import { Button } from "$lib/components/ui/button";
     
     // Sidebar 配置选项
     let {
@@ -66,12 +70,18 @@
 	</Sidebar.Header>
 	
 	<Sidebar.Content>
-		<Nav items={navData.navMain} label="Platform" {selectedItem} {onNavItemClick} />
-		<Nav items={navData.personalItems} label="个人" {selectedItem} {onNavItemClick} />
-	</Sidebar.Content>
-	
+            <Nav items={navData.navMain} label="Platform" {selectedItem} {onNavItemClick} />
+            <!-- <Nav items={navData.personalItems} label="个人" {selectedItem} {onNavItemClick} /> -->
+           <Sidebar.Separator></Sidebar.Separator>
+        <ScrollArea>
+            <NavPro />
+        </ScrollArea>
+       
+    </Sidebar.Content>
+    
     <Sidebar.Footer>
 		<Nav items={navData.navSecondary} {onNavItemClick}></Nav>
         <NavUser {user} />
     </Sidebar.Footer>
+    <Sidebar.Rail />
 </Sidebar.Root>
