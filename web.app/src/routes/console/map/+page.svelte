@@ -2,7 +2,6 @@
     import type { PageData } from "./$types";
     import { Button } from "$lib/components/ui/button";
     import type { ShellContext } from "../components/types";
-    import { EventDetail } from "./components/index.js";
     
     import { _ } from "svelte-i18n";
     import {
@@ -187,13 +186,13 @@
         <Button variant="ghost" size="icon">
             <MapPin class="h-5 w-5" />
         </Button>
-        <Button
+        <!-- <Button
             variant="secondary"
             size="icon"
             onclick={() => (goto("/console/events/new"))}
         >
             <PlusCircle class="h-5 w-5 hover:bg-background/20" />
-        </Button>
+        </Button> -->
     </div>
 
     <!-- 地图容器 -->
@@ -213,15 +212,3 @@
         <EventList class="" {events} />
     </div>
 </div>
-{#snippet contentView()}
-    <EventDetail />
-{/snippet}
-<!-- 底部分页栏 -->
-<NotionPanel
-    open={showCreatePanel}
-    showBackdrop={false}
-    {contentView}
-    width={40}
-    maxWidth={60}
-    on:close={handleClosePanel}
-></NotionPanel>

@@ -44,10 +44,10 @@
 	import Folder from "@lucide/svelte/icons/folder";
 	import PlusCircle from "@lucide/svelte/icons/plus-circle";
 	import type { ComponentProps } from "svelte";
-	import { Input } from "$lib/components/ui/input";
 	import { Button } from "$lib/components/ui/button";
 	import { goto } from "$app/navigation";
     import * as Card from "$lib/components/ui/card";
+    import EventDetail from "./event-detail.svelte";
 
 	let {
 		ref = $bindable(null),
@@ -64,26 +64,17 @@
 </script>
 
 <Dialog.Root bind:open={showDialog}>
-	<Dialog.Content>
-		<Dialog.Header>
-			<Dialog.Title>新建文件夹</Dialog.Title>
-			<Dialog.Description>请输入新文件夹的名称</Dialog.Description>
-		</Dialog.Header>
-		<div class="grid gap-4 py-4">
-			<div class="grid grid-cols-4 items-center gap-4">
-				<Input
-					id="name"
-					bind:value={folderName}
-					placeholder="文件夹名称"
-					class="col-span-4"
-				/>
-			</div>
-		</div>
-		<Dialog.Footer>
-			<Button type="submit" size="sm" onclick={handleCreateFolder}
-				>button</Button
-			>
-		</Dialog.Footer>
+	<Dialog.Content class="sm:max-w-[800px] h-[80vh]">
+		<EventDetail
+			eventTitle="新建事件"
+			eventLocation=""
+			eventDate=""
+			eventStatus="未开始"
+			creator={{
+				name: "范一",
+				avatar: "https://github.com/shadcn.png"
+			}}
+		/>
 	</Dialog.Content>
 </Dialog.Root>
 
@@ -98,6 +89,25 @@
 	>
 		<PlusCircle /> <span class="sr-only">Add Project</span>
 	</Sidebar.GroupAction>
+
+	<Card.Root class="shadow-none my-2 mx-2">
+		<form>
+			<Card.Header class="p-4 pb-0">
+				<Card.Title class="text-sm">分享身边的神秘事件</Card.Title>
+				<Card.Description>
+					记录和分享你遇到的神秘事件，让更多人了解这个世界的未知面
+				</Card.Description>
+			</Card.Header>
+			<Card.Content class="grid gap-2.5 p-4">
+				<Button
+					class="bg-sidebar-primary text-sidebar-primary-foreground w-full shadow-none"
+					size="sm" onclick={() => showDialog = true}
+				>
+					分享事件
+				</Button>
+			</Card.Content>
+		</form>
+	</Card.Root>
 	<Sidebar.GroupContent>
 		<!-- <Sidebar.Menu>
 			<Sidebar.MenuItem>
