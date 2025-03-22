@@ -13,21 +13,15 @@
 	import { goto } from "$app/navigation";
 	import { fade } from "svelte/transition";
 	import { get, writable } from "svelte/store";
-	import {
-		initEditor,
-		type AppState,
-	} from "$lib/components/editor/affine-editor";
 
-	
+		
 	// onMount(async () => {
 	// 	//test
 	// 	goto(base + "/events/BasicInfo");
 	// });
-	const appState = writable<AppState>(initEditor());
-	setContext("appState", appState);
 	onMount(() => {
 		const unsubscribe = mode.subscribe(currentMode => {
-			document.documentElement.setAttribute("data-theme", currentMode ?? "light");
+			 document.documentElement.dataset.theme = currentMode ?? "light";
 		});
 		return () => unsubscribe();
 	});

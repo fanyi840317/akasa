@@ -12,7 +12,6 @@
     import { browser } from "$app/environment";
     import { writable } from "svelte/store";
     import AffineEditor from "$lib/components/editor/affine-editor.svelte";
-    import { initEditor } from "$lib/components/editor/affine-editor";
     import type { AppState } from "$lib/components/editor/affine-editor";
     import {
         User,
@@ -128,91 +127,48 @@
                 <Collapsible.Content class="space-y-2">
                     <div class="flex flex-col gap-2 py-4 w-full">
                         <!-- 创作者 -->
-                        <div class="flex items-center gap-6 w-full">
+                        <div class="flex items-center gap-6 w-full h-12">
                             <div class="flex items-center gap-2 w-24">
-                                <User class="h-3 w-3 text-muted-foreground" />
-                                <span class="text-sm text-muted-foreground"
-                                    >创作者</span
-                                >
+                                <User class="h-4 w-4 text-muted-foreground" />
+                                <span class="text-base text-muted-foreground">创作者</span>
                             </div>
                             <div class="flex px-2 items-center gap-2 flex-1">
-                                <Avatar class="h-4 w-4">
-                                    <AvatarImage
-                                        src={creator.avatar}
-                                        alt={creator.name}
-                                    />
-                                    <AvatarFallback
-                                        >{creator.name[0]}</AvatarFallback
-                                    >
+                                <Avatar class="h-5 w-5">
+                                    <AvatarImage src={creator.avatar} alt={creator.name} />
+                                    <AvatarFallback>{creator.name[0]}</AvatarFallback>
                                 </Avatar>
-                                <span class="text-sm">{creator.name}</span>
+                                <span class="text-base">{creator.name}</span>
                             </div>
                         </div>
 
                         <!-- 位置输入 -->
-                        <div class="flex items-center gap-6 w-full">
+                        <div class="flex items-center gap-6 w-full h-12">
                             <div class="flex items-center gap-2 w-24">
-                                <MapPin class="h-3 w-3 text-muted-foreground" />
-                                <span class="text-sm text-muted-foreground"
-                                    >位置</span
-                                >
+                                <MapPin class="h-4 w-4 text-muted-foreground" />
+                                <span class="text-base text-muted-foreground">位置</span>
                             </div>
                             <div class="flex-1">
-                                <Button
-                                    variant="ghost"
-                                    class={cn(
-                                        " justify-start text-left  font-normal h-9 px-2 py-1",
-                                        !eventLocation &&
-                                            "text-muted-foreground/70",
-                                    )}
-                                    size="sm"
-                                >
-                                    <!-- <MapPin class="h-4 w-4 mr-2" /> -->
+                                <Button variant="ghost" class={cn(" justify-start text-left font-normal h-9 px-2 py-1", !eventLocation && "text-muted-foreground/70")} size="sm">
                                     {eventLocation || "添加位置"}
                                 </Button>
                             </div>
                         </div>
 
                         <!-- 日期选择器 -->
-                        <div class="flex items-center gap-6 w-full">
+                        <div class="flex items-center gap-6 w-full h-12">
                             <div class="flex items-center gap-2 w-24">
-                                <Clock class="h-3 w-3 text-muted-foreground" />
-                                <span class="text-sm text-muted-foreground"
-                                    >日期</span
-                                >
+                                <Clock class="h-4 w-4 text-muted-foreground" />
+                                <span class="text-base text-muted-foreground">日期</span>
                             </div>
                             <div class="flex-1">
                                 <Popover.Root>
                                     <Popover.Trigger>
-                                        <Button
-                                            variant="ghost"
-                                            class={cn(
-                                                " justify-start text-left  font-normal h-9 px-2 py-1",
-                                                !dateValue &&
-                                                    "text-muted-foreground/70",
-                                            )}
-                                            size="sm"
-                                        >
-                                            <!-- <CalendarIcon class="h-4 w-4 mr-2" /> -->
-                                            {dateValue
-                                                ? df.format(
-                                                      dateValue.toDate(
-                                                          getLocalTimeZone(),
-                                                      ),
-                                                  )
-                                                : "选择日期"}
+                                        <Button variant="ghost" class={cn(" justify-start text-left font-normal h-9 px-2 py-1", !dateValue && "text-muted-foreground/70")} size="sm">
+                                            {dateValue ? df.format(dateValue.toDate(getLocalTimeZone())) : "选择日期"}
                                         </Button>
                                     </Popover.Trigger>
-                                    <Popover.Content
-                                        class="w-auto p-0"
-                                        align="start"
-                                    >
-                                        <RangeCalendar
-                                            type="single"
-                                            bind:value={dateValue}
-                                            on:valueChange={(e) =>
-                                                handleDateChange(e.detail)}
-                                        />
+                                    <Popover.Content class="w-auto p-0" align="start">
+                                        <RangeCalendar type="single" bind:value={dateValue} on:valueChange={(e) => handleDateChange(e.detail)} />
                                     </Popover.Content>
                                 </Popover.Root>
                             </div>

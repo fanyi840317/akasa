@@ -1,6 +1,5 @@
 <script lang="ts">
     import AffineEditor from "$lib/components/editor/affine-editor.svelte";
-    import { initEditor } from "$lib/components/editor/affine-editor";
     import type { AppState } from "$lib/components/editor/affine-editor";
     import { writable } from "svelte/store";
     import { setContext } from "svelte";
