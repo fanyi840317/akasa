@@ -98,103 +98,146 @@
     }
 </script>
 
-<ScrollArea class="h-[calc(100vh-4rem)] py-4">
-    <div class="space-y-6 flex flex-col h-full mx-auto max-w-4xl">
-        <div class="px-24 space-y-4">
-            <!-- 标题区域 -->
-            <div class="pt-6 mb-10 space-y-2">
-                <input
-                    type="text"
-                    placeholder="无标题"
-                    class="text-4xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50"
-                    bind:value={eventTitle}
-                />
+<div class="space-y-6 flex flex-col h-full w-full">
+    <div class="space-y-4 px-24">
+        <!-- 标题区域 -->
+        <div class="pt-6 mb-10 space-y-2">
+            <input
+                type="text"
+                placeholder="无标题"
+                class="text-4xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50"
+                bind:value={eventTitle}
+            />
+        </div>
+
+        <!-- 属性区域 -->
+        <Collapsible.Root class="w-full space-y-2" open={true}>
+            <div class="flex items-center justify-between space-x-4">
+                <h4 class="text-sm text-muted-foreground font-semibold">
+                    事件属性
+                </h4>
+                <Collapsible.Trigger>
+                    <Button variant="ghost" size="sm" class="w-9 p-0">
+                        <ChevronsUpDown class="h-4 w-4" />
+                        <span class="sr-only">切换属性显示</span>
+                    </Button>
+                </Collapsible.Trigger>
             </div>
 
-            <!-- 属性区域 -->
-            <Collapsible.Root class="w-full space-y-2" open={true}>
-                <div class="flex items-center justify-between space-x-4">
-                    <h4 class="text-sm text-muted-foreground font-semibold">事件属性</h4>
-                    <Collapsible.Trigger>
-                        <Button variant="ghost" size="sm" class="w-9 p-0">
-                            <ChevronsUpDown class="h-4 w-4" />
-                            <span class="sr-only">切换属性显示</span>
-                        </Button>
-                    </Collapsible.Trigger>
-                </div>
-
-                <Separator class="my-4" />
-                <Collapsible.Content class="space-y-2">
-                    <div class="flex flex-col gap-2 py-4 w-full">
-                        <!-- 创作者 -->
-                        <div class="flex items-center gap-6 w-full h-12">
-                            <div class="flex items-center gap-2 w-24">
-                                <User class="h-4 w-4 text-muted-foreground" />
-                                <span class="text-base text-muted-foreground">创作者</span>
-                            </div>
-                            <div class="flex px-2 items-center gap-2 flex-1">
-                                <Avatar class="h-5 w-5">
-                                    <AvatarImage src={creator.avatar} alt={creator.name} />
-                                    <AvatarFallback>{creator.name[0]}</AvatarFallback>
-                                </Avatar>
-                                <span class="text-base">{creator.name}</span>
-                            </div>
+            <Separator class="my-4" />
+            <Collapsible.Content class="space-y-2">
+                <div class="flex flex-col py-4 w-full">
+                    <!-- 创作者 -->
+                    <div class="flex items-center gap-6 w-full h-10">
+                        <div class="flex items-center gap-2 w-24">
+                            <User class="h-4 w-4 text-muted-foreground" />
+                            <span class="text-base text-muted-foreground"
+                                >创作者</span
+                            >
                         </div>
-
-                        <!-- 位置输入 -->
-                        <div class="flex items-center gap-6 w-full h-12">
-                            <div class="flex items-center gap-2 w-24">
-                                <MapPin class="h-4 w-4 text-muted-foreground" />
-                                <span class="text-base text-muted-foreground">位置</span>
-                            </div>
-                            <div class="flex-1">
-                                <Button variant="ghost" class={cn(" justify-start text-left font-normal h-9 px-2 py-1", !eventLocation && "text-muted-foreground/70")} size="sm">
-                                    {eventLocation || "添加位置"}
-                                </Button>
-                            </div>
-                        </div>
-
-                        <!-- 日期选择器 -->
-                        <div class="flex items-center gap-6 w-full h-12">
-                            <div class="flex items-center gap-2 w-24">
-                                <Clock class="h-4 w-4 text-muted-foreground" />
-                                <span class="text-base text-muted-foreground">日期</span>
-                            </div>
-                            <div class="flex-1">
-                                <Popover.Root>
-                                    <Popover.Trigger>
-                                        <Button variant="ghost" class={cn(" justify-start text-left font-normal h-9 px-2 py-1", !dateValue && "text-muted-foreground/70")} size="sm">
-                                            {dateValue ? df.format(dateValue.toDate(getLocalTimeZone())) : "选择日期"}
-                                        </Button>
-                                    </Popover.Trigger>
-                                    <Popover.Content class="w-auto p-0" align="start">
-                                        <RangeCalendar type="single" bind:value={dateValue} on:valueChange={(e) => handleDateChange(e.detail)} />
-                                    </Popover.Content>
-                                </Popover.Root>
-                            </div>
+                        <div class="flex px-2 items-center gap-2 flex-1">
+                            <Avatar class="h-5 w-5">
+                                <AvatarImage
+                                    src={creator.avatar}
+                                    alt={creator.name}
+                                />
+                                <AvatarFallback
+                                    >{creator.name[0]}</AvatarFallback
+                                >
+                            </Avatar>
+                            <span class="text-base">{creator.name}</span>
                         </div>
                     </div>
-                </Collapsible.Content>
-            </Collapsible.Root>
-        </div>
 
-        <!-- 描述区域 -->
-        <div class="flex-1 flex flex-col">
-            <AffineEditor docId="event-doc" class="flex-1" />
-        </div>
+                    <!-- 位置输入 -->
+                    <div class="flex items-center gap-6 w-full h-10">
+                        <div class="flex items-center gap-2 w-24">
+                            <MapPin class="h-4 w-4 text-muted-foreground" />
+                            <span class="text-base text-muted-foreground"
+                                >位置</span
+                            >
+                        </div>
+                        <div class="flex-1">
+                            <Button
+                                variant="ghost"
+                                class={cn(
+                                    " justify-start text-left font-normal h-9 px-2 py-1",
+                                    !eventLocation &&
+                                        "text-muted-foreground/70",
+                                )}
+                                size="sm"
+                            >
+                                {eventLocation || "添加位置"}
+                            </Button>
+                        </div>
+                    </div>
 
-        <!-- 按钮区域 -->
-        <div class="px-24 py-6 ">
-            <div class="flex justify-start gap-4">
-                <Button variant="secondary" class="font-normal h-7 px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                    <Save class="h-4 w-4" />
-                    保存
-                </Button>
-                <Button variant="secondary" class="font-normal h-7 px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                    <Send class="h-4 w-4" />
-                    发表
-                </Button>
-            </div>
-        </div>
+                    <!-- 日期选择器 -->
+                    <div class="flex items-center gap-6 w-full h-10">
+                        <div class="flex items-center gap-2 w-24">
+                            <Clock class="h-4 w-4 text-muted-foreground" />
+                            <span class="text-base text-muted-foreground"
+                                >日期</span
+                            >
+                        </div>
+                        <div class="flex-1">
+                            <Popover.Root>
+                                <Popover.Trigger>
+                                    <Button
+                                        variant="ghost"
+                                        class={cn(
+                                            " justify-start text-left font-normal h-9 px-2 py-1",
+                                            !dateValue &&
+                                                "text-muted-foreground/70",
+                                        )}
+                                        size="sm"
+                                    >
+                                        {dateValue
+                                            ? df.format(
+                                                  dateValue.toDate(
+                                                      getLocalTimeZone(),
+                                                  ),
+                                              )
+                                            : "选择日期"}
+                                    </Button>
+                                </Popover.Trigger>
+                                <Popover.Content
+                                    class="w-auto p-0"
+                                    align="start"
+                                >
+                                    <RangeCalendar
+                                        type="single"
+                                        bind:value={dateValue}
+                                        on:valueChange={(e) =>
+                                            handleDateChange(e.detail)}
+                                    />
+                                </Popover.Content>
+                            </Popover.Root>
+                        </div>
+                    </div>
+                </div>
+            </Collapsible.Content>
+        </Collapsible.Root>
     </div>
-</ScrollArea>
+    <!-- 描述区域 -->
+    <div class="flex-1 flex flex-col">
+        <AffineEditor docId="event-doc" class="flex-1" />
+    </div>
+    <div class="flex justify-end gap-4">
+        <Button
+            variant="secondary"
+            class="font-normal h-7 px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+        >
+            <Save class="h-4 w-4" />
+            保存
+        </Button>
+        <Button
+            variant="secondary"
+            class="font-normal h-7 px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+        >
+            <Send class="h-4 w-4" />
+            发表
+        </Button>
+    </div>
+
+</div>

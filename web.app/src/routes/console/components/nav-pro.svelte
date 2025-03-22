@@ -48,6 +48,7 @@
 	import { goto } from "$app/navigation";
     import * as Card from "$lib/components/ui/card";
     import EventDetail from "./event-detail.svelte";
+    import { Save, Send } from "lucide-svelte";
 
 	let {
 		ref = $bindable(null),
@@ -75,7 +76,11 @@
 				avatar: "https://github.com/shadcn.png"
 			}}
 		/>
+		<!-- <Dialog.Footer class="fixed bottom-0 left-0 p-4 w-full bg-background/80 backdrop-blur-sm">
+			
+		</Dialog.Footer> -->
 	</Dialog.Content>
+
 </Dialog.Root>
 
 <Sidebar.Group>
@@ -94,7 +99,7 @@
 		<form>
 			<Card.Header class="p-4 pb-0">
 				<Card.Title class="text-sm">分享身边的神秘事件</Card.Title>
-				<Card.Description>
+				<Card.Description class="text-xs">
 					记录和分享你遇到的神秘事件，让更多人了解这个世界的未知面
 				</Card.Description>
 			</Card.Header>
