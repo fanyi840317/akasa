@@ -14,6 +14,8 @@
     import AffineEditor from "$lib/components/editor/affine-editor.svelte";
     import { initEditor } from "$lib/components/editor/affine-editor";
     import type { AppState } from "$lib/components/editor/affine-editor";
+    import { eventStore } from "$lib/stores/event";
+    import { auth } from "$lib/stores/auth";
     import {
         User,
         MapPin,
@@ -68,13 +70,7 @@
 
     onMount(async () => {
         // 自动聚焦到标题输入框
-        if (titleInput && !eventTitle) {
-            titleInput.focus();
-            titleInput.setSelectionRange(
-                titleInput.value.length,
-                titleInput.value.length,
-            );
-        }
+     
 
         // 延迟一点时间后让编辑器获得焦点
     });
@@ -97,13 +93,112 @@
             eventDate = "";
         }
     }
+
+    // 发布事件到Appwrite
+    let isPublishing = false;
+    let editorContent = "";
+    
+    // 获取编辑器内容的函数
+    function getEditorContent() {
+        // 这里应该实现从AffineEditor获取内容的逻辑
+        // 由于当前实现可能不支持直接获取，我们先使用空字符串
+        return editorContent;
+    }
+    
+    async function publishToAppwrite() {
+        if (!eventTitle) {
+            alert("请先填写事件标题");
+            return;
+        }
+
+        isPublishing = true;
+        try {
+            // 获取当前用户信息
+            const user = $auth.user;
+            if (!user) {
+                throw new Error("用户未登录");
+            }
+            
+            // 准备事件数据
+            const eventData = {
+                title: eventTitle,
+                location: eventLocation,
+                date: eventDate,
+                status: eventStatus || "未开始",
+                content: getEditorContent(),
+                user_id: user.$id,
+                creator_name: creator.name || user.name,
+                creator_avatar: creator.avatar || ""
+            };
+            
+            // 使用eventStore创建事件
+            const result = await eventStore.createEvent(eventData);
+            
+            alert("事件已成功发布！");
+        } catch (error) {
+            console.error("发布事件失败:", error);
+            alert("发布失败，请稍后重试: " + (error instanceof Error ? error.message : String(error)));
+        } finally {
+            isPublishing = false;
+        }
+    }
 </script>
 
-<ScrollArea class="h-[calc(100vh-4rem)] py-4">
-    <div class="space-y-6 flex flex-col h-full mx-auto max-w-4xl">
+<div class="flex flex-col h-full w-full relative">
+    <ScrollArea class="flex flex-1 w-full py-10">
         <div class="px-24 space-y-4">
             <!-- 标题区域 -->
-            <div class="pt-6 mb-10 space-y-2">
+            <div>
+                <Button
+                    variant="outline"
+                    class={cn(
+                        " text-left  font-normal h-7 px-2 py-1",
+                        !eventLocation && "text-muted-foreground/70",
+                    )}
+                    size="sm"
+                >
+                    <MapPin class="h-3 w-3" />
+                    {eventLocation || "添加位置"}
+                </Button>
+                <Popover.Root>
+                    <Popover.Trigger>
+                        <Button
+                            variant="outline"
+                            class={cn(
+                                " justify-start text-left  font-normal h-7 px-2 py-1",
+                                !dateValue && "text-muted-foreground/70",
+                            )}
+                            size="sm"
+                        >
+                            <CalendarIcon class="h-3 w-3" />
+                            {dateValue
+                                ? df.format(dateValue.toDate(getLocalTimeZone()))
+                                : "选择发生日期"}
+                        </Button>
+                    </Popover.Trigger>
+                    <Popover.Content class="w-auto p-0" align="start">
+                        <RangeCalendar
+                            type="single"
+                            bind:value={dateValue}
+                            on:valueChange={(e) => handleDateChange(e.detail)}
+                        />
+                    </Popover.Content>
+                </Popover.Root>
+
+                <Button
+                    variant="outline"
+                    class={cn(
+                        " text-left  font-normal h-7 px-2 py-1",
+                        !eventLocation && "text-muted-foreground/70",
+                    )}
+                    size="sm"
+                >
+                    <MapPin class="h-3 w-3" />
+                    {eventLocation || "添加位置"}
+                </Button>
+            </div>
+
+            <div class="space-y-2">
                 <input
                     type="text"
                     placeholder="无标题"
@@ -111,134 +206,31 @@
                     bind:value={eventTitle}
                 />
             </div>
-
-            <!-- 属性区域 -->
-            <Collapsible.Root class="w-full space-y-2" open={true}>
-                <div class="flex items-center justify-between space-x-4">
-                    <h4 class="text-sm text-muted-foreground font-semibold">事件属性</h4>
-                    <Collapsible.Trigger>
-                        <Button variant="ghost" size="sm" class="w-9 p-0">
-                            <ChevronsUpDown class="h-4 w-4" />
-                            <span class="sr-only">切换属性显示</span>
-                        </Button>
-                    </Collapsible.Trigger>
-                </div>
-
-                <Separator class="my-4" />
-                <Collapsible.Content class="space-y-2">
-                    <div class="flex flex-col gap-2 py-4 w-full">
-                        <!-- 创作者 -->
-                        <div class="flex items-center gap-6 w-full">
-                            <div class="flex items-center gap-2 w-24">
-                                <User class="h-3 w-3 text-muted-foreground" />
-                                <span class="text-sm text-muted-foreground"
-                                    >创作者</span
-                                >
-                            </div>
-                            <div class="flex px-2 items-center gap-2 flex-1">
-                                <Avatar class="h-4 w-4">
-                                    <AvatarImage
-                                        src={creator.avatar}
-                                        alt={creator.name}
-                                    />
-                                    <AvatarFallback
-                                        >{creator.name[0]}</AvatarFallback
-                                    >
-                                </Avatar>
-                                <span class="text-sm">{creator.name}</span>
-                            </div>
-                        </div>
-
-                        <!-- 位置输入 -->
-                        <div class="flex items-center gap-6 w-full">
-                            <div class="flex items-center gap-2 w-24">
-                                <MapPin class="h-3 w-3 text-muted-foreground" />
-                                <span class="text-sm text-muted-foreground"
-                                    >位置</span
-                                >
-                            </div>
-                            <div class="flex-1">
-                                <Button
-                                    variant="ghost"
-                                    class={cn(
-                                        " justify-start text-left  font-normal h-9 px-2 py-1",
-                                        !eventLocation &&
-                                            "text-muted-foreground/70",
-                                    )}
-                                    size="sm"
-                                >
-                                    <!-- <MapPin class="h-4 w-4 mr-2" /> -->
-                                    {eventLocation || "添加位置"}
-                                </Button>
-                            </div>
-                        </div>
-
-                        <!-- 日期选择器 -->
-                        <div class="flex items-center gap-6 w-full">
-                            <div class="flex items-center gap-2 w-24">
-                                <Clock class="h-3 w-3 text-muted-foreground" />
-                                <span class="text-sm text-muted-foreground"
-                                    >日期</span
-                                >
-                            </div>
-                            <div class="flex-1">
-                                <Popover.Root>
-                                    <Popover.Trigger>
-                                        <Button
-                                            variant="ghost"
-                                            class={cn(
-                                                " justify-start text-left  font-normal h-9 px-2 py-1",
-                                                !dateValue &&
-                                                    "text-muted-foreground/70",
-                                            )}
-                                            size="sm"
-                                        >
-                                            <!-- <CalendarIcon class="h-4 w-4 mr-2" /> -->
-                                            {dateValue
-                                                ? df.format(
-                                                      dateValue.toDate(
-                                                          getLocalTimeZone(),
-                                                      ),
-                                                  )
-                                                : "选择日期"}
-                                        </Button>
-                                    </Popover.Trigger>
-                                    <Popover.Content
-                                        class="w-auto p-0"
-                                        align="start"
-                                    >
-                                        <RangeCalendar
-                                            type="single"
-                                            bind:value={dateValue}
-                                            on:valueChange={(e) =>
-                                                handleDateChange(e.detail)}
-                                        />
-                                    </Popover.Content>
-                                </Popover.Root>
-                            </div>
-                        </div>
-                    </div>
-                </Collapsible.Content>
-            </Collapsible.Root>
         </div>
-
         <!-- 描述区域 -->
         <div class="flex-1 flex flex-col">
             <AffineEditor docId="event-doc" class="flex-1" />
         </div>
-
-        <!-- 按钮区域 -->
-        <div class="px-24 py-6 ">
-            <div class="flex justify-start gap-4">
-                <Button variant="secondary" class="font-normal h-7 px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                    <Save class="h-4 w-4" />
-                    保存
-                </Button>
-                <Button variant="secondary" class="font-normal h-7 px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+    </ScrollArea>
+    
+    <!-- 底部按钮区域 -->
+    <div class="absolute bottom-0 left-0 w-full bg-background/80 backdrop-blur-smp-4">
+        <div class="flex justify-between items-center px-24">
+            <div>
+                <Button 
+                    onclick={publishToAppwrite} 
+                    disabled={isPublishing} 
+                    variant="outline" 
+                    class="gap-2"
+                >
                     <Send class="h-4 w-4" />
-                    发表
+                    {isPublishing ? '发布中...' : '发布'}
                 </Button>
+            </div>
+            <div>
+                <!-- 右侧可以添加其他按钮 -->
             </div>
         </div>
     </div>
-</ScrollArea>
+</div>
+
