@@ -30,7 +30,6 @@
     };
 
     onMount(() => {
-        alert(get(mode));
         if (editorContainer && editor) {
             // // 设置暗色主题7
             
@@ -45,18 +44,18 @@
             editorContainer.appendChild(editor);
             
             // 等待编辑器完全挂载后尝试聚焦
-            editor.updateComplete.then(() => {
-                // 简化的聚焦逻辑
-                setTimeout(() => {
-                    const richText = editor?.host?.querySelector("rich-text");
-                    if (richText) {
-                        const inlineEditor = (richText as any).inlineEditor;
-                        if (inlineEditor) {
-                            inlineEditor.focusEnd();
-                        }
-                    }
-                }, 200);
-            });
+            // editor.updateComplete.then(() => {
+            //     // 简化的聚焦逻辑
+            //     setTimeout(() => {
+            //         const richText = editor?.host?.querySelector("rich-text");
+            //         if (richText) {
+            //             const inlineEditor = (richText as any).inlineEditor;
+            //             if (inlineEditor) {
+            //                 inlineEditor.focusEnd();
+            //             }
+            //         }
+            //     }, 200);
+            // });
         }
     });
 
@@ -82,7 +81,7 @@
         z-index: 10001;
     }
     /* 隐藏文档标题 */
-    :global(doc-title) {
+    /* :global(doc-title) {
         display: none !important;
-    }
+    } */
 </style>

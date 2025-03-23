@@ -1,38 +1,6 @@
 <script lang="ts" module>
-	// This is sample data.
-	const data = {
-		changes: [
-			{
-				file: "README.md",
-				state: "M",
-			},
-			{
-				file: "routes/+page.svelte",
-				state: "U",
-			},
-			{
-				file: "routes/+layout.svelte",
-				state: "M",
-			},
-		],
-		tree: [
-			["lib", ["components", "button.svelte", "card.svelte"], "utils.ts"],
-			[
-				"routes",
-				["hello", "+page.svelte", "+page.ts"],
-				"+page.svelte",
-				"+page.server.ts",
-				"+layout.svelte",
-			],
-			["static", "favicon.ico", "svelte.svg"],
-			"eslint.config.js",
-			".gitignore",
-			"svelte.config.js",
-			"tailwind.config.js",
-			"package.json",
-			"README.md",
-		],
-	};
+	import { eventStore } from '$lib/stores/event';
+	import { page } from '$app/stores';
 </script>
 
 <script lang="ts">
@@ -49,6 +17,10 @@
     import * as Card from "$lib/components/ui/card";
     import EventDetail from "./event-detail.svelte";
     import { Save } from "lucide-svelte";
+    import { auth } from '$lib/stores/auth';
+    import { get } from 'svelte/store';
+    import { toast } from 'svelte-sonner';
+    import { anyify } from '$lib/utils';
 
 	let {
 		ref = $bindable(null),
@@ -57,6 +29,34 @@
 	let showDialog = $state(false);
 	let folderName = "";
 
+
+	let userEvents = $state([]);
+	let hasEvents = $state(false);
+	let isLoading = $state(false);
+
+	// 监听caseStore的loading状态
+
+
+	// 在组件初始化时获取用户事件
+	$effect(() => {
+		async function loadUserEvents() {
+			if (get(auth).user?.$id) {
+				try {
+					
+					const events = await eventStore.fetchEvents(get(auth).user?.$id);
+					userEvents = events || [];
+					hasEvents = userEvents.length > 0;
+				} catch (e : any) {
+					toast.error('Failed to fetch user events:', e.message);
+					userEvents = [];
+					hasEvents = false;
+				}
+			}
+		}
+		console.log('loadUserEvents');
+		loadUserEvents();
+	});
+	
 	function handleCreateFolder() {
 		// TODO: 实现创建文件夹的逻辑
 		showDialog = false;
@@ -67,12 +67,12 @@
 <Dialog.Root bind:open={showDialog}>
 	<Dialog.Content class="sm:max-w-[900px] h-[80vh] px-0 py-10">
 		<EventDetail
-			eventTitle=""
+			eventTitle="新事件"
 			eventLocation=""
 			eventDate=""
 			eventStatus="未开始"
 			creator={{
-				name: "范一",
+				name: get(auth).user?.name || "用户",
 				avatar: "https://github.com/shadcn.png"
 			}}
 		/>
@@ -95,24 +95,26 @@
 		<PlusCircle /> <span class="sr-only">Add Project</span>
 	</Sidebar.GroupAction> -->
 
-	<Card.Root class="shadow-none my-2 mx-2">
-		<form>
-			<Card.Header class="p-4 pb-0">
-				<Card.Title class="text-sm">分享身边的神秘事件</Card.Title>
-				<Card.Description class="text-xs">
-					记录和分享你遇到的神秘事件，让更多人了解这个世界的未知面
-				</Card.Description>
-			</Card.Header>
-			<Card.Content class="grid gap-2.5 p-4">
-				<Button
-					class="bg-sidebar-primary text-sidebar-primary-foreground w-full shadow-none"
-					size="sm" onclick={() => showDialog = true}
-				>
-					分享事件
-				</Button>
-			</Card.Content>
-		</form>
-	</Card.Root>
+	{#if !hasEvents}
+		<Card.Root class="shadow-none my-2 mx-2">
+			<form>
+				<Card.Header class="p-4 pb-0">
+					<Card.Title class="text-sm">分享身边的神秘事件</Card.Title>
+					<Card.Description class="text-xs">
+						记录和分享你遇到的神秘事件，让更多人了解这个世界的未知面
+					</Card.Description>
+				</Card.Header>
+				<Card.Content class="grid gap-2.5 p-4">
+					<Button
+						class="bg-sidebar-primary text-sidebar-primary-foreground w-full shadow-none"
+						size="sm" onclick={() => showDialog = true}
+					>
+						分享事件
+					</Button>
+				</Card.Content>
+			</form>
+		</Card.Root>
+	{/if}
 	<Sidebar.GroupContent>
 		<!-- <Sidebar.Menu>
 			<Sidebar.MenuItem>
@@ -140,9 +142,26 @@
 			</Sidebar.MenuItem>
 		</Sidebar.Menu> -->
 		<Sidebar.Menu>
-			{#each data.tree as item, index (index)}
-				{@render Tree({ item })}
-			{/each}
+			{#if isLoading}
+				<!-- 加载状态显示 -->
+				<Sidebar.MenuButton isActive={false}>
+					<File />
+					加载中...
+				</Sidebar.MenuButton>
+			{:else if hasEvents}
+				{#each userEvents as event}
+					<Sidebar.MenuButton isActive={false}>
+						<File />
+						{event.title}
+					</Sidebar.MenuButton>
+				{/each}
+			{:else}
+				<!-- 当没有用户事件时显示默认内容 -->
+				<Sidebar.MenuButton isActive={false}>
+					<File />
+					暂无事件
+				</Sidebar.MenuButton>
+			{/if}
 		</Sidebar.Menu> 
 		
 		

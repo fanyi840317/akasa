@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 import { databases } from '../appwrite';
-import { ID } from 'appwrite';
+import { ID, Query } from 'appwrite';
 import type { Models } from 'appwrite';
 
 // Event数据类型定义
@@ -14,6 +14,7 @@ type Event = {
     user_id: string;
     creator_name?: string;
     creator_avatar?: string;
+    folder_id?: string;
 };
 
 type EventState = {
@@ -48,7 +49,8 @@ const createEventStore = () => {
                 
                 // 如果提供了用户ID，则按用户ID筛选
                 if (userId) {
-                    query.push(`user_id=${userId}`);
+                    
+                    query.push(Query.equal('user_id', userId));
                 }
                 
                 const response = await databases.listDocuments(
@@ -96,7 +98,7 @@ const createEventStore = () => {
         },
         
         // 创建新事件
-        createEvent: async (eventData: Omit<Event, '$id'>) => {
+        createEvent: async (eventData: Omit<Event, '$id'> & { folder_id?: string }) => {
             update(state => ({ ...state, loading: true, error: null }));
             try {
                 const newEvent = await databases.createDocument(
@@ -122,7 +124,7 @@ const createEventStore = () => {
         },
         
         // 更新事件
-        updateEvent: async (eventId: string, eventData: Partial<Event>) => {
+        updateEvent: async (eventId: string, eventData: Partial<Event> & { folder_id?: string }) => {
             update(state => ({ ...state, loading: true, error: null }));
             try {
                 const updatedEvent = await databases.updateDocument(

@@ -19,8 +19,27 @@ async function setupDatabase() {
         ]
     };
 
+    const eventsConfig = {
+        collectionId: 'events',
+        collectionName: 'event',
+        attributes: [
+            { name: "title", type: "string", size: 255, required: true },
+            { name: "location", type: "string", size: 255, required: false },
+            { name: "date", type: "datetime", required: false },
+            { name: "status", type: "string", size: 50, required: false, defaultValue: "pending" },
+            { name: "content", type: "string", size: 36000, required: false },
+            { name: "user_id", type: "string", size: 100, required: true },
+            { name: "creator_name", type: "string", size: 100, required: false },
+            { name: "creator_avatar", type: "string", size: 255, required: false },
+            { name: "folder_id", type: "string", size: 100, required: false }
+        ]
+    };
+
     try {
-        await setupCollection(config);
+        await Promise.all([
+            setupCollection(config),
+            setupCollection(eventsConfig)
+        ]);
     } catch (error) {
         console.error("❌ 数据库初始化失败:", error.message || error);
     }

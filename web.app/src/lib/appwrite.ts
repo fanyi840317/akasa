@@ -9,7 +9,7 @@ export const account = new Account(client);
 export const databases = new Databases(client);
 
 export const appwriteConfig = {
-    databaseId: '67ac15990027bfb157f9',
+    databaseId: '67d3a4480018e2e09b68',
     usersCollectionId: 'users',
     eventsCollectionId: 'events'
 };

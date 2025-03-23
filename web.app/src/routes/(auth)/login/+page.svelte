@@ -11,9 +11,9 @@
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
 
-  let email = "";
-  let password = "";
-  let loading = false;
+  let email = $state('');
+  let password = $state('');
+  let loading = $state(false);
 
   // 获取returnUrl参数
 
