@@ -48,7 +48,7 @@
 	import { goto } from "$app/navigation";
     import * as Card from "$lib/components/ui/card";
     import EventDetail from "./event-detail.svelte";
-    import { Save, Send } from "lucide-svelte";
+    import { Save } from "lucide-svelte";
 
 	let {
 		ref = $bindable(null),
@@ -65,9 +65,9 @@
 </script>
 
 <Dialog.Root bind:open={showDialog}>
-	<Dialog.Content class="sm:max-w-[800px] h-[80vh]">
+	<Dialog.Content class="sm:max-w-[900px] h-[80vh] px-0 py-10">
 		<EventDetail
-			eventTitle="新建事件"
+			eventTitle=""
 			eventLocation=""
 			eventDate=""
 			eventStatus="未开始"
@@ -85,7 +85,7 @@
 
 <Sidebar.Group>
 	<Sidebar.GroupLabel>私人</Sidebar.GroupLabel>
-	<Sidebar.GroupAction
+	<!-- <Sidebar.GroupAction
 		title="Add Project"
 		onclick={() => {
 			// goto("/console/events/new");
@@ -93,7 +93,7 @@
 		}}
 	>
 		<PlusCircle /> <span class="sr-only">Add Project</span>
-	</Sidebar.GroupAction>
+	</Sidebar.GroupAction> -->
 
 	<Card.Root class="shadow-none my-2 mx-2">
 		<form>

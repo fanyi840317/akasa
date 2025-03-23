@@ -14,6 +14,7 @@ async function setupDatabase() {
             { name: "status", type: "string", size: 50, required: false, defaultValue: "pending" },
             { name: "priority", type: "string", size: 20, required: false, defaultValue: "normal" },
             { name: "category", type: "string", size: 100, required: false },
+            { name: "folder_id", type: "string", size: 100, required: false },   // 关联的文件夹ID
             { name: "tags", type: "string", size: 500, required: false }
         ]
     };
