@@ -9,15 +9,19 @@
     import { page } from "$app/stores";
     import * as Card from "$lib/components/ui/card";
     import { Button } from "$lib/components/ui/button";
-    import { appStore, sidebarStore } from "$lib/stores/appState";
+    import { appStore } from "$lib/stores/appState";
+    import { navData } from "$lib/data/navigation-data";
     
-    // Sidebar 配置选项
+    /**
+     * Sidebar 组件 - 提供应用的主导航结构
+     * 统一使用appStore管理状态，避免状态管理混乱
+     */
     let {
         collapsible = 'none',
         collapsed = $bindable(false),
         side = "left" as "left" | "right",
         class: className = '',
-        selectedItem = null,
+        selectedItem = $state(appStore.get().selectedItem),
         onNavItemClick = (item: NavItem) => {},
         user = undefined,
     } = $props<{
@@ -30,22 +34,10 @@
         user?: User;
     }>();
     
-    // 从appStore获取选中状态
-    $effect(() => {
-        const state = appStore.get();
-        if (state.selectedItem !== selectedItem && state.selectedItem !== null) {
-            selectedItem = state.selectedItem;
-        }
+    // 订阅appStore以获取最新状态
+    appStore.subscribe(state => {
+        selectedItem = state.selectedItem;
     });
-    
-    // 将本地状态变化同步到store
-    $effect(() => {
-        if (selectedItem) {
-            appStore.setSelectedItem(selectedItem);
-        }
-    });
-    // 从数据源或存储中获取导航数据
-    import { navData } from "$lib/data/navigation-data";
     
     // 如果没有传入用户信息，则使用页面数据中的用户信息
     $effect(() => {

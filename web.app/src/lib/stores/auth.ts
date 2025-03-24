@@ -1,10 +1,10 @@
 import { writable, get } from 'svelte/store';
 import { account } from '../appwrite';
-import type { Models } from 'appwrite';
+import type { User } from '../types/user';
 import { ID } from 'appwrite';
 
 type AuthState = {
-    user: Models.User<Models.Preferences> | null;
+    user: User | null;
     loading: boolean;
     error: string | null;
 };
@@ -18,7 +18,7 @@ const createAuthStore = () => {
 
     return {
         subscribe,
-        setUser: (user: Models.User<Models.Preferences> | null) => update(state => ({ ...state, user })),
+        setUser: (user: User | null) => update(state => ({ ...state, user })),
         setLoading: (loading: boolean) => update(state => ({ ...state, loading })),
         setError: (error: string | null) => update(state => ({ ...state, error })),
         init: async () => {

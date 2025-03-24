@@ -23,13 +23,11 @@
    * @param {Snippet} actions - 右上角操作区域
    * @param {Snippet} footer - 底部区域
    * @param {{ name: string; path: string; }[]} titles - 页面标题数组
-   * @param {boolean} showLeftSidebar - 是否显示左侧导航栏
-   * @param {boolean} showLeftContent - 是否显示左侧内容区域
-   * @param {boolean} showRightSidebar - 是否显示右侧边栏
-   * @param {'floating' | 'inset'} leftViewMode - 左侧内容区域的显示模式：浮动或嵌入
-   * @param {string} contentClass - 主内容区域额外的样式类
+   * @param {boolean} showLeftView - 是否显示左侧内容区域
+   * @param {boolean} showRightView - 是否显示右侧内容区域
    * @param {boolean} showHeader - 是否显示头部区域
    * @param {boolean} showFooter - 是否显示底部区域
+   * @param {(item: NavItem | null) => void} onLeftViewChange - 左侧视图变更回调
    * @param {Snippet} dialogView - 对话框内容区域
    * @param {User} user - 用户信息
    */
@@ -40,7 +38,6 @@
     leftView = undefined,
     rightView = undefined,
     footer = undefined,
-    dialogView = undefined,
     showLeftView = false,
     showRightView = false,
     showHeader = true,
@@ -54,7 +51,6 @@
     leftView?: Snippet;
     rightView?: Snippet;
     footer?: Snippet;
-    dialogView?: Snippet;
     showLeftView?: boolean;
     showRightView?: boolean;
     showHeader?: boolean;
@@ -63,20 +59,27 @@
     user?: User;
   }>();
 
-  // 使用appStore中的状态
-  let sidebarCollapsed = $state(appStore.get().sidebarCollapsed);
-  let sidebarWidthIcon = appStore.get().sidebarWidthIcon;
-  let sidebarWidth = appStore.get().sidebarWidth;
-  let selectedItem = $state<string | null>(appStore.get().selectedItem);
-  let showDialog = $state(appStore.get().showDialog);
-  let dialogItem = $state<NavItem | null>(appStore.get().dialogItem);
+  /**
+   * 使用appStore统一管理状态
+   * 避免状态管理混乱和重复定义
+   */
+  let sidebarCollapsed = $state(false);
+  let sidebarWidthIcon = $state(56); // 默认值
+  let sidebarWidth = $state(256); // 默认值
+  let selectedItem = $state<string | null>(null);
+  let showDialog = $state(false);
+  let dialogItem = $state<NavItem | null>(null);
   
-  // 订阅appStore以获取最新状态
+  // 订阅appStore以获取最新状态，统一状态来源
   appStore.subscribe(state => {
     sidebarCollapsed = state.sidebarCollapsed;
+    sidebarWidthIcon = state.sidebarWidthIcon;
+    sidebarWidth = state.sidebarWidth;
     selectedItem = state.selectedItem;
     showDialog = state.showDialog;
     dialogItem = state.dialogItem;
+    showLeftView = state.showLeftView;
+    showRightView = state.showRightView;
   });
 
   $effect(() => {
@@ -110,13 +113,13 @@
   <div class="absolute z-10 h-full w-full">
     <div class="fixed inset-0 bg-card/20 backdrop-blur-sm"  
     transition:fade={{ duration: 200 }}
-    onclick={() => appStore.setShowLeftView(false)}
-    onkeydown={(e) => e.key === 'Escape' && appStore.setShowLeftView(false)}
+    on:click={() => appStore.setShowLeftView(false)}
+    on:keydown={(e) => e.key === 'Escape' && appStore.setShowLeftView(false)}
     role="button"
     tabindex="0"></div>
     <div
       class="bg-muted backdrop-blur-sm h-full absolute transition-[width,transform] duration-300 ease-in-out border-r shadow-lg overflow-hidden"
-      style="left: {sidebarCollapsed ? sidebarWidth : sidebarWidth}px; width: 400px;"
+      style="left: {sidebarCollapsed ? sidebarWidthIcon : sidebarWidth}px; width: 400px;"
       in:fly|local={{ x: -sidebarWidth, duration: 200 }}
       out:fly|local={{ x: -sidebarWidth, duration: 200 }}
     >
@@ -127,18 +130,14 @@
 {/if}
 
 <!-- Dialog组件 -->
-{#if showDialog && dialogView}
-  <Dialog.Root bind:open={showDialog} on:openChange={(e) => appStore.setShowDialog(e.detail)}>
-    {@render dialogView()}
-  </Dialog.Root>
-{/if}
+
 
 <Sidebar.Provider open={showRightView} style="--sidebar-width: {400}px">
   <Sidebar.Provider open={sidebarCollapsed} style="--sidebar-width: {sidebarWidth}px">
     <NavSidebar 
       collapsible="icon" 
       selectedItem={$page.url.pathname}
-      onNavItemClick={(item) => handleNavAction(item)}
+      on:navItemClick={(e) => handleNavAction(e.detail)}
       user={user}
     />
 
@@ -160,7 +159,7 @@
 
   <!-- 右侧内容区域 -->
 
-  <Sidebar.Root side="right" class="z-9">
+  <Sidebar.Root side="right" class="z-10">
     {#if rightView && showRightView}
     {@render rightView()}
     {/if}

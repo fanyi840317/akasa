@@ -46,21 +46,6 @@ export type ShellContext = {
   // setLeftViewItem: (item: PersonalItem | null) => void;
 };
 
-// 用户类型
-export interface User {
-  name: string;
-  email: string;
-  avatar: string;
-}
-
-// 地图数据类型
-export interface LocationData {
-  longitude: number;
-  latitude: number;
-  zoom?: number;
-  name?: string;
-}
-
 // 页面组件属性
 export interface PageProps {
   title: string;
@@ -69,10 +54,4 @@ export interface PageProps {
   className?: string;
 }
 
-// 个人导航项类型
-export interface PersonalItem extends NavItem {
-  // PersonalItem已经从NavItem继承了所有属性
-  // 包括unread属性用于显示未读消息数量
-  // 以及其他导航相关的属性
-}
 

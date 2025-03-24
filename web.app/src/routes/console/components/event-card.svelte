@@ -4,28 +4,24 @@
         AvatarImage,
         AvatarFallback,
     } from "$lib/components/ui/avatar";
-    import NotionPanel from "./notion-panel.svelte";
     
+    interface EventProps {
+        id: string;
+        title: string;
+        image: string;
+        location: string;
+        date: string;
+    }
+
     let { event, formatDate, onClick }: {
-        event: {
-            id: string;
-            title: string;
-            image: string;
-            location: string;
-            date: string;
-        };
+        event: EventProps;
         formatDate: (date: string) => string;
+        onClick?: (params: { event: MouseEvent }) => void;
     } = $props();
     
-    // 控制面板显示状态
-    
-    
-    // 点击事件处理函数
     function handleClick(event: MouseEvent) {
         onClick?.({ event });
     }
-    
-    
 </script>
 
 <div class="relative w-full px-2 py-4">

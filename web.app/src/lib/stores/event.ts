@@ -2,20 +2,9 @@ import { writable, get } from 'svelte/store';
 import { databases } from '../appwrite';
 import { ID, Query } from 'appwrite';
 import type { Models } from 'appwrite';
+import type { Event } from '../types/event';
 
 // Event数据类型定义
-type Event = {
-    $id?: string;
-    title: string;
-    location?: string;
-    date?: string;
-    status?: string;
-    content?: string;
-    user_id: string;
-    creator_name?: string;
-    creator_avatar?: string;
-    folder_id?: string;
-};
 
 type EventState = {
     events: Event[];

@@ -1,31 +1,9 @@
-export interface User {
-  id: string;
-  name: string;
-  avatar: string;
-  email: string;
-  role: 'investigator' | 'admin' | 'moderator';
-  level: number;
-  experience: number;
-  joinedAt: Date;
-  lastActiveAt: Date;
-  reputation: number;
-  badges: string[];
-  teamId?: string;
-  bio?: string;
-  followers?: number;
-  investigations?: number;
-  investigationSuccessRate?: number;
-  skills?: string[];
-  certifications?: string[];
-  socialLinks?: {
-    website?: string;
-    twitter?: string;
-    linkedin?: string;
-  };
-}
+
+import type { Models } from 'appwrite';
+export type User =  Models.User<Models.Preferences>  | null;
 
 export interface Team {
-  id: string;
+  $id: string;
   name: string;
   description: string;
   logo: string;

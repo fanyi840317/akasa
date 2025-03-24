@@ -32,20 +32,19 @@
 	let userEvents = $state([]);
 	let hasEvents = $state(false);
 	let isLoading = $state(false);
-	let selectedEventId = $state(""); // 当前选中的事件ID
+	/**
+	 * 当前选中的事件ID
+	 * 统一使用appStore管理状态，避免状态管理混乱
+	 */
+	let selectedEventId = $state("");
 
 	// 订阅appStore以获取最新的选中状态
-	
 	appStore.subscribe((state) => {
 		selectedEventId = state.selectedEventId || "";
 	});
 
-	// 将本地状态变化同步到store
-	$effect(() => {
-		if (selectedEventId) {
-			appStore.setSelectedEventId(selectedEventId);
-		}
-	});
+	// 不再需要手动同步到store，统一由事件处理函数处理
+	// 这样避免了双向绑定造成的循环更新问题
 	eventStore.subscribe((state) => {
 		userEvents = state.events;
 		hasEvents = state.events.length > 0;

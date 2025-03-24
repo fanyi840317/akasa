@@ -6,12 +6,16 @@
     import { Badge } from "$lib/components/ui/badge";
     import ChevronRight from "lucide-svelte/icons/chevron-right";
     import type { ComponentProps } from "svelte";
-    import { sidebarStore } from "$lib/stores/appState";
+    import { appStore } from "$lib/stores/appState";
 
+    /**
+     * 导航组件 - 显示导航菜单项
+     * 统一使用appStore管理状态，避免状态管理混乱
+     */
     let {
         items = [],
         label = "",
-        selectedItem = null,
+        selectedItem = $state(appStore.get().selectedItem),
         onNavItemClick = (item: NavItem) => {},
         ref = $bindable(null),
         ...restProps
@@ -28,20 +32,11 @@
     // 打开的子菜单状态
     let openItem = $state<string | null>(null);
     
-    // 从sidebarStore获取选中状态
-    $effect(() => {
-        const state = sidebarStore.get();
-        if (state.selectedItem !== selectedItem && state.selectedItem !== null) {
-            selectedItem = state.selectedItem;
-        }
+    // 订阅appStore以获取最新状态
+    appStore.subscribe(state => {
+        selectedItem = state.selectedItem;
     });
-    
-    // 将本地状态变化同步到store
-    $effect(() => {
-        if (selectedItem) {
-            sidebarStore.setSelectedItem(selectedItem);
-        }
-    });
+
 
     // $effect(() => {
     //     // 根据当前路径设置展开状态
@@ -57,7 +52,10 @@
     //     }
     // });
 
-    // 处理导航项点击
+    /**
+     * 处理导航项点击
+     * 统一使用appStore管理状态，避免状态管理混乱
+     */
     function handleItemClick(item: NavItem) {
         // 如果项目状态为disabled，不执行任何操作
         if (item.state === "disabled") {
@@ -75,8 +73,8 @@
         if (item.url) {
             // 如果有URL，进行导航
             goto(item.url);
-            // 更新sidebarStore中的选中状态，同时清除事件选中状态
-            sidebarStore.setSelectedItem(item.url);
+            // 更新appStore中的选中状态，同时清除事件选中状态
+            appStore.setSelectedItem(item.url);
         }
         if (item.items?.length) {
             // 如果有子项，切换展开状态
