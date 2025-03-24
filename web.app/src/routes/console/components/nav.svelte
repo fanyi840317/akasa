@@ -6,6 +6,7 @@
     import { Badge } from "$lib/components/ui/badge";
     import ChevronRight from "lucide-svelte/icons/chevron-right";
     import type { ComponentProps } from "svelte";
+    import { sidebarStore } from "$lib/stores/appState";
 
     let {
         items = [],
@@ -26,20 +27,35 @@
 
     // 打开的子菜单状态
     let openItem = $state<string | null>(null);
-
+    
+    // 从sidebarStore获取选中状态
     $effect(() => {
-        // 根据当前路径设置展开状态
-        if (selectedItem) {
-            const activeItem = items.find(
-                (item: NavItem) =>
-                    item.url === selectedItem ||
-                    item.items?.some((subItem) => subItem.url === selectedItem),
-            );
-            if (activeItem) {
-                openItem = activeItem.title;
-            }
+        const state = sidebarStore.get();
+        if (state.selectedItem !== selectedItem && state.selectedItem !== null) {
+            selectedItem = state.selectedItem;
         }
     });
+    
+    // 将本地状态变化同步到store
+    $effect(() => {
+        if (selectedItem) {
+            sidebarStore.setSelectedItem(selectedItem);
+        }
+    });
+
+    // $effect(() => {
+    //     // 根据当前路径设置展开状态
+    //     if (selectedItem) {
+    //         const activeItem = items.find(
+    //             (item: NavItem) =>
+    //                 item.url === selectedItem ||
+    //                 item.items?.some((subItem) => subItem.url === selectedItem),
+    //         );
+    //         if (activeItem) {
+    //             openItem = activeItem.title;
+    //         }
+    //     }
+    // });
 
     // 处理导航项点击
     function handleItemClick(item: NavItem) {
@@ -59,6 +75,8 @@
         if (item.url) {
             // 如果有URL，进行导航
             goto(item.url);
+            // 更新sidebarStore中的选中状态，同时清除事件选中状态
+            sidebarStore.setSelectedItem(item.url);
         }
         if (item.items?.length) {
             // 如果有子项，切换展开状态
@@ -74,8 +92,15 @@
         if (item.clickOnly || item.state === "disabled") {
             return false;
         }
+        
+        // 如果item有isActive属性且为true，直接返回true
+        if (item.isActive === true) {
+            return true;
+        }
+        
         if (item.url) {
             const pathname = $page.url.pathname;
+            
             // 精确匹配：完全相同的路径
             if (pathname === item.url) {
                 return true;
@@ -87,14 +112,17 @@
             }
             
             // 父路径匹配：确保只有直接子路径会被匹配
-            // 例如：/console/events 会匹配 /console/events/123，但不会匹配 /console/eventsother
-            if (pathname.startsWith(item.url)) {
-                // 确保是子路径而不是前缀匹配
-                // 检查item.url后面是否跟着/或者已经到达路径末尾
-                const nextChar = pathname.charAt(item.url.length);
-                return nextChar === '/' || nextChar === '';
+            if (pathname.startsWith(item.url + '/')) {
+                // 已经确保是子路径而不是前缀匹配
+                return true;
+            }
+            
+            // 检查是否为子项目的激活状态
+            if (item.items?.length) {
+                return item.items.some(subItem => isActive(subItem));
             }
         }
+        
         return false;
     }
 </script>

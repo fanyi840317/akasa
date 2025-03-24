@@ -32,6 +32,7 @@
         getLocalTimeZone,
     } from "@internationalized/date";
     import { RangeCalendar } from "$lib/components/ui/range-calendar";
+    import MapFloat from "$lib/components/map-float.svelte";
 
     // 组件属性类型定义
     interface Props {
@@ -48,7 +49,7 @@
     // 组件属性
     let {
         eventTitle = "",
-        eventLocation = "",
+        eventLocation = "成都市武侯区天府三街",
         eventDate = "",
         eventStatus = "未开始",
         creator = {
@@ -96,6 +97,12 @@
             eventDate = "";
         }
     }
+
+    // 地图位置数据
+    let locationCoords = $state({
+        longitude: 104.06,
+        latitude: 30.67
+    });
 </script>
 
 <ScrollArea class="h-[calc(100vh-4rem)] py-4">
@@ -165,6 +172,12 @@
                                             "text-muted-foreground/70",
                                     )}
                                     size="sm"
+                                    onclick={() => {
+                                        // 如果有位置信息，显示地图浮窗
+                                        if (eventLocation) {
+                                            // 这里可以添加显示地图浮窗的逻辑
+                                        }
+                                    }}
                                 >
                                     <!-- <MapPin class="h-4 w-4 mr-2" /> -->
                                     {eventLocation || "添加位置"}
@@ -227,17 +240,15 @@
         </div>
 
         <!-- 按钮区域 -->
-        <div class="px-24 py-6 ">
-            <div class="flex justify-start gap-4">
-                <Button variant="secondary" class="font-normal h-7 px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                    <Save class="h-4 w-4" />
-                    保存
-                </Button>
-                <Button variant="secondary" class="font-normal h-7 px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                    <Send class="h-4 w-4" />
-                    发表
-                </Button>
-            </div>
-        </div>
+       
     </div>
 </ScrollArea>
+
+<!-- 地图浮窗 -->
+{#if eventLocation}
+    <MapFloat 
+        locationName={eventLocation} 
+        locationData={locationCoords} 
+        showUserLocation={true}
+    />
+{/if}

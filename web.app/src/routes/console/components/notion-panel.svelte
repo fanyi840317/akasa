@@ -45,6 +45,7 @@
 
     // 处理关闭事件
     function handleClose() {
+        open = false;
         dispatch("close");
     }
 
@@ -84,14 +85,14 @@
             >
                 {#if showBackdrop}
                     <div
-                        class="w-full h-full bg-background/80 backdrop-blur-sm"
+                        class="w-full h-full "
                         transition:fade={{ duration: 200 }}
                     ></div>
                 {/if}
             </Resizable.Pane>
             <Resizable.Handle withHandle />
             <Resizable.Pane defaultSize={width} maxSize={maxWidth} minSize={width-10}
-                        class="bg-muted shadow-lg" >
+                        class="bg-background shadow-lg" >
                 {#if showHeader}
                     <!-- 面板头部 -->
                     <div class="flex items-center justify-between px-4 py-2">

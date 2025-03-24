@@ -9,6 +9,7 @@
     import { page } from "$app/stores";
     import * as Card from "$lib/components/ui/card";
     import { Button } from "$lib/components/ui/button";
+    import { appStore, sidebarStore } from "$lib/stores/appState";
     
     // Sidebar 配置选项
     let {
@@ -28,6 +29,21 @@
         onNavItemClick?: (item: NavItem) => void;
         user?: User;
     }>();
+    
+    // 从appStore获取选中状态
+    $effect(() => {
+        const state = appStore.get();
+        if (state.selectedItem !== selectedItem && state.selectedItem !== null) {
+            selectedItem = state.selectedItem;
+        }
+    });
+    
+    // 将本地状态变化同步到store
+    $effect(() => {
+        if (selectedItem) {
+            appStore.setSelectedItem(selectedItem);
+        }
+    });
     // 从数据源或存储中获取导航数据
     import { navData } from "$lib/data/navigation-data";
     
@@ -46,7 +62,7 @@
     });
 </script>
 
-<Sidebar.Root {collapsible} {side}>
+<Sidebar.Root {collapsible} {side} variant="inset">
     <Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>

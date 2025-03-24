@@ -75,10 +75,10 @@
 
 <style>
     :global(embed-card-create-modal .embed-card-modal-mask) {
-        z-index: 10000;
+        z-index: 200000;
     }
     :global(embed-card-create-modal .embed-card-modal-wrapper) {
-        z-index: 10001;
+        z-index: 200001;
     }
     /* 隐藏文档标题 */
     /* :global(doc-title) {

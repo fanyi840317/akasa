@@ -12,6 +12,8 @@
   import * as Dialog from "$lib/components/ui/dialog";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import { Separator } from "$lib/components/ui/separator";
+  import { appStore,sidebarStore } from "$lib/stores/appState";
+  
 
   /**
    * 控制台主外壳组件 - 提供整体布局骨架
@@ -61,17 +63,26 @@
     user?: User;
   }>();
 
-  let sidebarCollapsed = $state(true);
-  let sidebarWidthIcon = 56;
-  let sidebarWidth = 256;
-  let selectedItem = $state<string | null>(null);
-  let showDialog = $state(false);
-  let dialogItem = $state<NavItem | null>(null);
+  // 使用appStore中的状态
+  let sidebarCollapsed = $state(appStore.get().sidebarCollapsed);
+  let sidebarWidthIcon = appStore.get().sidebarWidthIcon;
+  let sidebarWidth = appStore.get().sidebarWidth;
+  let selectedItem = $state<string | null>(appStore.get().selectedItem);
+  let showDialog = $state(appStore.get().showDialog);
+  let dialogItem = $state<NavItem | null>(appStore.get().dialogItem);
+  
+  // 订阅appStore以获取最新状态
+  appStore.subscribe(state => {
+    sidebarCollapsed = state.sidebarCollapsed;
+    selectedItem = state.selectedItem;
+    showDialog = state.showDialog;
+    dialogItem = state.dialogItem;
+  });
 
   $effect(() => {
     const currentPath = $page.url.pathname;
     if (currentPath) {
-      selectedItem = currentPath;
+      appStore.setSelectedItem(currentPath);
     }
   });
 
@@ -80,14 +91,13 @@
     
     // 处理左侧视图变更
     if (!action || action === 'leftView') {
-      showLeftView = !showLeftView;
+      appStore.toggleLeftView();
       onLeftViewChange(item);
     }
     
     // 处理模态框显示
     if (item && item.onClickAction === 'modal') {
-      dialogItem = item;
-      showDialog = true;
+      appStore.setShowDialog(true, item);
     }
   }
 
@@ -100,8 +110,8 @@
   <div class="absolute z-10 h-full w-full">
     <div class="fixed inset-0 bg-card/20 backdrop-blur-sm"  
     transition:fade={{ duration: 200 }}
-    onclick={() => showLeftView = false}
-    onkeydown={(e) => e.key === 'Escape' && (showLeftView = false)}
+    onclick={() => appStore.setShowLeftView(false)}
+    onkeydown={(e) => e.key === 'Escape' && appStore.setShowLeftView(false)}
     role="button"
     tabindex="0"></div>
     <div
@@ -118,7 +128,7 @@
 
 <!-- Dialog组件 -->
 {#if showDialog && dialogView}
-  <Dialog.Root bind:open={showDialog}>
+  <Dialog.Root bind:open={showDialog} on:openChange={(e) => appStore.setShowDialog(e.detail)}>
     {@render dialogView()}
   </Dialog.Root>
 {/if}

@@ -11,6 +11,7 @@
     import { onMount, onDestroy, setContext } from "svelte";
     import { browser } from "$app/environment";
     import { writable } from "svelte/store";
+    import { createEventDispatcher } from "svelte";
     import AffineEditor from "$lib/components/editor/affine-editor.svelte";
     import type { AppState } from "$lib/components/editor/affine-editor";
     import { eventStore } from "$lib/stores/event";
@@ -74,14 +75,6 @@
         // 延迟一点时间后让编辑器获得焦点
     });
 
-    // 自动聚焦函数
-    const autofocus = (node: HTMLInputElement) => {
-        titleInput = node;
-        return {
-            destroy: () => {},
-        };
-    };
-
     // 处理日期变化
     function handleDateChange(date: DateValue) {
         dateValue = date;
@@ -103,6 +96,9 @@
         // 由于当前实现可能不支持直接获取，我们先使用空字符串
         return editorContent;
     }
+
+    // 创建事件分发器
+    const dispatch = createEventDispatcher();
 
     async function publishToAppwrite() {
         if (!eventTitle) {
@@ -134,6 +130,9 @@
             const result = await eventStore.createEvent(eventData);
 
             toast.success("事件已成功发布！");
+            
+            // 发布成功后，触发close事件通知父组件关闭对话框，并传递新创建的事件ID
+            dispatch("close", { eventId: result.$id });
         } catch (e: any) {
             console.error("发布事件失败:", e);
             toast.error(e.message || $_("event.publish_failed"));
@@ -187,6 +186,7 @@
                 </Popover.Root>
             </div>
         </div>
+        
         <!-- 描述区域 -->
         <div class="flex-1 flex flex-col">
             <AffineEditor docId="event-doc" class="flex-1" />
@@ -200,7 +200,7 @@
         <Button
             onclick={publishToAppwrite}
             disabled={isPublishing}
-            variant="outline"
+            variant="ghost"
             class="gap-2"
         >
             <Send class="h-4 w-4" />

@@ -4,8 +4,9 @@
         AvatarImage,
         AvatarFallback,
     } from "$lib/components/ui/avatar";
+    import NotionPanel from "./notion-panel.svelte";
     
-    let { event, formatDate }: {
+    let { event, formatDate, onClick }: {
         event: {
             id: string;
             title: string;
@@ -15,10 +16,20 @@
         };
         formatDate: (date: string) => string;
     } = $props();
+    
+    // 控制面板显示状态
+    
+    
+    // 点击事件处理函数
+    function handleClick(event: MouseEvent) {
+        onClick?.({ event });
+    }
+    
+    
 </script>
 
 <div class="relative w-full px-2 py-4">
-    <div class="flex items-center p-4 gap-6 group cursor-pointer bg-card/40 shadow-md hover:-translate-y-2 transition-transform hover:shadow-lg rounded-lg w-full">
+    <div class="flex items-center p-4 gap-6 group cursor-pointer bg-card/40 shadow-md hover:-translate-y-2 transition-transform hover:shadow-lg rounded-lg w-full" onclick={handleClick}>
         <div class="relative h-16 flex-shrink-0">
             <img src={event.image} alt={event.title} class="h-16 w-16 rounded-full object-cover" />
             <div class="absolute -bottom-2 -right-2">

@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { LayoutData } from "./$types";
     import type { Snippet } from "svelte";
-    import { Shell } from "./components/index.js";
+    import { NotionPanel, Shell } from "./components/index.js";
     import { setContext } from 'svelte';
     import { page } from "$app/stores";
     import { ScrollArea } from "$lib/components/ui/scroll-area";
@@ -25,6 +25,7 @@
     }>();
 
     let showLeftView = $state(false);
+    let showRightPanel = $state(false);
     let showRightView = $state(false);
     let selectedTemplate = $state<any>(null);
 
@@ -147,3 +148,18 @@
 />
 
 
+<!-- 事件详情面板 -->
+<!-- <NotionPanel 
+    open={showRightPanel} 
+    title={event.title}
+    width={40}
+    maxWidth={60}
+    showHeader={true}
+    showFooter={false}
+    contentView={panelContent}
+    properties={[
+        { label: "位置", value: selectedEvent?.location },
+        { label: "日期", value: selectedEvent?.date ? formatDate(selectedEvent.date) : '未设置' }
+    ]}
+    on:close={handleClosePanel}
+/> -->

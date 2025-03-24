@@ -2,15 +2,15 @@
     import type { PageData } from "./$types";
     import { Button } from "$lib/components/ui/button";
     import type { ShellContext } from "../components/types";
-    
+
     import { _ } from "svelte-i18n";
-    import {
-        Search,
-        MapPin,
-        PlusCircle,
-    } from "lucide-svelte";
+    import { Search, MapPin, PlusCircle } from "lucide-svelte";
     import Map from "$lib/components/map.svelte";
-    import { EventList, NotionPanel } from "../components/index.js";
+    import {
+        EventList,
+        NotionPanel,
+        EventDetail,
+    } from "../components/index.js";
     import CategoryList from "../components/category-list.svelte";
     import { getContext, setContext } from "svelte";
     import { writable } from "svelte/store";
@@ -18,7 +18,9 @@
     import { goto } from "$app/navigation";
 
     let { data }: { data: PageData } = $props();
-    
+
+    // 选中的事件数据
+    let selectedEvent = $state(null);
 
     // 地点分类数据
     const placeCategories = [
@@ -205,6 +207,33 @@
     <div
         class="absolute bottom-6 left-0 right-0 z-20 mx-auto max-w-[1200px] px-14"
     >
-        <EventList class="" {events} />
+        <EventList
+            class=""
+            {events}
+            on:cardclick={({ detail }) => {
+                showCreatePanel=true;
+                selectedEvent = detail.event;
+            }}
+        />
     </div>
+    {#snippet contentView()}
+        <EventDetail
+            {eventTitle}
+            {eventLocation}
+            {eventDate}
+            {eventStatus}
+            on:createEvent={handleCreateEvent}
+            on:closePanel={handleClosePanel}
+        />
+    {/snippet}
+    <!-- NotionPanel组件 -->
+    <NotionPanel
+        open={showCreatePanel}
+        title={selectedEvent?.title || ""}
+        on:close={() => {
+            setShowRightView(false);
+            selectedEvent = null;
+        }}
+        {contentView}
+    />
 </div>

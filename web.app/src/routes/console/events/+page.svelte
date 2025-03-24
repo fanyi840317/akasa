@@ -110,7 +110,7 @@
     }
 </script>
 
-<ScrollArea class="h-[calc(100vh-1rem)]">
+<ScrollArea class="h-[calc(100vh-1rem)] ">
 <div class="container mx-auto p-16 space-y-10">
     <!-- 页面标题和搜索栏 -->
     <div
@@ -153,15 +153,10 @@
                 image={event.image}
                 tags={event.tags}
                 rating={event.rating}
+                
             />
         {/each}
             </div>
     </div>
 
-    <!-- 分页控件 -->
-        <div class="flex justify-center mt-8"></div>
-    </div>
-    <div class="fixed bottom-20 right-4">
-        <ShareButton on:click={() => (showSharePanel = true)} />
-</div>
 </ScrollArea>

@@ -3,6 +3,7 @@
     import { TemplateCard, DatabaseCard, PageCard } from "$lib/components/notion-cards";
     import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
     import type { ShellContext } from "./components/types";
+	import { goto } from '$app/navigation';
     // import type { PersonalItem } from "./components/types";
     import { 
         LayoutTemplate,
@@ -15,9 +16,12 @@
         Table,
         FileText,
         Kanban,
-        X
+        X,
+
+        GhostIcon
+
     } from "lucide-svelte";
-    import { getContext } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     import type { Snippet } from "svelte";
 
     type CardColor = "blue" | "green" | "purple" | "amber";
@@ -40,7 +44,9 @@
         showRightView = false;
         selectedTemplate = null;
     }
-
+    onMount(() => {
+        goto("/console/events");
+    });
     // function handleLeftViewChange(item: PersonalItem | null) {
     //     console.log('Page: Left view item changed:', item);
     //     leftViewItem = item;
@@ -125,7 +131,9 @@
     ];
 </script>
 
-
+{#snippet sada()}
+    
+{/snippet}
 <ScrollArea class="h-[calc(100vh-1rem)]">
     <div class="max-w-5xl mx-auto px-8 py-10 space-y-16">
         <!-- 欢迎信息 -->

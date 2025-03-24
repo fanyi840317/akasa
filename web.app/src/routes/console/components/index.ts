@@ -19,6 +19,7 @@ export { default as SearchBox } from '../../../lib/components/search-box.svelte'
 export { default as EventList } from './event-list.svelte';
 export { default as EventCard } from './event-card.svelte';
 export { default as CategoryList } from './category-list.svelte';
+export { default as EventDetail } from './event-detail.svelte';
 
 // Notion 风格组件
 export { default as NotionPanel } from './notion-panel.svelte';
