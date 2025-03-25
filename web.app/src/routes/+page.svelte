@@ -5,7 +5,7 @@
     import { Clock, ArrowRight } from "lucide-svelte";
     import { onMount, onDestroy } from "svelte";
     import { _, locale } from 'svelte-i18n';
-    import LanguageToggle from "$lib/components/language-toggle.svelte";
+    import LanguageToggle from "$lib/components/website/language-toggle.svelte";
     import { setMode } from "mode-watcher";
 
     const data = $props();

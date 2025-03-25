@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 import { createLocalStorageStore } from './localStorage';
-import type { NavItem } from '../../routes/console/components/types';
+import type { NavItem } from '../types/types';
 
 type AppState = {
     // 导航相关状态

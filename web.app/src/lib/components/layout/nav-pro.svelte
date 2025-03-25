@@ -10,7 +10,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { goto } from "$app/navigation";
 	import * as Card from "$lib/components/ui/card";
-	import EventDetail from "./event-detail.svelte";
+	import EventDetail from "../console/event-detail.svelte";
 	import { Ellipsis, Forward, Plus, Save, Trash2 } from "lucide-svelte";
 	import { auth } from "$lib/stores/auth";
 	import { get } from "svelte/store";

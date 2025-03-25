@@ -24,7 +24,7 @@ import {
   MessageSquare
 } from "lucide-svelte";
 
-import type { NavItem, PersonalItem, User } from "../../routes/console/components/types";
+import type { NavItem, PersonalItem, User } from "../types/types";
 
 /**
  * 应用导航数据配置

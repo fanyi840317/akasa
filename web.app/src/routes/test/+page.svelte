@@ -1,9 +1,9 @@
 <script lang="ts">
-    import AffineEditor from "$lib/components/editor/affine-editor.svelte";
-    import type { AppState } from "$lib/components/editor/affine-editor";
+    import AffineEditor from "$lib/components/ui/editor/affine-editor.svelte";
+    import type { AppState } from "$lib/components/ui/editor/affine-editor";
     import { writable } from "svelte/store";
     import { setContext } from "svelte";
-    import EventDetail from "../console/components/event-detail.svelte";
+    import EventDetail from "../../lib/components/console/event-detail.svelte";
 
     // 事件属性
     let eventTitle = "测试事件";

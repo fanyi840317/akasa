@@ -1,36 +1,32 @@
 # akasa
 
-#### Description
-{**When you're done, you can delete the content in this README and update the file with details for others getting started with your repository**}
+## Project Overview
+A modern web application built with SvelteKit and Appwrite backend, providing efficient data management capabilities.
 
-#### Software Architecture
-Software architecture description
+## Tech Stack
+- **Frontend**: SvelteKit + Tailwind CSS
+- **Backend**: Appwrite BaaS
+- **Database**: Appwrite Database with JSON schema
 
-#### Installation
+## Quick Start
+```bash
+# Install dependencies
+pnpm install
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+# Initialize database (requires Appwrite endpoint & API key)
+node db/setup_database.js
 
-#### Instructions
+# Start dev server
+cd web.app && pnpm run dev
+```
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## Project Structure
+`web.app/` contains:
+- `src/routes/` - Page components
+- `src/lib/` - Shared utilities
+- `static/` - CSS/font assets
 
-#### Contribution
-
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
-
-
-#### Gitee Feature
-
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+## Contribution Guidelines
+1. Fork repository
+2. Create feature branch
+3. Submit PR with description

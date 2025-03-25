@@ -10,11 +10,11 @@
         Users,
         Star,
     } from "lucide-svelte";
-    import EventCard from "$lib/components/notion-cards/event-card.svelte";
-    import TagNav from "$lib/components/nav/tag-nav.svelte";
+    import EventCard from "$lib/components/ui/notion-cards/event-card.svelte";
+    import TagNav from "$lib/components/ui/tag-nav/tag-nav.svelte";
     import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
-    import ShareButton from "$lib/components/share/share-button.svelte";
-    import SharePanel from "$lib/components/share/share-panel.svelte";
+    import ShareButton from "$lib/components/ui/share/share-button.svelte";
+    import SharePanel from "$lib/components/ui/share/share-panel.svelte";
 
     let { data }: { data: PageData } = $props();
     let showSharePanel = $state(false);

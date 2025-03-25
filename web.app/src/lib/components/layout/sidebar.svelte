@@ -5,7 +5,8 @@
     import NavUser from "./nav-user.svelte";
     import NavPro from "./nav-pro.svelte";
     import Command from "lucide-svelte/icons/command";
-    import type { NavItem, User } from "./types";
+    import type { NavItem } from "$lib/types/types";
+    import type { User } from "$lib/types/user";
     import { page } from "$app/stores";
     import * as Card from "$lib/components/ui/card";
     import { Button } from "$lib/components/ui/button";
@@ -21,7 +22,7 @@
         collapsed = $bindable(false),
         side = "left" as "left" | "right",
         class: className = '',
-        selectedItem = $state(appStore.get().selectedItem),
+        selectedItem = "",
         onNavItemClick = (item: NavItem) => {},
         user = undefined,
     } = $props<{
@@ -54,7 +55,7 @@
     });
 </script>
 
-<Sidebar.Root {collapsible} {side} variant="inset">
+<Sidebar.Root {collapsible} {side} >
     <Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>

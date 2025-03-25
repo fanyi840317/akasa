@@ -1,22 +1,21 @@
 <script lang="ts">
   import { cn } from "$lib/utils";
   import * as Carousel from "$lib/components/ui/carousel";
-  import EventCard from "./event-card.svelte";
-  import { createEventDispatcher } from "svelte";
-
+  import type { Event } from "$lib/types/event";
   import {
     Avatar,
     AvatarImage,
     AvatarFallback,
   } from "$lib/components/ui/avatar";
-  import type { Event } from "$lib/types/event";
 
   let {
     events = [],
     class: className = "",
+    cardclick,
   }: {
     events: Event[];
     class?: string;
+    cardclick?: (event: Event) => void;
   } = $props();
 
   function formatDate(dateString: string) {
@@ -26,13 +25,6 @@
       month: "long",
       day: "numeric",
     });
-  }
-
-  function onClick(event: CustomEvent) {
-    const { detail } = event;
-
-    // 触发父组件处理卡片点击事件
-    // dispatch("cardclick", detail);
   }
 </script>
 
@@ -52,7 +44,7 @@
           <div class="relative w-full px-2 py-4">
             <div
               class="flex items-center p-4 gap-6 group cursor-pointer bg-card/40 shadow-md hover:-translate-y-2 transition-transform hover:shadow-lg rounded-lg w-full"
-              onclick={handleClick}
+              onclick={cardclick(event)}
             >
               <div class="relative h-16 flex-shrink-0">
                 <img

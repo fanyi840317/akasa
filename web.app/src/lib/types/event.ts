@@ -50,6 +50,7 @@ export type Event =  {
   creator_avatar?: string;
   folder_id?: string;
 };
+export type Tag = { $id?: string; name: string; };
 // Event {
 //   id: string;
 //   title: string;

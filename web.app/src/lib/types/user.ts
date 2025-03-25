@@ -2,7 +2,7 @@
 import type { Models } from 'appwrite';
 export type User =  Models.User<Models.Preferences>  | null;
 
-export interface Team {
+export type Team = {
   $id: string;
   name: string;
   description: string;
