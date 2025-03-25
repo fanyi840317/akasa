@@ -3,7 +3,7 @@
     import type { AppState } from "$lib/components/ui/editor/affine-editor";
     import { writable } from "svelte/store";
     import { setContext } from "svelte";
-    import EventDetail from "../../lib/components/console/event-detail.svelte";
+    import EventDetail from "../../lib/components/console/create-event.svelte";
 
     // 事件属性
     let eventTitle = "测试事件";

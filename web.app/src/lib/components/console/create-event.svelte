@@ -50,19 +50,28 @@
 
   // 组件属性类型定义
   interface Props {
-    x_evnet: Event;
+    x_event?: Event;
   }
   // 组件属性
-  let { x_evnet }: Props = $props();
+  let { x_event }: Props = $props();
 
-  let titleInput: HTMLInputElement;
+  if (!x_event) {
+    x_event = {
+      title: "",
+      content: "",
+      location: "",
+      date: "",
+      user_id: "",
+    };
+  }
+
   let dateValue: DateValue | undefined = undefined;
 
   // 日期格式化器
   const df = new DateFormatter("zh-CN", {
     dateStyle: "long",
   });
-  let newDoc: HtmlDoc = $state({ content: x_evnet.content });
+  let newDoc: HtmlDoc = $state({ content: x_event?.content });
   // let newDoc: Doc | undefined = undefined;
   onMount(async () => {
     // 自动聚焦到标题输入框
@@ -99,8 +108,9 @@
 
   async function publishToAppwrite() {
     console.log(getEditorContent());
-    // return;
-    if (!x_evnet?.title) {
+
+    // 标题已通过Input组件双向绑定到x_event.title
+    if (!x_event?.title) {
       toast.error($_("validation.title_required"));
       return;
     }
@@ -120,16 +130,16 @@
         return;
       }
       // 准备事件数据
-      x_evnet.content = content;
-      x_evnet.user_id = user.$id;
+      x_event.content = content;
+      x_event.user_id = user.$id;
 
       // 使用eventStore创建事件
-      const result = await eventStore.createEvent(x_evnet);
+      const result = await eventStore.createEvent(x_event);
 
       toast.success("事件已成功发布！");
 
       // 发布成功后，触发close事件通知父组件关闭对话框，并传递新创建的事件ID
-      dispatch("close", { eventId: result.$id });
+      dispatch("close", { result: result });
     } catch (e: any) {
       console.error("发布事件失败:", e);
       toast.error(e.message || $_("event.publish_failed"));
@@ -139,43 +149,17 @@
   }
 </script>
 
-<!-- <div class="absolute px-4 top-4 left-0 w-full">
-  <Button
-    variant="outline"
-    class={cn(
-      " text-left  font-normal h-7 px-2 py-1",
-      !eventLocation && "text-muted-foreground/70"
-    )}
-    size="sm"
-  >
-    <MapPin class="h-3 w-3" />
-    {eventLocation || "添加位置"}
-  </Button>
-  <Popover.Root>
-    <Popover.Trigger>
-      <Button
-        variant="outline"
-        class={cn(
-          " justify-start text-left  font-normal h-7 px-2 py-1",
-          !dateValue && "text-muted-foreground/70"
-        )}
-        size="sm"
-      >
-        <CalendarIcon class="h-3 w-3" />
-        {dateValue
-          ? df.format(dateValue.toDate(getLocalTimeZone()))
-          : "选择发生日期"}
-      </Button>
-    </Popover.Trigger>
-    <Popover.Content class="w-auto p-0" align="start">
-      <RangeCalendar
-        type="single"
-        bind:value={dateValue}
-        on:valueChange={(e) => handleDateChange(e.detail)}
-      />
-    </Popover.Content>
-  </Popover.Root>
-</div> -->
+<!-- 标题输入区域 - Notion风格 -->
+<div class="px-24 py-6">
+  <input
+    id="title"
+    type="text"
+    placeholder="无标题"
+    bind:value={x_event.title}
+    class="notion-title-input text-4xl font-bold border-none shadow-none focus-visible:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
+  />
+</div>
+
 <ScrollArea orientation="vertical" class="h-[calc(100vh-200px)]">
   <AffineEditor htmlDoc={newDoc} />
 </ScrollArea>
@@ -188,12 +172,12 @@
       variant="outline"
       class={cn(
         " text-left  font-normal h-7 px-2 py-1 bg-background/80 backdrop-blur-smp-4",
-        !eventLocation && "text-muted-foreground/70"
+        !x_event?.location && "text-muted-foreground/70",
       )}
       size="sm"
     >
       <MapPin class="h-3 w-3" />
-      {eventLocation || "添加位置"}
+      {x_event?.location || "添加位置"}
     </Button>
     <Popover.Root>
       <Popover.Trigger>
@@ -201,7 +185,7 @@
           variant="outline"
           class={cn(
             " justify-start text-left  font-normal h-7 px-2 py-1",
-            !dateValue && "text-muted-foreground/70"
+            !dateValue && "text-muted-foreground/70",
           )}
           size="sm"
         >
@@ -220,7 +204,7 @@
       </Popover.Content>
     </Popover.Root>
     <Button
-      on:click={publishToAppwrite}
+      onclick={publishToAppwrite}
       disabled={isPublishing}
       variant="ghost"
       class="gap-2 bg-background/80 backdrop-blur-smp-4 h-7 px-2 py-1"

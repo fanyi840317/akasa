@@ -30,18 +30,6 @@ export async function createDocByHtml(html: string) {
   }
   console.log(page);
   return page;
-
-  // return {
-  //   doc,
-  //   init() {
-  //     doc.load();
-  //     const rootId = doc.addBlock('affine:page', {});
-  //     doc.addBlock('affine:surface', {}, rootId);
-  //     const noteId = doc.addBlock('affine:note', {}, rootId);
-  //     doc.addBlock('affine:paragraph', {}, noteId);
-  //     return doc;
-  //   },
-  // };
 }
 
 export async function exportDoc(doc: Doc) {

@@ -10,7 +10,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { goto } from "$app/navigation";
 	import * as Card from "$lib/components/ui/card";
-	import EventDetail from "../console/event-detail.svelte";
+	import EventDetail from "../console/create-event.svelte";
 	import { Ellipsis, Forward, Plus, Save, Trash2 } from "lucide-svelte";
 	import { auth } from "$lib/stores/auth";
 	import { get } from "svelte/store";
@@ -40,6 +40,7 @@
 
 	// 订阅appStore以获取最新的选中状态
 	appStore.subscribe((state) => {
+		alert(selectedEventId)
 		selectedEventId = state.selectedEventId || "";
 	});
 
@@ -133,7 +134,7 @@
 		<Sidebar.GroupContent>
 			<Sidebar.Menu>
 				{#each userEvents as event}
-					{@render Files({ id: event.$id, title: event.title })}
+					{@render events({ id: event.$id, title: event.title })}
 					<!-- <div class="relative group">
 						<Sidebar.MenuButton isActive={false}>
 							<File />
@@ -149,20 +150,14 @@
 
 <Dialog.Root bind:open={showDialog}>
 	<Dialog.Content class="sm:max-w-[900px] h-[80vh] px-0 py-10 ">
-		<EventDetail
-			eventTitle="新事件"
-			eventLocation=""
-			eventDate=""
-			eventStatus="未开始"
-			creator={{
-				name: get(auth).user?.name || "用户",
-				avatar: "https://github.com/shadcn.png",
-			}}
-			on:close={(event) => {
+		<EventDetail x_event={undefined}
+			on:close={(result) => {
 				showDialog = false;
 				// 如果事件包含eventId，则设置为选中状态
-				if (event?.detail?.eventId) {
-					selectedEventId = event.detail.eventId;
+				if (result?.detail?.$id) {
+					// 更新全局状态管理中的选中状态
+					appStore.setSelectedEventId(result?.detail?.$id);
+					eventStore.setCurrentEvent(result?.detail);
 					goto(`/console/events/${selectedEventId}`);
 				}
 			}}
@@ -170,13 +165,13 @@
 	</Dialog.Content>
 </Dialog.Root>
 
-{#snippet Files({ id, title }: { id: string; title: string })}
+{#snippet events({ id, title }: { id: string; title: string })}
 	<Sidebar.MenuItem>
 		<Sidebar.MenuButton
 			isActive={selectedEventId === id}
 			onclick={() => {
-				// 设置当前选中的事件ID
-				selectedEventId = id;
+				// 更新全局状态管理中的选中状态
+				appStore.setSelectedEventId(id);
 				// 导航到事件详情页面
 				goto(`/console/events/${id}`);
 			}}

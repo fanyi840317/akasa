@@ -139,29 +139,3 @@ const createAppStore = () => {
 
 export const appStore = createAppStore();
 
-/**
- * 为了向后兼容，导出sidebarStore
- * 注意：新代码应该直接使用appStore而不是sidebarStore
- * 这个store将在未来版本中被移除
- * @deprecated 请使用appStore代替
- */
-export const sidebarStore = {
-    subscribe: (callback: (value: { selectedItem: string | null; selectedEventId: string | null }) => void) => {
-        return appStore.subscribe(state => {
-            callback({
-                selectedItem: state.selectedItem,
-                selectedEventId: state.selectedEventId
-            });
-        });
-    },
-    setSelectedItem: appStore.setSelectedItem,
-    setSelectedEventId: appStore.setSelectedEventId,
-    clearSelection: appStore.clearSelection,
-    get: () => {
-        const state = appStore.get();
-        return {
-            selectedItem: state.selectedItem,
-            selectedEventId: state.selectedEventId
-        };
-    }
-};

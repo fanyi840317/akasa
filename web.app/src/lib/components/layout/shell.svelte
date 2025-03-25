@@ -8,11 +8,12 @@
   import { Collapsible } from "bits-ui";
   import * as Resizable from "$lib/components/ui/resizable";
   import { page } from "$app/stores";
-  import type { NavItem, User } from "./types";
+  import type { NavItem } from "$lib/types/types";
   import * as Dialog from "$lib/components/ui/dialog";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import { Separator } from "$lib/components/ui/separator";
-  import { appStore,sidebarStore } from "$lib/stores/appState";
+    import { appStore } from "$lib/stores/appState";
+    import type { User } from "$lib/types/user";
   
 
   /**

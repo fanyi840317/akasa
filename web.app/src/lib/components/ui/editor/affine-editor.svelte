@@ -25,7 +25,7 @@
     getAppTheme: () => {
       const currentTheme = get(mode);
       return signal(
-        currentTheme === "dark" ? ColorScheme.Dark : ColorScheme.Light
+        currentTheme === "dark" ? ColorScheme.Dark : ColorScheme.Light,
       );
     },
   };
@@ -35,9 +35,9 @@
     // 初始化编辑器
     // 创建编辑器实例
     editor = new AffineEditorContainer();
-    
+
     let doc = await createDocByHtml(htmlDoc.content);
-    htmlDoc.doc=doc;    
+    htmlDoc.doc = doc;
     if (!doc) {
       doc = createEmptyDoc().init();
     }
@@ -96,7 +96,6 @@
       editor.disposables?.dispose();
     }
   });
-
 </script>
 
 <div
@@ -113,7 +112,7 @@
     z-index: 200001;
   }
   /* 隐藏文档标题 */
-  /* :global(doc-title) {
+  :global(doc-title) {
         display: none !important;
-    } */
+    }
 </style>
