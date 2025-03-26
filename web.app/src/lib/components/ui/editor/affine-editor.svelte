@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onDestroy, onMount, createEventDispatcher } from "svelte";
-  import "@toeverything/theme/style.css";
   import { signal } from "@preact/signals-core";
   import { mode } from "mode-watcher";
   import { createEmptyDoc, AffineEditorContainer } from "@blocksuite/presets";
