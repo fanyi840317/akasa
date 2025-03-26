@@ -1,12 +1,7 @@
 import { writable, get } from 'svelte/store';
-import { createLocalStorageStore } from './localStorage';
 import type { NavItem } from '../types/types';
 
 type AppState = {
-    // 导航相关状态
-    selectedItem: string | null;
-    selectedEventId: string | null;
-    
     // 视图显示状态
     showLeftView: boolean;
     showRightView: boolean;
@@ -26,10 +21,6 @@ type AppState = {
 
 const createAppStore = () => {
     const store = writable<AppState>({
-        // 导航相关状态
-        selectedItem: null,
-        selectedEventId: null,
-        
         // 视图显示状态
         showLeftView: false,
         showRightView: false,
@@ -49,33 +40,6 @@ const createAppStore = () => {
 
     return {
         subscribe: store.subscribe,
-        
-        // 导航相关方法
-        setSelectedItem: (item: string | null) => {
-            store.update(state => ({
-                ...state,
-                selectedItem: item,
-                // 当设置主导航项时，清除事件选中状态
-                selectedEventId: null
-            }));
-        },
-        
-        setSelectedEventId: (id: string | null) => {
-            store.update(state => ({
-                ...state,
-                // 当设置事件选中状态时，清除主导航选中状态
-                selectedItem: null,
-                selectedEventId: id
-            }));
-        },
-        
-        clearSelection: () => {
-            store.update(state => ({
-                ...state,
-                selectedItem: null,
-                selectedEventId: null
-            }));
-        },
         
         // 视图显示相关方法
         setShowLeftView: (show: boolean) => {

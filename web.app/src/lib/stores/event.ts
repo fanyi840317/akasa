@@ -3,6 +3,7 @@ import { databases } from '../appwrite';
 import { ID, Query } from 'appwrite';
 import type { Models } from 'appwrite';
 import type { Event } from '../types/event';
+import { toast } from "svelte-sonner";
 
 // Event数据类型定义
 
@@ -104,10 +105,12 @@ const createEventStore = () => {
                     loading: false
                 }));
                 
+                toast.success("事件已成功发布！");
                 return newEvent;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '创建事件失败';
                 update(state => ({ ...state, loading: false, error: errorMessage }));
+                toast.error(errorMessage || '创建事件失败');
                 throw error;
             }
         },
@@ -131,10 +134,12 @@ const createEventStore = () => {
                     loading: false
                 }));
                 
+                toast.success("事件已成功更新！");
                 return updatedEvent;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '更新事件失败';
                 update(state => ({ ...state, loading: false, error: errorMessage }));
+                toast.error(errorMessage || '更新事件失败');
                 throw error;
             }
         },
@@ -157,10 +162,12 @@ const createEventStore = () => {
                     loading: false
                 }));
                 
+                toast.success("事件已成功删除！");
                 return true;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '删除事件失败';
                 update(state => ({ ...state, loading: false, error: errorMessage }));
+                toast.error(errorMessage || '删除事件失败');
                 throw error;
             }
         },

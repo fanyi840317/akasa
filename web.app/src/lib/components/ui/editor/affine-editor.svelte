@@ -37,11 +37,12 @@
     editor = new AffineEditorContainer();
 
     let doc = await createDocByHtml(htmlDoc.content);
-    htmlDoc.doc = doc;
     if (!doc) {
       doc = createEmptyDoc().init();
     }
     editor.doc = doc;
+    htmlDoc.doc = doc;
+    alert(doc.meta?.title);
 
     if (editorContainer && editor) {
       // // 设置暗色主题7

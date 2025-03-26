@@ -76,19 +76,12 @@
     sidebarCollapsed = state.sidebarCollapsed;
     sidebarWidthIcon = state.sidebarWidthIcon;
     sidebarWidth = state.sidebarWidth;
-    selectedItem = state.selectedItem;
     showDialog = state.showDialog;
     dialogItem = state.dialogItem;
     showLeftView = state.showLeftView;
     showRightView = state.showRightView;
   });
 
-  $effect(() => {
-    const currentPath = $page.url.pathname;
-    if (currentPath) {
-      appStore.setSelectedItem(currentPath);
-    }
-  });
 
   function handleNavAction(item: NavItem | null, action?: string) {
     console.log('Nav action:', item, action);

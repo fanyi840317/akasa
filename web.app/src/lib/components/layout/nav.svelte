@@ -6,16 +6,11 @@
   import { Badge } from "$lib/components/ui/badge";
   import ChevronRight from "lucide-svelte/icons/chevron-right";
   import type { ComponentProps } from "svelte";
-  import { appStore } from "$lib/stores/appState";
 
-  /**
-   * 导航组件 - 显示导航菜单项
-   * 统一使用appStore管理状态，避免状态管理混乱
-   */
+  // 组件属性
   let {
     items = [],
     label = "",
-    selectedItem = "",
     onNavItemClick = (item: NavItem) => {},
     ref = $bindable(null),
     ...restProps
@@ -23,7 +18,6 @@
     {
       items: NavItem[];
       label?: string;
-      selectedItem?: string | null;
       onNavItemClick?: (item: NavItem) => void;
       ref?: any;
     } & ComponentProps<typeof Sidebar.Group>
@@ -31,41 +25,6 @@
 
   // 打开的子菜单状态
   let openItem = $state<string | null>(null);
-
-  // 订阅appStore以获取最新状态
-  appStore.subscribe((state) => {
-    selectedItem = state.selectedItem;
-  });
-
-  /**
-   * 处理导航项点击
-   * 统一使用appStore管理状态，避免状态管理混乱
-   */
-  function handleItemClick(item: NavItem) {
-    // 如果项目状态为disabled，不执行任何操作
-    if (item.state === "disabled") {
-      return;
-    }
-
-    if (item.clickOnly) {
-      // 统一使用onNavItemClick处理所有交互，包括leftView和modal
-      onNavItemClick(item);
-      // 仅执行点击操作
-      return;
-    }
-
-    if (item.url) {
-      // 如果有URL，进行导航
-      goto(item.url);
-      // 更新appStore中的选中状态，同时清除事件选中状态
-      appStore.setSelectedItem(item.url);
-    }
-    if (item.items?.length) {
-      // 如果有子项，切换展开状态
-      openItem = openItem === item.title ? null : item.title;
-      return;
-    }
-  }
 
   // 判断项目是否激活
   function isActive(item: NavItem): boolean {
@@ -81,21 +40,16 @@
 
     if (item.url) {
       const pathname = $page.url.pathname;
+      const itemPath = item.url;
 
       // 精确匹配：完全相同的路径
-      if (pathname === item.url) {
+      if (pathname === itemPath) {
         return true;
       }
 
       // 特殊处理根路径 /console，只有完全匹配才返回true
-      if (item.url === "/console") {
+      if (itemPath === "/console") {
         return pathname === "/console";
-      }
-
-      // 父路径匹配：确保只有直接子路径会被匹配
-      if (pathname.startsWith(item.url + "/")) {
-        // 已经确保是子路径而不是前缀匹配
-        return true;
       }
 
       // 检查是否为子项目的激活状态
@@ -106,13 +60,37 @@
 
     return false;
   }
+
+  // 处理导航项点击
+  function handleItemClick(item: NavItem) {
+    // 如果项目状态为disabled，不执行任何操作
+    if (item.state === "disabled") {
+      return;
+    }
+
+    if (item.clickOnly) {
+      // 统一使用onNavItemClick处理所有交互，包括leftView和modal
+      onNavItemClick(item);
+      return;
+    }
+
+    if (item.url) {
+      // 如果有URL，进行导航
+      goto(item.url);
+    }
+    
+    if (item.items?.length) {
+      // 如果有子项，切换展开状态
+      openItem = openItem === item.title ? null : item.title;
+    }
+  }
 </script>
 
 <Sidebar.Group bind:ref {...restProps}>
   {#if label}
-    <Sidebar.GroupLabel class="group-data-[collapsible=icon]:hidden"
-      >{label}</Sidebar.GroupLabel
-    >
+    <Sidebar.GroupLabel class="group-data-[collapsible=icon]:hidden">
+      {label}
+    </Sidebar.GroupLabel>
   {/if}
 
   <Sidebar.Menu>
@@ -122,43 +100,29 @@
           data-state={openItem === item.title ? "open" : "closed"}
           onclick={() => handleItemClick(item)}
           size={item.size || "md"}
-          class="group-data-[collapsible=icon]:justify-center {!item.clickOnly &&
-          (isActive(item) || selectedItem === item.url)
+          class="group-data-[collapsible=icon]:justify-center {isActive(item)
             ? 'bg-sidebar-accent text-sidebar-accent-foreground'
             : ''} {item.state === 'disabled'
             ? 'opacity-50 cursor-not-allowed'
             : ''}"
         >
-          <div
-            class="flex items-center justify-between w-full group-data-[collapsible=icon]:justify-center"
-          >
-            <div
-              class="flex items-center gap-2 group-data-[collapsible=icon]:gap-0"
-            >
+          <div class="flex items-center justify-between w-full group-data-[collapsible=icon]:justify-center">
+            <div class="flex items-center gap-2 group-data-[collapsible=icon]:gap-0">
               <item.icon class="h-4 w-4 shrink-0" />
-              <span class="group-data-[collapsible=icon]:hidden"
-                >{item.title}</span
-              >
+              <span class="group-data-[collapsible=icon]:hidden">{item.title}</span>
             </div>
             {#if item.items?.length}
               <ChevronRight
-                class="h-4 w-4 transition-transform group-data-[collapsible=icon]:hidden {openItem ===
-                item.title
+                class="h-4 w-4 transition-transform group-data-[collapsible=icon]:hidden {openItem === item.title
                   ? 'rotate-90'
                   : ''}"
               />
             {:else if item.badge && !item.clickOnly}
-              <Badge
-                variant="secondary"
-                class="ml-auto group-data-[collapsible=icon]:hidden"
-              >
+              <Badge variant="secondary" class="ml-auto group-data-[collapsible=icon]:hidden">
                 {item.badge}
               </Badge>
             {:else if item.unread}
-              <Badge
-                variant="outline"
-                class="ml-auto group-data-[collapsible=icon]:hidden"
-              >
+              <Badge variant="outline" class="ml-auto group-data-[collapsible=icon]:hidden">
                 {item.unread}
               </Badge>
             {/if}
@@ -174,7 +138,7 @@
               <Sidebar.MenuSubItem>
                 <Sidebar.MenuSubButton
                   href={subItem.url}
-                  class={selectedItem === subItem.url
+                  class={isActive(subItem)
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : ""}
                 >

@@ -5,12 +5,11 @@
 
   import { _ } from "svelte-i18n";
   import { Search, MapPin, PlusCircle } from "lucide-svelte";
-  import Map from "$lib/components/console/map.svelte";
+  import {MapBase as Map} from "$lib/components/ui/map";
   import EventList from "./event-list.svelte";
   import CategoryList from "./category-list.svelte";
   import { getContext, setContext } from "svelte";
   import { writable } from "svelte/store";
-  import type { AppState } from "$lib/components/ui/editor/affine-editor";
   import { goto } from "$app/navigation";
 
   let { data }: { data: PageData } = $props();
@@ -116,7 +115,6 @@
     { label: "截止日期", value: eventDate || "未设置", icon: false },
   ];
 
-  const { setShowRightView, setTemplate } = getContext<ShellContext>("shell");
   function handleCategoryClick(categoryId: string) {
     selectedCategory = categoryId;
     currentPage = 1;

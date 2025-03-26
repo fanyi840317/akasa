@@ -1,4 +1,6 @@
 import {Models} from 'appwrite';
+import type { LocationData } from '$lib/components/ui/map';
+
 export type EventStatus = 'unverified' | 'confirmed' | 'closed';
 export type EventCategory = 'urban' | 'paranormal' | 'supernatural' | 'mysterious' | 'unexplained' | 'phenomena';
 
@@ -37,19 +39,18 @@ export interface RelatedPerson {
   anonymous: boolean;
 }
 
-export type Event =  {
-  $id?: string;
+export interface Event extends Models.Document {
   title: string;
-  cover?: string;
-  location?: string;
-  date?: string;
-  status?: string;
   content?: string;
+  date?: string;
+  location?: string;
+  location_data?: LocationData;
+  status?: string;
   user_id: string;
   creator_name?: string;
   creator_avatar?: string;
-  folder_id?: string;
-};
+}
+
 export type Tag = { $id?: string; name: string; };
 // Event {
 //   id: string;

@@ -29,130 +29,129 @@
     DateFormatter,
     type DateValue,
     getLocalTimeZone,
+    parseDate,
   } from "@internationalized/date";
   import { RangeCalendar } from "$lib/components/ui/range-calendar";
-  import MapFloat from "$lib/components/console/map-float.svelte";
+  import MapFloat from "$lib/components/ui/map/map-float.svelte";
   import { page } from "$app/stores";
   import { eventStore } from "$lib/stores/event";
   import { toast } from "svelte-sonner";
   import type { Event } from "$lib/types/event";
   import { auth } from "$lib/stores/auth";
   import { get } from "svelte/store";
+  import {
+    LocationPicker,
+    type LocationData,
+    type LocationChangeEvent,
+  } from "$lib/components/ui/map";
+  import type { Html } from "@blocksuite/blocks";
+  import type { HtmlDoc } from "$lib/types/types";
 
-  // 当前事件数据
-  let current_event: Event | null = null;
-  let eventTitle = "";
-  let eventLocation = "";
-  let eventDate = "";
-  let eventStatus = "";
-  let creator = {
-    name: "",
-    avatar: "https://github.com/shadcn.png",
-  };
-  
-  let titleInput: HTMLInputElement;
-  let dateValue: DateValue | undefined = undefined;
-
-  // 日期格式化器
-  const df = new DateFormatter("zh-CN", {
-    dateStyle: "long",
-  });
-
-  // 自动聚焦函数
-  const autofocus = (node: HTMLInputElement) => {
-    titleInput = node;
-    return {
-      destroy: () => {},
-    };
+  // 事件数据
+  let event: Event | null = null;
+  let eventData = {
+    title: "",
+    location: "",
+    date: "",
+    status: "",
+    creator: {
+      name: "",
+      avatar: "https://github.com/shadcn.png",
+    },
   };
 
-  // 处理日期变化
-  function handleDateChange(date: DateValue) {
-    dateValue = date;
-    if (date) {
-      const jsDate = date.toDate(getLocalTimeZone());
-      eventDate = jsDate.toISOString().split("T")[0]; // 转换为YYYY-MM-DD格式
-    } else {
-      eventDate = "";
-    }
-  }
+  // 日期相关
+  let dateValue: DateValue | undefined;
+  const df = new DateFormatter("zh-CN", { dateStyle: "long" });
 
-  // 地图位置数据
-  let locationCoords = $state({
+  // 位置数据
+  let locationData: LocationData = {
     longitude: 104.06,
     latitude: 30.67,
-  });
-
-  // 在组件挂载时获取事件数据
+  };
+  let htmlDoc: HtmlDoc = { content: "" };
+  // 初始化事件数据
   onMount(async () => {
     const eventId = $page.params.id;
     if (eventId) {
       try {
-        // 获取事件详情
         await eventStore.fetchEvent(eventId);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : '获取事件详情失败';
-        toast.error(errorMessage);
+        toast.error(
+          error instanceof Error ? error.message : "获取事件详情失败",
+        );
       }
     }
   });
 
   // 订阅事件数据变化
   const unsubscribe = eventStore.subscribe((state) => {
-    current_event = state.currentEvent;
-    if (current_event) {
-      eventTitle = current_event.title || "";
-      eventLocation = current_event.location || "";
-      eventDate = current_event.date || "";
-      eventStatus = current_event.status || "";
-      
-      // 设置创建者信息
-      creator = {
-        name: current_event.creator_name || get(auth).user?.name || "",
-        avatar: current_event.creator_avatar || "https://github.com/shadcn.png",
+    event = state.currentEvent;
+    if (event) {
+      eventData = {
+        title: event.title || "",
+        location: event.location || "",
+        date: event.date || "",
+        status: event.status || "",
+        creator: {
+          name: event.creator_name || get(auth).user?.name || "",
+          avatar: event.creator_avatar || "https://github.com/shadcn.png",
+        },
       };
-
-      // 如果有日期，转换为DateValue对象
-      if (eventDate) {
+      if (event.content) {
+        htmlDoc.content = event.content;
+        // alert(htmlDoc.content)
+      }
+      // 设置日期
+      if (eventData.date) {
         try {
-          const dateParts = eventDate.split('-');
-          if (dateParts.length === 3) {
-            const year = parseInt(dateParts[0]);
-            const month = parseInt(dateParts[1]);
-            const day = parseInt(dateParts[2]);
-            // 使用internationalized-date库创建日期对象
-            // 注意：月份从1开始，不需要减1
-            dateValue = new Date(year, month - 1, day);
-          }
+          dateValue = parseDate(eventData.date);
         } catch (error) {
-          console.error('日期转换错误:', error);
+          console.error("日期转换错误:", error);
         }
+      }
+
+      // 设置位置数据（如果有）
+      if (event.location_data) {
+        locationData = event.location_data;
       }
     }
   });
 
-  // 组件销毁时取消订阅
   onDestroy(() => {
     unsubscribe();
   });
 
-  // 保存事件更新
-  async function saveEventChanges() {
-    if (!current_event?.$id) return;
-    
+  // 事件处理函数
+  async function handleSave() {
+    if (!event?.$id) return;
+
     try {
-      await eventStore.updateEvent(current_event.$id, {
-        title: eventTitle,
-        location: eventLocation,
-        date: eventDate,
-        status: eventStatus,
+      await eventStore.updateEvent(event.$id, {
+        title: eventData.title,
+        location: eventData.location,
+        date: eventData.date,
+        status: eventData.status,
+        location_data: locationData,
         user_id: get(auth).user?.$id || "",
       });
       toast.success("事件已更新");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '更新事件失败';
-      toast.error(errorMessage);
+      toast.error(error instanceof Error ? error.message : "更新事件失败");
     }
+  }
+
+  function handleDateChange(date: DateValue) {
+    dateValue = date;
+    if (date) {
+      eventData.date = date.toString();
+    }
+  }
+
+  function handleLocationChange(e: CustomEvent<LocationChangeEvent>) {
+    const { address, location } = e.detail;
+    eventData.location = address;
+    locationData = location;
   }
 </script>
 
@@ -160,12 +159,12 @@
   <div class="space-y-6 flex flex-col h-full mx-auto max-w-4xl">
     <div class="px-24 space-y-4">
       <!-- 标题区域 -->
-      <div class="pt-6 mb-10 space-y-2">
+      <div class="pt-6 mb-10">
         <input
           type="text"
           placeholder="无标题"
           class="text-4xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50"
-          bind:value={eventTitle}
+          bind:value={eventData.title}
         />
       </div>
 
@@ -192,37 +191,27 @@
               </div>
               <div class="flex px-2 items-center gap-2 flex-1">
                 <Avatar class="h-4 w-4">
-                  <AvatarImage src={creator.avatar} alt={creator.name} />
-                  <AvatarFallback>{creator.name[0]}</AvatarFallback>
+                  <AvatarImage
+                    src={eventData.creator.avatar}
+                    alt={eventData.creator.name}
+                  />
+                  <AvatarFallback>{eventData.creator.name[0]}</AvatarFallback>
                 </Avatar>
-                <span class="text-sm">{creator.name}</span>
+                <span class="text-sm">{eventData.creator.name}</span>
               </div>
             </div>
 
-            <!-- 位置输入 -->
+            <!-- 位置选择器 -->
             <div class="flex items-center gap-6 w-full">
               <div class="flex items-center gap-2 w-24">
                 <MapPin class="h-3 w-3 text-muted-foreground" />
                 <span class="text-sm text-muted-foreground">位置</span>
               </div>
               <div class="flex-1">
-                <Button
-                  variant="ghost"
-                  class={cn(
-                    " justify-start text-left  font-normal h-9 px-2 py-1",
-                    !eventLocation && "text-muted-foreground/70"
-                  )}
-                  size="sm"
-                  onclick={() => {
-                    // 如果有位置信息，显示地图浮窗
-                    if (eventLocation) {
-                      // 这里可以添加显示地图浮窗的逻辑
-                    }
-                  }}
-                >
-                  <!-- <MapPin class="h-4 w-4 mr-2" /> -->
-                  {eventLocation || "添加位置"}
-                </Button>
+                <LocationPicker
+                  value={eventData.location}
+                  on:locationChange={handleLocationChange}
+                />
               </div>
             </div>
 
@@ -238,12 +227,11 @@
                     <Button
                       variant="ghost"
                       class={cn(
-                        " justify-start text-left  font-normal h-9 px-2 py-1",
-                        !dateValue && "text-muted-foreground/70"
+                        "justify-start text-left font-normal h-9 px-2 py-1",
+                        !dateValue && "text-muted-foreground/70",
                       )}
                       size="sm"
                     >
-                      <!-- <CalendarIcon class="h-4 w-4 mr-2" /> -->
                       {dateValue
                         ? df.format(dateValue.toDate(getLocalTimeZone()))
                         : "选择日期"}
@@ -265,7 +253,7 @@
 
       <!-- 保存按钮 -->
       <div class="flex justify-end mt-4">
-        <Button variant="outline" class="gap-2" on:click={saveEventChanges}>
+        <Button variant="outline" class="gap-2" on:click={handleSave}>
           <Save class="h-4 w-4" />
           保存更改
         </Button>
@@ -274,16 +262,16 @@
 
     <!-- 描述区域 -->
     <div class="flex-1 flex flex-col">
-      <AffineEditor docId="event-doc" class="flex-1" />
+      <AffineEditor {htmlDoc} class="flex-1" />
     </div>
   </div>
 </ScrollArea>
 
 <!-- 地图浮窗 -->
-{#if eventLocation}
+{#if eventData.location}
   <MapFloat
-    locationName={eventLocation}
-    locationData={locationCoords}
+    locationName={eventData.location}
+    {locationData}
     showUserLocation={true}
   />
 {/if}
