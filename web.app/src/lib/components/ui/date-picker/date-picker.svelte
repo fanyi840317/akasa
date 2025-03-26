@@ -2,7 +2,6 @@
   import { Calendar } from "$lib/components/ui/calendar";
   import * as Popover from "$lib/components/ui/popover";
   import { Button } from "$lib/components/ui/button";
-  import { Input } from "$lib/components/ui/input";
   import { CalendarIcon } from "lucide-svelte";
   import { cn } from "$lib/utils";
   import { createEventDispatcher } from "svelte";
@@ -31,16 +30,22 @@
   });
 
   let inputValue = "";
+
+  // 当 value 变化时，更新输入框的值
+  $: if (value) {
+    inputValue = dateStrFormatter.format(value.toDate(getLocalTimeZone()));
+  }
+
   let showError = false;
 
   // 当日期通过日历选择时
-  function handleCalendarSelect(date: DateValue) {
-    value = date;
-    if (date) {
-      inputValue = dateStrFormatter.format(date.toDate(getLocalTimeZone()));
+  function handleCalendarSelect(newValue: DateValue | undefined) {
+    if (newValue) {
+      value = newValue;
+      inputValue = dateStrFormatter.format(newValue.toDate(getLocalTimeZone()));
       showError = false;
+      dispatch("dateChange", { date: newValue });
     }
-    dispatch("dateChange", { date });
   }
 
   // 当输入框值改变时
@@ -71,11 +76,11 @@
       <Button
         variant="outline"
         class={cn(
-          "justify-start text-left font-normal w-full",
+          "justify-start text-left font-normal w-full h-7 py-1 px-2",
           !value && "text-muted-foreground"
         )}
       >
-        <CalendarIcon class="mr-2 h-4 w-4" />
+        <CalendarIcon class="mr-2 h-3 w-3" />
         {#if value}
           {df.format(value.toDate(getLocalTimeZone()))}
         {:else}
@@ -84,25 +89,27 @@
       </Button>
     </Popover.Trigger>
     <Popover.Content class="w-auto p-0" align="start">
-      <Calendar
-        type="single"
-        bind:selected={value}
-        onSelect={handleCalendarSelect}
-        initialFocus
-      />
+      <div class="p-3">
+        <input
+          type="text"
+          placeholder="YYYY-MM-DD"
+          bind:value={inputValue}
+          on:keydown={e => e.key === 'Enter' && handleInputChange()}
+          class={cn(
+            "border-input placeholder:text-muted-foreground focus-visible:ring-1 flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mb-3",
+            showError && "border-red-500"
+          )}
+        />
+        {#if showError}
+          <p class="text-sm text-red-500 mb-3">请输入有效的日期格式：YYYY-MM-DD</p>
+        {/if}
+        <Calendar
+          type="single"
+          bind:value
+          onValueChange={handleCalendarSelect}
+          initialFocus
+        />
+      </div>
     </Popover.Content>
   </Popover.Root>
-
-  <div class="mt-2">
-    <Input
-      type="text"
-      placeholder="YYYY-MM-DD"
-      bind:value={inputValue}
-      on:blur={handleInputChange}
-      class={cn(showError && "border-red-500")}
-    />
-    {#if showError}
-      <p class="text-sm text-red-500 mt-1">请输入有效的日期格式：YYYY-MM-DD</p>
-    {/if}
-  </div>
 </div> 

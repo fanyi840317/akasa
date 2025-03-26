@@ -14,7 +14,6 @@
   import { Ellipsis, Forward, Plus, Save, Trash2 } from "lucide-svelte";
   import { auth } from "$lib/stores/auth";
   import { get } from "svelte/store";
-  import { toast } from "svelte-sonner";
   import { eventStore } from "$lib/stores/event";
   import { Skeleton } from "$lib/components/ui/skeleton";
   import { caseStore } from "$lib/stores/case";
@@ -57,10 +56,8 @@
   const handleEventDelete = async (eventId: string) => {
     try {
       await eventStore.deleteEvent(eventId);
-      toast.success("事件已成功删除");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "删除事件失败";
-      toast.error(errorMessage);
+      console.error('删除事件失败:', error);
     }
   };
 
@@ -68,8 +65,6 @@
     showDialog = false;
     if (result?.detail?.$id) {
       const newEventId = result.detail.$id;
-      // 更新当前事件
-      eventStore.setCurrentEvent(result.detail);
       // 导航到新创建的事件
       goto(`/console/events/${newEventId}`);
     }
@@ -79,7 +74,7 @@
   const unsubscribeEventStore = eventStore.subscribe((state) => {
     userEvents = state.events;
     hasEvents = state.events.length > 0;
-    isLoading = state.loading;
+    isLoading = state.listLoading;
   });
 
   // 生命周期钩子
@@ -88,8 +83,8 @@
     if (userId) {
       try {
         await eventStore.fetchEvents(userId);
-      } catch (e: any) {
-        toast.error("Failed to fetch user events:", e.message);
+      } catch (error) {
+        console.error('获取用户事件失败:', error);
       }
     }
   });

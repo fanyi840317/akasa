@@ -46,6 +46,10 @@
   } from "$lib/components/ui/map";
   import type { Html } from "@blocksuite/blocks";
   import type { HtmlDoc } from "$lib/types/types";
+  import { Skeleton } from "$lib/components/ui/skeleton";
+  import Header from "$lib/components/layout/header.svelte";
+  import type { Snippet } from "svelte";
+  import { Calendar } from "$lib/components/ui/calendar";
 
   // 事件数据
   let event: Event | null = null;
@@ -60,6 +64,11 @@
     },
   };
 
+  // 编辑器数据
+  let htmlDoc: HtmlDoc = { content: "" };
+  let editorLoaded = $state(false);
+  let shouldResetEditor = $state(false);
+
   // 日期相关
   let dateValue: DateValue | undefined;
   const df = new DateFormatter("zh-CN", { dateStyle: "long" });
@@ -69,24 +78,45 @@
     longitude: 104.06,
     latitude: 30.67,
   };
-  let htmlDoc: HtmlDoc = { content: "" };
-  // 初始化事件数据
-  onMount(async () => {
+
+  // 状态管理
+  let isLoading = $state(false);
+  let isOpen = $state(true); // 默认展开属性面板
+
+  // 面包屑数据
+  let titles = [
+    { name: "事件", path: "/console/events" },
+    { name: eventData.title || "无标题", path: `/console/events/${$page.params.id}` }
+  ];
+
+  // 加载事件数据
+  async function loadEventData(eventId: string) {
+    if (!eventId) return;
+    
+    try {
+      editorLoaded = false;
+      shouldResetEditor = true;
+      htmlDoc = { content: "" };
+      await eventStore.fetchEvent(eventId);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "获取事件详情失败",
+      );
+    }
+  }
+
+  // 监听 URL 变化
+  $effect(() => {
     const eventId = $page.params.id;
     if (eventId) {
-      try {
-        await eventStore.fetchEvent(eventId);
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "获取事件详情失败",
-        );
-      }
+      loadEventData(eventId);
     }
   });
 
   // 订阅事件数据变化
   const unsubscribe = eventStore.subscribe((state) => {
     event = state.currentEvent;
+    isLoading = state.eventLoading;
     if (event) {
       eventData = {
         title: event.title || "",
@@ -98,10 +128,17 @@
           avatar: event.creator_avatar || "https://github.com/shadcn.png",
         },
       };
+
+      // 更新编辑器内容
       if (event.content) {
-        htmlDoc.content = event.content;
-        // alert(htmlDoc.content)
+        htmlDoc = { content: event.content };
       }
+      
+      setTimeout(() => {
+        editorLoaded = true;
+        shouldResetEditor = false;
+      }, 100);
+
       // 设置日期
       if (eventData.date) {
         try {
@@ -120,6 +157,9 @@
 
   onDestroy(() => {
     unsubscribe();
+    clearTimeout(updateTimeout);
+    // 清理状态
+    eventStore.setCurrentEvent(null);
   });
 
   // 事件处理函数
@@ -153,119 +193,210 @@
     eventData.location = address;
     locationData = location;
   }
+
+  // 编辑器内容变化处理
+  let updateTimeout: NodeJS.Timeout;
+  function handleEditorChange(content: string) {
+    if (!event?.$id) return;
+    
+    clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+      try {
+        eventStore.updateEvent(event?.$id, {
+          ...eventData,
+          content,
+          location_data: locationData,
+          user_id: get(auth).user?.$id || "",
+        });
+      } catch (error) {
+        console.error('更新编辑器内容失败:', error);
+      }
+    }, 500);
+  }
+
+  // 更新面包屑标题
+  $effect(() => {
+    if (eventData.title) {
+      titles = [
+        { name: "事件", path: "/console/events" },
+        { name: eventData.title, path: `/console/events/${$page.params.id}` }
+      ];
+    }
+  });
 </script>
 
-<ScrollArea class="h-[calc(100vh-4rem)] py-4">
-  <div class="space-y-6 flex flex-col h-full mx-auto max-w-4xl">
-    <div class="px-24 space-y-4">
-      <!-- 标题区域 -->
-      <div class="pt-6 mb-10">
-        <input
-          type="text"
-          placeholder="无标题"
-          class="text-4xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50"
-          bind:value={eventData.title}
-        />
-      </div>
+<div class="flex flex-col h-full">
+  <Header {titles}>
+    <div slot="actions">
+      <Button variant="ghost" size="icon" class="gap-2" onclick={handleSave}>
+        <Save class="h-4 w-4" />
+        <!-- 保存更改 -->
+      </Button>
+    </div>
+  </Header>
 
-      <!-- 属性区域 -->
-      <Collapsible.Root class="w-full space-y-2">
-        <div class="flex items-center justify-between space-x-4">
-          <h4 class="text-sm text-muted-foreground font-semibold">事件属性</h4>
-          <Collapsible.Trigger>
-            <Button variant="ghost" size="sm" class="w-9 p-0">
-              <ChevronsUpDown class="h-4 w-4" />
-              <span class="sr-only">切换属性显示</span>
-            </Button>
-          </Collapsible.Trigger>
-        </div>
-
-        <Separator class="my-4" />
-        <Collapsible.Content class="space-y-2">
-          <div class="flex flex-col gap-2 py-4 w-full">
-            <!-- 创作者 -->
-            <div class="flex items-center gap-6 w-full">
-              <div class="flex items-center gap-2 w-24">
-                <User class="h-3 w-3 text-muted-foreground" />
-                <span class="text-sm text-muted-foreground">创作者</span>
-              </div>
-              <div class="flex px-2 items-center gap-2 flex-1">
-                <Avatar class="h-4 w-4">
-                  <AvatarImage
-                    src={eventData.creator.avatar}
-                    alt={eventData.creator.name}
-                  />
-                  <AvatarFallback>{eventData.creator.name[0]}</AvatarFallback>
-                </Avatar>
-                <span class="text-sm">{eventData.creator.name}</span>
-              </div>
+  <ScrollArea class="flex-1">
+    <div class="flex flex-col h-full mx-auto max-w-4xl">
+      <div class="px-24 space-y-4">
+        {#if isLoading}
+          <!-- 骨架屏 -->
+          <div class="space-y-8">
+            <!-- 标题骨架 -->
+            <div class="pt-6 mb-10">
+              <Skeleton class="h-12 w-[70%]" />
             </div>
 
-            <!-- 位置选择器 -->
-            <div class="flex items-center gap-6 w-full">
-              <div class="flex items-center gap-2 w-24">
-                <MapPin class="h-3 w-3 text-muted-foreground" />
-                <span class="text-sm text-muted-foreground">位置</span>
+            <!-- 属性区域骨架 -->
+            <div class="space-y-6">
+              <div class="flex items-center justify-between">
+                <Skeleton class="h-4 w-24" />
+                <Skeleton class="h-8 w-8 rounded-md" />
               </div>
-              <div class="flex-1">
-                <LocationPicker
-                  value={eventData.location}
-                  on:locationChange={handleLocationChange}
-                />
-              </div>
-            </div>
-
-            <!-- 日期选择器 -->
-            <div class="flex items-center gap-6 w-full">
-              <div class="flex items-center gap-2 w-24">
-                <Clock class="h-3 w-3 text-muted-foreground" />
-                <span class="text-sm text-muted-foreground">日期</span>
-              </div>
-              <div class="flex-1">
-                <Popover.Root>
-                  <Popover.Trigger>
-                    <Button
-                      variant="ghost"
-                      class={cn(
-                        "justify-start text-left font-normal h-9 px-2 py-1",
-                        !dateValue && "text-muted-foreground/70",
-                      )}
-                      size="sm"
-                    >
-                      {dateValue
-                        ? df.format(dateValue.toDate(getLocalTimeZone()))
-                        : "选择日期"}
-                    </Button>
-                  </Popover.Trigger>
-                  <Popover.Content class="w-auto p-0" align="start">
-                    <RangeCalendar
-                      type="single"
-                      bind:value={dateValue}
-                      on:valueChange={(e) => handleDateChange(e.detail)}
-                    />
-                  </Popover.Content>
-                </Popover.Root>
+              <Separator />
+              <div class="space-y-4">
+                <!-- 创作者骨架 -->
+                <div class="flex items-center gap-6">
+                  <Skeleton class="h-4 w-24" />
+                  <div class="flex items-center gap-2">
+                    <Skeleton class="h-6 w-6 rounded-full" />
+                    <Skeleton class="h-4 w-32" />
+                  </div>
+                </div>
+                <!-- 位置骨架 -->
+                <div class="flex items-center gap-6">
+                  <Skeleton class="h-4 w-24" />
+                  <Skeleton class="h-9 w-[200px]" />
+                </div>
+                <!-- 日期骨架 -->
+                <div class="flex items-center gap-6">
+                  <Skeleton class="h-4 w-24" />
+                  <Skeleton class="h-9 w-[200px]" />
+                </div>
               </div>
             </div>
           </div>
-        </Collapsible.Content>
-      </Collapsible.Root>
+        {:else}
+          <!-- 标题区域 -->
+          <div class="pt-6 mb-10">
+            <input
+              type="text"
+              placeholder="无标题"
+              class="text-4xl font-bold bg-transparent border-none outline-none w-full placeholder:text-muted-foreground/50"
+              bind:value={eventData.title}
+            />
+          </div>
 
-      <!-- 保存按钮 -->
-      <div class="flex justify-end mt-4">
-        <Button variant="outline" class="gap-2" on:click={handleSave}>
-          <Save class="h-4 w-4" />
-          保存更改
-        </Button>
+          <!-- 属性区域 -->
+          <Collapsible.Root bind:open={isOpen} class="w-full space-y-2">
+            <div class="flex items-center justify-between space-x-4">
+              <h4 class="text-sm text-muted-foreground font-semibold">事件属性</h4>
+              <Collapsible.Trigger>
+                <Button variant="ghost" size="sm" class="w-9 p-0">
+                  <ChevronsUpDown class="h-4 w-4" />
+                  <span class="sr-only">切换属性显示</span>
+                </Button>
+              </Collapsible.Trigger>
+            </div>
+
+            <Separator class="my-4" />
+            <Collapsible.Content class="space-y-2">
+              <div class="flex flex-col gap-2 py-4 w-full">
+                <!-- 创作者 -->
+                <div class="flex items-center gap-6 w-full">
+                  <div class="flex items-center gap-2 w-24">
+                    <User class="h-3 w-3 text-muted-foreground" />
+                    <span class="text-sm text-muted-foreground">创作者</span>
+                  </div>
+                  <div class="flex px-2 items-center gap-2 flex-1">
+                    <Avatar class="h-4 w-4">
+                      <AvatarImage
+                        src={eventData.creator.avatar}
+                        alt={eventData.creator.name}
+                      />
+                      <AvatarFallback>{eventData.creator.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <span class="text-sm">{eventData.creator.name}</span>
+                  </div>
+                </div>
+
+                <!-- 位置选择器 -->
+                <div class="flex items-center gap-6 w-full">
+                  <div class="flex items-center gap-2 w-24">
+                    <MapPin class="h-3 w-3 text-muted-foreground" />
+                    <span class="text-sm text-muted-foreground">位置</span>
+                  </div>
+                  <div class="flex-1">
+                    <LocationPicker
+                      value={eventData.location}
+                      on:locationChange={handleLocationChange}
+                    />
+                  </div>
+                </div>
+
+                <!-- 日期选择器 -->
+                <div class="flex items-center gap-6 w-full">
+                  <div class="flex items-center gap-2 w-24">
+                    <Clock class="h-3 w-3 text-muted-foreground" />
+                    <span class="text-sm text-muted-foreground">日期</span>
+                  </div>
+                  <div class="flex-1">
+                    <Popover.Root>
+                      <Popover.Trigger>
+                        <Button
+                          variant="ghost"
+                          class={cn(
+                            "justify-start text-left font-normal h-9 px-2 py-1",
+                            !dateValue && "text-muted-foreground/70",
+                          )}
+                          size="sm"
+                        >
+                          {dateValue
+                            ? df.format(dateValue.toDate(getLocalTimeZone()))
+                            : "选择日期"}
+                        </Button>
+                      </Popover.Trigger>
+                      <Popover.Content class="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateValue}
+                          onSelect={handleDateChange}
+                          initialFocus
+                        />
+                      </Popover.Content>
+                    </Popover.Root>
+                  </div>
+                </div>
+              </div>
+            </Collapsible.Content>
+          </Collapsible.Root>
+        {/if}
+      </div>
+
+      <!-- 描述区域 -->
+      <div class="flex-1">
+        {#if !editorLoaded}
+          <div class="flex-1 space-y-4 p-4">
+            <Skeleton class="h-6 w-[40%]" />
+            <Skeleton class="h-4 w-[60%]" />
+            <Skeleton class="h-4 w-[80%]" />
+            <Skeleton class="h-4 w-[70%]" />
+            <Skeleton class="h-4 w-[50%]" />
+            <div class="mt-8">
+              <Skeleton class="h-[300px] w-full" />
+            </div>
+          </div>
+        {:else}
+          <AffineEditor
+            {htmlDoc}
+            shouldReset={shouldResetEditor}
+            class="flex-1"
+            on:contentChange={(e) => handleEditorChange(e.detail)}
+          />
+        {/if}
       </div>
     </div>
-
-    <!-- 描述区域 -->
-    <div class="flex-1 flex flex-col">
-      <AffineEditor {htmlDoc} class="flex-1" />
-    </div>
-  </div>
-</ScrollArea>
+  </ScrollArea>
+</div>
 
 <!-- 地图浮窗 -->
 {#if eventData.location}
@@ -275,3 +406,9 @@
     showUserLocation={true}
   />
 {/if}
+
+<style>
+  :global(.affine-editor) {
+    padding: 0 !important;
+  }
+</style>

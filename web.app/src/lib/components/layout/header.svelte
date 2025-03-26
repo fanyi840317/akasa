@@ -3,26 +3,19 @@
     import * as Breadcrumb from "$lib/components/ui/breadcrumb";
     import { Separator } from "$lib/components/ui/separator";
     import { cn } from "$lib/utils.js";
-    import type { Snippet } from "svelte";
 
     /**
      * 控制台页面头部组件 - 提供标题、面包屑和页面布局容器
      * @param {any} ref - 组件引用
      * @param {{ name: string; path: string; }[]} titles - 页面标题数组
-     * @param {Snippet} actions - 右侧操作区域
-     * @param {Snippet} children - 子内容
      */
     let {
         ref = $bindable(null),
         titles = [] as { name: string; path: string; }[],
-        children = undefined,
-        actions = undefined,
         ...restProps
     } = $props<{
         ref?: any;
         titles?: { name: string; path: string; }[];
-        children?: Snippet;
-        actions?: Snippet;
     }>();
 
     // 定义面包屑项的数组
@@ -50,7 +43,6 @@
         </Breadcrumb.Root>
     </div>
     <div class="pr-4">
-        <!-- 可扩展的右侧工具栏区域 -->
-        {@render actions?.()}
+        <slot name="actions" />
     </div>
 </header>

@@ -1,10 +1,9 @@
-import {Models} from 'appwrite';
 import type { LocationData } from '$lib/components/ui/map';
 
 export type EventStatus = 'unverified' | 'confirmed' | 'closed';
 export type EventCategory = 'urban' | 'paranormal' | 'supernatural' | 'mysterious' | 'unexplained' | 'phenomena';
 
-export interface Evidence {
+export type Evidence = {
   id: string;
   type: 'image' | 'video' | 'document' | 'testimony';
   url: string;
@@ -12,44 +11,49 @@ export interface Evidence {
   submittedBy: string;
   submittedAt: Date;
   verificationStatus: 'pending' | 'verified' | 'rejected';
-}
+};
 
-export interface Witness {
+export type Witness = {
   id: string;
   name: string;
   credibilityScore: number;
   testimony: string;
   contactInfo?: string;
   anonymous: boolean;
-}
+};
 
-export interface TimelineEvent {
+export type TimelineEvent = {
   id: string;
   timestamp: Date;
   description: string;
   evidenceIds: string[];
   witnessIds: string[];
-}
+};
 
-export interface RelatedPerson {
+export type RelatedPerson = {
   id: string;
   name: string;
   role: string;
   description: string;
   anonymous: boolean;
-}
+};
 
-export interface Event extends Models.Document {
-  title: string;
+export type Event = {
+  $id?: string;
+  $createdAt?: string;
+  $updatedAt?: string;
+  title?: string;
   content?: string;
-  date?: string;
   location?: string;
-  location_data?: LocationData;
-  status?: string;
+  date?: string;
   user_id: string;
+  location_data?: LocationData;
+  status?: EventStatus;
+  category?: EventCategory;
   creator_name?: string;
   creator_avatar?: string;
-}
+};
+
 
 export type Tag = { $id?: string; name: string; };
 // Event {

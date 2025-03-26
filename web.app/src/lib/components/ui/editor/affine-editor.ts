@@ -46,5 +46,5 @@ export async function exportDoc(doc: Doc) {
     snapshot,
     assets: job.assetsManager,
   });
-  return htmlResult.file;
+  return { content: htmlResult.file, title: doc.meta?.title };
 }

@@ -35,6 +35,11 @@
         const { latitude, longitude } = position.coords;
         locationData = { longitude, latitude };
         
+        // 更新地图中心
+        if (mapComponent) {
+          mapComponent.setCenter([longitude, latitude]);
+        }
+        
         // 获取地址信息
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
@@ -121,11 +126,11 @@
       <Button
         variant="outline"
         class={cn(
-          "justify-start text-left font-normal w-full",
+          "justify-start text-left font-normal w-full h-7 py-1 px-2",
           !value && "text-muted-foreground"
         )}
       >
-        <MapPin class="mr-2 h-4 w-4" />
+        <MapPin class=" h-3 w-3" />
         {#if value}
           {value}
         {:else}
@@ -133,20 +138,20 @@
         {/if}
       </Button>
     </Popover.Trigger>
-    <Popover.Content class="w-[400px] p-2" sideOffset={5}>
+    <Popover.Content class="w-[400px] p-2" align="start">
       <div class="flex gap-2 mb-2">
         <div class="flex-1">
           <Input
             type="text"
             placeholder="搜索地址"
             bind:value={addressInput}
-            on:input={() => handleAddressInput()}
+            oninput={() => handleAddressInput()}
           />
         </div>
         <Button
           variant="outline"
           size="icon"
-          on:click={() => getCurrentLocation()}
+          onclick={() => getCurrentLocation()}
           title="获取当前位置"
         >
           <Locate class="h-4 w-4" />
