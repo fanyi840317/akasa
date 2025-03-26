@@ -101,33 +101,30 @@
   />
 </div> -->
 
-<ScrollArea orientation="vertical" class="h-[calc(100vh-200px)]">
+<ScrollArea orientation="vertical" class="h-[calc(100vh-280px)]">
+  <div id="btns" class="flex flex-wrap px-24 gap-2 mt-10 z-20 max-w-[800px]">
+    <LocationPicker
+      value={x_event?.location || ""}
+      placeholder="添加位置"
+      on:locationChange={handleLocationChange}
+    />
+    <DatePicker
+      value={dateValue}
+      placeholder="选择发生日期"
+      on:dateChange={handleDateChange}
+    />
+  </div>
   <AffineEditor htmlDoc={newDoc} />
 </ScrollArea>
 
 <div class="absolute px-24 bottom-20 left-0">
-  <div id="btns" class="flex gap-2">
-    <div class="w-[200px]">
-      <LocationPicker
-        value={x_event?.location || ""}
-        placeholder="添加位置"
-        on:locationChange={handleLocationChange}
-      />
-    </div>
-
-    <div class="w-[200px]">
-      <DatePicker
-        value={dateValue}
-        placeholder="选择发生日期"
-        on:dateChange={handleDateChange}
-      />
-    </div>
+  <div id="btns" class="flex flex-wrap gap-2">
 
     <Button
       onclick={publishToAppwrite}
       disabled={isPublishing}
       variant="ghost"
-      class="gap-2 bg-background/80 backdrop-blur-smp-4 h-7 px-2 py-1"
+      class="gap-2 ml-4 bg-background/40 backdrop-blur-smp-4 h-7 px-2 py-1"
     >
       <Send class="h-4 w-4" />
       {isPublishing ? "发布中..." : "发布"}

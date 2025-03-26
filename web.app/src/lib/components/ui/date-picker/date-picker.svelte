@@ -6,6 +6,7 @@
   import { cn } from "$lib/utils";
   import { createEventDispatcher } from "svelte";
   import type { DateValue } from "@internationalized/date";
+  import Input from "../input/input.svelte";
   import {
     DateFormatter,
     getLocalTimeZone,
@@ -80,7 +81,7 @@
           !value && "text-muted-foreground"
         )}
       >
-        <CalendarIcon class="mr-2 h-3 w-3" />
+        <CalendarIcon class="h-3 w-3" />
         {#if value}
           {df.format(value.toDate(getLocalTimeZone()))}
         {:else}
@@ -90,15 +91,12 @@
     </Popover.Trigger>
     <Popover.Content class="w-auto p-0" align="start">
       <div class="p-3">
-        <input
+        <Input
           type="text"
           placeholder="YYYY-MM-DD"
           bind:value={inputValue}
-          on:keydown={e => e.key === 'Enter' && handleInputChange()}
-          class={cn(
-            "border-input placeholder:text-muted-foreground focus-visible:ring-1 flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mb-3",
-            showError && "border-red-500"
-          )}
+          onkeydown={e => e.key === 'Enter' && handleInputChange()}
+          class={showError ? "border-red-500" : ""}
         />
         {#if showError}
           <p class="text-sm text-red-500 mb-3">请输入有效的日期格式：YYYY-MM-DD</p>

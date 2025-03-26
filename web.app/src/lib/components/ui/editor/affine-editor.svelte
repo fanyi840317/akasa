@@ -167,7 +167,10 @@
     z-index: 200001;
   }
   /* 隐藏文档标题 */
-  /* :global(doc-title) {
-    display: none !important;
-  } */
+  :global(doc-title) {
+    /* height: 48px; */
+  }
+  :global(doc-title .doc-title-container-empty::before) {
+      content: 'New Event Title';
+    }
 </style>
