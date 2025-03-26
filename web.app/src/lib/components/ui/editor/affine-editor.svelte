@@ -6,7 +6,6 @@
   import {
     ColorScheme,
     OverrideThemeExtension,
-    ParagraphBlockSchema,
     ParagraphBlockService,
     SpecProvider,
     type ThemeExtension,
@@ -33,13 +32,10 @@
 
   async function setupEditor() {
     if (!editorContainer) return;
-
     cleanup(); // 确保清理旧的编辑器
-
     try {
       // 创建新的编辑器实例
       editor = new AffineEditorContainer();
-
       // 创建文档
       let doc = createEmptyDoc().init();
       if (htmlDoc.content) {
@@ -63,7 +59,6 @@
           }
         }, 300);
       });
-
       // 应用主题扩展到编辑器
       if (editor.pageSpecs) {
         const pageSpecs = SpecProvider.getInstance().getSpec("page");
@@ -87,7 +82,6 @@
           };
         }
       }
-
       // 添加编辑器到容器
       editorContainer.appendChild(editor);
       isInitialized = true;
@@ -109,7 +103,6 @@
       cleanup();
     }
   }
-
   function cleanup() {
     clearTimeout(contentUpdateTimeout);
     if (editor) {
@@ -135,23 +128,9 @@
     }
   });
 
-  // 监听内容变化
-  // $effect(() => {
-  //   if (htmlDoc.content !== undefined && isInitialized && editor?.doc) {
-  //     const currentEditor = editor;
-  //     createDocByHtml(htmlDoc.content).then(doc => {
-  //       if (doc && currentEditor) {
-  //         currentEditor.doc = doc;
-  //         htmlDoc.doc = doc;
-  //       }
-  //     });
-  //   }
-  // });
-
   onMount(() => {
     setupEditor();
   });
-
   onDestroy(() => {
     cleanup();
   });

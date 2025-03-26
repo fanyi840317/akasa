@@ -25,6 +25,7 @@ async function setupDatabase() {
         attributes: [
             { name: "title", type: "string", size: 255, required: true },
             { name: "location", type: "string", size: 255, required: false },
+            { name: "location_data", type: "string", size: 1000, required: false },
             { name: "date", type: "datetime", required: false },
             { name: "status", type: "string", size: 50, required: false, defaultValue: "pending" },
             { name: "content", type: "string", size: 36000, required: false },
