@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as Collapsible from "$lib/components/ui/collapsible/index.js";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-  import * as Dialog from "$lib/components/ui/dialog/index.js";
+  import * as Modal from "$lib/components/ui/modal/index.js";
   import ChevronRight from "@lucide/svelte/icons/chevron-right";
   import File from "@lucide/svelte/icons/file";
   import Folder from "@lucide/svelte/icons/folder";
@@ -10,7 +10,7 @@
   import { Button } from "$lib/components/ui/button";
   import { goto } from "$app/navigation";
   import * as Card from "$lib/components/ui/card";
-  import EventDetail from "../console/create-event.svelte";
+  import EventDetail from "../events/event-detail.svelte";
   import { Ellipsis, Forward, Plus, Save, Trash2 } from "lucide-svelte";
   import { auth } from "$lib/stores/auth";
   import { get } from "svelte/store";
@@ -137,21 +137,21 @@
     <Sidebar.GroupContent>
       <Sidebar.Menu>
         {#each userEvents as event}
-          {@render events({ id: event.$id || '', title: event.title })}
+          {@render events({ id: event.$id ?? '', title: event.title ?? '' })}
         {/each}
       </Sidebar.Menu>
     </Sidebar.GroupContent>
   {/if}
 </Sidebar.Group>
 
-<Dialog.Root bind:open={showDialog}>
-  <Dialog.Content class="sm:max-w-[900px] h-[80vh] px-0 py-10">
+<Modal.Root bind:open={showDialog} class="sm:max-w-[900px] h-[80vh]">
+  <Modal.Content>
     <EventDetail
       x_event={undefined}
       on:close={handleEventCreate}
     />
-  </Dialog.Content>
-</Dialog.Root>
+  </Modal.Content>
+</Modal.Root>
 
 {#snippet events({ id, title }: { id: string; title: string })}
   <Sidebar.MenuItem>

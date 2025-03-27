@@ -47,7 +47,7 @@ export type Event = {
   location?: string;
   date?: string;
   user_id: string;
-  location_data?: LocationData;
+  location_data?: string;
   status?: EventStatus;
   category?: EventCategory;
   creator_name?: string;

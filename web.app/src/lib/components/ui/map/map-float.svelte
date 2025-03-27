@@ -25,7 +25,7 @@
       variant="outline" 
       size="sm" 
       class="map-toggle-button"
-      on:click={() => toggleExpand()}
+      onclick={() => toggleExpand()}
     >
       <MapPin class="h-4 w-4 mr-2" />
       {locationName || "查看位置"}
@@ -37,7 +37,7 @@
         variant="ghost" 
         size="sm" 
         class="map-close-button"
-        on:click={() => toggleExpand()}
+        onclick={() => toggleExpand()}
       >
         收起
       </Button>

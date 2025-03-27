@@ -29,7 +29,7 @@
   let { x_event }: Props = $props();
   let dateValue: DateValue | undefined = undefined;
   let isPublishing = $state(false);
-  let newDoc: HtmlDoc = {};
+  let newDoc: HtmlDoc = {content:x_event?.content || ""};
 
   // 初始化默认事件对象
   if (!x_event) {
@@ -59,7 +59,7 @@
     const { location, address } = event.detail;
     if (x_event) {
       x_event.location = address;
-      x_event.location_data = location;
+      x_event.location_data = JSON.stringify(location);
     }
   }
 
@@ -102,24 +102,21 @@
 </div> -->
 
 <ScrollArea orientation="vertical" class="h-[calc(100vh-280px)]">
-  <div id="btns" class="flex flex-wrap px-24 gap-2 mt-10 z-20 max-w-[800px]">
-    <LocationPicker
-      value={x_event?.location || ""}
-      placeholder="添加位置"
-      on:locationChange={handleLocationChange}
-    />
-    <DatePicker
-      value={dateValue}
-      placeholder="选择发生日期"
-      on:dateChange={handleDateChange}
-    />
-  </div>
   <AffineEditor htmlDoc={newDoc} />
 </ScrollArea>
 
-<div class="absolute px-24 bottom-20 left-0">
-  <div id="btns" class="flex flex-wrap gap-2">
-
+<div class="absolute bottom-20 left-0 px=24 w-full">
+  <div id="btns" class="flex flex-wrap gap-2 max-w-[600px] mx-auto">
+    <LocationPicker
+    value={x_event?.location || ""}
+    placeholder="添加位置"
+    on:locationChange={handleLocationChange}
+  />
+  <DatePicker
+    value={dateValue}
+    placeholder="选择发生日期"
+    on:dateChange={handleDateChange}
+  />
     <Button
       onclick={publishToAppwrite}
       disabled={isPublishing}
