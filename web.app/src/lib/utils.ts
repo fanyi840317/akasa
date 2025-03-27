@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { writable } from "svelte/store";
 
 export function cn(...inputs: ClassValue[]) {
 	// alert(twMerge(clsx(inputs)));
@@ -42,4 +43,73 @@ export function getUrlFromString(str: string) {
 	} catch (e) {
 		return null;
 	}
+}
+
+// i18n utilities
+export const currentLang = writable('zh');
+
+export function setLanguage(lang: string) {
+    currentLang.set(lang);
+}
+
+export function getCurrentLang() {
+    let currentValue = 'zh';
+    currentLang.subscribe(value => {
+        currentValue = value;
+    })();
+    return currentValue;
+}
+
+interface I18nFields {
+    name?: string | { zh: string; en: string };
+    description?: string | { zh: string; en: string };
+    [key: string]: any;
+}
+
+export function parseI18nFields<T extends I18nFields>(data: T): T {
+    const result = { ...data };
+    
+    // 处理 name 字段
+    if (typeof result.name === 'string') {
+        try {
+            result.name = JSON.parse(result.name);
+        } catch (e) {
+            // 如果解析失败，保持原样
+        }
+    }
+    
+    // 处理 description 字段
+    if (typeof result.description === 'string') {
+        try {
+            result.description = JSON.parse(result.description);
+        } catch (e) {
+            // 如果解析失败，保持原样
+        }
+    }
+    
+    return result;
+}
+
+export function stringifyI18nFields<T extends I18nFields>(data: T): T {
+    const result = { ...data };
+    
+    // 处理 name 字段
+    if (typeof result.name === 'object') {
+        result.name = JSON.stringify(result.name);
+    }
+    
+    // 处理 description 字段
+    if (typeof result.description === 'object') {
+        result.description = JSON.stringify(result.description);
+    }
+    
+    return result;
+}
+
+type I18nValue = { zh: string; en: string } | string;
+type SupportedLang = 'zh' | 'en';
+
+export function getI18nValue(field: I18nValue, lang?: SupportedLang): string {
+    if (typeof field === 'string') return field;
+    return field[lang || getCurrentLang() as SupportedLang] || field.zh;
 }

@@ -6,6 +6,7 @@ import type { Event } from '../types/event';
 import { toast } from "svelte-sonner";
 import { _ } from "svelte-i18n";
 import { auth } from "./auth";
+import { parseI18nFields } from '$lib/utils';
 
 // Event数据类型定义
 
@@ -52,13 +53,16 @@ const createEventStore = () => {
                     query
                 );
                 
+                // 使用工具方法解析 i18n 字段
+                const events = response.documents.map(doc => parseI18nFields(doc as unknown as Event));
+
                 update(state => ({
                     ...state,
-                    events: response.documents as unknown as Event[],
+                    events: events,
                     listLoading: false
                 }));
                 
-                return response.documents;
+                return events;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '获取事件失败';
                 update(state => ({ ...state, listLoading: false, error: errorMessage }));
@@ -77,13 +81,16 @@ const createEventStore = () => {
                     eventId
                 );
                 
+                // 使用工具方法解析 i18n 字段
+                const event = parseI18nFields(eventDoc as unknown as Event);
+
                 update(state => ({
                     ...state,
-                    currentEvent: eventDoc as unknown as Event,
+                    currentEvent: event,
                     eventLoading: false
                 }));
                 
-                return eventDoc;
+                return event;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '获取事件详情失败';
                 update(state => ({ ...state, eventLoading: false, error: errorMessage }));
@@ -125,15 +132,18 @@ const createEventStore = () => {
                     }
                 );
                 
+                // 使用工具方法解析 i18n 字段
+                const parsedEvent = parseI18nFields(newEvent as unknown as Event);
+
                 update(state => ({
                     ...state,
-                    events: [...state.events, newEvent as unknown as Event],
-                    currentEvent: newEvent as unknown as Event,
+                    events: [...state.events, parsedEvent],
+                    currentEvent: parsedEvent,
                     eventLoading: false
                 }));
                 
                 toast.success("事件已成功发布！");
-                return newEvent;
+                return parsedEvent;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '创建事件失败';
                 update(state => ({ ...state, eventLoading: false, error: errorMessage }));
@@ -156,16 +166,19 @@ const createEventStore = () => {
                     }
                 );
                 
+                // 使用工具方法解析 i18n 字段
+                const parsedUpdatedEvent = parseI18nFields(updatedEvent as unknown as Event);
+
                 update(state => ({
                     ...state,
-                    events: state.events.map(e => e.$id === eventId ? { ...e, ...updatedEvent } : e),
+                    events: state.events.map(e => e.$id === eventId ? parsedUpdatedEvent : e),
                     currentEvent: state.currentEvent && state.currentEvent.$id === eventId ? 
-                        { ...state.currentEvent, ...updatedEvent } : state.currentEvent,
+                        parsedUpdatedEvent : state.currentEvent,
                     eventLoading: false
                 }));
                 
                 toast.success("事件已成功更新！");
-                return updatedEvent;
+                return parsedUpdatedEvent;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '更新事件失败';
                 update(state => ({ ...state, eventLoading: false, error: errorMessage }));

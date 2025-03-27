@@ -1,10 +1,9 @@
 <script lang="ts">
-  import BadgeCheck from "lucide-svelte/icons/badge-check";
-  import Bell from "lucide-svelte/icons/bell";
+  import Upload from "lucide-svelte/icons/upload";
   import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
-  import CreditCard from "lucide-svelte/icons/credit-card";
   import LogOut from "lucide-svelte/icons/log-out";
-  import Sparkles from "lucide-svelte/icons/sparkles";
+  import Globe from "lucide-svelte/icons/globe";
+  import Palette from "lucide-svelte/icons/palette";
 
   import * as Avatar from "$lib/components/ui/avatar/index.js";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
@@ -15,6 +14,8 @@
   import { base } from "$app/paths";
   import { page } from "$app/stores";
   import type { User } from "$lib/types/user";
+  import { locale, _ } from 'svelte-i18n';
+  import { mode, setMode } from 'mode-watcher';
 
   /**
    * 用户导航组件
@@ -23,10 +24,40 @@
   let { user: user } = $props();
   const sidebar = useSidebar();
 
+  // 语言选项
+  const languages = [
+    { value: "en", label: "English" },
+    { value: "zh", label: "中文" }
+  ];
+
+  // 主题选项
+  const themes = [
+    { value: "light" as const, label: $_('theme.light') },
+    { value: "dark" as const, label: $_('theme.dark') }
+  ];
+
+  let selectedLanguage = $state($locale);
+  let selectedTheme = $state($mode);
+
   function handleLogout() {
     auth.logout();
     const returnUrl = encodeURIComponent($page.url.pathname);
     goto(`${base}/login?redirect=${returnUrl}`);
+  }
+
+  function handleUploadAvatar() {
+    // TODO: 实现头像上传功能
+    console.log('Upload avatar');
+  }
+
+  function handleLanguageChange(value: string) {
+    selectedLanguage = value;
+    locale.set(value);
+  }
+
+  function handleThemeChange(value: "light" | "dark") {
+    selectedTheme = value;
+    setMode(value);
   }
 </script>
 
@@ -72,30 +103,50 @@
         </DropdownMenu.Label>
         <DropdownMenu.Separator />
         <DropdownMenu.Group>
-          <DropdownMenu.Item>
-            <Sparkles />
-            Upgrade to Pro
+          <DropdownMenu.Item onclick={handleUploadAvatar}>
+            <Upload class="mr-2 h-4 w-4" />
+            {$_('common.uploadAvatar')}
           </DropdownMenu.Item>
         </DropdownMenu.Group>
         <DropdownMenu.Separator />
         <DropdownMenu.Group>
-          <DropdownMenu.Item>
-            <BadgeCheck />
-            Account
-          </DropdownMenu.Item>
-          <DropdownMenu.Item>
-            <CreditCard />
-            Billing
-          </DropdownMenu.Item>
-          <DropdownMenu.Item>
-            <Bell />
-            Notifications
-          </DropdownMenu.Item>
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger>
+              <Globe class="mr-2 h-4 w-4" />
+              {$_('common.changeLanguage')}
+            </DropdownMenu.SubTrigger>
+            <DropdownMenu.SubContent>
+              {#each languages as language}
+                <DropdownMenu.Item onclick={() => handleLanguageChange(language.value)}>
+                  {language.label}
+                  {#if selectedLanguage === language.value}
+                    <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
+                  {/if}
+                </DropdownMenu.Item>
+              {/each}
+            </DropdownMenu.SubContent>
+          </DropdownMenu.Sub>
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger>
+              <Palette class="mr-2 h-4 w-4" />
+              {$_('common.changeTheme')}
+            </DropdownMenu.SubTrigger>
+            <DropdownMenu.SubContent>
+              {#each themes as theme}
+                <DropdownMenu.Item onclick={() => handleThemeChange(theme.value)}>
+                  {theme.label}
+                  {#if selectedTheme === theme.value}
+                    <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
+                  {/if}
+                </DropdownMenu.Item>
+              {/each}
+            </DropdownMenu.SubContent>
+          </DropdownMenu.Sub>
         </DropdownMenu.Group>
         <DropdownMenu.Separator />
         <DropdownMenu.Item onclick={handleLogout}>
-          <LogOut />
-          Log out
+          <LogOut class="mr-2 h-4 w-4" />
+          {$_('common.logout')}
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

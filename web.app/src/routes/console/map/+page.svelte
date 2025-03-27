@@ -2,7 +2,6 @@
   import type { PageData } from "./$types";
   import { Button } from "$lib/components/ui/button";
   import type { ShellContext } from "../../../lib/types/types";
-
   import { _ } from "svelte-i18n";
   import { Search, MapPin, PlusCircle } from "lucide-svelte";
   import {MapBase as Map} from "$lib/components/ui/map";
@@ -11,93 +10,29 @@
   import { getContext, setContext } from "svelte";
   import { writable } from "svelte/store";
   import { goto } from "$app/navigation";
+  import { categoryStore } from "$lib/stores/category";
+  import { eventStore } from "$lib/stores/event";
+  import type { Category } from "$lib/types/category";
+  import type { Event } from "$lib/types/event";
 
   let { data }: { data: PageData } = $props();
 
   // 选中的事件数据
-  let selectedEvent = $state(null);
+  let selectedEvent = $state<Event | null>(null);
 
   // 地点分类数据
-  const placeCategories = [
-    { id: "atm", name: "ATMs", count: 12 },
-    { id: "bus", name: "Bus Stops", count: 24 },
-    { id: "cafe", name: "Cafés", count: 3 },
-    { id: "emergency", name: "Emergencies", count: 5 },
-    { id: "museum", name: "Museums", count: 8 },
-    { id: "parking", name: "Parkings", count: 15 },
-    { id: "restaurant", name: "Restaurants", count: 32 },
-    { id: "sport", name: "Sport Centers", count: 6 },
-  ];
+  let placeCategories = $state([
+    { id: "all", name: "全部", count: 0 }
+  ]);
 
-  // 模拟事件数据
-  const events = [
-    {
-      id: "1",
-      title: "摄影工作坊",
-      location: "上海市",
-      date: "2023-12-15",
-      image: "/images/31.03_banner-373x373.jpg",
-      tags: ["摄影", "工作坊"],
-      attendees: 24,
-      rating: 4.5,
-    },
-    {
-      id: "2",
-      title: "户外徒步活动",
-      location: "杭州市",
-      date: "2023-12-20",
-      image: "/images/31.04_banner-373x373.jpg",
-      tags: ["户外", "徒步"],
-      attendees: 36,
-      rating: 4.8,
-    },
-    {
-      id: "3",
-      title: "创意绘画课程",
-      location: "北京市",
-      date: "2023-12-25",
-      image: "/images/31.05_banner-373x373.jpg",
-      tags: ["艺术", "绘画"],
-      attendees: 18,
-      rating: 4.2,
-    },
-    {
-      id: "4",
-      title: "音乐节",
-      location: "成都市",
-      date: "2023-12-30",
-      image: "/images/33.04_banner-373x373.jpg",
-      tags: ["音乐", "演出"],
-      attendees: 120,
-      rating: 4.7,
-    },
-    {
-      id: "5",
-      title: "科技展览",
-      location: "深圳市",
-      date: "2024-01-05",
-      image: "/images/33.05_banner-373x373.jpg",
-      tags: ["科技", "展览"],
-      attendees: 85,
-      rating: 4.4,
-    },
-    {
-      id: "6",
-      title: "美食节",
-      location: "广州市",
-      date: "2024-01-10",
-      image: "/images/31.03_banner-373x373.jpg",
-      tags: ["美食", "文化"],
-      attendees: 150,
-      rating: 4.6,
-    },
-  ];
+  // 事件列表数据
+  let events = $state<Event[]>([]);
 
-  let selectedCategory = "cafe";
+  let selectedCategory = "all";
   let searchQuery = "";
   let currentPage = 1;
   const itemsPerPage = 6;
-  const totalPages = Math.ceil(events.length / itemsPerPage);
+  let totalPages = 1;
 
   // 创建事件相关状态
   let showCreatePanel = $state(false);
@@ -115,9 +50,51 @@
     { label: "截止日期", value: eventDate || "未设置", icon: false },
   ];
 
+  // 获取分类数据
+  async function fetchCategories() {
+    try {
+      const categories = await categoryStore.fetchCategories();
+      // 更新地点分类数据
+      placeCategories = [
+        { id: "all", name: "全部", count: events.length },
+        ...categories.map(cat => ({
+          id: cat.$id,
+          name: cat.name.zh,
+          count: events.filter(event => event.category === cat.$id).length
+        }))
+      ];
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  }
+
+  // 获取事件数据
+  async function fetchEvents() {
+    try {
+      const fetchedEvents = await eventStore.fetchEvents();
+      events = fetchedEvents;
+      totalPages = Math.ceil(events.length / itemsPerPage);
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+    }
+  }
+
+  // 页面加载时获取数据
+  $effect(() => {
+    fetchEvents();
+    fetchCategories();
+  });
+
   function handleCategoryClick(categoryId: string) {
     selectedCategory = categoryId;
     currentPage = 1;
+  }
+
+  function handleEventClick(event: Event) {
+    selectedEvent = event;
+    if (event.$id) {
+      goto(`/console/events/${event.$id}`);
+    }
   }
 
   function formatDate(dateString: string) {
@@ -140,14 +117,10 @@
 
   function handleCreateEvent() {
     // 处理创建事件的逻辑
-    // console.log(event.detail);
-    // showCreatePanel = false;
-    // 重置表单
     eventTitle = "";
     eventDescription = "";
     eventLocation = "";
     eventDate = "";
-    setShowRightView(true);
   }
 
   function handleClosePanel() {
@@ -161,7 +134,7 @@
     <CategoryList
       categories={placeCategories}
       {selectedCategory}
-      onCategoryClick={handleCategoryClick}
+      onClick={handleCategoryClick}
     />
   </div>
 
@@ -194,26 +167,6 @@
   <div
     class="absolute bottom-6 left-0 right-0 z-20 mx-auto max-w-[1200px] px-14"
   >
-    <EventList class="" events={events as any[] as Event[]} />
+    <EventList class="" {events} cardclick={handleEventClick} />
   </div>
-  <!-- {#snippet contentView()}
-    <EventDetail
-      {eventTitle}
-      {eventLocation}
-      {eventDate}
-      {eventStatus}
-      on:createEvent={handleCreateEvent}
-      on:closePanel={handleClosePanel}
-    />
-  {/snippet} -->
-  <!-- NotionPanel组件 -->
-  <!-- <NotionPanel
-    open={showCreatePanel}
-    title={selectedEvent?.title || ""}
-    on:close={() => {
-      setShowRightView(false);
-      selectedEvent = null;
-    }}
-    {contentView}
-  /> -->
 </div>

@@ -69,16 +69,18 @@ export const navData: {
       size: "sm",
       url: "#",
       icon: BookOpen,
-    },
-    {
-      title: "设置",
-      size: "sm",
-      icon: Settings2,
-      state: "disabled",
-      url: "/console/settings",
       clickOnly: true,
-      onClickAction: "modal",
+      onClickAction: "modal"
     },
+    // {
+    //   title: "设置",
+    //   size: "sm",
+    //   icon: Settings2,
+    //   state: "disabled",
+    //   url: "/console/settings",
+    //   clickOnly: true,
+    //   onClickAction: "modal",
+    // },
   ],
   
   personalItems: [

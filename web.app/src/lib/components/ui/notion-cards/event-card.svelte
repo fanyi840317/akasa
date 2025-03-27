@@ -7,13 +7,41 @@
         AvatarFallback,
     } from "$lib/components/ui/avatar";
 
-    export let title: string;
-    export let image: string = "";
-    export let tags: string[] = [];
-    export let rating: number = 0;
-    export let url: string = "#";
-    export let avatarSrc: string = "";
-    export let avatarFallback: string = title ? title.slice(0, 2) : "";
+    let { title, image = "", tags = [], rating = 0, url = "#", avatarSrc = "", avatarFallback = title ? title.slice(0, 2) : "" } = $props<{
+        title: string;
+        image?: string;
+        tags?: string[];
+        rating?: number;
+        url?: string;
+        avatarSrc?: string;
+        avatarFallback?: string;
+    }>();
+
+    // 获取随机默认封面图
+    function getRandomDefaultCover(): string {
+        const defaultCovers = [
+            '/images/cover/c1.webp',
+            '/images/cover/c2.webp',
+            '/images/cover/c3.webp'
+        ];
+        const randomIndex = Math.floor(Math.random() * defaultCovers.length);
+        return defaultCovers[randomIndex];
+    }
+
+    // 使用 $effect 生成封面URL
+    let coverUrl = $state(image || getRandomDefaultCover());
+
+    $effect(() => {
+        if (!image) {
+            coverUrl = getRandomDefaultCover();
+        } else {
+            coverUrl = image;
+        }
+    });
+
+    function handleImageError() {
+        coverUrl = getRandomDefaultCover();
+    }
 </script>
 
 <style lang="postcss">
@@ -48,7 +76,7 @@
 
 <a href={url} class="event-card">
     <div class="event-card-image">
-        <img src={image} alt={title} />
+        <img src={coverUrl} alt={title} on:error={handleImageError} />
     </div>
     <div class="event-card-content">
         <div class="event-card-title">
@@ -60,16 +88,18 @@
                 <span class="text-sm text-foreground/90">{title}</span>
             </div>
         </div>
-        <div class="event-card-tags">
-            {#each tags as tag}
-                <Badge variant="outline" class="ml-1 text-muted-foreground/30">{tag}</Badge>
-            {/each}
-        </div>
+        {#if tags && tags.length > 0}
+            <div class="event-card-tags">
+                {#each tags as tag}
+                    <Badge variant="outline" class="ml-1 text-muted-foreground/30">{tag}</Badge>
+                {/each}
+            </div>
+        {/if}
     </div>
     {#if rating > 0}
         <div class="event-card-rating gap-1">
             <Star class="h-3 w-3" />
-            <span >{rating}</span>
+            <span>{rating}</span>
         </div>
     {/if}
 </a>

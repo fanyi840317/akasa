@@ -18,13 +18,35 @@
     cardclick?: (event: Event) => void;
   } = $props();
 
-  function formatDate(dateString: string) {
+  // 获取随机默认封面图
+  function getRandomDefaultCover(): string {
+    const defaultCovers = [
+      '/images/cover/c1.webp',
+      '/images/cover/c2.webp',
+      '/images/cover/c3.webp'
+    ];
+    const randomIndex = Math.floor(Math.random() * defaultCovers.length);
+    return defaultCovers[randomIndex];
+  }
+
+  function formatDate(dateString: string | undefined) {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString("zh-CN", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
+  }
+
+  function handleEventClick(event: Event) {
+    if (cardclick) {
+      cardclick(event);
+    }
+  }
+
+  function handleImageError(event: Event) {
+    event.cover = getRandomDefaultCover();
   }
 </script>
 
@@ -44,13 +66,14 @@
           <div class="relative w-full px-2 py-4">
             <div
               class="flex items-center p-4 gap-6 group cursor-pointer bg-card/40 shadow-md hover:-translate-y-2 transition-transform hover:shadow-lg rounded-lg w-full"
-              onclick={cardclick(event)}
+              on:click={() => handleEventClick(event)}
             >
               <div class="relative h-16 flex-shrink-0">
                 <img
-                  src={event.cover}
+                  src={event.cover || getRandomDefaultCover()}
                   alt={event.title}
                   class="h-16 w-16 rounded-full object-cover"
+                  on:error={() => handleImageError(event)}
                 />
                 <div class="absolute -bottom-2 -right-2">
                   <Avatar class="h-8 w-8 border-2 border-background">

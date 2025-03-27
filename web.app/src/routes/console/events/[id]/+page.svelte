@@ -57,7 +57,7 @@
 
 <div class="flex flex-col h-full">
   <Header {titles}>
-    <div slot="actions">
+    <div>
       <Button variant="ghost" size="icon" class="gap-2">
         <Save class="h-4 w-4" />
       </Button>

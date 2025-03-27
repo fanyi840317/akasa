@@ -7,8 +7,8 @@
     "login": "Login"
   },
   "common": {
-    "changeTheme": "Change Theme",
-    "changeLanguage": "Change Language",
+    "changeTheme": "Set Theme",
+    "changeLanguage": "Set Language",
     "comingSoon": "Coming Soon",
     "contactUs": "Contact Us",
     "days": "Days",

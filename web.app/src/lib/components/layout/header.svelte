@@ -3,6 +3,8 @@
     import * as Breadcrumb from "$lib/components/ui/breadcrumb";
     import { Separator } from "$lib/components/ui/separator";
     import { cn } from "$lib/utils.js";
+    import type { HTMLAnchorAttributes } from "svelte/elements";
+    import type { WithElementRef } from "bits-ui";
 
     /**
      * 控制台页面头部组件 - 提供标题、面包屑和页面布局容器
@@ -12,11 +14,11 @@
     let {
         ref = $bindable(null),
         titles = [] as { name: string; path: string; }[],
+        children,
         ...restProps
-    } = $props<{
-        ref?: any;
+    }: WithElementRef<HTMLAnchorAttributes>&{
         titles?: { name: string; path: string; }[];
-    }>();
+    } = $props();
 
     // 定义面包屑项的数组
     let breadcrumbItems = [
@@ -43,6 +45,6 @@
         </Breadcrumb.Root>
     </div>
     <div class="pr-4">
-        <slot name="actions" />
+        {@render children?.()}
     </div>
 </header>

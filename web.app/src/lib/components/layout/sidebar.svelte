@@ -8,9 +8,6 @@
     import type { NavItem } from "$lib/types/types";
     import type { User } from "$lib/types/user";
     import { page } from "$app/stores";
-    import * as Card from "$lib/components/ui/card";
-    import { Button } from "$lib/components/ui/button";
-    import { appStore } from "$lib/stores/appState";
     import { navData } from "$lib/data/navigation-data";
     
     /**
@@ -22,7 +19,6 @@
         collapsed = $bindable(false),
         side = "left" as "left" | "right",
         class: className = '',
-        selectedItem = "",
         onNavItemClick = (item: NavItem) => {},
         user = undefined,
     } = $props<{
@@ -30,15 +26,9 @@
         collapsed?: boolean;
         side?: "left" | "right";
         class?: string;
-        selectedItem?: string | null;
         onNavItemClick?: (item: NavItem) => void;
         user?: User;
     }>();
-    
-    // 订阅appStore以获取最新状态
-    appStore.subscribe(state => {
-        selectedItem = state.selectedItem;
-    });
     
     // 如果没有传入用户信息，则使用页面数据中的用户信息
     $effect(() => {
@@ -79,17 +69,15 @@
 	</Sidebar.Header>
 	
 	<Sidebar.Content>
-            <Nav items={navData.navMain} label="Platform" {selectedItem} {onNavItemClick} />
-            <!-- <Nav items={navData.personalItems} label="个人" {selectedItem} {onNavItemClick} /> -->
-           <Sidebar.Separator></Sidebar.Separator>
+        <Nav items={navData.navMain} label="Platform" {onNavItemClick} />
+        <Sidebar.Separator />
         <ScrollArea>
             <NavPro />
         </ScrollArea>
-       
     </Sidebar.Content>
     
     <Sidebar.Footer>
-		<Nav items={navData.navSecondary} {onNavItemClick}></Nav>
+		<Nav items={navData.navSecondary} {onNavItemClick} />
         <NavUser {user} />
     </Sidebar.Footer>
     <Sidebar.Rail />
