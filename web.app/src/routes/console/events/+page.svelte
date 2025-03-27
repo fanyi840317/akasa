@@ -20,6 +20,7 @@
     import { Query } from "appwrite";
     import type { Event } from "$lib/types/event";
     import type { Category } from "$lib/types/category";
+    import { fade, slide, scale } from 'svelte/transition';
 
     let { data }: { data: PageData } = $props();
     let showSharePanel = $state(false);
@@ -32,7 +33,7 @@
         { id: "all", name: "全部" }
     ]);
 
-    let selectedCategory = "all";
+    let selectedCategory = $state("all");
     let searchQuery = "";
     let currentPage = 1;
     const itemsPerPage = 6;
@@ -47,7 +48,7 @@
                 categoryStore.fetchCategories()
             ]);
             
-            events = eventsResponse.slice(0, 10) as unknown as Event[];
+            events = eventsResponse as unknown as Event[];
             categories = categoriesResponse;
             
             // 更新分类标签
@@ -78,6 +79,23 @@
             day: "numeric",
         });
     }
+
+    let filteredEvents = $state<Event[]>([]);
+
+    // 根据选中的分类过滤事件
+    $effect(() => {
+        if (!events) return;
+        console.log('Category changed:', selectedCategory); // 添加日志
+        filteredEvents = selectedCategory === 'all'
+            ? events
+            : events.filter(event => event.category === selectedCategory);
+        console.log('Filtered events:', filteredEvents); // 添加日志
+    });
+
+    // 添加过渡动画配置
+    const fadeConfig = { duration: 300, delay: 100 };
+    const slideConfig = { duration: 300 };
+    const scaleConfig = { duration: 200 };
 </script>
 
 <ScrollArea class="h-[calc(100vh-1rem)] ">
@@ -120,13 +138,19 @@
         {#if loading}
             <div class="col-span-full text-center py-8">加载中...</div>
         {:else}
-            {#each events as event}
-                <EventCard
-                    title={event.title || ''}
-                    image={event.creator_avatar || ''}
-                    tags={[event.category || '']}
-                    rating={4.5}
-                />
+            {#each filteredEvents as event (event.$id)}
+                <div
+                    in:fade={fadeConfig}
+                    out:slide={slideConfig}
+                    animate:scale={scaleConfig}
+                >
+                    <EventCard
+                        title={event.title || ''}
+                        image={event.creator_avatar || ''}
+                        tags={[event.category || '']}
+                        rating={0}
+                    />
+                </div>
             {/each}
         {/if}
     </div>

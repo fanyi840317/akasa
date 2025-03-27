@@ -15,7 +15,11 @@
 
     function handleSelect(id: string) {
         selectedId = id;
+        dispatch('select', { id });
     }
+
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
 </script>
 
 <div class="relative">
@@ -28,7 +32,7 @@
                 {#each items as item}
                     {@const isActive = selectedId === item.id}
                     <button
-                        on:click={() => handleSelect(item.id)}
+                        onclick={() => handleSelect(item.id)}
                         class={cn(
                             "hover:text-primary relative flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors",
                             isActive ? "text-primary font-medium" : "text-muted-foreground"
