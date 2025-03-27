@@ -6,7 +6,7 @@
   import { Search, MapPin, PlusCircle } from "lucide-svelte";
   import {MapBase as Map} from "$lib/components/ui/map";
   import EventList from "./event-list.svelte";
-  import CategoryList from "./category-list.svelte";
+  import TagNav from "$lib/components/ui/tag-nav/tag-nav.svelte";
   import { getContext, setContext } from "svelte";
   import { writable } from "svelte/store";
   import { goto } from "$app/navigation";
@@ -20,47 +20,41 @@
   // 选中的事件数据
   let selectedEvent = $state<Event | null>(null);
 
-  // 地点分类数据
-  let placeCategories = $state([
-    { id: "all", name: "全部", count: 0 }
+  // 分类标签
+  let categoryItems = $state([
+    { id: "all", name: "全部" }
   ]);
 
   // 事件列表数据
   let events = $state<Event[]>([]);
+  let filteredEvents = $state<Event[]>([]);
 
-  let selectedCategory = "all";
+  let selectedCategory = $state("all");
   let searchQuery = "";
   let currentPage = 1;
   const itemsPerPage = 6;
   let totalPages = 1;
 
-  // 创建事件相关状态
-  let showCreatePanel = $state(false);
-  let eventTitle = $state("");
-  let eventDescription = $state("");
-  let eventLocation = $state("");
-  let eventDate = $state("");
-  let eventStatus = $state("未开始");
+  // 地图相关状态
+  let mapInstance: any = null;
 
-  // 事件属性
-  let eventProperties = [
-    { label: "状态", value: "未开始", icon: true, color: "bg-gray-400" },
-    { label: "负责人", value: "空白", icon: true, color: "bg-gray-200" },
-    { label: "优先级", value: "空白", icon: true, color: "bg-gray-400" },
-    { label: "截止日期", value: eventDate || "未设置", icon: false },
-  ];
+  // 页面加载时获取数据
+  $effect(() => {
+    fetchEvents();
+    fetchCategories();
+  });
 
   // 获取分类数据
   async function fetchCategories() {
     try {
       const categories = await categoryStore.fetchCategories();
-      // 更新地点分类数据
-      placeCategories = [
-        { id: "all", name: "全部", count: events.length },
+      console.log('Fetched categories:', categories);
+      // 更新分类标签
+      categoryItems = [
+        { id: "all", name: "全部" },
         ...categories.map(cat => ({
           id: cat.$id,
-          name: cat.name.zh,
-          count: events.filter(event => event.category === cat.$id).length
+          name: cat.name.zh
         }))
       ];
     } catch (error) {
@@ -73,19 +67,37 @@
     try {
       const fetchedEvents = await eventStore.fetchEvents();
       events = fetchedEvents;
-      totalPages = Math.ceil(events.length / itemsPerPage);
+      filterEvents();
     } catch (error) {
       console.error('Failed to fetch events:', error);
     }
   }
 
-  // 页面加载时获取数据
+  // 过滤事件
+  function filterEvents() {
+    console.log('Filtering events with category:', selectedCategory);
+    let filtered = [...events];
+
+    // 按分类过滤
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(event => {
+        console.log('Checking event:', event.title, 'category:', event.category, 'selected:', selectedCategory);
+        return event.category === selectedCategory;
+      });
+    }
+
+    console.log('Filtered events:', filtered.length);
+    filteredEvents = filtered;
+    totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
+  }
+
+  // 监听分类变化
   $effect(() => {
-    fetchEvents();
-    fetchCategories();
+    filterEvents();
   });
 
   function handleCategoryClick(categoryId: string) {
+    console.log('Category clicked:', categoryId);
     selectedCategory = categoryId;
     currentPage = 1;
   }
@@ -111,12 +123,11 @@
   }
 
   function getCategoryTransform(index: number, total: number) {
-    const verticalSpacing = 60; // 每个项目之间的垂直间距
+    const verticalSpacing = 60;
     return `translate(0, ${index * verticalSpacing}px)`;
   }
 
   function handleCreateEvent() {
-    // 处理创建事件的逻辑
     eventTitle = "";
     eventDescription = "";
     eventLocation = "";
@@ -126,47 +137,99 @@
   function handleClosePanel() {
     showCreatePanel = false;
   }
+
+  function handleMapLoad(map: any) {
+    console.log('Map loaded:', map);
+    mapInstance = map;
+  }
+
+  function handleLocationClick() {
+    console.log('Location button clicked');
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log('Got position:', position);
+          const { latitude, longitude } = position.coords;
+          if (mapInstance) {
+            console.log('Setting map location:', { latitude, longitude });
+            mapInstance.setLocation(longitude, latitude);
+            mapInstance.setZoom(15);
+          } else {
+            console.error('Map instance not available');
+          }
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }
 </script>
 
-<div class="w-full h-screen overflow-hidden">
-  <!-- 左侧分类列表 -->
-  <div class="absolute left-16 top-[180px] z-20">
-    <CategoryList
-      categories={placeCategories}
-      {selectedCategory}
-      onClick={handleCategoryClick}
+<div class="w-full h-screen relative">
+  <!-- 地图容器 -->
+  <div class="absolute inset-0 z-0">
+    <Map 
+      on:mapLoad={({ detail }) => handleMapLoad(detail)}
+      locationData={{ 
+        latitude: 39.9042, 
+        longitude: 116.4074
+      }}
+      zoom={12}
+      showUserLocation={true}
     />
   </div>
 
-  <div class="absolute top-14 left-14 z-20 p-4">
-    <h1 class="text-3xl font-bold mb-2">{$_("site.events")}</h1>
-    <h2 class="text-sm text-muted-foreground">{$_("events.subtitle")}</h2>
-  </div>
-
-  <!-- 右上角搜索框 -->
-  <div class="absolute top-16 right-14 z-20 flex items-center gap-4">
-    <Button variant="ghost" size="icon">
-      <Search class="h-5 w-5" />
-    </Button>
-    <Button variant="ghost" size="icon">
-      <MapPin class="h-5 w-5" />
-    </Button>
-  </div>
-
-  <!-- 地图容器 -->
-  <div class="absolute inset-0 z-0">
-    <Map />
-  </div>
   <!-- 黑雾蒙层 -->
   <div
     class="absolute inset-0 z-10 pointer-events-none"
-    style="background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.9) 100%)"
+    style="background: radial-gradient(circle at center, transparent 30%, hsl(var(--background) / 0.2) 50%, hsl(var(--background) / 0.9) 100%)"
   ></div>
 
+  <!-- 顶部标题和按钮区域 -->
+  <div class="absolute top-0 left-0 right-0 z-20">
+    <!-- 毛玻璃背景 -->
+    <div class="absolute inset-0 bg-background/40 backdrop-blur-sm/60 border-b border-border/20"></div>
+    <!-- 渐变背景 -->
+    <div class="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-transparent"></div>
+    
+    <!-- 内容区域 -->
+    <div class="container mx-auto p-16 space-y-10 relative">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">{$_("site.events")}</h1>
+          <h2 class="text-sm text-muted-foreground">{$_("events.subtitle")}</h2>
+        </div>
+        <div class="flex items-center gap-4">
+          <Button variant="ghost" size="icon">
+            <Search class="h-5 w-5" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onclick={() => handleLocationClick()}
+          >
+            <MapPin class="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+
+      <!-- 分类标签 -->
+      <TagNav 
+        bind:selectedId={selectedCategory}
+        items={categoryItems} 
+        on:select={({ detail }) => {
+          console.log('TagNav select event:', detail);
+          filterEvents();
+        }}
+      />
+    </div>
+  </div>
+
   <!-- 底部事件展示区域 -->
-  <div
-    class="absolute bottom-6 left-0 right-0 z-20 mx-auto max-w-[1200px] px-14"
-  >
-    <EventList class="" {events} cardclick={handleEventClick} />
+  <div class="absolute bottom-6 left-0 right-0 z-20 mx-auto max-w-[1200px] px-14">
+    <EventList class="" events={filteredEvents} cardclick={handleEventClick} />
   </div>
 </div>
