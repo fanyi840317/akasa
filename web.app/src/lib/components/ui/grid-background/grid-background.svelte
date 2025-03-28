@@ -59,6 +59,10 @@
         const rect = container.getBoundingClientRect();
         mouseX = event.clientX - rect.left;
         mouseY = event.clientY - rect.top;
+        requestAnimationFrame(() => {
+            container.style.setProperty('--mouse-x', `${mouseX}px`);
+            container.style.setProperty('--mouse-y', `${mouseY}px`);
+        });
     }
 
     function handleMouseEnter() {
@@ -77,35 +81,12 @@
     on:mouseenter={handleMouseEnter}
     on:mouseleave={handleMouseLeave}
 >
-    <!-- 网格容器 -->
-    <div class="absolute inset-0">
-        {#each cells as cell}
-            <div 
-                class="mesh-cell"
-                style="--x: {cell.x}; --y: {cell.y};"
-            />
-        {/each}
-    </div>
-
-    <!-- 鼠标跟随发光效果 -->
-    <div 
-        class="pointer-events-none absolute w-[300px] h-[300px] transition-all duration-150"
-        class:opacity-0={!isHovering}
-        style="
-            left: {mouseX}px;
-            top: {mouseY}px;
-            background: radial-gradient(
-                circle,
-                rgba(255, 255, 255, 0.15) 0%,
-                rgba(255, 255, 255, 0.1) 15%,
-                rgba(255, 255, 255, 0.05) 30%,
-                transparent 60%
-            );
-            mix-blend-mode: screen;
-            transform: translate(-50%, -50%);
-            will-change: transform;
-        "
-    ></div>
+{#each cells as cell}
+<div 
+    class="mesh-cell"
+    style="--x: {cell.x}; --y: {cell.y};"
+/>
+{/each}
 
     <!-- 渐变遮罩 -->
     <!-- <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/80 to-black pointer-events-none"></div> -->
@@ -134,5 +115,32 @@
     .mesh-cell:hover {
         background: hsla(0, 0%, 100%, .08);
         box-shadow: 0 0 20px hsla(0, 0%, 100%, .1);
+    }
+
+    div[class*="relative"]::before {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        pointer-events: none;
+        transition: opacity 150ms ease-out;
+        opacity: 0;
+        background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.1) 15%,
+            rgba(255, 255, 255, 0.05) 30%,
+            transparent 60%
+        );
+        mix-blend-mode: screen;
+        transform: translate(-50%, -50%);
+        will-change: transform, opacity;
+        left: var(--mouse-x, 0);
+        top: var(--mouse-y, 0);
+        contain: strict;
+    }
+
+    div[class*="relative"]:hover::before {
+        opacity: 1;
     }
 </style>

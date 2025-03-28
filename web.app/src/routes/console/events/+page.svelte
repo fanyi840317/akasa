@@ -94,7 +94,7 @@
 <ScrollArea class="h-[calc(100vh-1rem)] relative">
     <!-- 网格背景 -->
     <div class="fixed inset-0">
-        <!-- <GridBackground className="w-full h-full" /> -->
+        <GridBackground className="w-full h-full" />
     </div>
     <!-- 内容区域 -->
     <div class="container mx-auto p-16 space-y-10 relative z-10">
