@@ -92,42 +92,46 @@
 </script>
 
 <ScrollArea class="h-[calc(100vh-1rem)] relative">
-    <!-- 网格背景 -->
-    <div class="fixed inset-0">
-        <GridBackground className="w-full h-full" />
-    </div>
-    <!-- 内容区域 -->
-    <div class="container mx-auto p-16 space-y-10 relative z-10">
-        <!-- 页面标题和搜索栏 -->
-        <div
-            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-        >
-            <div>
-                    <h1 class="text-3xl font-bold mb-2">活动与事件</h1>
-                    <p class="text-sm text-muted-foreground">发现并参与各种精彩活动</p>
-            </div>
-            <div class="flex items-center gap-2 w-full md:w-auto">
-                <div class="relative w-full md:w-[300px]">
-                    <Search
-                        class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
-                    />
-                    <Input
-                        type="search"
-                        placeholder="搜索活动..."
-                        class="pl-8"
-                        bind:value={searchQuery}
-                    />
-                </div>
-            </div>
+    <!-- Hero 区域 -->
+    <div class="relative w-full">
+        <!-- 网格背景 -->
+        <div class="absolute inset-0 bg-background/80">
+            <GridBackground className="w-full h-full" />
         </div>
 
-        <!-- 分类标签 -->
-        <TagNav bind:selectedId={selectedCategory} items={categoryItems} />
+        <!-- 页面标题和搜索栏 -->
+        <div class="relative container mx-auto px-20 pointer-events-none pt-20 pb-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-20">
+                <div >
+                    <h1 class="text-3xl font-bold mb-2">活动与事件</h1>
+                    <p class="text-sm text-muted-foreground">发现并参与各种精彩活动</p>
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <div class="relative w-full md:w-[300px] pointer-events-auto">
+                        <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="搜索活动..."
+                            class="pl-8"
+                            bind:value={searchQuery}
+                        />
+                    </div>
+                </div>
+            </div>
 
+            <!-- 分类标签 -->
+            <div class="mt-6 pointer-events-auto">
+                <TagNav bind:selectedId={selectedCategory} items={categoryItems} />
+            </div>
+        </div>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="container mx-auto px-20 space-y-10 `">
         <div class="space-y-4">
             <!-- 精选模板区域 -->
             <div class="flex items-center gap-2 px-2 text-muted-foreground">
-                <Star class="h-3 w-3 " />
+                <Star class="h-3 w-3" />
                 <span class="text-xs">精选模板</span>
             </div>
 
@@ -154,3 +158,9 @@
         </div>
     </div>
 </ScrollArea>
+
+<style>
+    :global(.bg-grid-white) {
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+</style>
