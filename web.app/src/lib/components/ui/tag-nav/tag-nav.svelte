@@ -4,7 +4,7 @@
     import { ScrollArea } from "$lib/components/ui/scroll-area";
     import { cn } from "$lib/utils";
 
-    export let items: Array<{ id: string; name: string; label?: string }> = [];
+    export let items: Array<{ id: string; name: string; label?: string; color?: string }> = [];
     export let selectedId: string = items[0]?.id || "";
     export let className: string | undefined | null = undefined;
 
@@ -24,9 +24,9 @@
 
 <div class="relative">
     <div class="lg:max-w-none">
-        <ScrollArea orientation="both" scrollbarXClasses="invisible">
+        <ScrollArea orientation="horizontal" scrollbarXClasses="invisible">
             <div
-                class={cn("mb-4 flex items-center overflow-y-auto pb-3 md:pb-0", className)}
+                class={cn("mb-4 grid grid-flow-col auto-cols-max gap-2 pb-3 md:pb-0", className)}
                 {...$$restProps}
             >
                 {#each items as item}
@@ -34,13 +34,17 @@
                     <button
                         onclick={() => handleSelect(item.id)}
                         class={cn(
-                            "hover:text-primary relative flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors",
-                            isActive ? "text-primary font-medium" : "text-muted-foreground"
+                            "hover:text-primary relative flex h-7 min-w-max items-center justify-center rounded-full px-4 text-center text-sm transition-colors whitespace-nowrap",
+                            isActive ? "text-primary font-medium" : "text-muted-foreground",
+                            item.color && !isActive && `hover:bg-${item.color}/10`
                         )}
                     >
                         {#if isActive}
                             <div
-                                class="bg-muted absolute inset-0 rounded-full"
+                                class={cn(
+                                    "absolute inset-0 rounded-full",
+                                    item.color ? `bg-${item.color}/10` : "bg-muted"
+                                )}
                                 in:send={{ key: "activetab" }}
                                 out:receive={{ key: "activetab" }}
                             />

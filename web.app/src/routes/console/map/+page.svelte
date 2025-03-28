@@ -7,7 +7,7 @@
   import {MapBase as Map} from "$lib/components/ui/map";
   import EventList from "./event-list.svelte";
   import TagNav from "$lib/components/ui/tag-nav/tag-nav.svelte";
-  import { getContext, setContext } from "svelte";
+  import { getContext, onMount, setContext } from "svelte";
   import { writable } from "svelte/store";
   import { goto } from "$app/navigation";
   import { categoryStore } from "$lib/stores/category";
@@ -22,7 +22,7 @@
 
   // 分类标签
   let categoryItems = $state([
-    { id: "all", name: "全部" }
+    { id: "all", name: "全部" ,color: "#94a3b8" }
   ]);
 
   // 事件列表数据
@@ -39,7 +39,7 @@
   let mapInstance: any = null;
 
   // 页面加载时获取数据
-  $effect(() => {
+  onMount(() => {
     fetchEvents();
     fetchCategories();
   });
@@ -51,10 +51,10 @@
       console.log('Fetched categories:', categories);
       // 更新分类标签
       categoryItems = [
-        { id: "all", name: "全部" },
         ...categories.map(cat => ({
           id: cat.$id,
-          name: cat.name.zh
+          name: cat.name.zh,
+          color: cat.color
         }))
       ];
     } catch (error) {
@@ -92,9 +92,9 @@
   }
 
   // 监听分类变化
-  $effect(() => {
-    filterEvents();
-  });
+  // $effect(() => {
+  //   filterEvents();
+  // });
 
   function handleCategoryClick(categoryId: string) {
     console.log('Category clicked:', categoryId);
@@ -168,7 +168,7 @@
   }
 </script>
 
-<div class="w-full h-screen relative">
+<div class="w-full h-screen flex flex-col relative">
   <!-- 地图容器 -->
   <div class="absolute inset-0 z-0">
     <Map 
@@ -189,14 +189,9 @@
   ></div>
 
   <!-- 顶部标题和按钮区域 -->
-  <div class="absolute top-0 left-0 right-0 z-20">
-    <!-- 毛玻璃背景 -->
-    <div class="absolute inset-0 bg-background/40 backdrop-blur-sm/60 border-b border-border/20"></div>
-    <!-- 渐变背景 -->
-    <div class="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-transparent"></div>
-    
+  <div class="relative flex-none">
     <!-- 内容区域 -->
-    <div class="container mx-auto p-16 space-y-10 relative">
+    <div class="container mx-auto p-16 space-y-10">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 class="text-3xl font-bold mb-2">{$_("site.events")}</h1>
@@ -217,19 +212,19 @@
       </div>
 
       <!-- 分类标签 -->
-      <TagNav 
+      <!-- <TagNav 
         bind:selectedId={selectedCategory}
         items={categoryItems} 
         on:select={({ detail }) => {
           console.log('TagNav select event:', detail);
           filterEvents();
         }}
-      />
+      /> -->
     </div>
   </div>
 
   <!-- 底部事件展示区域 -->
-  <div class="absolute bottom-6 left-0 right-0 z-20 mx-auto max-w-[1200px] px-14">
+  <div class="relative mt-auto mx-auto max-w-[1200px] px-14 mb-6">
     <EventList class="" events={filteredEvents} cardclick={handleEventClick} />
   </div>
 </div>
