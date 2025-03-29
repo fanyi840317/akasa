@@ -9,7 +9,8 @@
     import type { User } from "$lib/types/user";
     import { page } from "$app/stores";
     import { navData } from "$lib/data/navigation-data";
-    
+    import { createEventDispatcher } from "svelte";
+
     /**
      * Sidebar 组件 - 提供应用的主导航结构
      * 统一使用appStore管理状态，避免状态管理混乱
@@ -21,6 +22,7 @@
         class: className = '',
         onNavItemClick = (item: NavItem) => {},
         user = undefined,
+        selectedItem: initialSelectedItem = null,
     } = $props<{
         collapsible?: 'none' | 'icon' | 'full';
         collapsed?: boolean;
@@ -28,6 +30,7 @@
         class?: string;
         onNavItemClick?: (item: NavItem) => void;
         user?: User;
+        selectedItem?: string | null;
     }>();
     
     // 如果没有传入用户信息，则使用页面数据中的用户信息
@@ -43,6 +46,14 @@
             user = navData.user;
         }
     });
+
+    const dispatch = createEventDispatcher<{
+        navItemClick: NavItem;
+    }>();
+
+    function handleItemClick(item: NavItem) {
+        dispatch("navItemClick", item);
+    }
 </script>
 
 <Sidebar.Root {collapsible} {side} >

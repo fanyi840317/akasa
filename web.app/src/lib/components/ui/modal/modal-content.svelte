@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { cn } from "$lib/utils.js";
 	import type { Snippet } from "svelte";
+	import { ScrollArea } from "$lib/components/ui/scroll-area";
 
 	let {
 		class: className = "",
@@ -15,14 +16,18 @@
 	}>();
 </script>
 
-<div class={cn("relative w-full overflow-y-auto", className)} {...restProps}>
-	<div class="flex justify-between items-center mb-4">
-		<div class="flex items-center">
-			{@render leftToolbar?.()}
+<div class={cn("relative w-full h-full flex flex-col", className)} {...restProps}>
+	{#if leftToolbar || rightToolbar}
+		<div class="flex-none flex justify-between items-center">
+			<div class="flex items-center">
+				{@render leftToolbar?.()}
+			</div>
+			<div class="flex items-center">
+				{@render rightToolbar?.()}
+			</div>
 		</div>
-		<div class="flex items-center">
-			{@render rightToolbar?.()}
-		</div>
-	</div>
-	{@render children?.()}
+	{/if}
+	<ScrollArea class="flex-1">
+		{@render children?.()}
+	</ScrollArea>
 </div>

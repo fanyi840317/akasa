@@ -34,16 +34,15 @@
                     <button
                         onclick={() => handleSelect(item.id)}
                         class={cn(
-                            "hover:text-primary relative flex h-7 min-w-max items-center justify-center rounded-full px-4 text-center text-sm transition-colors whitespace-nowrap",
-                            isActive ? "text-primary font-medium" : "text-muted-foreground",
-                            item.color && !isActive && `hover:bg-${item.color}/10`
+                            "hover:text-primary relative flex h-7 min-w-max items-center justify-center rounded-sm px-4 text-center text-sm transition-colors whitespace-nowrap",
+                            isActive ? "text-primary font-medium" : "text-muted-foreground/70",
+                            item.color && !isActive && `hover:bg-${item.color}/5`
                         )}
                     >
                         {#if isActive}
                             <div
                                 class={cn(
-                                    "absolute inset-0 rounded-full",
-                                    item.color ? `bg-${item.color}/10` : "bg-muted"
+                                    "absolute inset-0 rounded-sm bg-primary/5 border-[0.5px] border-primary/10 dark:bg-primary/10 dark:border-primary/20 backdrop-filter backdrop-blur-[2px] shadow-sm"
                                 )}
                                 in:send={{ key: "activetab" }}
                                 out:receive={{ key: "activetab" }}

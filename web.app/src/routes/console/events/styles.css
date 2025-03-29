@@ -1,0 +1,410 @@
+/* 神秘效果 */
+.mysterious-title {
+    @apply text-foreground/90;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dark .mysterious-title {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.mysterious-badge {
+    @apply bg-black/[0.02] dark:bg-white/[0.02];
+    @apply backdrop-blur-sm;
+    @apply border border-black/5 dark:border-white/5;
+}
+
+.mysterious-search {
+    @apply bg-black/[0.02] dark:bg-white/[0.02];
+    @apply border-black/5 dark:border-white/5;
+    @apply backdrop-blur-sm;
+    @apply transition-all duration-300;
+}
+
+.mysterious-search:focus {
+    @apply bg-black/[0.03] dark:bg-white/[0.03];
+    @apply border-black/10 dark:border-white/10;
+    @apply shadow-lg shadow-black/5 dark:shadow-white/5;
+}
+
+.mysterious-grid {
+    @apply relative w-full h-full overflow-hidden;
+    background-size: 40px 40px;
+    background-image: 
+        linear-gradient(to right, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+    transition: all 0.5s ease-out;
+}
+
+.mysterious-grid::before {
+    content: '';
+    @apply absolute inset-0;
+    background-size: 40px 40px;
+    background-image: 
+        linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    opacity: 0;
+    transition: all 0.5s ease-out;
+}
+
+.mysterious-grid:hover::before {
+    opacity: 1;
+    transform: scale(0.98);
+}
+
+.dark .mysterious-grid {
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+.dark .mysterious-grid::before {
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+/* 粒子效果 */
+.particle-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(168, 85, 247, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: particle-float 3s infinite ease-in-out;
+}
+
+@keyframes particle-float {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateY(-100px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* 光晕效果 */
+.glow-effect {
+    @apply relative;
+}
+
+.glow-effect::after {
+    content: '';
+    @apply absolute -inset-px rounded-xl opacity-0;
+    @apply transition-all duration-300;
+    background: radial-gradient(
+        500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.1),
+        transparent 40%
+    );
+}
+
+.glow-effect:hover::after {
+    @apply opacity-100;
+}
+
+/* 神秘卡片效果 */
+.mysterious-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+    transition: all 0.3s ease;
+}
+
+.mysterious-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        45deg,
+        rgba(168, 85, 247, 0.1),
+        rgba(59, 130, 246, 0.1)
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mysterious-card:hover::before {
+    opacity: 1;
+}
+
+/* 动态边框效果 */
+.border-glow {
+    position: relative;
+}
+
+.border-glow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    background: linear-gradient(
+        45deg,
+        rgba(168, 85, 247, 0.3),
+        rgba(59, 130, 246, 0.3)
+    );
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+/* 悬浮效果 */
+.hover-lift {
+    @apply transition-transform duration-300;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+/* 闪烁效果 */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(168, 85, 247, 0) 0%,
+        rgba(168, 85, 247, 0.1) 50%,
+        rgba(168, 85, 247, 0) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+/* 渐变文字 */
+.gradient-text {
+    background: linear-gradient(45deg, #a855f7, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* 神秘加载动画 */
+.mysterious-loading {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+.mysterious-loading::before,
+.mysterious-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    animation: mysterious-spin 2s linear infinite;
+}
+
+.mysterious-loading::before {
+    border-top-color: rgba(168, 85, 247, 0.5);
+    animation-delay: -0.5s;
+}
+
+.mysterious-loading::after {
+    border-left-color: rgba(59, 130, 246, 0.5);
+}
+
+@keyframes mysterious-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 动画效果 */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.float-animation {
+    animation: float 6s ease-in-out infinite;
+}
+
+/* 加载动画 */
+@keyframes pulse-mysterious {
+    0% {
+        box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(168, 85, 247, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+    }
+}
+
+.pulse-mysterious {
+    animation: pulse-mysterious 2s infinite;
+}
+
+/* 优化滚动区域 */
+:global(.scrollbar) {
+    @apply bg-black/[0.02] dark:bg-white/[0.02];
+    @apply hover:bg-black/[0.03] dark:hover:bg-white/[0.03];
+}
+
+:global(.thumb) {
+    @apply bg-black/10 dark:bg-white/10;
+    @apply hover:bg-black/20 dark:hover:bg-white/20;
+}
+
+/* 优化分割线 */
+.divider {
+    @apply h-px w-full;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0, 0, 0, 0.05),
+        transparent
+    );
+}
+
+.dark .divider {
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255, 255, 255, 0.05),
+        transparent
+    );
+}
+
+/* 添加网格光影效果 */
+.grid-container {
+    @apply relative overflow-hidden;
+}
+
+.grid-container::after {
+    content: '';
+    @apply absolute inset-0 opacity-0;
+    @apply transition-all duration-700;
+    background: radial-gradient(
+        800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.06),
+        transparent 40%
+    );
+}
+
+.grid-container:hover::after {
+    @apply opacity-100;
+}
+
+.featured-title-container {
+    @apply relative flex items-center gap-3 px-2 py-4;
+    @apply before:absolute before:inset-0 before:bg-black/[0.02] dark:before:bg-white/[0.02];
+    @apply before:opacity-0 hover:before:opacity-100;
+    @apply before:transition-all before:duration-500;
+}
+
+.featured-title-content {
+    @apply relative flex items-center gap-2 text-foreground/70;
+    @apply transition-all duration-500;
+}
+
+.featured-title-container:hover .featured-title-content {
+    @apply text-foreground/90;
+    @apply translate-x-1;
+}
+
+.featured-title-text {
+    @apply text-sm font-medium;
+    @apply transition-all duration-500;
+}
+
+.featured-title-icon {
+    @apply transition-all duration-500;
+}
+
+.featured-title-container:hover .featured-title-icon {
+    @apply rotate-[30deg] scale-110;
+}
+
+.featured-divider {
+    @apply relative flex-1 h-px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0, 0, 0, 0.03) 20%,
+        rgba(0, 0, 0, 0.03) 80%,
+        transparent
+    );
+    @apply transition-all duration-500;
+}
+
+.dark .featured-divider {
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255, 255, 255, 0.03) 20%,
+        rgba(255, 255, 255, 0.03) 80%,
+        transparent
+    );
+}
+
+.featured-title-container:hover .featured-divider {
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0, 0, 0, 0.05) 20%,
+        rgba(0, 0, 0, 0.05) 80%,
+        transparent
+    );
+}
+
+.dark .featured-title-container:hover .featured-divider {
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255, 255, 255, 0.05) 20%,
+        rgba(255, 255, 255, 0.05) 80%,
+        transparent
+    );
+} 

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher, type Snippet } from "svelte";
+    import { createEventDispatcher, type ComponentType } from "svelte";
     import { fade, fly } from "svelte/transition";
     import { Button } from "$lib/components/ui/button";
     import { X, PlusCircle, Minimize, Maximize } from "lucide-svelte";
@@ -16,7 +16,8 @@
         width = 40,
         maxWidth = 80,
         showHeader = true,
-        contentView = undefined,
+        component = undefined,
+        componentProps = {},
         showFooter = false,
         showBackdrop = true,
         properties = [],
@@ -30,7 +31,8 @@
         showHeader?: boolean;
         showFooter?: boolean;
         showBackdrop?: boolean;
-        contentView?: Snippet;
+        component?: ComponentType;
+        componentProps?: Record<string, any>;
         properties?: Array<{
             label: string;
             value: string;
@@ -77,27 +79,30 @@
         class="fixed top-0 right-0 h-full w-full z-50"
         transition:fly={{ x: "100%", duration: 300, opacity: 1 }}
     >
-        <Resizable.PaneGroup direction="horizontal" class="h-full w-full ">
+        <Resizable.PaneGroup direction="horizontal" class="h-full w-full">
             <Resizable.Pane
                 defaultSize={100-width}
-                class=""
                 onclick={handleClose}
             >
                 {#if showBackdrop}
                     <div
-                        class="w-full h-full "
+                        class="w-full h-full"
                         transition:fade={{ duration: 200 }}
                     ></div>
                 {/if}
             </Resizable.Pane>
             <Resizable.Handle withHandle />
-            <Resizable.Pane defaultSize={width} maxSize={maxWidth} minSize={width-10}
-                        class="bg-background shadow-lg" >
+            <Resizable.Pane 
+                defaultSize={width} 
+                maxSize={maxWidth} 
+                minSize={width-10}
+                class="bg-background shadow-lg flex flex-col overflow-hidden"
+            >
                 {#if showHeader}
                     <!-- 面板头部 -->
-                    <div class="flex items-center justify-between px-4 py-2">
+                    <div class="flex items-center justify-between p-2 border-b">
                         <div class="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" class="h-4 w-4" onclick={handleMinimize}>
+                            <Button variant="ghost" size="icon" class="h-8 w-8" onclick={handleMinimize}>
                                 <Minimize class="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="icon" class="h-8 w-8" onclick={handleMaximize}>
@@ -114,15 +119,16 @@
                 {/if}
 
                 <!-- 面板内容 -->
-                <div class="flex-1 overflow-y-auto p-4" class:hidden={isMinimized}>
-                    {@render contentView?.()}
+                <div class="flex-1 overflow-hidden" class:hidden={isMinimized}>
+                    {#if component}
+                        <svelte:component this={component} {...componentProps} />
+                    {/if}
                 </div>
 
                 {#if showFooter}
                     <!-- 面板底部 -->
-                    <div
-                        class="p-4 border-t flex items-center justify-between sticky bottom-0 bg-card"
-                    ></div>
+                    <div class="p-4 border-t bg-card">
+                    </div>
                 {/if}
             </Resizable.Pane>
         </Resizable.PaneGroup>

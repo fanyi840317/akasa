@@ -145,11 +145,11 @@
   :global(embed-card-create-modal .embed-card-modal-wrapper) {
     z-index: 1001;
   }
-  /* 隐藏文档标题 */
+  /* 完全隐藏文档标题 */
   :global(doc-title) {
-    /* height: 48px; */
+    display: none !important;
   }
   :global(doc-title .doc-title-container-empty::before) {
-      content: 'New Event Title';
-    }
+    content: none;
+  }
 </style>

@@ -38,22 +38,25 @@ export type RelatedPerson = {
   anonymous: boolean;
 };
 
-export type Event = {
-  $id?: string;
-  $createdAt?: string;
-  $updatedAt?: string;
-  title?: string;
-  content?: string;
-  location?: string;
-  date?: string;
-  user_id: string;
+export interface Event {
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  title: string;
+  content: string;
+  location: string;
   location_data?: string;
+  date: string;
+  user_id: string;
+  is_public?: boolean;
+  cover_image?: string;
   status?: EventStatus;
   category?: EventCategory;
   creator_name?: string;
   creator_avatar?: string;
-};
-
+  latitude?: number;
+  longitude?: number;
+}
 
 export type Tag = { $id?: string; name: string; };
 // Event {

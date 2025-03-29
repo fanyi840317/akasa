@@ -33,18 +33,20 @@
 		<div
 			bind:this={modalRef}
 			class={cn(
-				"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background shadow-xl duration-200 sm:rounded-lg",
+				"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] bg-background shadow-xl duration-200 sm:rounded-lg overflow-hidden",
 				className
 			)}
 		>
-			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-2">
-					{@render leftToolbar?.()}
+			{#if leftToolbar || rightToolbar}
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-2">
+						{@render leftToolbar?.()}
+					</div>
+					<div class="flex items-center gap-2">
+						{@render rightToolbar?.()}
+					</div>
 				</div>
-				<div class="flex items-center gap-2">
-					{@render rightToolbar?.()}
-				</div>
-			</div>
+			{/if}
 			{@render children?.()}
 		</div>
 	</div>

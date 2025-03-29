@@ -12,15 +12,26 @@
   import * as Dialog from "$lib/components/ui/dialog";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import { Separator } from "$lib/components/ui/separator";
-    import { appStore } from "$lib/stores/appState";
-    import type { User } from "$lib/types/user";
-  
+  import { appStore } from "$lib/stores/appState";
+  import type { User } from "$lib/types/user";
+  import { setContext } from "svelte";
+  import { NotionPanel } from "$lib/components/layout";
+  import PanelContent from "./panel-content.svelte";
+
+  interface NavSidebarEvents {
+    navItemClick: CustomEvent<NavItem>;
+  }
+
+  interface HeaderProps {
+    titles?: { name: string; path: string }[];
+    actions?: Snippet;
+  }
 
   /**
    * 控制台主外壳组件 - 提供整体布局骨架
    * @param {Snippet} child - 主内容区域
    * @param {Snippet} leftView - 左侧内容区域
-   * @param {Snippet} rightView - 右侧内容区域
+   @param {Snippet} rightView - 右侧内容区域
    * @param {Snippet} actions - 右上角操作区域
    * @param {Snippet} footer - 底部区域
    * @param {{ name: string; path: string; }[]} titles - 页面标题数组
@@ -82,6 +93,9 @@
     showRightView = state.showRightView;
   });
 
+  // 事件面板状态
+  let showEventPanel = false;
+  let selectedEvent: any = null;
 
   function handleNavAction(item: NavItem | null, action?: string) {
     console.log('Nav action:', item, action);
@@ -97,6 +111,24 @@
       appStore.setShowDialog(true, item);
     }
   }
+
+  // 处理事件点击
+  function handleEventClick(event: any) {
+    selectedEvent = event;
+    showEventPanel = true;
+  }
+
+  // 处理面板关闭
+  function handlePanelClose() {
+    showEventPanel = false;
+    selectedEvent = null;
+  }
+
+  // 设置上下文，让子组件可以访问这些函数
+  setContext('shell', {
+    openEvent: handleEventClick,
+    closeEvent: handlePanelClose
+  });
 
   onMount(() => {
   });
@@ -131,14 +163,14 @@
     <NavSidebar 
       collapsible="icon" 
       selectedItem={$page.url.pathname}
-      on:navItemClick={(e) => handleNavAction(e.detail)}
+      on:navItemClick={e => handleNavAction(e.detail)}
       user={user}
     />
 
     <!-- 主内容区域 -->
     <Sidebar.Inset>
       {#if showHeader}
-        <Header {titles} {actions} />
+        <Header titles={titles} actions={actions} />
       {/if}
 
       {@render child()}
@@ -159,4 +191,26 @@
     {/if}
   </Sidebar.Root>
 </Sidebar.Provider>
-<!-- -->
+
+<!-- 事件详情面板 -->
+<NotionPanel 
+    open={showEventPanel}
+    title={selectedEvent?.title || '事件详情'}
+    width={40}
+    maxWidth={60}
+    showHeader={true}
+    showFooter={false}
+    component={PanelContent}
+    componentProps={{
+        title: selectedEvent?.title || '',
+        time: selectedEvent?.time || '',
+        status: selectedEvent?.status || '',
+        content: selectedEvent?.content || ''
+    }}
+    properties={[
+        { label: "标题", value: selectedEvent?.title || '' },
+        { label: "时间", value: selectedEvent?.time || '' },
+        { label: "状态", value: selectedEvent?.status || '' }
+    ]}
+    on:close={handlePanelClose}
+/>

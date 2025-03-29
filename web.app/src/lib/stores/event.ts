@@ -100,11 +100,11 @@ const createEventStore = () => {
         },
         
         // 创建新事件
-        createEvent: async (eventData: Event) => {
+        createEvent: async (event: Omit<Event, '$id' | '$createdAt' | '$updatedAt'>) => {
             update(state => ({ ...state, eventLoading: true, error: null }));
             try {
                 // 验证事件数据
-                if (!eventData.title) {
+                if (!event.title) {
                     toast.error(get(_)("validation.title_required"));
                     return null;
                 }
@@ -115,7 +115,7 @@ const createEventStore = () => {
                     return null;
                 }
 
-                if (!eventData.content) {
+                if (!event.content) {
                     toast.error(get(_)("validation.content_required"));
                     return null;
                 }
@@ -125,7 +125,7 @@ const createEventStore = () => {
                     eventsCollectionId,
                     ID.unique(),
                     {
-                        ...eventData,
+                        ...event,
                         user_id: user.$id,
                         $createdAt: new Date().toISOString(),
                         $updatedAt: new Date().toISOString(),

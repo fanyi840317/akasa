@@ -5,19 +5,22 @@
     import { cn } from "$lib/utils.js";
     import type { HTMLAnchorAttributes } from "svelte/elements";
     import type { WithElementRef } from "bits-ui";
+    import type { Snippet } from "svelte";
 
     /**
      * 控制台页面头部组件 - 提供标题、面包屑和页面布局容器
      * @param {any} ref - 组件引用
      * @param {{ name: string; path: string; }[]} titles - 页面标题数组
+     * @param {Snippet} actions - 右侧操作区域
      */
     let {
         ref = $bindable(null),
         titles = [] as { name: string; path: string; }[],
-        children,
+        actions = undefined,
         ...restProps
     }: WithElementRef<HTMLAnchorAttributes>&{
         titles?: { name: string; path: string; }[];
+        actions?: Snippet;
     } = $props();
 
     // 定义面包屑项的数组
@@ -45,6 +48,8 @@
         </Breadcrumb.Root>
     </div>
     <div class="pr-4">
-        {@render children?.()}
+        {#if actions}
+            {@render actions()}
+        {/if}
     </div>
 </header>
