@@ -143,12 +143,12 @@ Database-related directory containing database migrations, seed data, and schema
 
 2. **Naming Conventions**
    - File Naming:
-     - Component files: `re-component-name.svelte` (e.g., `re-event-card.svelte`)
-     - Utility files: `re-utils-name.ts` (e.g., `re-format-date.ts`)
-     - Type files: `re-types-name.ts` (e.g., `re-event-types.ts`)
-     - Store files: `re-store-name.ts` (e.g., `re-user-store.ts`)
-     - Test files: `re-test-name.test.ts` (e.g., `re-event-card.test.ts`)
-     - Style files: `re-style-name.css` (e.g., `re-event-card.css`)
+     - Component files: `component-name.svelte` (e.g., `event-card.svelte`)
+     - Utility files: `utils-name.ts` (e.g., `format-date.ts`)
+     - Type files: `types-name.ts` (e.g., `event-types.ts`)
+     - Store files: `stoname.ts` (e.g., `user-store.ts`)
+     - Test files: `test-name.test.ts` (e.g., `event-card.test.ts`)
+     - Style files: `style-name.css` (e.g., `event-card.css`)
      - Layout files: `+layout.svelte` (SvelteKit convention)
      - Page files: `+page.svelte` (SvelteKit convention)
      - Loading files: `+loading.svelte` (SvelteKit convention)
@@ -178,22 +178,22 @@ Database-related directory containing database migrations, seed data, and schema
    - Import Naming:
      ```typescript
      // Component imports
-     import EventCard from '$lib/components/events/re-event-card.svelte';
+     import EventCard from '$lib/components/events/event-card.svelte';
      
      // Type imports
-     import type { Event, User } from '$lib/types/re-event-types';
+     import type { Event, User } from '$lib/types/event-types';
      
      // Store imports
-     import { UserStore } from '$lib/stores/re-user-store';
+     import { UserStore } from '$lib/stores/user-store';
      
      // Utility function imports
-     import { FormatDate } from '$lib/utils/re-format-date';
+     import { FormatDate } from '$lib/utils/format-date';
      ```
 
    - CSS Class Naming:
      - Use Tailwind class names
      - Custom class names use `PascalCase`
-     - Component-specific classes use `re-component-name-class` format
+     - Component-specific classes use `component-name-class` format
      - State classes use `Is` prefix (e.g., `IsActive`, `IsDisabled`)
      - Theme classes use `Theme` prefix (e.g., `ThemeDark`, `ThemeLight`)
 
@@ -207,7 +207,7 @@ Database-related directory containing database migrations, seed data, and schema
 
 2. **Component Documentation**
    ```svelte
-   <!-- re-event-card.svelte -->
+   <!-- event-card.svelte -->
    <script lang="ts">
      /**
       * @component EventCard
@@ -234,9 +234,9 @@ Database-related directory containing database migrations, seed data, and schema
 
 3. **Component Testing**
    ```typescript
-   // re-event-card.test.ts
+   // event-card.test.ts
    import { render, screen } from '@testing-library/svelte';
-   import EventCard from './re-event-card.svelte';
+   import EventCard from './event-card.svelte';
    
    describe('EventCard', () => {
      it('renders event title', () => {

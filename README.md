@@ -143,12 +143,12 @@ akasa/
 
 2. **命名规范**
    - 文件命名:
-     - 组件文件: `re-component-name.svelte` (例如: `re-event-card.svelte`)
-     - 工具文件: `re-utils-name.ts` (例如: `re-format-date.ts`)
-     - 类型文件: `re-types-name.ts` (例如: `re-event-types.ts`)
-     - Store 文件: `re-store-name.ts` (例如: `re-user-store.ts`)
-     - 测试文件: `re-test-name.test.ts` (例如: `re-event-card.test.ts`)
-     - 样式文件: `re-style-name.css` (例如: `re-event-card.css`)
+     - 组件文件: `component-name.svelte` (例如: `event-card.svelte`)
+     - 工具文件: `utils-name.ts` (例如: `format-date.ts`)
+     - 类型文件: `types-name.ts` (例如: `event-types.ts`)
+     - Store 文件: `stoname.ts` (例如: `user-store.ts`)
+     - 测试文件: `test-name.test.ts` (例如: `event-card.test.ts`)
+     - 样式文件: `style-name.css` (例如: `event-card.css`)
      - 布局文件: `+layout.svelte` (SvelteKit 约定)
      - 页面文件: `+page.svelte` (SvelteKit 约定)
      - 加载文件: `+loading.svelte` (SvelteKit 约定)

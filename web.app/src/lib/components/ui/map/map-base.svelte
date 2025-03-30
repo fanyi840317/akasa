@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, afterUpdate } from 'svelte';
+  import { onMount, afterUpdate, onDestroy } from 'svelte';
   import mapboxgl from 'mapbox-gl';
   import 'mapbox-gl/dist/mapbox-gl.css';
   import { mode } from 'mode-watcher';
@@ -8,65 +8,84 @@
   import { createEventDispatcher } from 'svelte';
   import { mapStore } from '$lib/stores/map';
   import type { MapMarker } from '$lib/types/map';
+  import { EVENT_CATEGORIES } from '$lib/data/event-categories';
+  import { PUBLIC_MAPBOX_TOKEN } from '$env/static/public';
 
-  export let locationData: LocationData = {
-    longitude: 104.06,
-    latitude: 30.67
-  };
+  export let locationData: LocationData | undefined = undefined;
   export let zoom = 13;
   export let showUserLocation = true;
   export let onClick: ((e: { lngLat: { lng: number; lat: number } }) => void) | undefined = undefined;
 
   let container: HTMLDivElement;
-  let map: mapboxgl.Map;
-  let resizeObserver: ResizeObserver;
+  let map: mapboxgl.Map | undefined;
+  let resizeObserver: ResizeObserver | undefined;
   let marker: mapboxgl.Marker | undefined;
   let customMarkers: mapboxgl.Marker[] = [];
+  let cleanup: (() => void) | undefined;
 
   const dispatch = createEventDispatcher();
 
-  mapboxgl.accessToken = 'pk.eyJ1IjoiZmFueWk4NDAzMTciLCJhIjoiY202cDE4OW9wMHZxMzJscTBtbW82NDNxdCJ9.90mwfIpA62nmCY0_C7IkUw';
+  // 设置 Mapbox token
+  mapboxgl.accessToken = PUBLIC_MAPBOX_TOKEN;
 
-  // 定义事件分类和对应的颜色
-  const EVENT_CATEGORIES: Record<string, { name: string; color: string }> = {
-    EMERGENCY: { name: '紧急', color: '#FF4D4F' },
-    WARNING: { name: '警告', color: '#FAAD14' },
-    NOTICE: { name: '提示', color: '#1890FF' },
-    INFO: { name: '信息', color: '#52C41A' },
-    SPECIAL: { name: '特殊', color: '#722ED1' }
-  };
+  const categories = Object.keys(EVENT_CATEGORIES);
 
   // 获取随机分类
   function getRandomCategory() {
-    const categories = Object.keys(EVENT_CATEGORIES);
     const randomIndex = Math.floor(Math.random() * categories.length);
     return EVENT_CATEGORIES[categories[randomIndex]];
+  }
+
+  function cleanupMap() {
+    if (map) {
+      map.remove();
+      map = undefined;
+    }
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = undefined;
+    }
+    if (marker) {
+      marker.remove();
+      marker = undefined;
+    }
+    customMarkers.forEach(m => m.remove());
+    customMarkers = [];
   }
 
   function initMap() {
     if (!container) return;
     
-    console.log('Initializing map with location:', locationData);
+    // 清理现有实例
+    cleanupMap();
     
-    map = new mapboxgl.Map({
+    // 如果没有位置数据，使用默认值
+    const defaultLocation = { longitude: 104.06, latitude: 30.67 };
+    const currentLocation = locationData || defaultLocation;
+    
+    console.log('Initializing map with location:', currentLocation);
+    
+    const newMap = new mapboxgl.Map({
       container,
       style: get(mode) === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
       zoom,
-      center: [locationData.longitude, locationData.latitude],
+      center: [currentLocation.longitude, currentLocation.latitude],
       pitch: 0,
       antialias: true
     });
 
+    map = newMap; // 赋值给外部变量
+
     // 等待地图加载完成
-    map.on('load', () => {
+    newMap.on('load', () => {
       console.log('Map loaded successfully');
-      console.log('Current center:', map.getCenter());
-      console.log('Current zoom:', map.getZoom());
-      dispatch('mapLoad', { map });
+      console.log('Current center:', newMap.getCenter());
+      console.log('Current zoom:', newMap.getZoom());
+      dispatch('mapLoad', { map: newMap });
     });
 
     // 添加错误处理
-    map.on('error', (e) => {
+    newMap.on('error', (e) => {
       console.error('Map error:', e);
     });
 
@@ -77,20 +96,22 @@
         element: userMarkerElement,
         anchor: 'center'
       })
-        .setLngLat([locationData.longitude, locationData.latitude])
-        .addTo(map);
+        .setLngLat([currentLocation.longitude, currentLocation.latitude])
+        .addTo(newMap);
       
-      console.log('Added user location marker at:', [locationData.longitude, locationData.latitude]);
+      console.log('Added user location marker at:', [currentLocation.longitude, currentLocation.latitude]);
     }
 
     // 监听主题变化
     const unsubscribe = mode.subscribe(currentMode => {
-      map?.setStyle(currentMode === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11');
+      if (newMap) {
+        newMap.setStyle(currentMode === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11');
+      }
     });
 
     // 监听容器大小变化
     resizeObserver = new ResizeObserver(() => {
-      if (map) map.resize();
+      if (newMap) newMap.resize();
     });
     
     if (container) {
@@ -98,27 +119,43 @@
     }
 
     // 点击事件处理
-    if (onClick) {
-      map.on('click', (e) => {
+    newMap.on('click', (e) => {
+      console.log('Map clicked at:', e.lngLat);
+      if (onClick) {
         onClick(e);
-        if (marker) {
-          marker.setLngLat(e.lngLat);
-        } else {
-          const userMarkerElement = document.createElement('div');
-          userMarkerElement.className = 'user-location-marker';
-          marker = new mapboxgl.Marker({
-            element: userMarkerElement,
-            anchor: 'center'
-          })
-            .setLngLat(e.lngLat)
-            .addTo(map);
-        }
-      });
-    }
+      }
+      if (marker) {
+        marker.setLngLat(e.lngLat);
+      } else {
+        const userMarkerElement = document.createElement('div');
+        userMarkerElement.className = 'user-location-marker';
+        marker = new mapboxgl.Marker({
+          element: userMarkerElement,
+          anchor: 'center'
+        })
+          .setLngLat(e.lngLat)
+          .addTo(newMap);
+      }
+      // 更新位置数据
+      locationData = {
+        longitude: e.lngLat.lng,
+        latitude: e.lngLat.lat
+      };
+      dispatch('locationDataChange', locationData);
+    });
+
+    // 添加鼠标样式
+    newMap.on('mouseenter', () => {
+      newMap.getCanvas().style.cursor = 'crosshair';
+    });
+
+    newMap.on('mouseleave', () => {
+      newMap.getCanvas().style.cursor = '';
+    });
 
     // 监听标记变化
-    mapStore.subscribe(markers => {
-      if (!map) {
+    const unsubscribeMarkers = mapStore.subscribe(markers => {
+      if (!newMap) {
         console.log('Map not initialized yet');
         return;
       }
@@ -185,7 +222,7 @@
           anchor: 'center'
         })
           .setLngLat(markerData.position)
-          .addTo(map);
+          .addTo(newMap);
 
         console.log('Added marker to map at position:', markerData.position);
 
@@ -194,24 +231,30 @@
     });
 
     return () => {
-      if (map) map.remove();
-      if (resizeObserver) resizeObserver.disconnect();
+      cleanupMap();
       unsubscribe();
+      unsubscribeMarkers();
     };
   }
 
   onMount(() => {
-    const cleanup = initMap();
+    cleanup = initMap();
     return () => {
       if (cleanup) cleanup();
+      cleanupMap();
     };
+  });
+
+  onDestroy(() => {
+    cleanupMap();
+    if (cleanup) cleanup();
   });
 
   afterUpdate(() => {
     if (map) {
       map.resize();
       if (marker) {
-        marker.setLngLat([locationData.longitude, locationData.latitude]);
+        marker.setLngLat([locationData?.longitude || 104.06, locationData?.latitude || 30.67]);
       }
     }
   });

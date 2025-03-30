@@ -49,7 +49,7 @@ export interface Event {
   date: string;
   user_id: string;
   is_public?: boolean;
-  cover_image?: string;
+  cover?: string;
   status?: EventStatus;
   category?: EventCategory;
   creator_name?: string;
