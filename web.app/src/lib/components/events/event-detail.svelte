@@ -254,7 +254,7 @@
 </script>
 
 {#if showContent}
-  <div class="relative h-[calc(100vh-280px)] bg-gradient-to-b from-background to-background/95">
+  <div class="relative h-[calc(100vh-280px)]">
     <div class="relative h-full flex flex-col">
       <!-- 顶部标题区域 -->
       <div class="relative flex-none h-[160px]" in:fly={{ y: 20, duration: 500, delay: 200 }}>
@@ -266,9 +266,9 @@
               alt="事件封面" 
               class="w-full h-full object-cover"
             />
-            <div class="absolute inset-0 bg-gradient-to-b from-background/80 via-background/40 to-background" />
+            <div class="absolute inset-0 bg-gradient-to-b from-neutral-900/80 via-neutral-900/40 to-neutral-900" />
           {:else}
-            <div class="w-full h-full bg-muted/50" />
+            <div class="w-full h-full" />
           {/if}
         </div>
 
@@ -365,17 +365,17 @@
         </div>
 
         <!-- 右侧信息面板 -->
-        <div class="w-[320px] bg-background/50 backdrop-blur-sm overflow-y-auto border-l border-border/40" in:fly={{ x: 20, duration: 500, delay: 600 }}>
+        <div class="w-[320px] border-l border-border/40" in:fly={{ x: 20, duration: 500, delay: 600 }}>
           <div class="p-4 space-y-4">
             <!-- 时间选择 -->
-            <Card class="p-4 bg-background/80 border-border/20 hover:border-primary/20 transition-all hover:shadow-lg hover:shadow-primary/10">
+            <Card class="p-4 border-neutral-800/50 hover:border-primary/20 transition-all hover:shadow-lg hover:shadow-primary/10">
               <div class="flex items-center gap-2 mb-4">
                 <Clock class="w-4 h-4 text-primary/70" />
                 <h3 class="text-sm font-medium text-muted-foreground">时间</h3>
               </div>
               
               <Tabs value={timePreset} onValueChange={handleTimeTabChange} class="w-full">
-                <TabsList class="grid w-full grid-cols-3 mb-4 bg-background/50 p-1">
+                <TabsList class="grid w-full grid-cols-3 mb-4 p-1">
                   <TabsTrigger 
                     value="exact" 
                     class="text-xs data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-sm transition-all"
@@ -424,7 +424,7 @@
                 </TabsContent>
                 
                 <TabsContent value="unknown">
-                  <div class="text-sm text-muted-foreground italic bg-background/50 p-3 rounded-md border border-border/20 hover:border-primary/20 transition-all">
+                  <div class="text-sm text-muted-foreground italic p-3 rounded-md border border-neutral-800/50 hover:border-primary/20 transition-all">
                     这个神秘事件发生的时间暂时无法确定
                   </div>
                 </TabsContent>
@@ -432,7 +432,7 @@
             </Card>
 
             <!-- 地点选择 -->
-            <Card class="p-4 bg-background/80 border-border/20 hover:border-primary/20 transition-all hover:shadow-lg hover:shadow-primary/10">
+            <Card class="p-4 border-neutral-800/50 hover:border-primary/20 transition-all hover:shadow-lg hover:shadow-primary/10">
               <div class="flex items-center gap-2 mb-4">
                 <MapPin class="w-4 h-4 text-primary/70" />
                 <h3 class="text-sm font-medium text-muted-foreground">地点</h3>
@@ -445,7 +445,7 @@
             </Card>
 
             <!-- 发布设置 -->
-            <Card class="p-4 bg-background/80 border-border/20 hover:border-primary/20 transition-all hover:shadow-lg hover:shadow-primary/10">
+            <Card class="p-4 border-neutral-800/50 hover:border-primary/20 transition-all hover:shadow-lg hover:shadow-primary/10">
               <div class="flex items-center gap-2 mb-4">
                 <Share2 class="w-4 h-4 text-primary/70" />
                 <h3 class="text-sm font-medium text-muted-foreground">发布设置</h3>
@@ -501,7 +501,7 @@
         <DialogTitle>微信扫码分享</DialogTitle>
       </DialogHeader>
       <div class="flex flex-col items-center space-y-4">
-        <div class="w-48 h-48 bg-white p-2">
+        <div class="w-48 h-48 p-2">
           <!-- 这里可以添加二维码生成逻辑 -->
           <div class="w-full h-full flex items-center justify-center text-muted-foreground">
             二维码占位

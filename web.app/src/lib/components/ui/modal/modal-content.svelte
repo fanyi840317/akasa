@@ -16,9 +16,9 @@
 	}>();
 </script>
 
-<div class={cn("relative w-full h-full flex flex-col", className)} {...restProps}>
+<div class={cn("relative w-full h-full flex flex-col border-t border-border/20 dark:border-white/[0.08]", className)} {...restProps}>
 	{#if leftToolbar || rightToolbar}
-		<div class="flex-none flex justify-between items-center">
+		<div class="flex-none flex justify-between items-center border-b border-border/20 dark:border-white/[0.08] p-4">
 			<div class="flex items-center">
 				{@render leftToolbar?.()}
 			</div>
