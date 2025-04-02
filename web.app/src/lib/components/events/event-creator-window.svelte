@@ -136,50 +136,57 @@
 {#if open}
   <div
     class="fixed inset-0 z-50 bg-neutral-900/10 backdrop-blur-[2px] dark:bg-neutral-900/50"
-    transition:fade={backdropTransition}
+    transition:fade={{ duration: 300, delay: 100, easing: cubicOut }}
+    on:click={handleClose}
   >
-    <div
-      class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-[1200px] translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_0_0_1px_rgba(0,0,0,0.03)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.03)] duration-200 sm:rounded-lg overflow-hidden"
-      transition:fly={modalTransition}
+    <!-- 窗口容器 -->
+    <div 
+      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-12 p-8"
+      on:click|stopPropagation
     >
-      <div class="flex flex-col h-[80vh]">
-        <!-- 顶部工具栏 -->
-        <div class="flex items-center justify-between p-2 bg-white dark:bg-neutral-900 z-10 border-b border-neutral-200/50 dark:border-neutral-800/50">
-          <div class="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onclick={handleClose}>
-              <X class="h-4 w-4" />
-            </Button>
-            <Input
-              placeholder="输入事件标题..."
-              bind:value={title}
-              class="w-[300px]"
-            />
-          </div>
-          <div class="flex items-center gap-2">
-            <Button variant="outline" onclick={handleCoverUpload}>
-              <ImageIcon class="h-4 w-4 mr-2" />
-              上传封面
-            </Button>
-            <Button onclick={handleSave} disabled={isPublishing}>
-              <Save class="h-4 w-4 mr-2" />
-              {isPublishing ? "保存中..." : "保存"}
-            </Button>
-          </div>
-        </div>
-
-        <!-- 主要内容区域 -->
-        <div class="flex-1 flex overflow-hidden">
-          <!-- 左侧编辑器 -->
-          <div class="flex-1 overflow-hidden border-r border-neutral-200/50 dark:border-neutral-800/50">
+      <!-- 左侧编辑器窗口 -->
+      <div
+        class="w-[800px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+        in:fly={{ duration: 600, x: -100, delay: 200, easing: backInOut }}
+        out:fly={{ duration: 500, x: -100, easing: cubicOut }}
+      >
+        <div class="flex flex-col h-[80vh]">
+          <div class="flex-1 overflow-hidden">
             <div class="h-full">
               <AffineEditor htmlDoc={newDoc} />
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- 右侧地图选择器 -->
-          <div class="w-[400px] overflow-hidden">
-            <div class="h-full">
-              <MapPicker on:locationChange={handleLocationChange} />
+      <!-- 右侧窗口容器 -->
+      <div class="flex flex-col gap-12">
+        <!-- AI 窗口 -->
+        <div
+          class="w-[300px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+          in:fly={{ duration: 600, x: 100, delay: 300, easing: backInOut }}
+          out:fly={{ duration: 500, x: 100, easing: cubicOut }}
+        >
+          <div class="flex flex-col h-[250px]">
+            <div class="flex-1 overflow-hidden">
+              <div class="h-full p-4">
+                <p class="text-sm text-muted-foreground">AI 助手将帮助你优化内容...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 地图窗口 -->
+        <div
+          class="w-[300px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+          in:fly={{ duration: 600, x: 100, delay: 400, easing: backInOut }}
+          out:fly={{ duration: 500, x: 100, easing: cubicOut }}
+        >
+          <div class="flex flex-col h-[250px]">
+            <div class="flex-1 overflow-hidden">
+              <div class="h-full">
+                <MapPicker on:locationChange={handleLocationChange} />
+              </div>
             </div>
           </div>
         </div>
