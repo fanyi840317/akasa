@@ -19,6 +19,7 @@
   import type { LocationData, LocationChangeEvent } from ".";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import { getCurrentLocation, reverseGeocode, getLocationData } from '$lib/services/location';
+    import { Card } from "../ui/card";
 
   interface Props {
     locationData?: LocationData;
@@ -330,9 +331,82 @@
 </script>
 
 <div class="relative w-full h-full">
+  
+  <div class="absolute top-0 left-0 right-0 px-2">
+    <Popover.Root bind:open={isOpen}>
+      <Popover.Trigger bind:ref={triggerRef}>
+        {#snippet child({ props })}
+          <Button
+            variant="outline"
+            class="h-8 py-1 px-2 w-full text-left  bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 rounded-t-xl rounded-b-none"
+            {...props}
+            role="combobox"
+            aria-expanded={isOpen}
+          >
+            <MapPin class="h-4 text-primary/30 flex-shrink-0" />
+            <span class="truncate text-primary/70 max-w-[200px]">{selectedValue}</span>
+          </Button>
+        {/snippet}
+      </Popover.Trigger>
+      <Popover.Content
+        class="w-full p-0 shadow-lg bg-background/95 backdrop-blur-sm rounded-b-xl"
+        align="start"
+      >
+        <Command.Root>
+          <Command.Input
+            placeholder="搜索地址..."
+            class="h-9 search-input"
+            oninput={handleSearchInput}
+          />
+          <Command.List class="max-h-[300px] overflow-y-auto">
+            {#if isSearching}
+              <div
+                class="py-6 text-sm text-muted-foreground text-center flex items-center justify-center gap-2"
+              >
+                <div
+                  class="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"
+                ></div>
+                <span>搜索中...</span>
+              </div>
+            {:else}
+              <Command.Empty
+                class="py-2 px-2 h-7 text-sm text-muted-foreground text-center"
+                >未找到相关地点</Command.Empty
+              >
+              <Command.Group>
+                {#if !searchResults.length}
+                  <div
+                    class="py-2 px-2 text-sm text-muted-foreground text-center"
+                  >
+                    推荐地点
+                  </div>
+                {/if}
+                {#each searchResults as result (result.value)}
+                  <Command.Item
+                    value={result.value}
+                    onSelect={() => handleSelect(result)}
+                    class="search-result-item"
+                  >
+                    <Check
+                      class={cn(
+                        "h-4 w-4 text-primary flex-shrink-0",
+                        locationData ? `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}` !== result.value && "text-transparent" : "text-transparent"
+                      )}
+                    />
+                    <span class="text-sm truncate">{result.label}</span>
+                  </Command.Item>
+                {/each}
+              </Command.Group>
+            {/if}
+          </Command.List>
+        </Command.Root>
+      </Popover.Content>
+    </Popover.Root>
+  </div>
   <!-- 地图 -->
-  <div class="absolute inset-0 w-full h-full">
-    <MapBase
+  <div class="absolute inset-0 w-full h-full py-8">
+    <Card class="w-full h-full rounded-b-xl overflow-hidden">
+      <MapBase
       bind:this={mapComponent}
       {locationData}
       on:locationDataChange={(e) => {
@@ -349,89 +423,14 @@
       zoom={13}
       showUserLocation={true}
     />
+    </Card>
   </div>
 
   <!-- 控件层 -->
   <!-- 顶部搜索框 -->
-    <div class="absolute top-0 left-0 right-0 p-2">
-      <div class="flex items-center gap-2">
-        <!-- 搜索框 -->
-        <div class="flex-1 min-w-0">
-          <Popover.Root bind:open={isOpen}>
-            <Popover.Trigger bind:ref={triggerRef}>
-              {#snippet child({ props })}
-                <Button
-                  variant="outline"
-                  class="h-8 py-1 px-2 bg-muted border-primary/10 rounded-sm"
-                  {...props}
-                  role="combobox"
-                  aria-expanded={isOpen}
-                >
-                  <MapPin class="h-4 text-primary/30 flex-shrink-0" />
-                  <span class="truncate text-primary/70 max-w-[200px]">{selectedValue}</span>
-                </Button>
-              {/snippet}
-            </Popover.Trigger>
-            <Popover.Content
-              class="w-full p-0 shadow-lg bg-background/95 backdrop-blur-sm"
-              align="start"
-            >
-              <Command.Root>
-                <Command.Input
-                  placeholder="搜索地址..."
-                  class="h-9 search-input"
-                  oninput={handleSearchInput}
-                />
-                <Command.List class="max-h-[300px] overflow-y-auto">
-                  {#if isSearching}
-                    <div
-                      class="py-6 text-sm text-muted-foreground text-center flex items-center justify-center gap-2"
-                    >
-                      <div
-                        class="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"
-                      ></div>
-                      <span>搜索中...</span>
-                    </div>
-                  {:else}
-                    <Command.Empty
-                      class="py-2 px-2 h-7 text-sm text-muted-foreground text-center"
-                      >未找到相关地点</Command.Empty
-                    >
-                    <Command.Group>
-                      {#if !searchResults.length}
-                        <div
-                          class="py-2 px-2 text-sm text-muted-foreground text-center"
-                        >
-                          推荐地点
-                        </div>
-                      {/if}
-                      {#each searchResults as result (result.value)}
-                        <Command.Item
-                          value={result.value}
-                          onSelect={() => handleSelect(result)}
-                          class="search-result-item"
-                        >
-                          <Check
-                            class={cn(
-                              "h-4 w-4 text-primary flex-shrink-0",
-                              locationData ? `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}` !== result.value && "text-transparent" : "text-transparent"
-                            )}
-                          />
-                          <span class="text-sm truncate">{result.label}</span>
-                        </Command.Item>
-                      {/each}
-                    </Command.Group>
-                  {/if}
-                </Command.List>
-              </Command.Root>
-            </Popover.Content>
-          </Popover.Root>
-        </div>
-      </div>
-    </div>
 
     <!-- 底部定位按钮 -->
-    <div class="absolute bottom-0 right-0 p-1">
+    <div class="absolute bottom-8 right-0 p-1">
       <Button
         variant="outline"
         size="icon"
@@ -451,4 +450,13 @@
     box-shadow: none !important;
   }
 
+  :global(.mapboxgl-canvas) {
+    border-radius: 0 0 0.75rem 0.75rem !important;
+    transform: translateZ(0);
+  }
+
+  :global(.mapboxgl-container) {
+    border-radius: 0 0 0.75rem 0.75rem !important;
+    transform: translateZ(0);
+  }
 </style>

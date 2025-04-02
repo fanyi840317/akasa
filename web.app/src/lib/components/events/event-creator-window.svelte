@@ -158,11 +158,11 @@
       <div class="flex flex-col gap-2 py-10">
         <!-- AI 窗口 -->
         <div
-          class="w-[200px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+          class="w-[220px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
           in:fly={{ duration: 500, x: -100, delay: 100, easing: backInOut }}
           out:fly={{ duration: 400, x: -100, easing: cubicOut }}
         >
-          <div class="flex flex-col h-[200px]">
+          <div class="flex flex-col h-[180px]">
             <div class="flex-1 overflow-hidden">
               <div class="h-full p-4">
                 <!-- <p class="text-sm text-muted-foreground">AI 助手将帮助你优化内容...</p> -->
@@ -173,11 +173,11 @@
 
         <!-- 地图窗口 -->
         <div
-          class="w-[200px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+          class="w-[220px]  overflow-hidden"
           in:fly={{ duration: 500, x: -100, delay: 200, easing: backInOut }}
           out:fly={{ duration: 400, x: -100, easing: cubicOut }}
         >
-          <div class="flex flex-col h-[200px]">
+          <div class="flex flex-col h-[220px]">
             <div class="flex-1 overflow-hidden">
               <div class="h-full">
                 <MapPicker on:locationChange={handleLocationChange} />
