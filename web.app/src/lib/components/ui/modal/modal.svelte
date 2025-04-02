@@ -10,6 +10,8 @@
 		children,
 		...restProps
 	} = $props<{
+		open?: boolean;
+		class?: string;
 		leftToolbar?: Snippet;
 		rightToolbar?: Snippet;
 		children?: Snippet;
@@ -37,17 +39,21 @@
 				className
 			)}
 		>
-			{#if leftToolbar || rightToolbar}
-				<div class="flex items-center justify-between border-b border-neutral-200/50 dark:border-neutral-800/50 p-4">
-					<div class="flex items-center gap-2">
-						{@render leftToolbar?.()}
+			<div class="flex flex-col h-full">
+				{#if leftToolbar || rightToolbar}
+					<div class="flex items-center justify-between p-2 bg-white dark:bg-neutral-900 z-10">
+						<div class="flex items-center gap-2">
+							{@render leftToolbar?.()}
+						</div>
+						<div class="flex items-center gap-2">
+							{@render rightToolbar?.()}
+						</div>
 					</div>
-					<div class="flex items-center gap-2">
-						{@render rightToolbar?.()}
-					</div>
+				{/if}
+				<div class="flex-1 overflow-auto">
+					{@render children?.()}
 				</div>
-			{/if}
-			{@render children?.()}
+			</div>
 		</div>
 	</div>
 {/if}

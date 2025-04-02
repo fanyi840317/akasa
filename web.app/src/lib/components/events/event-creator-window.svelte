@@ -1,26 +1,37 @@
 <script lang="ts">
-  import { fade, fly, slide } from 'svelte/transition';
-  import { backInOut, cubicOut } from 'svelte/easing';
-  import { createEventDispatcher, onMount } from 'svelte';
-  import { X, MapPin, Save, Clock, Tag, Calendar, Image as ImageIcon } from 'lucide-svelte';
-  import * as Tabs from '$lib/components/ui/tabs';
-  import { Button } from '$lib/components/ui/button';
-  import { Input } from '$lib/components/ui/input';
-  import { ScrollArea } from '$lib/components/ui/scroll-area';
-  import { Separator } from '$lib/components/ui/separator';
-  import { Label } from '$lib/components/ui/label';
-  import AffineEditor from '$lib/components/editor/affine-editor.svelte';
-  import MapPicker from '$lib/components/map/map-picker.svelte';
-  import type { LocationData, LocationChangeEvent } from '$lib/components/map';
-  import * as Select from '$lib/components/ui/select';
-  import { cn } from '$lib/utils';
-  import { categoryStore } from '$lib/stores/category';
-  import { toast } from 'svelte-sonner';
-  import type { Category } from '$lib/types/category';
+  import { fade, fly, slide } from "svelte/transition";
+  import { backInOut, cubicOut } from "svelte/easing";
+  import { createEventDispatcher, onMount } from "svelte";
+  import {
+    X,
+    MapPin,
+    Save,
+    Clock,
+    Tag,
+    Calendar,
+    Image as ImageIcon,
+  } from "lucide-svelte";
+  import * as Tabs from "$lib/components/ui/tabs";
+  import { Button } from "$lib/components/ui/button";
+  import { Input } from "$lib/components/ui/input";
+  import { ScrollArea } from "$lib/components/ui/scroll-area";
+  import { Separator } from "$lib/components/ui/separator";
+  import { Label } from "$lib/components/ui/label";
+  import AffineEditor from "$lib/components/editor/affine-editor.svelte";
+  import MapPicker from "$lib/components/map/map-picker.svelte";
+  import type { LocationData, LocationChangeEvent } from "$lib/components/map";
+  import * as Select from "$lib/components/ui/select";
+  import { cn } from "$lib/utils";
+  import { categoryStore } from "$lib/stores/category";
+  import { toast } from "svelte-sonner";
+  import type { Category } from "$lib/types/category";
+  import { appStore } from "$lib/stores/appState";
+  import * as Modal from "$lib/components/ui/modal";
+  import EventDetail from "./event-detail.svelte";
 
   const dispatch = createEventDispatcher();
 
-  let { open = false } = $props();
+  let { open = $bindable(false) } = $props();
 
   // 编辑器文档
   let newDoc = { content: "", doc: null };
@@ -32,6 +43,14 @@
   let categories = $state<Category[]>([]);
   let activeTab = $state("content");
   let isPublishing = $state(false);
+  let currentEvent = $state({
+    title: "",
+    content: "",
+    location: "",
+    date: "",
+    user_id: "",
+    cover: "",
+  });
 
   // 加载分类数据
   async function loadCategories() {
@@ -39,8 +58,8 @@
       const result = await categoryStore.fetchCategories();
       categories = result;
     } catch (error) {
-      console.error('无法加载分类数据:', error);
-      toast.error('无法加载分类数据');
+      console.error("无法加载分类数据:", error);
+      toast.error("无法加载分类数据");
     }
   }
 
@@ -56,7 +75,7 @@
 
   async function handleSave() {
     if (!title.trim()) {
-      toast.error('请输入事件标题');
+      toast.error("请输入事件标题");
       return;
     }
 
@@ -69,14 +88,14 @@
         location: locationData,
         category: selectedCategory,
         date: eventDate,
-        cover_image: coverImage
+        cover_image: coverImage,
       };
-      
+
       dispatch("save", eventData);
       handleClose();
     } catch (error) {
-      console.error('保存事件失败:', error);
-      toast.error('保存事件失败');
+      console.error("保存事件失败:", error);
+      toast.error("保存事件失败");
     } finally {
       isPublishing = false;
     }
@@ -84,9 +103,9 @@
 
   function handleCoverUpload() {
     // 实现封面上传功能
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
@@ -106,136 +125,63 @@
 
   // 动画配置
   const backdropTransition = { duration: 300, opacity: 0 };
-  const modalTransition = { duration: 400, y: 30, opacity: 0, easing: cubicOut };
+  const modalTransition = {
+    duration: 400,
+    y: 30,
+    opacity: 0,
+    easing: cubicOut,
+  };
 </script>
 
 {#if open}
-  <div 
-    class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" 
-    on:click|self={handleClose}
-    in:fade={backdropTransition}
-    out:fade={backdropTransition}
+  <div
+    class="fixed inset-0 z-50 bg-neutral-900/10 backdrop-blur-[2px] dark:bg-neutral-900/50"
+    transition:fade={backdropTransition}
   >
-    <div 
-      class="fixed left-[50%] top-[50%] z-50 w-[95vw] h-[90vh] max-w-[1400px] translate-x-[-50%] translate-y-[-50%] bg-background border border-border shadow-xl rounded-lg overflow-hidden flex flex-col"
-      in:fly={modalTransition}
-      out:fade={{ duration: 200 }}
-      on:click|stopPropagation
+    <div
+      class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-[1200px] translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_0_0_1px_rgba(0,0,0,0.03)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.03)] duration-200 sm:rounded-lg overflow-hidden"
+      transition:fly={modalTransition}
     >
-      <!-- 顶部标题栏 -->
-      <div class="flex justify-between items-center px-6 py-3 border-b">
-        <h2 class="text-xl font-medium">创建新事件</h2>
-        <Button variant="ghost" size="icon" onclick={handleClose}>
-          <X class="h-4 w-4" />
-        </Button>
-      </div>
-
-      <!-- 主体内容 -->
-      <div class="flex-1 flex min-h-0">
-        <!-- 左侧内容 -->
-        <div class="w-[70%] border-r flex flex-col">
-          <!-- 标题输入 -->
-          <div class="border-b p-4 flex items-center">
-            <Input 
-              type="text" 
-              placeholder="输入事件标题..." 
-              class="text-xl border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12 px-0"
+      <div class="flex flex-col h-[80vh]">
+        <!-- 顶部工具栏 -->
+        <div class="flex items-center justify-between p-2 bg-white dark:bg-neutral-900 z-10 border-b border-neutral-200/50 dark:border-neutral-800/50">
+          <div class="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onclick={handleClose}>
+              <X class="h-4 w-4" />
+            </Button>
+            <Input
+              placeholder="输入事件标题..."
               bind:value={title}
+              class="w-[300px]"
             />
-            {#if coverImage}
-              <div class="flex items-center gap-2 ml-4">
-                <img src={coverImage} alt="封面" class="h-8 w-8 rounded object-cover" />
-                <Button variant="outline" size="sm" onclick={handleCoverUpload}>更换</Button>
-              </div>
-            {:else}
-              <Button variant="outline" size="sm" class="ml-4 flex items-center gap-2" onclick={handleCoverUpload}>
-                <ImageIcon class="h-4 w-4" />
-                <span>添加封面</span>
-              </Button>
-            {/if}
           </div>
-
-          <!-- 内容编辑 -->
-          <div class="flex-1 min-h-0 overflow-hidden">
-            <Tabs.Root value={activeTab} onValueChange={(v) => activeTab = v} class="h-full flex flex-col">
-              <Tabs.List class="border-b px-4">
-                <Tabs.Trigger value="content">内容</Tabs.Trigger>
-                <Tabs.Trigger value="location">位置</Tabs.Trigger>
-              </Tabs.List>
-              <Tabs.Content value="content" class="flex-1 p-4 h-full">
-                <AffineEditor htmlDoc={newDoc} class="h-full" />
-              </Tabs.Content>
-              <Tabs.Content value="location" class="flex-1 p-4 overflow-hidden">
-                <div class="h-full w-full rounded-md overflow-hidden border">
-                  <MapPicker 
-                    locationData={locationData} 
-                    on:locationChange={handleLocationChange}
-                  />
-                </div>
-              </Tabs.Content>
-            </Tabs.Root>
+          <div class="flex items-center gap-2">
+            <Button variant="outline" onclick={handleCoverUpload}>
+              <ImageIcon class="h-4 w-4 mr-2" />
+              上传封面
+            </Button>
+            <Button onclick={handleSave} disabled={isPublishing}>
+              <Save class="h-4 w-4 mr-2" />
+              {isPublishing ? "保存中..." : "保存"}
+            </Button>
           </div>
         </div>
 
-        <!-- 右侧属性面板 -->
-        <div class="w-[30%]">
-          <ScrollArea class="h-full">
-            <div class="p-6 space-y-6">
-              <div>
-                <Label class="text-sm font-medium mb-2 block">分类</Label>
-                <Select.Root onValueChange={(value) => selectedCategory = value}>
-                  <Select.Trigger class="w-full">
-                    <span>{selectedCategory ? categories.find(c => c.$id === selectedCategory)?.name?.zh || '选择事件分类' : '选择事件分类'}</span>
-                  </Select.Trigger>
-                  <Select.Content>
-                    {#each categories as category}
-                      <Select.Item value={category.$id}>
-                        <div class="flex items-center gap-2">
-                          <div class="h-2 w-2 rounded-full" style="background-color: {category.color}"></div>
-                          <span>{category.name.zh}</span>
-                        </div>
-                      </Select.Item>
-                    {/each}
-                  </Select.Content>
-                </Select.Root>
-              </div>
-
-              <div>
-                <Label class="text-sm font-medium mb-2 block">日期</Label>
-                <Input 
-                  type="text" 
-                  placeholder="具体日期或时间描述..." 
-                  bind:value={eventDate}
-                />
-              </div>
-
-              <div>
-                <Label class="text-sm font-medium mb-2 block">位置</Label>
-                <div class="text-sm text-muted-foreground flex items-center gap-2">
-                  <MapPin class="h-4 w-4" />
-                  {#if locationData}
-                    <span>已选择位置 ({locationData.latitude.toFixed(4)}, {locationData.longitude.toFixed(4)})</span>
-                  {:else}
-                    <span>未选择位置</span>
-                  {/if}
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div class="pt-4">
-                <Button class="w-full" onclick={handleSave} disabled={isPublishing}>
-                  {#if isPublishing}
-                    <div class="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
-                    保存中...
-                  {:else}
-                    <Save class="h-4 w-4 mr-2" />
-                    发布事件
-                  {/if}
-                </Button>
-              </div>
+        <!-- 主要内容区域 -->
+        <div class="flex-1 flex overflow-hidden">
+          <!-- 左侧编辑器 -->
+          <div class="flex-1 overflow-hidden border-r border-neutral-200/50 dark:border-neutral-800/50">
+            <div class="h-full">
+              <AffineEditor htmlDoc={newDoc} />
             </div>
-          </ScrollArea>
+          </div>
+
+          <!-- 右侧地图选择器 -->
+          <div class="w-[400px] overflow-hidden">
+            <div class="h-full">
+              <MapPicker on:locationChange={handleLocationChange} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
