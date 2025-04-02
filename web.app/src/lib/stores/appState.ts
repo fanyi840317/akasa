@@ -1,5 +1,6 @@
 import { writable, get } from 'svelte/store';
 import type { NavItem } from '../types/types';
+import type { Event } from '../types/event';
 
 type AppState = {
     // 视图显示状态
@@ -17,6 +18,11 @@ type AppState = {
     
     // 模板相关
     selectedTemplate: any | null;
+
+    // 事件创建器状态
+    showEventCreator: boolean;
+    eventCreatorType: 'experience' | 'documentation' | 'witness' | 'evidence' | null;
+    currentEvent: Event | null;
 };
 
 const createAppStore = () => {
@@ -36,6 +42,11 @@ const createAppStore = () => {
         
         // 模板相关
         selectedTemplate: null,
+
+        // 事件创建器状态
+        showEventCreator: false,
+        eventCreatorType: null,
+        currentEvent: null,
     });
 
     return {
@@ -93,6 +104,23 @@ const createAppStore = () => {
                 ...state,
                 selectedTemplate: template,
                 showRightView: template !== null
+            }));
+        },
+        
+        // 事件创建器相关方法
+        openEventCreator: (type?: 'experience' | 'documentation' | 'witness' | 'evidence') => {
+            store.update(state => ({
+                ...state,
+                showEventCreator: true,
+                eventCreatorType: type || null
+            }));
+        },
+        
+        closeEventCreator: () => {
+            store.update(state => ({
+                ...state,
+                showEventCreator: false,
+                eventCreatorType: null
             }));
         },
         

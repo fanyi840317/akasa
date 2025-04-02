@@ -1,36 +1,29 @@
 <script lang="ts">
     import type { PageData } from "./$types";
     import { Input } from "$lib/components/ui/input";
-    import { Button } from "$lib/components/ui/button";
     import {
         Search,
-        Filter,
-        Calendar,
-        MapPin,
-        Users,
         Star,
+        Map,
     } from "lucide-svelte";
     import EventCard from "$lib/components/ui/notion-cards/event-card.svelte";
     import TagNav from "$lib/components/ui/tag-nav/tag-nav.svelte";
     import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
-    import ShareButton from "$lib/components/ui/share/share-button.svelte";
-    import SharePanel from "$lib/components/ui/share/share-panel.svelte";
     import { eventStore } from "$lib/stores/event";
     import { categoryStore } from "$lib/stores/category";
-    import { Query } from "appwrite";
     import type { Event } from "$lib/types/event";
     import type { Category } from "$lib/types/category";
-    import { fade, slide, scale } from 'svelte/transition';
+    import { fade, slide } from 'svelte/transition';
     import { GridBackground } from "$lib/components/ui/grid-background";
     import LightGridBackground from "$lib/components/ui/grid-background/light-grid-background.svelte";
     import { onMount } from 'svelte';
     import { ModeWatcher, mode } from "mode-watcher";
     import { NotionPanel } from "$lib/components/layout";
     import EventView from "$lib/components/events/event-view.svelte";
+    import { goto } from "$app/navigation";
     import './styles.css';
 
     let { data }: { data: PageData } = $props();
-    let showSharePanel = $state(false);
     let events = $state<Event[]>([]);
     let categories = $state<Category[]>([]);
     let loading = $state(true);
@@ -38,7 +31,7 @@
     let searchQuery = "";
     let currentPage = 1;
     const itemsPerPage = 6;
-
+    
     // Panel 状态
     let showEventPanel = $state(false);
     let selectedEvent = $state<Event | null>(null);
@@ -134,18 +127,19 @@
             {#if $mode === 'dark'}
                 <GridBackground />
             {:else}
-                <LightGridBackground />
+                <!-- <LightGridBackground /> -->
             {/if}
         </div>
 
         <!-- 页面标题和搜索栏 -->
-        <div class="relative container mx-auto px-20 pointer-events-none pt-20 pb-10">
+        <div class="relative container mx-auto px-20 pointer-events-none pt-10 pb-10">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-20">
                 <div class="space-y-4">
                     <div class="inline-flex items-center gap-2">
                         <span class="mysterious-badge px-2 py-1 rounded-md text-sm text-foreground/70">
                             神秘事件
                         </span>
+                        
                     </div>
                     <h1 class="mysterious-title text-4xl font-medium tracking-tight">探索未知</h1>
                     <p class="text-sm text-muted-foreground max-w-[600px]">
@@ -169,6 +163,8 @@
             <div class="mt-6 pointer-events-auto">
                 <TagNav bind:selectedId={selectedCategory} items={categoryItems} />
             </div>
+
+           
         </div>
     </div>
 

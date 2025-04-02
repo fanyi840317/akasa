@@ -28,7 +28,7 @@
     shouldRequest?: boolean;
   }
 
-  let { locationData = $bindable({ longitude: 104.06, latitude: 30.67 }), placeholder = "选择位置", isLocating = false, autoRequest = true, shouldRequest = false } = $props();
+  let { locationData = $bindable(null), placeholder = "选择位置", isLocating = false, autoRequest = true, shouldRequest = false } = $props();
 
   const dispatch = createEventDispatcher<{
     locationChange: LocationChangeEvent;
@@ -353,7 +353,7 @@
 
   <!-- 控件层 -->
   <!-- 顶部搜索框 -->
-    <div class="absolute top-0 left-0 right-0 p-1">
+    <div class="absolute top-0 left-0 right-0 p-2">
       <div class="flex items-center gap-2">
         <!-- 搜索框 -->
         <div class="flex-1 min-w-0">
@@ -362,12 +362,12 @@
               {#snippet child({ props })}
                 <Button
                   variant="outline"
-                  class="h-8 py-1 px-2 "
+                  class="h-8 py-1 px-2 bg-muted border-primary/10 rounded-sm"
                   {...props}
                   role="combobox"
                   aria-expanded={isOpen}
                 >
-                  <MapPin class="h-4 text-primary/70 flex-shrink-0" />
+                  <MapPin class="h-4 text-primary/30 flex-shrink-0" />
                   <span class="truncate text-primary/70 max-w-[200px]">{selectedValue}</span>
                 </Button>
               {/snippet}
@@ -449,56 +449,6 @@
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
-    background: transparent;
-    transition: all 0.2s ease;
   }
 
-  :global(.search-input:hover) {
-    background: hsl(var(--accent) / 0.05);
-  }
-
-  :global(.search-input:focus) {
-    background: hsl(var(--accent) / 0.1);
-  }
-
-  :global(.search-result-item) {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.375rem 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid hsl(var(--border) / 0.1);
-  }
-
-  :global(.search-result-item:last-child) {
-    border-bottom: none;
-  }
-
-  :global(.search-result-item:hover) {
-    background: hsl(var(--accent) / 0.05);
-    transform: translateX(2px);
-  }
-
-  :global(.search-result-item:active) {
-    transform: translateX(0);
-  }
-
-  :global(.command-list) {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted)) transparent;
-  }
-
-  :global(.command-list::-webkit-scrollbar) {
-    width: 6px;
-  }
-
-  :global(.command-list::-webkit-scrollbar-track) {
-    background: transparent;
-  }
-
-  :global(.command-list::-webkit-scrollbar-thumb) {
-    background-color: hsl(var(--muted));
-    border-radius: 3px;
-  }
 </style>

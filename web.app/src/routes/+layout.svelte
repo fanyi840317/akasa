@@ -1,7 +1,6 @@
 <script lang="ts">
   import "../app.css";
   import { ModeWatcher, mode } from "mode-watcher";
-  import "../lib/i18n"; // 确保在应用启动时加载 i18n 配置
   import { waitLocale } from "svelte-i18n";
   import Loading from "$lib/components/website/loading.svelte";
   let { children } = $props();
@@ -13,17 +12,25 @@
   import { goto } from "$app/navigation";
   import { fade } from "svelte/transition";
   import { get, writable } from "svelte/store";
+  import { page } from '$app/stores';
+
+  let isThemeInitialized = false;
 
   onMount(() => {
+    if (isThemeInitialized) return;
+    
     const unsubscribe = mode.subscribe((currentMode) => {
-      document.documentElement.dataset.theme = currentMode ?? "light";
+      if (document.documentElement) {
+        document.documentElement.dataset.theme = currentMode ?? "light";
+        isThemeInitialized = true;
+      }
     });
     return () => unsubscribe();
   });
 </script>
 
-<ModeWatcher />
 <Toaster />
+<ModeWatcher />
 {#await waitLocale()}
   <div
     in:fade={{ duration: 200 }}

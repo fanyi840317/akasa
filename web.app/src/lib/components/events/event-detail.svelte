@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import AffineEditor from "$lib/components/ui/editor/affine-editor.svelte";
-  import { exportDoc } from "$lib/components/ui/editor/affine-editor";
+  import AffineEditor from "$lib/components/editor/affine-editor.svelte";
+  import { exportDoc } from "$lib/components/editor/affine-editor";
   import { eventStore } from "$lib/stores/event";
   import { _ } from "svelte-i18n";
   import {
@@ -30,8 +30,8 @@
   import type { Event } from "$lib/types/event";
   import { toast } from "svelte-sonner";
   import DatePicker from "$lib/components/ui/date-picker/date-picker.svelte";
-  import MapPicker from "$lib/components/ui/map/map-picker.svelte";
-  import type { LocationChangeEvent, LocationData } from "$lib/components/ui/map";
+  import MapPicker from "$lib/components/map/map-picker.svelte";
+  import type { LocationChangeEvent, LocationData } from "$lib/components/map";
   import { fly } from "svelte/transition";
   import { onMount } from "svelte";
   import {
@@ -56,6 +56,7 @@
   } from "$lib/components/ui/dropdown-menu";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import { getCurrentLocation } from "$lib/services/location";
+  import EventActions from "./event-actions.svelte";
 
   interface Props {
     x_event?: Omit<Event, "$id" | "$createdAt" | "$updatedAt"> & {
@@ -352,83 +353,13 @@
                     class="event-title-input w-full bg-transparent text-4xl font-semibold border-0 outline-none shadow-none focus:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
                   />
                 </div>
-                <div
-                  class="flex items-center gap-2 border-l border-border/40 pl-4"
-                >
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <label class="cursor-pointer">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            class="hidden"
-                            on:change={handleCoverUpload}
-                            disabled={isUploading}
-                          />
-                          <Button variant="ghost" size="icon" class="h-8 w-8">
-                            <Image class="h-4 w-4" />
-                          </Button>
-                        </label>
-                      </TooltipTrigger>
-                      <TooltipContent>更换封面</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          class="h-8 w-8"
-                          onclick={handlePreview}
-                        >
-                          <Eye class="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>预览</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <DropdownMenu bind:open={showShareMenu}>
-                          <DropdownMenuTrigger>
-                            <Button variant="ghost" size="icon" class="h-8 w-8">
-                              <Share2 class="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" class="w-48">
-                            <DropdownMenuItem
-                              onclick={() => handleShare("copy")}
-                            >
-                              <Copy class="mr-2 h-4 w-4" />
-                              复制链接
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onclick={() => handleShare("twitter")}
-                            >
-                              <Twitter class="mr-2 h-4 w-4" />
-                              分享到 Twitter
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onclick={() => handleShare("facebook")}
-                            >
-                              <Facebook class="mr-2 h-4 w-4" />
-                              分享到 Facebook
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onclick={() => handleShare("wechat")}
-                            >
-                              <QrCode class="mr-2 h-4 w-4" />
-                              微信扫码分享
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TooltipTrigger>
-                      <TooltipContent>分享</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                <div class="flex items-center gap-2 border-l border-border/40 pl-4">
+                  <EventActions 
+                    title={x_event?.title || ""}
+                    onPreview={handlePreview}
+                    onCoverUpload={handleCoverUpload}
+                    on:wechatShare={() => showQRCode = true}
+                  />
                 </div>
               </div>
             </div>
@@ -450,7 +381,7 @@
 
         <!-- 右侧信息面板 -->
         <div
-          class="w-[320px] border-l border-border/40"
+          class="w-[320px] border-l border-border/40 -mt-10"
           in:fly={{ x: 20, duration: 500, delay: 600 }}
         >
           <div class="p-4 space-y-4">
@@ -539,7 +470,7 @@
             </Card>
 
             <!-- 发布按钮 -->
-            <div class="sticky bottom-4">
+            <!-- <div class="sticky bottom-4">
               <Button
                 onclick={handlePublish}
                 disabled={isPublishing}
@@ -548,7 +479,7 @@
                 <Sparkles class="h-4 w-4" />
                 <span>{isPublishing ? "正在发布..." : "发布神秘事件"}</span>
               </Button>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>

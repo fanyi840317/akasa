@@ -19,7 +19,7 @@
   let editorContainer: HTMLDivElement;
   let editor: AffineEditorContainer | null = null;
   let isInitialized = false;
-  let contentUpdateTimeout: NodeJS.Timeout;
+  // let contentUpdateTimeout: NodeJS.Timeout;
 
   const themeExtension: ThemeExtension = {
     getAppTheme: () => {
@@ -48,17 +48,17 @@
       htmlDoc.doc = doc;
 
       // 设置编辑器变化监听
-      editor.doc.slots.historyUpdated.on(async () => {
-        clearTimeout(contentUpdateTimeout);
-        contentUpdateTimeout = setTimeout(async () => {
-          if (editor?.doc) {
-            const content = await exportDoc(editor.doc);
-            if (content) {
-              dispatch("contentChange", content);
-            }
-          }
-        }, 300);
-      });
+      // editor.doc.slots.historyUpdated.on(async () => {
+      //   clearTimeout(contentUpdateTimeout);
+      //   contentUpdateTimeout = setTimeout(async () => {
+      //     if (editor?.doc) {
+      //       const content = await exportDoc(editor.doc);
+      //       if (content) {
+      //         dispatch("contentChange", content);
+      //       }
+      //     }
+      //   }, 300);
+      // });
       // 应用主题扩展到编辑器
       if (editor.pageSpecs) {
         const pageSpecs = SpecProvider.getInstance().getSpec("page");
@@ -104,7 +104,7 @@
     }
   }
   function cleanup() {
-    clearTimeout(contentUpdateTimeout);
+    // clearTimeout(contentUpdateTimeout);
     if (editor) {
       try {
         editor.doc?.dispose();

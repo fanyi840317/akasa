@@ -1,26 +1,23 @@
 <script lang="ts">
-  import * as Collapsible from "$lib/components/ui/collapsible/index.js";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-  import * as Modal from "$lib/components/ui/modal/index.js";
-  import ChevronRight from "@lucide/svelte/icons/chevron-right";
   import File from "@lucide/svelte/icons/file";
   import Folder from "@lucide/svelte/icons/folder";
-  import PlusCircle from "@lucide/svelte/icons/plus-circle";
   import { onMount, onDestroy, type ComponentProps } from "svelte";
   import { Button } from "$lib/components/ui/button";
-  import { goto } from "$app/navigation";
   import * as Card from "$lib/components/ui/card";
-  import EventDetail from "../events/event-detail.svelte";
-  import { Ellipsis, Forward, Plus, Save, Trash2 } from "lucide-svelte";
+  import { Ellipsis, Forward, Plus, Trash2, Sparkles } from "lucide-svelte";
   import { auth } from "$lib/stores/auth";
   import { get } from "svelte/store";
   import { eventStore } from "$lib/stores/event";
   import { Skeleton } from "$lib/components/ui/skeleton";
-  import { caseStore } from "$lib/stores/case";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import { useSidebar } from "$lib/components/ui/sidebar/index.js";
-  import type { Event } from "$lib/types/event";
   import { page } from "$app/stores";
+  import { appStore } from "$lib/stores/appState";
+  import type { Event } from "$lib/types/event";
+  import { goto } from '$app/navigation';
+  import EventCreatorSelector from "$lib/components/events/event-creator-selector.svelte";
+  import EventCreatorWindow from "$lib/components/events/event-creator-window.svelte";
 
   // 组件属性
   let {
@@ -28,14 +25,52 @@
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> = $props();
 
-  // 状态管理
-  let showDialog = $state(false);
-  let userEvents = $state<Event[]>([]);
+  // 获取侧边栏实例
+  const sidebar = useSidebar();
+
+  // 状态
+  let showEventTypeSelector = $state(false);
+  let showEventCreatorWindow = $state(false);
+
+  // 从 eventStore 获取状态
+  let userEvents: Event[] = $state([]);
   let hasEvents = $state(false);
   let isLoading = $state(false);
 
-  // 获取侧边栏实例
-  const sidebar = useSidebar();
+  // 事件处理函数
+  function handleOpenEventCreator() {
+    // 直接打开创建窗口而不是选择器
+    showEventCreatorWindow = true;
+  }
+
+  function handleEventSave(event: CustomEvent) {
+    // 保存事件
+    const eventData = event.detail;
+    console.log('保存事件:', eventData);
+    
+    eventStore.createEvent(eventData)
+      .then(() => {
+        // 成功创建事件后刷新列表
+        eventStore.fetchEvents();
+      })
+      .catch(error => {
+        console.error('创建事件失败:', error);
+      });
+  }
+
+  type EventType = "experience" | "documentation" | "witness" | "evidence";
+  function handleEventTypeSelect(event: CustomEvent<{ type: EventType }>) {
+    showEventTypeSelector = false;
+    appStore.openEventCreator(event.detail.type);
+  }
+
+  function handleEventSelect(eventId: string) {
+    goto(`/console/events/${eventId}`);
+  }
+
+  function handleEventDelete(eventId: string) {
+    eventStore.deleteEvent(eventId);
+  }
 
   // 判断事件是否激活
   function isEventActive(eventId: string): boolean {
@@ -43,35 +78,8 @@
     return pathname === `/console/events/${eventId}`;
   }
 
-  // 事件处理函数
-  const handleEventSelect = (eventId: string) => {
-    // 如果点击的是当前选中的事件，不做任何操作
-    if (isEventActive(eventId)) {
-      return;
-    }
-    // 导航到事件详情页面
-    goto(`/console/events/${eventId}`);
-  };
-
-  const handleEventDelete = async (eventId: string) => {
-    try {
-      await eventStore.deleteEvent(eventId);
-    } catch (error) {
-      console.error('删除事件失败:', error);
-    }
-  };
-
-  const handleEventCreate = (result: { detail?: Event }) => {
-    showDialog = false;
-    if (result?.detail?.$id) {
-      const newEventId = result.detail.$id;
-      // 导航到新创建的事件
-      goto(`/console/events/${newEventId}`);
-    }
-  };
-
   // Store 订阅
-  const unsubscribeEventStore = eventStore.subscribe((state) => {
+  const unsubscribe = eventStore.subscribe((state) => {
     userEvents = state.events;
     hasEvents = state.events.length > 0;
     isLoading = state.listLoading;
@@ -90,13 +98,23 @@
   });
 
   onDestroy(() => {
-    unsubscribeEventStore();
+    unsubscribe();
   });
 </script>
 
-<Sidebar.Group>
-  <Sidebar.GroupLabel>私人</Sidebar.GroupLabel>
+<EventCreatorSelector
+  open={showEventTypeSelector}
+  on:select={handleEventTypeSelect}
+  on:close={() => showEventTypeSelector = false}
+/>
 
+<EventCreatorWindow
+  open={showEventCreatorWindow}
+  on:save={handleEventSave}
+  on:close={() => showEventCreatorWindow = false}
+/>
+
+<Sidebar.Group>
   {#if isLoading}
     <div class="flex items-center space-x-4 p-4">
       <div class="space-y-2 flex-1">
@@ -107,29 +125,32 @@
       </div>
     </div>
   {:else if !hasEvents}
-    <Card.Root class="shadow-none my-2 mx-2">
-      <form>
-        <Card.Header class="p-4 pb-0">
-          <Card.Title class="text-sm">分享身边的神秘事件</Card.Title>
-          <Card.Description class="text-xs">
-            记录和分享你遇到的神秘事件，让更多人了解这个世界的未知面
-          </Card.Description>
-        </Card.Header>
-        <Card.Content class="grid gap-2.5 p-4">
-          <Button
-            class="bg-sidebar-primary text-sidebar-primary-foreground w-full shadow-none"
-            size="sm"
-            onclick={() => (showDialog = true)}
-          >
-            分享事件
-          </Button>
-        </Card.Content>
-      </form>
-    </Card.Root>
+  <Card.Root class="shadow-none bg-muted/10 border-primary/10">
+    <form>
+      <Card.Header class="p-4 pb-0">
+        <Card.Title class="text-sm  text-primary/70">探索未知的世界</Card.Title>
+        <Card.Description class="text-xs">
+          每一个神秘事件背后都有一个等待被讲述的故事，分享你的发现
+        </Card.Description>
+      </Card.Header>
+      <Card.Content class="grid px-2 py-4">
+        <Button
+          variant="outline"
+          class="w-full "
+          size="sm"
+          onclick={() => handleOpenEventCreator()}
+        >
+          <Sparkles class="mr-2 h-4 w-4" />
+          我要爆料
+        </Button>
+      </Card.Content>
+    </form>
+  </Card.Root>
   {:else}
+  <Sidebar.GroupLabel>私人</Sidebar.GroupLabel>
     <Sidebar.GroupAction
       title="Add Project"
-      onclick={() => (showDialog = true)}
+      onclick={() => handleOpenEventCreator()}
     >
       <Plus /> <span class="sr-only">Add Project</span>
     </Sidebar.GroupAction>
@@ -143,15 +164,6 @@
     </Sidebar.GroupContent>
   {/if}
 </Sidebar.Group>
-
-<Modal.Root bind:open={showDialog} class="sm:max-w-[900px] h-[80vh]">
-  <Modal.Content>
-    <EventDetail
-      x_event={undefined}
-      on:close={handleEventCreate}
-    />
-  </Modal.Content>
-</Modal.Root>
 
 {#snippet events({ id, title }: { id: string; title: string })}
   <Sidebar.MenuItem>

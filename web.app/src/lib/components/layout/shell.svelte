@@ -17,6 +17,8 @@
   import { setContext } from "svelte";
   import { NotionPanel } from "$lib/components/layout";
   import PanelContent from "./panel-content.svelte";
+  import EventDetail from "../events/event-detail.svelte";
+  import * as Modal from "$lib/components/ui/modal";
 
   interface NavSidebarEvents {
     navItemClick: CustomEvent<NavItem>;
@@ -96,6 +98,15 @@
   // 事件面板状态
   let showEventPanel = false;
   let selectedEvent: any = null;
+
+  // 订阅 appStore 以获取事件创建器状态
+  let showEventCreator = $state(false);
+  let currentEvent = $state(null);
+
+  appStore.subscribe(state => {
+    showEventCreator = state.showEventCreator;
+    currentEvent = state.currentEvent;
+  });
 
   function handleNavAction(item: NavItem | null, action?: string) {
     console.log('Nav action:', item, action);
@@ -191,6 +202,16 @@
     {/if}
   </Sidebar.Root>
 </Sidebar.Provider>
+
+<!-- 事件创建器模态框 -->
+<Modal.Root bind:open={showEventCreator} class="sm:max-w-[900px] h-[80vh]">
+  <Modal.Content>
+    <EventDetail
+      x_event={currentEvent}
+      on:close={() => appStore.closeEventCreator()}
+    />
+  </Modal.Content>
+</Modal.Root>
 
 <!-- 事件详情面板 -->
 <NotionPanel 

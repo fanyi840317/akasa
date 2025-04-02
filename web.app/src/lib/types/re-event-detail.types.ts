@@ -1,5 +1,5 @@
-import type { Event } from "./re-event-types";
-import type { HtmlDoc } from "./re-doc-types";
+import type { Event } from "./event-types";
+import type { HtmlDoc } from "./doc-types";
 import type { DateValue } from "@internationalized/date";
 
 export interface EventDetailProps {

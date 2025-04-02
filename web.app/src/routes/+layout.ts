@@ -15,29 +15,32 @@ export const load: LayoutLoad = async ({ url, route }) => {
     try {
         // 避免在每次导航时都重新初始化认证
         await auth.init();
-        
-        // 只使用 IP 获取位置数据，如果失败则使用默认值
-        let locationData;
-        try {
-            locationData = await getLocationByIP();
-        } catch (error) {
-            console.error('获取位置数据失败:', error);
-            locationData = DEFAULT_LOCATION;
-        }
-
-        // 初始化 i18n
-        initI18n(locationData.country);
 
         // 获取 auth store 的当前状态
         const { user } = get(auth);
 
+        // 优先使用浏览器语言设置
+        const browserLang = navigator.language.split('-')[0];
+        if (browserLang && ['en', 'zh'].includes(browserLang)) {
+            initI18n(browserLang);
+        } else {
+            // 如果浏览器语言不支持，则使用IP定位
+            getLocationByIP().then(locationData => {
+                if (locationData) {
+                    initI18n(locationData.country);
+                }
+            }).catch(error => {
+                console.error('获取位置数据失败:', error);
+                initI18n(DEFAULT_LOCATION.country);
+            });
+        }
+
         return {
-            location: locationData,
+            location: DEFAULT_LOCATION,
             user
         };
     } catch (error) {
         console.error('布局加载失败:', error);
-        // 返回默认值，确保页面不会白屏
         return {
             location: DEFAULT_LOCATION,
             user: null

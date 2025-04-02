@@ -234,7 +234,7 @@ const createEventStore = () => {
                 eventLoading: false,
                 error: null
             });
-        }
+        },
     };
 };
 

@@ -5,7 +5,7 @@ import {
   HtmlAdapter,
   titleMiddleware,
 } from "@blocksuite/blocks";
-import { Doc, Job } from "@blocksuite/store";
+import { Block, Doc, Job, toJSON } from "@blocksuite/store";
 
 import { AffineSchemas } from "@blocksuite/blocks/schemas";
 import { DocCollection, Schema } from "@blocksuite/store";
@@ -47,4 +47,8 @@ export async function exportDoc(doc: Doc) {
     assets: job.assetsManager,
   });
   return { content: htmlResult.file, title: doc.meta?.title };
+}
+
+export async function exportDocToJson(doc: Doc) {
+
 }
