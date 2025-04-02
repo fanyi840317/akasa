@@ -28,6 +28,7 @@
   import { appStore } from "$lib/stores/appState";
   import * as Modal from "$lib/components/ui/modal";
   import EventDetail from "./event-detail.svelte";
+  import EventActions from "./event-actions.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -124,9 +125,9 @@
   });
 
   // 动画配置
-  const backdropTransition = { duration: 300, opacity: 0 };
+  const backdropTransition = { duration: 400, opacity: 0 };
   const modalTransition = {
-    duration: 400,
+    duration: 500,
     y: 30,
     opacity: 0,
     easing: cubicOut,
@@ -136,41 +137,35 @@
 {#if open}
   <div
     class="fixed inset-0 z-50 bg-neutral-900/10 backdrop-blur-[2px] dark:bg-neutral-900/50"
-    transition:fade={{ duration: 300, delay: 100, easing: cubicOut }}
+    transition:fade={{ duration: 400, delay: 0, easing: cubicOut }}
     on:click={handleClose}
   >
     <!-- 窗口容器 -->
     <div 
-      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-12 p-8"
+      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-2 p-8"
       on:click|stopPropagation
     >
-      <!-- 左侧编辑器窗口 -->
-      <div
-        class="w-[800px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
-        in:fly={{ duration: 600, x: -100, delay: 200, easing: backInOut }}
-        out:fly={{ duration: 500, x: -100, easing: cubicOut }}
-      >
-        <div class="flex flex-col h-[80vh]">
-          <div class="flex-1 overflow-hidden">
-            <div class="h-full">
-              <AffineEditor htmlDoc={newDoc} />
-            </div>
-          </div>
-        </div>
+      <!-- 事件操作按钮 -->
+      <div class="absolute right-0 top-0 p-4">
+        <EventActions
+          {title}
+          onPreview={() => {}}
+          onCoverUpload={handleCoverUpload}
+        />
       </div>
 
-      <!-- 右侧窗口容器 -->
-      <div class="flex flex-col gap-12">
+      <!-- 左侧窗口容器 -->
+      <div class="flex flex-col gap-2 py-10">
         <!-- AI 窗口 -->
         <div
-          class="w-[300px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
-          in:fly={{ duration: 600, x: 100, delay: 300, easing: backInOut }}
-          out:fly={{ duration: 500, x: 100, easing: cubicOut }}
+          class="w-[200px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+          in:fly={{ duration: 500, x: -100, delay: 100, easing: backInOut }}
+          out:fly={{ duration: 400, x: -100, easing: cubicOut }}
         >
-          <div class="flex flex-col h-[250px]">
+          <div class="flex flex-col h-[200px]">
             <div class="flex-1 overflow-hidden">
               <div class="h-full p-4">
-                <p class="text-sm text-muted-foreground">AI 助手将帮助你优化内容...</p>
+                <!-- <p class="text-sm text-muted-foreground">AI 助手将帮助你优化内容...</p> -->
               </div>
             </div>
           </div>
@@ -178,15 +173,30 @@
 
         <!-- 地图窗口 -->
         <div
-          class="w-[300px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
-          in:fly={{ duration: 600, x: 100, delay: 400, easing: backInOut }}
-          out:fly={{ duration: 500, x: 100, easing: cubicOut }}
+          class="w-[200px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+          in:fly={{ duration: 500, x: -100, delay: 200, easing: backInOut }}
+          out:fly={{ duration: 400, x: -100, easing: cubicOut }}
         >
-          <div class="flex flex-col h-[250px]">
+          <div class="flex flex-col h-[200px]">
             <div class="flex-1 overflow-hidden">
               <div class="h-full">
                 <MapPicker on:locationChange={handleLocationChange} />
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 右侧编辑器窗口 -->
+      <div
+        class="w-[800px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+        in:fly={{ duration: 500, x: 100, delay: 0, easing: backInOut }}
+        out:fly={{ duration: 400, x: 100, easing: cubicOut }}
+      >
+        <div class="flex flex-col h-[80vh]">
+          <div class="flex-1 overflow-hidden">
+            <div class="h-full">
+              <AffineEditor htmlDoc={newDoc} />
             </div>
           </div>
         </div>

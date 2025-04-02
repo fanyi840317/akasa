@@ -146,10 +146,10 @@
     z-index: 1001;
   }
   /* 完全隐藏文档标题 */
-  :global(doc-title) {
+  /* :global(doc-title) {
     display: none !important;
-  }
-  :global(doc-title .doc-title-container-empty::before) {
+  } */
+  /* :global(doc-title .doc-title-container-empty::before) {
     content: none;
-  }
+  } */
 </style>

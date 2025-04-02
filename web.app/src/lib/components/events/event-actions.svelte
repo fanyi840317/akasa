@@ -51,8 +51,9 @@
 
 <DropdownMenu>
   <DropdownMenuTrigger>
-    <Button variant="ghost" size="icon" class="h-8 w-8">
+    <Button variant="outline" class="gap-2">
       <Share2 class="h-4 w-4" />
+      分享
     </Button>
   </DropdownMenuTrigger>
   <DropdownMenuContent align="end" class="w-48">
