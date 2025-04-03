@@ -10,12 +10,6 @@
     Copy,
   } from "lucide-svelte";
   import { Button } from "$lib/components/ui/button";
-  import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-  } from "$lib/components/ui/dropdown-menu";
   import { toast } from "svelte-sonner";
 
   export let title: string = "";
@@ -49,45 +43,31 @@
   }
 </script>
 
-<DropdownMenu>
-  <DropdownMenuTrigger>
-    <Button variant="outline" class="gap-2">
-      <Share2 class="h-4 w-4" />
-      分享
+<div class="flex items-center gap-2">
+  <Button variant="ghost" size="icon" onclick={onPreview} class="h-9 w-9">
+    <Eye class="h-4 w-4" strokeWidth={3} />
+  </Button>
+  <Button variant="ghost" size="icon" onclick={() => handleShare("copy")} class="h-9 w-9">
+    <Copy class="h-4 w-4" strokeWidth={3} />
+  </Button>
+  <Button variant="ghost" size="icon" onclick={() => handleShare("twitter")} class="h-9 w-9">
+    <Twitter class="h-4 w-4" strokeWidth={3} />
+  </Button>
+  <Button variant="ghost" size="icon" onclick={() => handleShare("facebook")} class="h-9 w-9">
+    <Facebook class="h-4 w-4" strokeWidth={3} />
+  </Button>
+  <Button variant="ghost" size="icon" onclick={() => handleShare("wechat")} class="h-9 w-9">
+    <QrCode class="h-4 w-4" strokeWidth={3} />
+  </Button>
+  <label class="cursor-pointer">
+    <input
+      type="file"
+      accept="image/*"
+      class="hidden"
+      on:change={onCoverUpload}
+    />
+    <Button variant="ghost" size="icon" class="h-9 w-9">
+      <Image class="h-4 w-4" strokeWidth={3} />
     </Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent align="end" class="w-48">
-    <DropdownMenuItem onclick={onPreview}>
-      <Eye class="mr-2 h-4 w-4" />
-      预览
-    </DropdownMenuItem>
-    <DropdownMenuItem onclick={() => handleShare("copy")}>
-      <Copy class="mr-2 h-4 w-4" />
-      复制链接
-    </DropdownMenuItem>
-    <DropdownMenuItem onclick={() => handleShare("twitter")}>
-      <Twitter class="mr-2 h-4 w-4" />
-      分享到 Twitter
-    </DropdownMenuItem>
-    <DropdownMenuItem onclick={() => handleShare("facebook")}>
-      <Facebook class="mr-2 h-4 w-4" />
-      分享到 Facebook
-    </DropdownMenuItem>
-    <DropdownMenuItem onclick={() => handleShare("wechat")}>
-      <QrCode class="mr-2 h-4 w-4" />
-      微信扫码分享
-    </DropdownMenuItem>
-    <DropdownMenuItem>
-      <label class="cursor-pointer w-full flex items-center">
-        <input
-          type="file"
-          accept="image/*"
-          class="hidden"
-          on:change={onCoverUpload}
-        />
-        <Image class="mr-2 h-4 w-4" />
-        更换封面
-      </label>
-    </DropdownMenuItem>
-  </DropdownMenuContent>
-</DropdownMenu> 
+  </label>
+</div> 
