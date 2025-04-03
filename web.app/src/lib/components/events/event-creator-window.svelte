@@ -136,7 +136,7 @@
 
 {#if open}
   <div
-    class="fixed inset-0 z-50 bg-neutral-900/10 backdrop-blur-[2px] dark:bg-neutral-900/50"
+    class="fixed inset-0 z-50 bg-background"
     transition:fade={{ duration: 400, delay: 0, easing: cubicOut }}
     on:click={handleClose}
   >

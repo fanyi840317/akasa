@@ -338,13 +338,13 @@
         {#snippet child({ props })}
           <Button
             variant="outline"
-            class="h-8 py-1 px-2 w-full text-left  bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 rounded-t-xl rounded-b-none"
+            class="h-7 py-0 px-2 w-full flex justify-start items-center bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 rounded-t-xl rounded-b-none"
             {...props}
             role="combobox"
             aria-expanded={isOpen}
           >
-            <MapPin class="h-4 text-primary/30 flex-shrink-0" />
-            <span class="truncate text-primary/70 max-w-[200px]">{selectedValue}</span>
+            <MapPin class="h-4 text-primary/30 flex-shrink-0 mr-0" />
+            <span class="truncate text-primary/50 max-w-[85%] text-xs">{selectedValue}</span>
           </Button>
         {/snippet}
       </Popover.Trigger>
@@ -404,7 +404,7 @@
     </Popover.Root>
   </div>
   <!-- 地图 -->
-  <div class="absolute inset-0 w-full h-full py-8">
+  <div class="absolute inset-0 w-full h-full py-6 pointer-events-none">
     <Card class="w-full h-full rounded-b-xl overflow-hidden">
       <MapBase
       bind:this={mapComponent}
