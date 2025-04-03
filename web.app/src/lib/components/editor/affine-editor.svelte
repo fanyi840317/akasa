@@ -12,14 +12,16 @@
   } from "@blocksuite/blocks";
   import { get } from "svelte/store";
   import { createDocByHtml, exportDoc } from "./affine-editor";
+  import { Sparkles } from "lucide-svelte";
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{
+    cursorPosition: { top: number; left: number };
+  }>();
 
   let { htmlDoc, shouldReset = false, class: className = "" } = $props();
   let editorContainer: HTMLDivElement;
   let editor: AffineEditorContainer | null = null;
   let isInitialized = false;
-  // let contentUpdateTimeout: NodeJS.Timeout;
 
   const themeExtension: ThemeExtension = {
     getAppTheme: () => {
@@ -28,6 +30,23 @@
         currentTheme === "dark" ? ColorScheme.Dark : ColorScheme.Light,
       );
     },
+  };
+
+  // 监听光标位置
+  const updateCursorPosition = () => {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const editorRect = editorContainer.getBoundingClientRect();
+
+    const position = {
+      top: rect.bottom - editorRect.top + 4,
+      left: rect.left - editorRect.left
+    };
+
+    dispatch("cursorPosition", position);
   };
 
   async function setupEditor() {
@@ -47,18 +66,20 @@
       editor.doc = doc;
       htmlDoc.doc = doc;
 
-      // 设置编辑器变化监听
-      // editor.doc.slots.historyUpdated.on(async () => {
-      //   clearTimeout(contentUpdateTimeout);
-      //   contentUpdateTimeout = setTimeout(async () => {
-      //     if (editor?.doc) {
-      //       const content = await exportDoc(editor.doc);
-      //       if (content) {
-      //         dispatch("contentChange", content);
-      //       }
-      //     }
-      //   }, 300);
-      // });
+      // 添加事件监听
+      if (editor?.host) {
+        editor.host.addEventListener("focus", updateCursorPosition);
+        editor.host.addEventListener("blur", updateCursorPosition);
+        editor.host.addEventListener("click", updateCursorPosition);
+        editor.host.addEventListener("keyup", updateCursorPosition);
+        editor.host.addEventListener("input", updateCursorPosition);
+      }
+
+      // 添加编辑器变化监听
+      if (editor?.doc) {
+        editor.doc.slots.historyUpdated.on(updateCursorPosition);
+      }
+
       // 应用主题扩展到编辑器
       if (editor.pageSpecs) {
         const pageSpecs = SpecProvider.getInstance().getSpec("page");
@@ -95,6 +116,8 @@
           const inlineEditor = (richText as any).inlineEditor;
           if (inlineEditor) {
             inlineEditor.focusEnd();
+            // 触发初始光标位置事件
+            setTimeout(updateCursorPosition, 100);
           }
         }
       }, 200);
@@ -104,7 +127,6 @@
     }
   }
   function cleanup() {
-    // clearTimeout(contentUpdateTimeout);
     if (editor) {
       try {
         editor.doc?.dispose();
@@ -144,6 +166,9 @@
   }
   :global(embed-card-create-modal .embed-card-modal-wrapper) {
     z-index: 1001;
+  }
+  :global(.affine-editor-container) {
+    position: relative !important;
   }
   /* 完全隐藏文档标题 */
   /* :global(doc-title) {

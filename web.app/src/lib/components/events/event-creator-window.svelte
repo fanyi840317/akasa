@@ -10,6 +10,13 @@
     Tag,
     Calendar,
     Image as ImageIcon,
+    Eye,
+    Share2,
+    Twitter,
+    Facebook,
+    QrCode,
+    Copy,
+    Sparkles,
   } from "lucide-svelte";
   import * as Tabs from "$lib/components/ui/tabs";
   import { Button } from "$lib/components/ui/button";
@@ -18,6 +25,7 @@
   import { Separator } from "$lib/components/ui/separator";
   import { Label } from "$lib/components/ui/label";
   import AffineEditor from "$lib/components/editor/affine-editor.svelte";
+  import AICard from "$lib/components/ai/ai-card.svelte";
   import MapPicker from "$lib/components/map/map-picker.svelte";
   import type { LocationData, LocationChangeEvent } from "$lib/components/map";
   import * as Select from "$lib/components/ui/select";
@@ -53,6 +61,9 @@
     cover: "",
   });
 
+  let cursorPosition = $state({ top: 0, left: 0 });
+  let showAICard = $state(false);
+
   // 加载分类数据
   async function loadCategories() {
     try {
@@ -72,6 +83,26 @@
   function handleLocationChange(event: CustomEvent<LocationChangeEvent>) {
     const { location } = event.detail;
     locationData = location;
+  }
+
+  function handleCursorPosition(
+    event: CustomEvent<{ top: number; left: number }>,
+  ) {
+    console.log("ai-card 位置:");
+    console.log(event.detail);
+    cursorPosition = {
+      top: event.detail.top + 40,
+      left: event.detail.left + 40,
+    };
+    setTimeout(() => {
+      alert();
+      showAICard = true;
+    }, 200);
+  }
+
+  function handleAIAction(action: string) {
+    console.log("AI action:", action);
+    // TODO: 实现 AI 操作
   }
 
   async function handleSave() {
@@ -138,55 +169,56 @@
   <div
     class="fixed inset-0 z-50 bg-background"
     transition:fade={{ duration: 400, delay: 0, easing: cubicOut }}
-    on:click={handleClose}
   >
+    <!-- 关闭按钮 -->
+    <Button variant="ghost" class="absolute left-4 top-4" onclick={handleClose}>
+      <X class="h-4 w-4 stroke-[3]" />
+    </Button>
+
+    <!-- 事件操作按钮 -->
+    <div class="absolute right-4 top-4 flex gap-2">
+      <Button variant="ghost" onclick={() => {}}>
+        <Eye class="h-4 w-4 stroke-[3]" />
+      </Button>
+      <Button variant="ghost" onclick={() => {}}>
+        <Copy class="h-4 w-4 stroke-[3]" />
+      </Button>
+      <Button variant="ghost" onclick={() => {}}>
+        <Twitter class="h-4 w-4 stroke-[3]" />
+      </Button>
+      <Button variant="ghost" onclick={() => {}}>
+        <Facebook class="h-4 w-4 stroke-[3]" />
+      </Button>
+      <Button variant="ghost" onclick={() => {}}>
+        <QrCode class="h-4 w-4 stroke-[3]" />
+      </Button>
+      <Button variant="ghost" onclick={handleCoverUpload}>
+        <ImageIcon class="h-4 w-4 stroke-[3]" />
+      </Button>
+    </div>
+
     <!-- 窗口容器 -->
-    <div 
+    <div
       class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-2 p-8"
-      on:click|stopPropagation
     >
-      <!-- 事件操作按钮 -->
-      <div class="absolute right-0 top-0 p-4">
-        <EventActions
-          {title}
-          onPreview={() => {}}
-          onCoverUpload={handleCoverUpload}
-        />
-      </div>
-
       <!-- 左侧窗口容器 -->
-      <div class="flex flex-col gap-2 py-10">
-        <!-- AI 窗口 -->
-        <div
-          class="w-[220px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
-          in:fly={{ duration: 500, x: -100, delay: 100, easing: backInOut }}
-          out:fly={{ duration: 400, x: -100, easing: cubicOut }}
-        >
-          <div class="flex flex-col h-[180px]">
-            <div class="flex-1 overflow-hidden">
-              <div class="h-full p-4">
-                <!-- <p class="text-sm text-muted-foreground">AI 助手将帮助你优化内容...</p> -->
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <div class="flex flex-col gap-2 hidden">
         <!-- 地图窗口 -->
         <div
-          class="w-[220px]  overflow-hidden"
+          class="w-[220px] overflow-hidden"
           in:fly={{ duration: 500, x: -100, delay: 200, easing: backInOut }}
           out:fly={{ duration: 400, x: -100, easing: cubicOut }}
         >
           <div class="flex flex-col h-[220px]">
             <div class="flex-1 overflow-hidden">
               <div class="h-full">
-                <MapPicker on:locationChange={handleLocationChange} />
+                <!-- <MapPicker on:locationChange={handleLocationChange} /> -->
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- 右侧编辑器窗口 -->
       <div
         class="w-[800px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
@@ -195,8 +227,17 @@
       >
         <div class="flex flex-col h-[80vh]">
           <div class="flex-1 overflow-hidden">
-            <div class="h-full">
-              <AffineEditor htmlDoc={newDoc} />
+            <div class="h-full relative">
+              <AffineEditor
+                htmlDoc={newDoc}
+                on:cursorPosition={handleCursorPosition}
+              />
+              {#if showAICard}
+                <AICard
+                  position={cursorPosition}
+                  onAction={handleAIAction}
+                />
+              {/if}
             </div>
           </div>
         </div>
@@ -209,5 +250,6 @@
   :global(.event-creator-window .affine-editor) {
     min-height: 100%;
     height: 100%;
+    position: relative;
   }
 </style>
