@@ -9,7 +9,6 @@
     import { Card } from "$lib/components/ui/card";
     import { fly } from "svelte/transition";
     import { onMount } from "svelte";
-    import Map from "$lib/components/ui/map.svelte";
 
     export let event: Event;
 

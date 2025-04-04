@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fade, fly, slide } from "svelte/transition";
   import { backInOut, cubicOut } from "svelte/easing";
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher, onDestroy, onMount } from "svelte";
   import {
     X,
     MapPin,
@@ -85,6 +85,8 @@
     locationData = location;
   }
 
+  let showAICardTimer: ReturnType<typeof setTimeout>;
+
   function handleCursorPosition(
     event: CustomEvent<{ top: number; left: number }>,
   ) {
@@ -94,12 +96,17 @@
       top: event.detail.top + 40,
       left: event.detail.left + 40,
     };
-    setTimeout(() => {
-      alert();
+    showAICardTimer = setTimeout(() => {
       showAICard = true;
     }, 200);
   }
 
+  // onDestroy(() => {
+  //   if (showAICardTimer) {
+  //     clearTimeout(showAICardTimer);
+  //   }
+  //   console.log("EventCreatorWindow 销毁");
+  // });
   function handleAIAction(action: string) {
     console.log("AI action:", action);
     // TODO: 实现 AI 操作
@@ -212,7 +219,7 @@
           <div class="flex flex-col h-[220px]">
             <div class="flex-1 overflow-hidden">
               <div class="h-full">
-                <!-- <MapPicker on:locationChange={handleLocationChange} /> -->
+                <MapPicker on:locationChange={handleLocationChange} />
               </div>
             </div>
           </div>
@@ -221,25 +228,18 @@
 
       <!-- 右侧编辑器窗口 -->
       <div
-        class="w-[800px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
+        class="w-[800px] h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
         in:fly={{ duration: 500, x: 100, delay: 0, easing: backInOut }}
         out:fly={{ duration: 400, x: 100, easing: cubicOut }}
       >
-        <div class="flex flex-col h-[80vh]">
-          <div class="flex-1 overflow-hidden">
-            <div class="h-full relative">
-              <AffineEditor
-                htmlDoc={newDoc}
-                on:cursorPosition={handleCursorPosition}
-              />
-              {#if showAICard}
-                <AICard
-                  position={cursorPosition}
-                  onAction={handleAIAction}
-                />
-              {/if}
-            </div>
-          </div>
+        <div class="w-full h-full">
+          <AffineEditor
+            htmlDoc={newDoc}
+            on:cursorPosition={handleCursorPosition}
+          />
+          {#if showAICard}
+            <AICard position={cursorPosition} onAction={handleAIAction} />
+          {/if}
         </div>
       </div>
     </div>

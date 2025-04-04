@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Sparkles } from "lucide-svelte";
-  import { fade, scale } from "svelte/transition";
 
   export let position = { top: 0, left: 0 };
   export let visible = false;
@@ -12,17 +11,13 @@
 </script>
 
 <div
-  class="fixed bg-white dark:bg-neutral-800 border border-neutral-200/50 dark:border-neutral-700/50 rounded-lg shadow-lg p-2 flex flex-col gap-2 z-50"
+  class="fixed bg-white dark:bg-neutral-800 border border-neutral-200/50 dark:border-neutral-700/50 rounded-lg shadow-lg p-2 flex flex-col gap-2 z-50 ai-card"
   style="top: {position.top}px; left: {position.left}px;"
-  in:scale={{
-    duration: 150,
-    start: 0.95,
-    opacity: 0,
-  }}
-  out:fade={{ duration: 100 }}
 >
   <div class="flex items-center gap-1.5">
-    <Sparkles class="h-3 w-3 stroke-[2.5] text-primary" />
+    <div class="bg-primary/10 p-1 rounded-full">
+      <Sparkles class="h-3 w-3 stroke-[2.5] text-primary" />
+    </div>
     <p class="text-xs font-medium">AI 写作助手</p>
   </div>
   <p class="text-xs text-muted-foreground leading-5 px-0.5">
@@ -43,3 +38,21 @@
     </button>
   </div>
 </div>
+
+<style>
+  .ai-card {
+    animation: cardEnter 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top left;
+  }
+
+  @keyframes cardEnter {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+</style>
