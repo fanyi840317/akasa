@@ -34,8 +34,13 @@
     { id: 2, title: "百慕大三角神秘失踪案", date: "1945-12-05" },
     { id: 3, title: "尼斯湖水怪目击事件", date: "1934-04-21" },
     { id: 4, title: "罗斯威尔事件", date: "1947-07-08" },
-    { id: 5, title: "通古斯大爆炸", date: "1908-06-30" }
-  ];
+    { id: 5, title: "通古斯大爆炸", date: "1908-06-30" },
+    { id: 6, title: "贝尔岛灯塔事件", date: "1900-12-15" },
+    { id: 7, title: "玛丽·赛勒斯特号失踪案", date: "1872-11-25" },
+    { id: 8, title: "戴克洞穴之谜", date: "1925-08-14" },
+    { id: 9, title: "费城实验", date: "1943-10-28" },
+    { id: 10, title: "金字塔建造之谜", date: "前2560年" }
+  ].slice(0, 10);
 
   function handleAction(action: string, data?: any) {
     onAction(action, data);
@@ -105,7 +110,7 @@
 <p>[周围人或目击者的反应和评论]</p>`
       })}>
         <span class="text-xs font-medium">插入范本</span>
-        <ArrowRight class="h-3.5 w-3.5 ml-1" />
+        <ArrowRight class="h-3.5 w-3.5 ml-1 text-muted-foreground/50" />
       </Button>
     </div>
   </div>
@@ -121,21 +126,21 @@
     </p>
 
     <ScrollArea class="h-[120px]">
-      <div class="space-y-1">
+      <div class="flex flex-wrap gap-1.5 px-0.5 py-0.5">
         {#each recommendedEvents as event}
-          <button 
-            class="w-full flex justify-between items-center rounded px-2 py-1.5 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors" 
-            on:click={() => handleAction('select-event', event)}
+          <Badge 
+            variant="outline" 
+            class="flex items-center px-2 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors cursor-pointer font-normal border-neutral-300 dark:border-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-500" 
+            onclick={() => handleAction('select-event', event)}
           >
-            <span class="text-sm text-foreground">{event.title}</span>
-            <div class="px-2.5 py-0.5 text-xs font-normal text-foreground">{event.date}</div>
-          </button>
+            <span class="text-xs text-muted-foreground whitespace-nowrap">{event.title}</span>
+          </Badge>
         {/each}
       </div>
     </ScrollArea>
 
     <div class="flex gap-2 justify-between">
-      <Button variant="ghost" size="sm" class="text-muted-foreground h-5 w-5 p-0" onclick={() => handleAction('refresh-example')}>
+      <Button variant="ghost" size="sm" class="text-muted-foreground/50 h-5 w-5 p-0" onclick={() => handleAction('refresh-example')}>
         <RefreshCcw class="h-3.5 w-3.5" />
       </Button>
       <div class="flex-1 items-center gap-2"></div>      
