@@ -53,15 +53,15 @@
 >
   <!-- 亲身经历模式 -->
   <div class="space-y-2">
-    <p class="text-xs text-muted-foreground leading-relaxed">
+    <p class="text-xs text-muted-foreground/60 leading-relaxed">
       如果你有想分享的神秘经历，或者身边发生的离奇事件，你可以...
     </p>
 
     <ScrollArea class="h-[180px]">
       <div class="space-y-4">
         <div class="">
-          <p class="text-lg font-medium mb-2 text-primary">写作建议</p>
-          <ul class="text-sm text-primary space-y-1 list-disc list-inside">
+          <p class="text-lg font-medium mb-2 text-foreground">写作建议</p>
+          <ul class="text-sm text-foreground/80 space-y-1 list-disc list-inside">
             <li>发生的时间 & 地点</li>
             <li>事件具体经过</li>
             <li>你的感受 & 反应</li>
@@ -71,14 +71,14 @@
         </div>
 
         <div class="space-y-3">
-          <p class="text-lg font-medium text-primary">示例参考</p>
+          <p class="text-lg font-medium text-foreground">示例参考</p>
           {#each examples as example}
             <div class="space-y-1">
               <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-primary">{example.title}</p>
-                <span class="text-[10px] text-foreground">{example.date}</span>
+                <p class="text-sm font-medium text-foreground/80">{example.title}</p>
+                <span class="text-[10px] text-foreground/60">{example.date}</span>
               </div>
-              <p class="text-xs text-foreground leading-relaxed">{example.content}</p>
+              <p class="text-xs text-foreground/60 leading-relaxed">{example.content}</p>
             </div>
           {/each}
         </div>
@@ -87,7 +87,7 @@
 
     <div class="flex gap-2 justify-between">
       <div class="flex items-center gap-2"></div>
-      <Button variant="ghost" size="sm" class="text-muted-foreground h-5 px-2"  onclick={() => handleAction('select-mode', {
+      <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('select-mode', {
         title: examples[0].title,
         content: `<h1>${examples[0].title}</h1>
 
@@ -110,7 +110,7 @@
 <p>[周围人或目击者的反应和评论]</p>`
       })}>
         <span class="text-xs font-medium">插入范本</span>
-        <ArrowRight class="h-3.5 w-3.5 ml-1 text-muted-foreground/50" />
+        <ArrowRight class="h-3.5 w-3.5 ml-1 text-muted-foreground/60" />
       </Button>
     </div>
   </div>
@@ -121,7 +121,7 @@
 
   <!-- 个人解读模式 -->
   <div class="space-y-3">
-    <p class="text-xs text-muted-foreground leading-relaxed">
+    <p class="text-xs text-muted-foreground/60 leading-relaxed">
       对已有事件有自己的看法和见解？选择一个感兴趣的事件...
     </p>
 
@@ -130,24 +130,24 @@
         {#each recommendedEvents as event}
           <Badge 
             variant="outline" 
-            class="flex items-center px-2 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors cursor-pointer font-normal border-neutral-300 dark:border-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-500" 
+            class="flex items-center px-2 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors cursor-pointer font-normal border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600" 
             onclick={() => handleAction('select-event', event)}
           >
-            <span class="text-xs text-muted-foreground whitespace-nowrap">{event.title}</span>
+            <span class="text-xs text-foreground/60 whitespace-nowrap">{event.title}</span>
           </Badge>
         {/each}
       </div>
     </ScrollArea>
 
     <div class="flex gap-2 justify-between">
-      <Button variant="ghost" size="sm" class="text-muted-foreground/50 h-5 w-5 p-0" onclick={() => handleAction('refresh-example')}>
+      <Button variant="ghost" size="sm" class="text-muted-foreground/40 h-5 w-5 p-0" onclick={() => handleAction('refresh-example')}>
         <RefreshCcw class="h-3.5 w-3.5" />
       </Button>
       <div class="flex-1 items-center gap-2"></div>      
-      <Button variant="ghost" size="sm" class="text-muted-foreground h-5 px-2"  onclick={() => handleAction('view-all-events')}>
+      <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('view-all-events')}>
         <span class="text-xs font-medium">查看所有事件</span>
       </Button>
-      <Button variant="ghost" size="sm" class="text-muted-foreground h-5 px-2"  onclick={() => handleAction('view-all-events')}>
+      <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('view-all-events')}>
         <span class="text-xs font-medium">自己写</span>
       </Button>
     </div>
