@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Snippet } from "svelte";
-    import Header from "$lib/components/header.svelte";
-    import Footer from "$lib/components/footer.svelte";
+    import Header from "$lib/components/website/header.svelte";
+    import Footer from "$lib/components/website/footer.svelte";
 </script>
 
 <div class="layout">

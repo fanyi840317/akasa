@@ -17,6 +17,9 @@
     QrCode,
     Copy,
     Sparkles,
+    CornerDownLeft,
+    Circle,
+    FileText,
   } from "lucide-svelte";
   import * as Tabs from "$lib/components/ui/tabs";
   import { Button } from "$lib/components/ui/button";
@@ -37,6 +40,7 @@
   import * as Modal from "$lib/components/ui/modal";
   import EventDetail from "./event-detail.svelte";
   import EventActions from "./event-actions.svelte";
+  import EventDetailPanel from "./event-detail-panel.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -61,9 +65,40 @@
     cover: "",
   });
 
+  // 事件属性状态
+  let createdAt = $state(new Date().toISOString());
+  let lastModified = $state(new Date().toISOString());
+  let creator = $state({
+    name: "神秘探索者",
+    avatar: null
+  });
+  let evidenceCount = $state(0);
+  let timelinePointsCount = $state(0);
+
+  // 监听内容变化，更新最后修改时间
+  $effect(() => {
+    if (newDoc.content) {
+      lastModified = new Date().toISOString();
+    }
+  });
+
+  // 格式化日期时间
+  function formatDateTime(isoString: string) {
+    const date = new Date(isoString);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
   let cursorPosition = $state({ top: 0, left: 0 });
   let showAICard = $state(false);
   let isAICardMinimized = $state(false);
+  let showEventDetail = $state(false);
+  let selectedEvent = $state(null);
 
   // 加载分类数据
   async function loadCategories() {
@@ -91,18 +126,28 @@
   ) {
     console.log("ai-card 位置:");
     console.log(event.detail);
-    cursorPosition = {
-      top: event.detail.top + 40,
-      left: event.detail.left + 40,
-    };
-    showAICard = true;
-    isAICardMinimized = false;
+    if (event.detail && event.detail.top > 0 && event.detail.left > 0) {
+      if (cursorPosition.top === 0 && cursorPosition.left === 0) {
+        // 计算 AI 面板的位置，考虑右侧面板的影响
+        const baseLeft = event.detail.left;
+        const adjustedLeft = showEventDetail ? baseLeft - 400 : baseLeft; // 如果右侧面板显示，向左偏移
+        cursorPosition = {
+          top: event.detail.top + 40,
+          left: baseLeft+100,
+        };
+        showAICard = true;
+      }
+    }
   }
 
-  function handleAIAction(action: string) {
+  function handleAIAction(action: string, data?: any) {
     console.log("AI action:", action);
-    if (action === 'maximize') {
+    if (action === "maximize") {
       isAICardMinimized = false;
+    } else if (action === "select-event") {
+      selectedEvent = data;
+      showEventDetail = true;
+      // 这里可以添加将范文插入编辑器的逻辑
     }
   }
 
@@ -116,6 +161,11 @@
     if (showAICard && !isAICardMinimized) {
       isAICardMinimized = true;
     }
+  }
+
+  function handleCloseEventDetail() {
+    showEventDetail = false;
+    selectedEvent = null;
   }
 
   async function handleSave() {
@@ -169,13 +219,9 @@
   });
 
   // 动画配置
-  const backdropTransition = { duration: 400, opacity: 0 };
-  const modalTransition = {
-    duration: 500,
-    y: 30,
-    opacity: 0,
-    easing: cubicOut,
-  };
+  onDestroy(() => {
+    // alert();
+  });
 </script>
 
 {#if open}
@@ -212,37 +258,122 @@
 
     <!-- 窗口容器 -->
     <div
-      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-2 p-8"
+      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-4 p-8"
     >
-      <!-- 左侧窗口容器 -->
-      <div class="flex flex-col gap-2 hidden">
-        <!-- 地图窗口 -->
-        <div
-          class="w-[220px] overflow-hidden"
-          in:fly={{ duration: 500, x: -100, delay: 200, easing: backInOut }}
-          out:fly={{ duration: 400, x: -100, easing: cubicOut }}
-        >
-          <div class="flex flex-col h-[220px]">
-            <div class="flex-1 overflow-hidden">
-              <div class="h-full">
-                <MapPicker on:locationChange={handleLocationChange} />
+    <!-- 右侧属性按钮 -->
+      <div class="w-[80px] h-[80vh] flex flex-col justify-start">
+        <div class="space-y-2 py-20">
+          <!-- 基本信息 -->
+          <div class="space-y-2">
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">创建时间</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <Clock class="h-4 w-4 text-muted-foreground" />
+                  <span>{formatDateTime(createdAt)}</span>
+                </div>
               </div>
-            </div>
+            </Button>
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">最后修改</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <Clock class="h-4 w-4 text-muted-foreground" />
+                  <span>{formatDateTime(lastModified)}</span>
+                </div>
+              </div>
+            </Button>
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">创建者</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <Circle class="h-4 w-4 text-primary" />
+                  <span>{creator.name}</span>
+                </div>
+              </div>
+            </Button>
+          </div>
+
+          <!-- 事件信息 -->
+          <div class="space-y-2">
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">发生时间</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <Calendar class="h-4 w-4 text-muted-foreground" />
+                  <span>{eventDate || "未设置"}</span>
+                </div>
+              </div>
+            </Button>
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">发生地点</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <MapPin class="h-4 w-4 text-muted-foreground" />
+                  <span>{locationData?.address || "未设置"}</span>
+                </div>
+              </div>
+            </Button>
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">事件分类</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <Tag class="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedCategory || "未分类"}</span>
+                </div>
+              </div>
+            </Button>
+          </div>
+
+          <!-- 统计信息 -->
+          <div class="space-y-2">
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">字数统计</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <FileText class="h-4 w-4 text-muted-foreground" />
+                  <span>{newDoc.content.length} 字</span>
+                </div>
+              </div>
+            </Button>
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">证据数量</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <ImageIcon class="h-4 w-4 text-muted-foreground" />
+                  <span>{evidenceCount} 个</span>
+                </div>
+              </div>
+            </Button>
+            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
+              <div class="flex flex-col items-end gap-1">
+                <Label class="text-xs text-muted-foreground">时间点数量</Label>
+                <div class="flex items-center gap-2 text-sm">
+                  <Clock class="h-4 w-4 text-muted-foreground" />
+                  <span>{timelinePointsCount} 个</span>
+                </div>
+              </div>
+            </Button>
           </div>
         </div>
       </div>
-
-      <!-- 右侧编辑器窗口 -->
+      <!-- 中间编辑器窗口 -->
       <div
         class="w-[800px] h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
-        in:fly={{ duration: 500, x: 100, delay: 0, easing: backInOut }}
-        out:fly={{ duration: 400, x: 100, easing: cubicOut }}
+        class:translate-x-[-10px]={showEventDetail}
+        class:transition-transform={showEventDetail}
+        class:duration-500={showEventDetail}
+        in:fly={{ duration: 500, x: -100, delay: 0, easing: backInOut }}
+        out:fly={{ duration: 400, x: -100, easing: cubicOut }}
       >
         <div class="w-full h-full relative">
-          <div 
+          <div
+            role="button"
+            tabindex="0"
+            onkeydown={(e) => e.key === "Enter"}
             class="w-full h-full"
-            on:click={handleEditorClick}
-            on:input={handleEditorInput}
+            onclick={handleEditorClick}
+            oninput={handleEditorInput}
           >
             <AffineEditor
               htmlDoc={newDoc}
@@ -250,7 +381,7 @@
             />
           </div>
           {#if showAICard}
-            <AICard 
+            <AICard
               position={cursorPosition}
               onAction={handleAIAction}
               minimized={isAICardMinimized}
@@ -258,6 +389,16 @@
           {/if}
         </div>
       </div>
+
+      
+
+      <!-- 右侧事件详情面板 -->
+      {#if showEventDetail && selectedEvent}
+        <EventDetailPanel
+          event={selectedEvent}
+          onClose={handleCloseEventDetail}
+        />
+      {/if}
     </div>
   </div>
 {/if}
