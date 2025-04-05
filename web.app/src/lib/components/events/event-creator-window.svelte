@@ -63,6 +63,7 @@
 
   let cursorPosition = $state({ top: 0, left: 0 });
   let showAICard = $state(false);
+  let isAICardMinimized = $state(false);
 
   // 加载分类数据
   async function loadCategories() {
@@ -85,8 +86,6 @@
     locationData = location;
   }
 
-  let showAICardTimer: ReturnType<typeof setTimeout>;
-
   function handleCursorPosition(
     event: CustomEvent<{ top: number; left: number }>,
   ) {
@@ -96,20 +95,27 @@
       top: event.detail.top + 40,
       left: event.detail.left + 40,
     };
-    showAICardTimer = setTimeout(() => {
-      showAICard = true;
-    }, 200);
+    showAICard = true;
+    isAICardMinimized = false;
   }
 
-  // onDestroy(() => {
-  //   if (showAICardTimer) {
-  //     clearTimeout(showAICardTimer);
-  //   }
-  //   console.log("EventCreatorWindow 销毁");
-  // });
   function handleAIAction(action: string) {
     console.log("AI action:", action);
-    // TODO: 实现 AI 操作
+    if (action === 'maximize') {
+      isAICardMinimized = false;
+    }
+  }
+
+  function handleEditorClick() {
+    if (showAICard && !isAICardMinimized) {
+      isAICardMinimized = true;
+    }
+  }
+
+  function handleEditorInput() {
+    if (showAICard && !isAICardMinimized) {
+      isAICardMinimized = true;
+    }
   }
 
   async function handleSave() {
@@ -232,13 +238,23 @@
         in:fly={{ duration: 500, x: 100, delay: 0, easing: backInOut }}
         out:fly={{ duration: 400, x: 100, easing: cubicOut }}
       >
-        <div class="w-full h-full">
-          <AffineEditor
-            htmlDoc={newDoc}
-            on:cursorPosition={handleCursorPosition}
-          />
+        <div class="w-full h-full relative">
+          <div 
+            class="w-full h-full"
+            on:click={handleEditorClick}
+            on:input={handleEditorInput}
+          >
+            <AffineEditor
+              htmlDoc={newDoc}
+              on:cursorPosition={handleCursorPosition}
+            />
+          </div>
           {#if showAICard}
-            <AICard position={cursorPosition} onAction={handleAIAction} />
+            <AICard 
+              position={cursorPosition}
+              onAction={handleAIAction}
+              minimized={isAICardMinimized}
+            />
           {/if}
         </div>
       </div>

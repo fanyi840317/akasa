@@ -9,6 +9,7 @@
 
   export let position = { top: 0, left: 0 };
   export let visible = false;
+  export let minimized = false;
   export let onAction: (action: string, data?: any) => void = () => {};
 
   const examples = [
@@ -47,49 +48,57 @@
   }
 </script>
 
-<div
-  class="fixed bg-white dark:bg-neutral-800 border border-neutral-200/50 dark:border-neutral-700/50 rounded-lg shadow-lg p-4 flex flex-col gap-4 z-50 ai-card w-[400px]"
-  style="top: {position.top}px; left: {position.left}px;"
->
-  <!-- 亲身经历模式 -->
-  <div class="space-y-2">
-    <p class="text-xs text-muted-foreground/60 leading-relaxed">
-      如果你有想分享的神秘经历，或者身边发生的离奇事件，你可以...
-    </p>
+{#if minimized}
+  <div
+    class="fixed left-2 top-1/2 -translate-y-1/2 bg-white dark:bg-neutral-800 border border-neutral-200/50 dark:border-neutral-700/50 rounded-full shadow-lg p-2 z-50 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors ai-card"
+    on:click={() => handleAction('maximize')}
+  >
+    <Sparkles class="h-4 w-4 stroke-[2] text-primary" />
+  </div>
+{:else}
+  <div
+    class="fixed bg-white dark:bg-neutral-800 border border-neutral-200/50 dark:border-neutral-700/50 rounded-lg shadow-lg p-4 flex flex-col gap-4 z-50 ai-card w-[400px]"
+    style="top: {position.top}px; left: {position.left}px;"
+  >
+    <!-- 亲身经历模式 -->
+    <div class="space-y-2">
+      <p class="text-xs text-muted-foreground/60 leading-relaxed">
+        如果你有想分享的神秘经历，或者身边发生的离奇事件，你可以...
+      </p>
 
-    <ScrollArea class="h-[180px]">
-      <div class="space-y-4">
-        <div class="">
-          <p class="text-lg font-medium mb-2 text-foreground">写作建议</p>
-          <ul class="text-sm text-foreground/80 space-y-1 list-disc list-inside">
-            <li>发生的时间 & 地点</li>
-            <li>事件具体经过</li>
-            <li>你的感受 & 反应</li>
-            <li>你对事件的猜测</li>
-            <li>其他人的看法</li>
-          </ul>
-        </div>
+      <ScrollArea class="h-[180px]">
+        <div class="space-y-4">
+          <div class="">
+            <p class="text-lg font-medium mb-2 text-foreground">写作建议</p>
+            <ul class="text-sm text-foreground/80 space-y-1 list-disc list-inside">
+              <li>发生的时间 & 地点</li>
+              <li>事件具体经过</li>
+              <li>你的感受 & 反应</li>
+              <li>你对事件的猜测</li>
+              <li>其他人的看法</li>
+            </ul>
+          </div>
 
-        <div class="space-y-3">
-          <p class="text-lg font-medium text-foreground">示例参考</p>
-          {#each examples as example}
-            <div class="space-y-1">
-              <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-foreground/80">{example.title}</p>
-                <span class="text-[10px] text-foreground/60">{example.date}</span>
+          <div class="space-y-3">
+            <p class="text-lg font-medium text-foreground">示例参考</p>
+            {#each examples as example}
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-foreground/80">{example.title}</p>
+                  <span class="text-[10px] text-foreground/60">{example.date}</span>
+                </div>
+                <p class="text-xs text-foreground/60 leading-relaxed">{example.content}</p>
               </div>
-              <p class="text-xs text-foreground/60 leading-relaxed">{example.content}</p>
-            </div>
-          {/each}
+            {/each}
+          </div>
         </div>
-      </div>
-    </ScrollArea>
+      </ScrollArea>
 
-    <div class="flex gap-2 justify-between">
-      <div class="flex items-center gap-2"></div>
-      <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('select-mode', {
-        title: examples[0].title,
-        content: `<h1>${examples[0].title}</h1>
+      <div class="flex gap-2 justify-between">
+        <div class="flex items-center gap-2"></div>
+        <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('select-mode', {
+          title: examples[0].title,
+          content: `<h1>${examples[0].title}</h1>
 
 <h2>发生时间</h2>
 <p>${examples[0].date}</p>
@@ -108,51 +117,52 @@
 
 <h2>其他人的看法</h2>
 <p>[周围人或目击者的反应和评论]</p>`
-      })}>
-        <span class="text-xs font-medium">插入范本</span>
-        <ArrowRight class="h-3.5 w-3.5 ml-1 text-muted-foreground/60" />
-      </Button>
-    </div>
-  </div>
-
-  <div class="relative">
-    <div class="absolute inset-x-0 -ml-4 -mr-4 h-px bg-neutral-200 dark:bg-neutral-700"></div>
-  </div>
-
-  <!-- 个人解读模式 -->
-  <div class="space-y-3">
-    <p class="text-xs text-muted-foreground/60 leading-relaxed">
-      对已有事件有自己的看法和见解？选择一个感兴趣的事件...
-    </p>
-
-    <ScrollArea class="h-[120px]">
-      <div class="flex flex-wrap gap-1.5 px-0.5 py-0.5">
-        {#each recommendedEvents as event}
-          <Badge 
-            variant="outline" 
-            class="flex items-center px-2 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors cursor-pointer font-normal border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600" 
-            onclick={() => handleAction('select-event', event)}
-          >
-            <span class="text-xs text-foreground/60 whitespace-nowrap">{event.title}</span>
-          </Badge>
-        {/each}
+        })}>
+          <span class="text-xs font-medium">插入范本</span>
+          <ArrowRight class="h-3.5 w-3.5 ml-1 text-muted-foreground/60" />
+        </Button>
       </div>
-    </ScrollArea>
+    </div>
 
-    <div class="flex gap-2 justify-between">
-      <Button variant="ghost" size="sm" class="text-muted-foreground/40 h-5 w-5 p-0" onclick={() => handleAction('refresh-example')}>
-        <RefreshCcw class="h-3.5 w-3.5" />
-      </Button>
-      <div class="flex-1 items-center gap-2"></div>      
-      <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('view-all-events')}>
-        <span class="text-xs font-medium">查看所有事件</span>
-      </Button>
-      <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('view-all-events')}>
-        <span class="text-xs font-medium">自己写</span>
-      </Button>
+    <div class="relative">
+      <div class="absolute inset-x-0 -ml-4 -mr-4 h-px bg-neutral-200 dark:bg-neutral-700"></div>
+    </div>
+
+    <!-- 个人解读模式 -->
+    <div class="space-y-3">
+      <p class="text-xs text-muted-foreground/60 leading-relaxed">
+        对已有事件有自己的看法和见解？选择一个感兴趣的事件...
+      </p>
+
+      <ScrollArea class="h-[120px]">
+        <div class="flex flex-wrap gap-1.5 px-0.5 py-0.5">
+          {#each recommendedEvents as event}
+            <Badge 
+              variant="outline" 
+              class="flex items-center px-2 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors cursor-pointer font-normal border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600" 
+              onclick={() => handleAction('select-event', event)}
+            >
+              <span class="text-xs text-foreground/60 whitespace-nowrap">{event.title}</span>
+            </Badge>
+          {/each}
+        </div>
+      </ScrollArea>
+
+      <div class="flex gap-2 justify-between">
+        <Button variant="ghost" size="sm" class="text-muted-foreground/40 h-5 w-5 p-0" onclick={() => handleAction('refresh-example')}>
+          <RefreshCcw class="h-3.5 w-3.5" />
+        </Button>
+        <div class="flex-1 items-center gap-2"></div>      
+        <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('view-all-events')}>
+          <span class="text-xs font-medium">查看所有事件</span>
+        </Button>
+        <Button variant="ghost" size="sm" class="text-muted-foreground/60 h-5 px-2" onclick={() => handleAction('view-all-events')}>
+          <span class="text-xs font-medium">自己写</span>
+        </Button>
+      </div>
     </div>
   </div>
-</div>
+{/if}
 
 <style>
   .ai-card {
