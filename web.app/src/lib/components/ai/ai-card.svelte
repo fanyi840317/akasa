@@ -51,16 +51,7 @@
     });
 </script>
 
-  <div
-    class="fixed bg-white dark:bg-neutral-800 border border-neutral-200/50 dark:border-neutral-700/50 rounded-full shadow-lg p-2 z-50 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors ai-card"
-    style="top: {position.top - 24}px; left: {position.left - 24}px;"
-    on:click={() => handleAction("maximize")}
-    on:keydown={(e) => e.key === 'Enter' && handleAction("maximize")}
-    role="button"
-    tabindex="0"
-  >
-    <Sparkles class="h-4 w-4 stroke-[2] text-primary" />
-  </div>
+
 
   {#if !minimized}
   <div

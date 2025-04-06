@@ -39,23 +39,21 @@ export type RelatedPerson = {
 };
 
 export interface Event {
-  $id: string;
-  $createdAt: string;
-  $updatedAt: string;
+  $id?: string;
+  $createdAt?: string;
+  $updatedAt?: string;
   title: string;
   content: string;
   location: string;
-  location_data?: string;
+  categories?: string[];
   date: string;
   user_id: string;
-  is_public?: boolean;
   cover?: string;
-  status?: EventStatus;
-  category?: EventCategory;
+  location_data?: string;
+  status?: string;
   creator_name?: string;
   creator_avatar?: string;
-  latitude?: number;
-  longitude?: number;
+  folder_id?: string;
 }
 
 export type Tag = { $id?: string; name: string; };

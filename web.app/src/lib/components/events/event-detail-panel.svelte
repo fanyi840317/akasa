@@ -35,7 +35,7 @@
 <div
   class="w-[400px] h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
   in:fly={{ duration: 500, x: 100, delay: 200, easing: backInOut }}
-  out:fly={{ duration: 400, x: 100, easing: cubicOut }}
+  out:fly={{ duration: 400, x: 100 }}
 >
   <ScrollArea class="h-full">
     <div class="p-6 flex flex-col gap-6">

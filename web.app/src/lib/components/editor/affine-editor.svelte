@@ -13,12 +13,17 @@
   import { get } from "svelte/store";
   import { createDocByHtml, exportDoc } from "./affine-editor";
   import { Sparkles } from "lucide-svelte";
+    import type { Doc } from "@blocksuite/store";
 
   const dispatch = createEventDispatcher<{
     cursorPosition: { top: number; left: number };
   }>();
 
-  let { htmlDoc, shouldReset = false, class: className = "" } = $props();
+  let { doc = $bindable(createEmptyDoc().init()), shouldReset = false, class: className = "" } = $props<{
+    doc?: Doc|null;
+    shouldReset?: boolean;
+    class?: string;
+  }>();
   let editorContainer: HTMLDivElement;
   let editor: AffineEditorContainer | null = null;
   let isInitialized = false;
@@ -51,20 +56,16 @@
 
   async function setupEditor() {
     if (!editorContainer) return;
-    cleanup(); // 确保清理旧的编辑器
+    cleanup(); // 确保清理旧的编辑器 
     try {
       // 创建新的编辑器实例
       editor = new AffineEditorContainer();
-      // 创建文档
-      let doc = createEmptyDoc().init();
-      if (htmlDoc.content) {
-        const existingDoc = await createDocByHtml(htmlDoc.content);
-        if (existingDoc) {
-          doc = existingDoc;
-        }
-      }
+      if (!doc) {
+        doc = createEmptyDoc().init();
+        
+      } 
+
       editor.doc = doc;
-      htmlDoc.doc = doc;
 
       // 添加事件监听
       if (editor?.host) {
@@ -171,9 +172,9 @@
     position: relative !important;
   }
   /* 完全隐藏文档标题 */
-  /* :global(doc-title) {
+  :global(doc-title) {
     display: none !important;
-  } */
+  }
   /* :global(doc-title .doc-title-container-empty::before) {
     content: none;
   } */

@@ -9,10 +9,59 @@
     import { Card } from "$lib/components/ui/card";
     import { fly } from "svelte/transition";
     import { onMount } from "svelte";
+    import { Client, Storage } from "appwrite";
+    import { ImageGravity, ImageFormat } from 'appwrite';
 
-    export let event: Event;
+    let { event } = $props<{ event: Event }>();
 
     let mapLocation: { lat: number; lng: number } | null = null;
+
+    let title = "";
+    let content = "";
+    let location = "";
+    let selectedCategories: string[] = [];
+    let date: Date | undefined;
+    let coverImageUrl = $state("");
+    let locationData: any = null;
+
+    // 初始化 Appwrite 客户端
+    const client = new Client();
+    const storage = new Storage(client);
+
+    client
+        .setEndpoint('https://cloud.appwrite.io/v1')
+        .setProject('67f13e1d003e1c7ea764');
+
+    $effect(() => {
+        console.log('Event:', event);
+        if (event) {
+            title = event.title;
+            content = event.content;
+            location = event.location;
+            selectedCategories = event.categories || [];
+            date = event.date ? new Date(event.date) : undefined;
+            console.log('Event cover data:', event.cover);
+            
+            if (event.cover) {
+                try {
+                    const coverData = JSON.parse(event.cover);
+                    console.log('Parsed cover data:', coverData);
+                    
+                    // 直接使用 coverData.url 作为图片 URL
+                    if (coverData.url) {
+                        coverImageUrl = coverData.url;
+                        console.log('Cover image URL set to:', coverImageUrl);
+                    } else {
+                        console.error('No URL found in cover data');
+                    }
+                } catch (e) {
+                    console.error('Failed to parse cover data:', e);
+                    console.error('Raw cover data:', event.cover);
+                }
+            }
+            locationData = event.location_data ? JSON.parse(event.location_data) : null;
+        }
+    });
 
     onMount(() => {
         if (event.location_data) {
@@ -45,9 +94,9 @@
 <div class="flex flex-col h-full">
     <!-- 封面区域 -->
     <div class="relative h-[240px] bg-muted" in:fly={{ y: 20, duration: 300 }}>
-        {#if event.cover_image}
+        {#if coverImageUrl}
             <img 
-                src={event.cover_image} 
+                src={coverImageUrl} 
                 alt={event.title} 
                 class="w-full h-full object-cover"
             />
@@ -92,8 +141,12 @@
             <!-- 创建者信息 -->
             <div class="flex items-center gap-3">
                 <Avatar class="h-8 w-8">
-                    <AvatarImage src={event.creator_avatar} alt={event.creator_name} />
-                    <AvatarFallback>{event.creator_name?.[0] || '?'}</AvatarFallback>
+                    {#if event.creator_avatar}
+                        <AvatarImage src={event.creator_avatar} alt={event.creator_name || '创建者'} />
+                        <AvatarFallback>{event.creator_name?.[0] || '?'}</AvatarFallback>
+                    {:else}
+                        <AvatarFallback class="bg-primary/10 text-primary">{event.creator_name?.[0] || '?'}</AvatarFallback>
+                    {/if}
                 </Avatar>
                 <div>
                     <div class="font-medium">{event.creator_name || '未知创建者'}</div>

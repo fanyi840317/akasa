@@ -56,7 +56,6 @@
   } from "$lib/components/ui/dropdown-menu";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import { getCurrentLocation } from "$lib/services/location";
-  import EventActions from "./event-actions.svelte";
 
   interface Props {
     x_event?: Omit<Event, "$id" | "$createdAt" | "$updatedAt"> & {

@@ -20,6 +20,7 @@
     CornerDownLeft,
     Circle,
     FileText,
+    Send,
   } from "lucide-svelte";
   import * as Tabs from "$lib/components/ui/tabs";
   import { Button } from "$lib/components/ui/button";
@@ -37,61 +38,140 @@
   import { toast } from "svelte-sonner";
   import type { Category } from "$lib/types/category";
   import { appStore } from "$lib/stores/appState";
+  import { auth } from "$lib/stores/auth";
   import * as Modal from "$lib/components/ui/modal";
   import EventDetail from "./event-detail.svelte";
-  import EventActions from "./event-actions.svelte";
   import EventDetailPanel from "./event-detail-panel.svelte";
+  import { Calendar as CalendarPicker } from "$lib/components/ui/calendar";
+  import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+  } from "$lib/components/ui/popover";
+  import { eventStore } from "$lib/stores/event";
+  import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+  } from "$lib/components/ui/dialog";
+  import { exportDoc } from "$lib/components/editor/affine-editor";
+  import type { EventCategory } from "$lib/types/event";
+  import { databases, storage } from "$lib/appwrite";
+  import { ID } from "appwrite";
+  import { ImageGravity, ImageFormat } from "appwrite";
+  import type { Doc } from "@blocksuite/store";
+  import { createEmptyDoc } from "@blocksuite/presets";
+  // import EventTitleArea from "./event-title-area.svelte";
+  import EventPropertiesArea from "./event-properties-area.svelte";
+  import EventEditorArea from "./event-editor-area.svelte";
+  import EventCoverArea from "./event-cover-area.svelte";
 
   const dispatch = createEventDispatcher();
 
   let { open = $bindable(false) } = $props();
 
   // 编辑器文档
-  let newDoc = { content: "", doc: null };
+  let newDoc = $state<Doc|null>(createEmptyDoc().init());
   let locationData: LocationData | null = null;
   let title = "";
-  let coverImage = "";
-  let selectedCategory = "";
-  let eventDate = "";
+  let coverImage = $state("");
+  let coverFileId = "";
+  let selectedCategories: string[] = [];
+  let eventDate = $state<Date | undefined>();
   let categories = $state<Category[]>([]);
   let activeTab = $state("content");
   let isPublishing = $state(false);
-  let currentEvent = $state({
-    title: "",
-    content: "",
-    location: "",
-    date: "",
-    user_id: "",
-    cover: "",
-  });
+  let hasChanges = $state(false);
+  let showSaveDialog = $state(false);
+  let eventId = $state(ID.unique()); // 生成事件ID
+  let localPreviewUrl = $state(""); // 添加本地预览 URL 状态
+  let showContent = $state(false);
 
   // 事件属性状态
   let createdAt = $state(new Date().toISOString());
   let lastModified = $state(new Date().toISOString());
-  let creator = $state({
-    name: "神秘探索者",
-    avatar: null
-  });
+  let creator = $state(
+    $auth.user || {
+      name: "神秘探索者",
+      avatar: null,
+    },
+  );
   let evidenceCount = $state(0);
   let timelinePointsCount = $state(0);
 
-  // 监听内容变化，更新最后修改时间
-  $effect(() => {
-    if (newDoc.content) {
-      lastModified = new Date().toISOString();
-    }
-  });
+  let isUploading = $state(false);
+  let uploadProgress = $state(0);
 
-  // 格式化日期时间
-  function formatDateTime(isoString: string) {
-    const date = new Date(isoString);
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+  // 初始化事件数据
+  function initializeEventData(event: any) {
+    if (event) {
+      title = event.title || "";
+      locationData = event.location_data
+        ? JSON.parse(event.location_data)
+        : null;
+      selectedCategories = event.categories || [];
+      eventDate = event.date ? new Date(event.date) : undefined;
+
+      // 解析封面信息
+      if (event.cover) {
+        try {
+          const coverData = JSON.parse(event.cover);
+          coverImage = coverData.url || "";
+          coverFileId = coverData.fileId || "";
+        } catch (e) {
+          console.error("解析封面数据失败:", e);
+          coverImage = "";
+          coverFileId = "";
+        }
+      }
+
+      createdAt = event.$createdAt || new Date().toISOString();
+      lastModified = event.$updatedAt || new Date().toISOString();
+    }
+  }
+
+  // 格式化日期
+  function formatDate(date: Date | undefined) {
+    if (!date) return "未设置";
+    return date.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
+  }
+
+  // 处理标题变化
+  function handleTitleChange(event: CustomEvent<string>) {
+    title = event.detail;
+  }
+
+  // 处理 AI 生成
+  function handleAIGenerate(event: CustomEvent<void>) {
+    showAICard = !showAICard;
+  }
+
+  // 处理日期选择
+  function handleDateSelect(event: CustomEvent<Date | undefined>) {
+    eventDate = event.detail;
+  }
+
+  // 处理分类选择
+  function handleCategorySelect(event: CustomEvent<string>) {
+    const value = event.detail;
+    if (!value) return;
+    selectedCategories = value.split(",");
+    const category = categories.find((c) => c.$id === value);
+    if (category) {
+      selectedCategories = [category.name.zh];
+    }
+  }
+
+  // 处理位置选择
+  function handleLocationSelect(event: CustomEvent<LocationData>) {
+    locationData = event.detail;
   }
 
   let cursorPosition = $state({ top: 0, left: 0 });
@@ -111,9 +191,19 @@
     }
   }
 
+  // 处理关闭
   function handleClose() {
-    open = false;
-    dispatch("close");
+    if (isUploading) {
+      toast.error("请等待封面上传完成");
+      return;
+    }
+
+    if (hasChanges) {
+      showSaveDialog = true;
+    } else {
+      open = false;
+      dispatch("close");
+    }
   }
 
   function handleLocationChange(event: CustomEvent<LocationChangeEvent>) {
@@ -133,7 +223,7 @@
         const adjustedLeft = showEventDetail ? baseLeft - 400 : baseLeft; // 如果右侧面板显示，向左偏移
         cursorPosition = {
           top: event.detail.top + 40,
-          left: baseLeft+100,
+          left: baseLeft + 100,
         };
         showAICard = true;
       }
@@ -168,239 +258,329 @@
     selectedEvent = null;
   }
 
-  async function handleSave() {
-    if (!title.trim()) {
-      toast.error("请输入事件标题");
-      return;
-    }
-
-    isPublishing = true;
-    try {
-      // 提交事件数据
-      const eventData = {
-        title,
-        content: newDoc.content,
-        location: locationData,
-        category: selectedCategory,
-        date: eventDate,
-        cover_image: coverImage,
-      };
-
-      dispatch("save", eventData);
-      handleClose();
-    } catch (error) {
-      console.error("保存事件失败:", error);
-      toast.error("保存事件失败");
-    } finally {
-      isPublishing = false;
-    }
-  }
-
-  function handleCoverUpload() {
-    // 实现封面上传功能
+  // 处理封面上传
+  async function handleCoverUpload() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          coverImage = e.target?.result as string;
-        };
-        reader.readAsDataURL(file);
+        isUploading = true;
+        uploadProgress = 0;
+        try {
+          // 清理之前的预览 URL
+          if (localPreviewUrl) {
+            URL.revokeObjectURL(localPreviewUrl);
+          }
+
+          // 创建新的本地预览
+          localPreviewUrl = URL.createObjectURL(file);
+          console.log("Local preview URL created:", localPreviewUrl);
+
+          // 确保 coverImage 被正确设置
+          coverImage = localPreviewUrl;
+          console.log("Cover image set to:", coverImage);
+
+          // 强制更新 UI
+          await new Promise((resolve) => setTimeout(resolve, 0));
+
+          // 准备上传到 ImgBB
+          const formData = new FormData();
+          formData.append("image", file);
+
+          // 使用 XMLHttpRequest 来获取上传进度
+          const xhr = new XMLHttpRequest();
+
+          // 创建一个 Promise 来处理 XHR 请求
+          const uploadPromise = new Promise<{
+            success: boolean;
+            data: { url: string };
+            error?: { message: string };
+          }>((resolve, reject) => {
+            xhr.open(
+              "POST",
+              "https://api.imgbb.com/1/upload?key=dc1398dd7ba5dc154d50c82c42bf18c6",
+              true,
+            );
+
+            // 监听上传进度
+            xhr.upload.addEventListener("progress", (event) => {
+              if (event.lengthComputable) {
+                uploadProgress = Math.round((event.loaded / event.total) * 100);
+                console.log(`Upload progress: ${uploadProgress}%`);
+              }
+            });
+
+            // 监听请求完成
+            xhr.addEventListener("load", () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                  const result = JSON.parse(xhr.responseText);
+                  resolve(result);
+                } catch (e) {
+                  reject(new Error("Failed to parse response"));
+                }
+              } else {
+                reject(
+                  new Error(`HTTP error: ${xhr.status} ${xhr.statusText}`),
+                );
+              }
+            });
+
+            // 监听请求错误
+            xhr.addEventListener("error", () => {
+              reject(new Error("Network error"));
+            });
+
+            // 发送请求
+            xhr.send(formData);
+          });
+
+          // 等待上传完成
+          const result = await uploadPromise;
+          console.log("ImgBB upload result:", result);
+
+          if (result.success) {
+            // 使用 ImgBB 返回的 URL
+            coverImage = result.data.url;
+            console.log("Cover image set to ImgBB URL:", coverImage);
+
+            // 标记有更改
+            hasChanges = true;
+
+            toast.success("封面上传成功");
+          } else {
+            throw new Error(result.error?.message || "上传失败");
+          }
+        } catch (error: any) {
+          console.error("上传封面失败:", error);
+          // 显示更详细的错误信息
+          const errorMessage =
+            error.message || error.response?.message || "上传封面失败";
+          toast.error(`上传失败: ${errorMessage}`);
+          // 如果上传失败，清除本地预览
+          if (localPreviewUrl) {
+            URL.revokeObjectURL(localPreviewUrl);
+            localPreviewUrl = "";
+            coverImage = "";
+          }
+        } finally {
+          isUploading = false;
+          uploadProgress = 0;
+        }
       }
     };
     input.click();
   }
 
+  // 处理保存
+  async function handleSave() {
+    if (!title?.trim()) {
+      toast.error("请输入事件标题");
+      return;
+    }
+
+    // 检查文档内容
+    let exportedDoc;
+    try {
+      console.log("newDoc:", newDoc);
+      if (newDoc) {
+        exportedDoc = await exportDoc(newDoc);
+        console.log("Exported doc:", exportedDoc);
+      } else {
+        exportedDoc = { content: "" };
+      }
+    } catch (error) {
+      console.error("导出文档失败:", error);
+      exportedDoc = { content: "" };
+    }
+
+    if (!exportedDoc?.content?.trim()) {
+      toast.error("请输入事件内容");
+      return;
+    }
+
+    if (title.length > 100) {
+      toast.error("标题长度不能超过100个字符");
+      return;
+    }
+
+    isPublishing = true;
+    try {
+      const eventData = {
+        title: title.trim(),
+        content: exportedDoc.content.trim(),
+        location: locationData?.address || "",
+        categories: selectedCategories,
+        date: eventDate?.toISOString() || "",
+        user_id: $auth.user?.$id || "",
+        cover: JSON.stringify({
+          fileId: coverFileId,
+          url: coverImage,
+        }),
+        location_data: locationData ? JSON.stringify(locationData) : "",
+      };
+
+      const result = await eventStore.createEvent(eventData);
+      if (result) {
+        toast.success("事件保存成功！");
+        hasChanges = false;
+        open = false;
+        dispatch("close", { result });
+      }
+    } catch (error: any) {
+      console.error("保存事件失败:", error);
+      toast.error(error.message || "保存事件失败");
+    } finally {
+      isPublishing = false;
+    }
+  }
+
+  // 处理放弃保存
+  function handleDiscard() {
+    // 清理本地预览 URL
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      localPreviewUrl = "";
+    }
+    hasChanges = false;
+    open = false;
+    dispatch("close");
+  }
+
   onMount(() => {
+    showContent = true;
     loadCategories();
+    // 如果是在编辑模式下，初始化事件数据
+    if (event) {
+      initializeEventData(event);
+    } else {
+      // 确保 newDoc 被正确初始化
+      console.log("初始化新文档");
+      newDoc = createEmptyDoc().init();
+    }
   });
 
-  // 动画配置
+  // 组件销毁时清理
   onDestroy(() => {
-    // alert();
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      localPreviewUrl = "";
+    }
   });
 </script>
 
-{#if open}
+{#if open && showContent}
   <div
     class="fixed inset-0 z-50 bg-background"
-    transition:fade={{ duration: 400, delay: 0, easing: cubicOut }}
+    in:fade={{ duration: 400, delay: 0 }}
+    out:fade={{ duration: 400 }}
   >
-    <!-- 关闭按钮 -->
-    <Button variant="ghost" class="absolute left-4 top-4" onclick={handleClose}>
-      <X class="h-4 w-4 stroke-[3]" />
-    </Button>
-
-    <!-- 事件操作按钮 -->
-    <div class="absolute right-4 top-4 flex gap-2">
-      <Button variant="ghost" onclick={() => {}}>
-        <Eye class="h-4 w-4 stroke-[3]" />
-      </Button>
-      <Button variant="ghost" onclick={() => {}}>
-        <Copy class="h-4 w-4 stroke-[3]" />
-      </Button>
-      <Button variant="ghost" onclick={() => {}}>
-        <Twitter class="h-4 w-4 stroke-[3]" />
-      </Button>
-      <Button variant="ghost" onclick={() => {}}>
-        <Facebook class="h-4 w-4 stroke-[3]" />
-      </Button>
-      <Button variant="ghost" onclick={() => {}}>
-        <QrCode class="h-4 w-4 stroke-[3]" />
-      </Button>
-      <Button variant="ghost" onclick={handleCoverUpload}>
-        <ImageIcon class="h-4 w-4 stroke-[3]" />
-      </Button>
+    <!-- 使用封面区域组件 -->
+    <div 
+      in:fly={{ y: 20, duration: 500, delay: 200 }}
+      out:fly={{ y: 20, duration: 500 }}
+    >
+      <EventCoverArea
+        {coverImage}
+        {isUploading}
+        {uploadProgress}
+        onClose={handleClose}
+        on:coverUpload={handleCoverUpload}
+        on:imageError={() => {
+          console.error("Image load error");
+          console.log("Failed image src:", coverImage);
+          coverImage = "";
+        }}
+      />
     </div>
 
     <!-- 窗口容器 -->
     <div
       class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-4 p-8"
+      in:fly={{ y: 20, duration: 500, delay: 300 }}
+      out:fly={{ y: 20, duration: 500 }}
     >
-    <!-- 右侧属性按钮 -->
-      <div class="w-[80px] h-[80vh] flex flex-col justify-start">
-        <div class="space-y-2 py-20">
-          <!-- 基本信息 -->
-          <div class="space-y-2">
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">创建时间</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span>{formatDateTime(createdAt)}</span>
-                </div>
-              </div>
-            </Button>
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">最后修改</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span>{formatDateTime(lastModified)}</span>
-                </div>
-              </div>
-            </Button>
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">创建者</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <Circle class="h-4 w-4 text-primary" />
-                  <span>{creator.name}</span>
-                </div>
-              </div>
-            </Button>
-          </div>
-
-          <!-- 事件信息 -->
-          <div class="space-y-2">
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">发生时间</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <Calendar class="h-4 w-4 text-muted-foreground" />
-                  <span>{eventDate || "未设置"}</span>
-                </div>
-              </div>
-            </Button>
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">发生地点</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <MapPin class="h-4 w-4 text-muted-foreground" />
-                  <span>{locationData?.address || "未设置"}</span>
-                </div>
-              </div>
-            </Button>
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">事件分类</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <Tag class="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedCategory || "未分类"}</span>
-                </div>
-              </div>
-            </Button>
-          </div>
-
-          <!-- 统计信息 -->
-          <div class="space-y-2">
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">字数统计</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <FileText class="h-4 w-4 text-muted-foreground" />
-                  <span>{newDoc.content.length} 字</span>
-                </div>
-              </div>
-            </Button>
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">证据数量</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <ImageIcon class="h-4 w-4 text-muted-foreground" />
-                  <span>{evidenceCount} 个</span>
-                </div>
-              </div>
-            </Button>
-            <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2">
-              <div class="flex flex-col items-end gap-1">
-                <Label class="text-xs text-muted-foreground">时间点数量</Label>
-                <div class="flex items-center gap-2 text-sm">
-                  <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span>{timelinePointsCount} 个</span>
-                </div>
-              </div>
-            </Button>
-          </div>
-        </div>
-      </div>
-      <!-- 中间编辑器窗口 -->
-      <div
-        class="w-[800px] h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
-        class:translate-x-[-10px]={showEventDetail}
-        class:transition-transform={showEventDetail}
-        class:duration-500={showEventDetail}
-        in:fly={{ duration: 500, x: -100, delay: 0, easing: backInOut }}
-        out:fly={{ duration: 400, x: -100, easing: cubicOut }}
+        
+    <!-- 属性区域 -->
+    <div class="w-[80px]"
+      in:fly={{ x: -20, duration: 500, delay: 400 }}
+      out:fly={{ x: -20, duration: 500 }}
+    >
+      <EventPropertiesArea
+        {createdAt}
+        {lastModified}
+        {eventDate}
+        {locationData}
+        {selectedCategories}
+        {categories}
+        {evidenceCount}
+        {timelinePointsCount}
+        on:dateSelect={handleDateSelect}
+        on:categorySelect={handleCategorySelect}
+        on:locationSelect={handleLocationSelect}
+      />
+    </div>
+    
+      <!-- 使用新创建的组件 -->
+      <div class="flex h-[80vh] gap-4"
+        in:fly={{ x: 20, duration: 500, delay: 500 }}
+        out:fly={{ x: 20, duration: 500 }}
       >
-        <div class="w-full h-full relative">
-          <div
-            role="button"
-            tabindex="0"
-            onkeydown={(e) => e.key === "Enter"}
-            class="w-full h-full"
-            onclick={handleEditorClick}
-            oninput={handleEditorInput}
-          >
-            <AffineEditor
-              htmlDoc={newDoc}
-              on:cursorPosition={handleCursorPosition}
-            />
-          </div>
-          {#if showAICard}
-            <AICard
-              position={cursorPosition}
-              onAction={handleAIAction}
-              minimized={isAICardMinimized}
-            />
-          {/if}
+        <!-- 编辑器区域（包含标题和封面） -->
+        <div class="w-[800px]">
+          <EventEditorArea
+            {title}
+            doc={newDoc}
+            {showAICard}
+            {coverImage}
+            on:titleChange={(e) => title = e.detail}
+            on:aiGenerate={() => showAICard = !showAICard}
+            on:editorClick={handleEditorClick}
+            on:editorInput={handleEditorInput}
+            on:cursorPosition={handleCursorPosition}
+            on:save={handleSave}
+          />
+        </div>
+        
+        <!-- 操作区域 -->
+        <div class="w-[80px]"
+          in:fly={{ x: 20, duration: 500, delay: 600 }}
+          out:fly={{ x: 20, duration: 500 }}
+        >
+       
         </div>
       </div>
-
-      
 
       <!-- 右侧事件详情面板 -->
       {#if showEventDetail && selectedEvent}
-        <EventDetailPanel
-          event={selectedEvent}
-          onClose={handleCloseEventDetail}
-        />
+        <div 
+          in:fly={{ x: 20, duration: 500, delay: 700 }}
+          out:fly={{ x: 20, duration: 500 }}
+        >
+          <EventDetailPanel
+            event={selectedEvent}
+            onClose={handleCloseEventDetail}
+          />
+        </div>
       {/if}
     </div>
   </div>
+
+  <!-- 保存提示对话框 -->
+  <Dialog bind:open={showSaveDialog}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>保存更改</DialogTitle>
+        <DialogDescription>您有未保存的更改，是否要保存？</DialogDescription>
+      </DialogHeader>
+      <DialogFooter class="gap-2">
+        <Button variant="outline" onclick={handleDiscard}>放弃更改</Button>
+        <Button onclick={handleSave}>保存</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 {/if}
 
 <style>
