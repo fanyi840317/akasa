@@ -211,18 +211,16 @@
     locationData = location;
   }
 
-  function handleCursorPosition(
-    event: CustomEvent<{ top: number; left: number }>,
-  ) {
+  function handleCursorPosition(position: { top: number; left: number }) {
     console.log("ai-card 位置:");
-    console.log(event.detail);
-    if (event.detail && event.detail.top > 0 && event.detail.left > 0) {
+    console.log(position);
+    if (position && position.top > 0 && position.left > 0) {
       if (cursorPosition.top === 0 && cursorPosition.left === 0) {
         // 计算 AI 面板的位置，考虑右侧面板的影响
-        const baseLeft = event.detail.left;
+        const baseLeft = position.left;
         const adjustedLeft = showEventDetail ? baseLeft - 400 : baseLeft; // 如果右侧面板显示，向左偏移
         cursorPosition = {
-          top: event.detail.top + 40,
+          top: position.top + 40,
           left: baseLeft + 100,
         };
         showAICard = true;
@@ -504,7 +502,7 @@
     >
         
     <!-- 属性区域 -->
-    <div class="w-[80px]"
+    <div class="w-[120px]"
       in:fly={{ x: -20, duration: 500, delay: 400 }}
       out:fly={{ x: -20, duration: 500 }}
     >
@@ -534,13 +532,12 @@
             {title}
             doc={newDoc}
             {showAICard}
-            {coverImage}
-            on:titleChange={(e) => title = e.detail}
-            on:aiGenerate={() => showAICard = !showAICard}
-            on:editorClick={handleEditorClick}
-            on:editorInput={handleEditorInput}
-            on:cursorPosition={handleCursorPosition}
-            on:save={handleSave}
+            onTitleChange={(value) => title = value}
+            onAIGenerate={() => showAICard = !showAICard}
+            onEditorClick={handleEditorClick}
+            onEditorInput={handleEditorInput}
+            onCursorPosition={handleCursorPosition}
+            onSave={handleSave}
           />
         </div>
         
