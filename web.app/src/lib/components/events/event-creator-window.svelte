@@ -74,7 +74,7 @@
   let { open = $bindable(false) } = $props();
 
   // 编辑器文档
-  let newDoc = $state<Doc|null>(createEmptyDoc().init());
+  let newDoc = $state<Doc | null>(createEmptyDoc().init());
   let locationData: LocationData | null = null;
   let title = "";
   let coverImage = $state("");
@@ -476,7 +476,7 @@
     out:fade={{ duration: 400 }}
   >
     <!-- 使用封面区域组件 -->
-    <div 
+    <div
       in:fly={{ y: 20, duration: 500, delay: 200 }}
       out:fly={{ y: 20, duration: 500 }}
     >
@@ -500,29 +500,30 @@
       in:fly={{ y: 20, duration: 500, delay: 300 }}
       out:fly={{ y: 20, duration: 500 }}
     >
-        
-    <!-- 属性区域 -->
-    <div class="w-[120px]"
-      in:fly={{ x: -20, duration: 500, delay: 400 }}
-      out:fly={{ x: -20, duration: 500 }}
-    >
-      <EventPropertiesArea
-        {createdAt}
-        {lastModified}
-        {eventDate}
-        {locationData}
-        {selectedCategories}
-        {categories}
-        {evidenceCount}
-        {timelinePointsCount}
-        on:dateSelect={handleDateSelect}
-        on:categorySelect={handleCategorySelect}
-        on:locationSelect={handleLocationSelect}
-      />
-    </div>
-    
+      <!-- 属性区域 -->
+      <div
+        class="w-[120px]"
+        in:fly={{ x: -20, duration: 500, delay: 400 }}
+        out:fly={{ x: -20, duration: 500 }}
+      >
+        <EventPropertiesArea
+          {createdAt}
+          {lastModified}
+          {eventDate}
+          {locationData}
+          {selectedCategories}
+          {categories}
+          {evidenceCount}
+          {timelinePointsCount}
+          on:dateSelect={handleDateSelect}
+          on:categorySelect={handleCategorySelect}
+          on:locationSelect={handleLocationSelect}
+        />
+      </div>
+
       <!-- 使用新创建的组件 -->
-      <div class="flex h-[80vh] gap-4"
+      <div
+        class="flex h-[80vh] gap-4"
         in:fly={{ x: 20, duration: 500, delay: 500 }}
         out:fly={{ x: 20, duration: 500 }}
       >
@@ -532,84 +533,21 @@
             {title}
             doc={newDoc}
             {showAICard}
-            onTitleChange={(value) => title = value}
-            onAIGenerate={() => showAICard = !showAICard}
+            onTitleChange={(value) => (title = value)}
+            onAIGenerate={() => (showAICard = !showAICard)}
             onEditorClick={handleEditorClick}
             onEditorInput={handleEditorInput}
             onCursorPosition={handleCursorPosition}
             onSave={handleSave}
           />
         </div>
-
-        <!-- 新窗口 -->
-        <div
-          class="w-[220px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
-          in:fly={{ duration: 500, x: -100, delay: 400, easing: backInOut }}
-          out:fly={{ duration: 400, x: -100, easing: cubicOut }}
-        >
-          <div class="flex flex-col h-[180px]">
-            <div class="flex-1 overflow-hidden">
-              <div class="h-full p-4">
-                <!-- 新窗口内容 -->
-              </div>
-            </div>
-          </div>
-        
-        <!-- 操作区域 -->
-        <div class="w-[80px]"
-          in:fly={{ x: 20, duration: 500, delay: 600 }}
-          out:fly={{ x: 20, duration: 500 }}
-        >
-       
-        </div>
       </div>
-      
-      <!-- 中间窗口容器 -->
-      <div class="flex flex-col gap-2">
-        <!-- 编辑器窗口 -->
-        <div
-          class="w-[800px] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden"
-          in:fly={{ duration: 500, x: 100, delay: 500, easing: backInOut }}
-          out:fly={{ duration: 400, x: 100, easing: cubicOut }}
-        >
-          <div class="flex flex-col h-[80vh]">
-            <div class="flex-1 overflow-hidden">
-              <div class="h-full">
-                <AffineEditor htmlDoc={newDoc} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 右侧窗口容器 -->
-      <div class="flex flex-col gap-2">
-        <!-- 地图窗口 -->
-        <div
-          class="w-[220px] overflow-hidden"
-          in:fly={{ duration: 500, x: 100, delay: 600, easing: backInOut }}
-          out:fly={{ duration: 400, x: 100, easing: cubicOut }}
-        >
-          <div class="flex flex-col h-[220px]">
-            <div class="flex-1 overflow-hidden">
-              <div class="h-full">
-                <MapPicker on:locationChange={handleLocationChange} />
-              </div>
-            </div>
-          </div>
-
-      <!-- 右侧事件详情面板 -->
-      {#if showEventDetail && selectedEvent}
-        <div 
-          in:fly={{ x: 20, duration: 500, delay: 700 }}
-          out:fly={{ x: 20, duration: 500 }}
-        >
-          <EventDetailPanel
-            event={selectedEvent}
-            onClose={handleCloseEventDetail}
-          />
-        </div>
-      {/if}
+      <!-- 操作区域 -->
+      <div
+        class="w-[80px]"
+        in:fly={{ x: 20, duration: 500, delay: 600 }}
+        out:fly={{ x: 20, duration: 500 }}
+      ></div>
     </div>
   </div>
 

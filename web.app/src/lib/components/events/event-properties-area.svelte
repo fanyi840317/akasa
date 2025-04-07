@@ -86,7 +86,7 @@
 </script>
 
 <div class="h-[80vh] flex flex-col justify-start">
-  <div class="space-y-4 py-20">
+  <div class="space-y-4 py-14">
     <Accordion.Root type="single" class="w-full" >
       <!-- 基本信息 -->
       <Accordion.Item value="basic-info">
