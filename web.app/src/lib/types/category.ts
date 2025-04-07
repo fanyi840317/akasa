@@ -1,17 +1,17 @@
 export interface Category {
-    $id: string;
+    $id?: string;
     name: {
         zh: string;
         en: string;
     };
-    description: {
+    description?: {
         zh: string;
         en: string;
     };
     icon: string;
     color: string;
-    parent_id: string | null;
-    order: number;
+    parent_id?: string;
+    order?: number;
     status: string;
     user_id: string;
     created_at: string;

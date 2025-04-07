@@ -31,12 +31,33 @@
     }
 
     let coverUrl = $state(image || getRandomDefaultCover());
+    let categoryText = $state("神秘事件");
 
     $effect(() => {
         if (!image) {
             coverUrl = getRandomDefaultCover();
         } else {
-            coverUrl = image;
+            // 处理 ImgBB URL，确保图片正确显示
+            try {
+                // 检查是否是有效的 URL
+                if (image.startsWith('http')) {
+                    coverUrl = image;
+                } else {
+                    // 尝试解析 JSON 格式的封面数据
+                    const coverData = JSON.parse(image);
+                    coverUrl = coverData.url || getRandomDefaultCover();
+                }
+            } catch (e) {
+                console.error("解析封面数据失败:", e);
+                coverUrl = getRandomDefaultCover();
+            }
+        }
+
+        // 设置分类文本
+        if (tags && tags.length > 0 && tags.some((tag: string) => tag && tag.trim() !== '')) {
+            categoryText = tags[0];
+        } else {
+            categoryText = "未知分类";
         }
     });
 
@@ -107,6 +128,7 @@
         @apply transition-all duration-700 ease-out;
         @apply saturate-[0.9] contrast-[0.95];
         @apply hover:saturate-100 hover:contrast-100;
+        object-position: center;
     }
 
     .event-card-image::after {
@@ -215,15 +237,19 @@
             <div class="event-card-title">
                 <div class="event-card-avatar">
                     <Avatar class="h-8 w-8 ring-1 ring-black/[0.03] dark:ring-white/[0.03]">
-                        <AvatarImage src={avatarSrc || image} alt={title} />
-                        <AvatarFallback class="bg-black/[0.02] dark:bg-white/[0.02]">{avatarFallback}</AvatarFallback>
+                        {#if avatarSrc}
+                            <AvatarImage src={avatarSrc} alt={title} />
+                            <AvatarFallback class="bg-black/[0.02] dark:bg-white/[0.02]">{avatarFallback}</AvatarFallback>
+                        {:else}
+                            <AvatarFallback class="bg-primary/10 text-primary">{avatarFallback}</AvatarFallback>
+                        {/if}
                     </Avatar>
                 </div>
                 <div class="space-y-1">
-                    <h3 class="font-medium leading-none group-hover:text-foreground/90 transition-colors">
+                    <h3 class="font-medium leading-none group-hover:text-foreground/90 transition-colors truncate">
                         {title}
                     </h3>
-                    <p class="text-xs text-muted-foreground">神秘事件</p>
+                    <p class="text-xs text-muted-foreground">{categoryText}</p>
                 </div>
             </div>
             {#if tags && tags.length > 0 && tags.some((tag: string) => tag && tag.trim() !== '')}

@@ -2,6 +2,8 @@ import { writable, get } from 'svelte/store';
 import { databases } from '../appwrite';
 import { ID } from 'appwrite';
 import type { Models } from 'appwrite';
+import { parseI18nFields } from '$lib/utils';
+import type { Case } from '$lib/types/case';
 
 // Case数据类型定义，基于setup_database.js中的结构
 type Case = {
@@ -34,46 +36,40 @@ const { databaseId, usersCollectionId } = appwriteConfig;
 const casesCollectionId = 'cases';
 
 const createCaseStore = () => {
-    const { subscribe, set, update } = writable<CaseState>({
-        cases: [],
-        currentCase: null,
-        loading: false,
-        error: null
-    });
+    const { subscribe, set, update } = writable<Case[]>([]);
 
     return {
         subscribe,
-        // 获取所有案例
-        fetchCases: async (userId?: string) => {
-            update(state => ({ ...state, loading: true, error: null }));
+        set,
+        update,
+        fetchCases: async () => {
             try {
-                let query = [];
-                
-                // 如果提供了用户ID，则按用户ID筛选
-                if (userId) {
-                    query.push(`user_id=${userId}`);
-                }
-                
                 const response = await databases.listDocuments(
-                    databaseId,
-                    casesCollectionId,
-                    query
+                    'akasa',
+                    'cases'
                 );
-                
-                update(state => ({
-                    ...state,
-                    cases: response.documents as unknown as Case[],
-                    loading: false
-                }));
-                
-                return response.documents;
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : '获取案例失败';
-                update(state => ({ ...state, loading: false, error: errorMessage }));
-                throw error;
+                const cases = response.documents.map(doc => parseI18nFields(doc as unknown as Case));
+                set(cases);
+                return cases;
+            } catch (err) {
+                console.error('Failed to fetch cases:', err);
+                return [];
             }
         },
-        
+        getCaseById: async (id: string) => {
+            try {
+                const response = await databases.getDocument(
+                    'akasa',
+                    'cases',
+                    id
+                );
+                const case_ = parseI18nFields(response as unknown as Case);
+                return case_;
+            } catch (err) {
+                console.error('Failed to fetch case:', err);
+                return null;
+            }
+        },
         // 获取单个案例
         fetchCase: async (caseId: string) => {
             update(state => ({ ...state, loading: true, error: null }));
@@ -189,12 +185,7 @@ const createCaseStore = () => {
         
         // 重置状态
         reset: () => {
-            set({
-                cases: [],
-                currentCase: null,
-                loading: false,
-                error: null
-            });
+            set([]);
         }
     };
 };

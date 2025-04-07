@@ -108,11 +108,13 @@
   on:close={() => showEventTypeSelector = false}
 />
 
+{#if showEventCreatorWindow}
 <EventCreatorWindow
   open={showEventCreatorWindow}
   on:save={handleEventSave}
   on:close={() => showEventCreatorWindow = false}
 />
+{/if}
 
 <Sidebar.Group>
   {#if isLoading}

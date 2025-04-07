@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher, type ComponentType } from "svelte";
+    import { createEventDispatcher, type ComponentType, type SvelteComponent } from "svelte";
     import { fade, fly } from "svelte/transition";
     import { Button } from "$lib/components/ui/button";
     import { X, PlusCircle, Minimize, Maximize } from "lucide-svelte";
@@ -31,7 +31,7 @@
         showHeader?: boolean;
         showFooter?: boolean;
         showBackdrop?: boolean;
-        component?: ComponentType;
+        component?: any;
         componentProps?: Record<string, any>;
         properties?: Array<{
             label: string;

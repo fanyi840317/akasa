@@ -22,6 +22,7 @@
     import EventView from "$lib/components/events/event-view.svelte";
     import { goto } from "$app/navigation";
     import './styles.css';
+    import type { ComponentType } from "svelte";
 
     let { data }: { data: PageData } = $props();
     let events = $state<Event[]>([]);
@@ -40,7 +41,7 @@
     let categoryItems = $derived([
         { id: "all", name: "全部" },
         ...categories.map(cat => ({
-            id: cat.$id,
+            id: cat.$id || "",
             name: cat.name.zh,
             color: cat.color
         }))
@@ -50,7 +51,7 @@
     let filteredEvents = $derived(
         selectedCategory === 'all'
             ? events
-            : events.filter(event => event.category === selectedCategory)
+            : events.filter(event => event.categories && event.categories.includes(selectedCategory))
     );
 
     const totalPages = $derived(Math.ceil(events.length / itemsPerPage));
@@ -213,9 +214,9 @@
                             <div class="glow-effect">
                                 <EventCard
                                     title={event.title || ''}
-                                    image={event.cover_image || ''}
+                                    image={event.cover ? JSON.parse(event.cover).url : ''}
                                     avatarSrc={event.creator_avatar}
-                                    tags={event.category ? [event.category] : []}
+                                    tags={event.categories ? event.categories : []}
                                     rating={0}
                                 />
                             </div>
