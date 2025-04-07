@@ -3,6 +3,7 @@
   import { Input } from "$lib/components/ui/input";
   import { Sparkles, Save } from "lucide-svelte";
   import AffineEditor from "$lib/components/editor/affine-editor.svelte";
+  import { ScrollArea } from "$lib/components/ui/scroll-area";
   import type { Doc } from "@blocksuite/store";
 
   let { 
@@ -84,7 +85,7 @@
 <div class="w-[800px] h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col">
  
   <!-- 标题输入框 -->
-  <div class=" py-6 mt-10">
+  <div class="py-6 mt-10">
     <div class="px-16 max-w-4xl mx-auto">
       <div class="flex items-center gap-4">
         <div class="flex-1">
@@ -119,19 +120,31 @@
   </div>
 
   <!-- 编辑器区域 -->
-  <div class="flex-1 relative">
-    <div
-      role="button"
-      tabindex="0"
-      onkeydown={handleKeydown}
-      class="w-full h-full -ml-7"
-      onclick={handleEditorClick}
-      oninput={handleEditorInput}
-    >
-      <AffineEditor
-        bind:doc={doc}
-        on:cursorPosition={handleCursorPosition}
-      />
-    </div>
+  <div class="flex-1 relative overflow-hidden">
+    <ScrollArea class="w-full h-full">
+      <div
+        role="button"
+        tabindex="0"
+        onkeydown={handleKeydown}
+        class="w-full h-full -ml-7"
+        onclick={handleEditorClick}
+        oninput={handleEditorInput}
+      >
+        <AffineEditor
+          bind:doc={doc}
+          on:cursorPosition={handleCursorPosition}
+        />
+      </div>
+    </ScrollArea>
   </div>
-</div> 
+</div>
+
+<style>
+  :global(.event-editor-area .scroll-area-viewport) {
+    height: 100%;
+  }
+  
+  :global(.event-editor-area .scroll-area-scrollbar) {
+    z-index: 10;
+  }
+</style> 
