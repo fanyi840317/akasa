@@ -76,14 +76,6 @@
 
 <div class="flex flex-col h-full">
   <Header {titles}>
-    <div class="flex gap-2">
-      <button
-        class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 h-9 w-9 hover:bg-accent hover:text-accent-foreground"
-        on:click={() => (isEditing = true)}
-      >
-        <Save class="h-4 w-4" />
-      </button>
-    </div>
   </Header>
 
   <div class="flex-1">
@@ -95,7 +87,7 @@
         </div>
       </div>
     {:else if event}
-      <EventCreatorWindow open={true} {event} on:close={handleClose} />
+      <EventCreatorWindow mode="embedded" open={true} {event} on:close={handleClose} />
     {:else}
       <div class="flex items-center justify-center h-full">
         <div class="text-center text-muted-foreground">未找到事件</div>

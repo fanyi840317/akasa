@@ -1,9 +1,7 @@
 <script lang="ts">
   import { fade, fly } from "svelte/transition";
   import { createEventDispatcher, onDestroy, onMount } from "svelte";
-  import {
-    Plus,
-  } from "lucide-svelte";
+  import { Plus } from "lucide-svelte";
   import { Button } from "$lib/components/ui/button";
   import type { LocationData, LocationChangeEvent } from "$lib/components/map";
   import { categoryStore } from "$lib/stores/category";
@@ -24,7 +22,10 @@
     DialogFooter,
     DialogDescription,
   } from "$lib/components/ui/dialog";
-  import { exportDocToJson, createDocByJson } from "$lib/components/editor/affine-editor";
+  import {
+    exportDocToJson,
+    createDocByJson,
+  } from "$lib/components/editor/affine-editor";
   import { ID } from "appwrite";
   import type { Doc } from "@blocksuite/store";
   import { createEmptyDoc } from "@blocksuite/presets";
@@ -36,7 +37,15 @@
 
   const dispatch = createEventDispatcher();
 
-  let { open = $bindable(false), event = $bindable(null) } = $props();
+  let {
+    open = $bindable(false),
+    event,
+    mode = "window",
+  } = $props<{
+    open?: boolean;
+    event?: import("$lib/types/event").Event;
+    mode?: "window" | "embedded";
+  }>();
 
   // 编辑器文档
   let newDoc = $state<Doc | null>(null);
@@ -71,7 +80,7 @@
   let uploadProgress = $state(0);
 
   // 封面选择器状态
-  let showCoverSelector = $state(false);
+  let isCoverSelectorOpen = $state(false);
   let coverSelectorTab = $state("my-images");
   let coverLink = $state("");
 
@@ -192,7 +201,7 @@
         confirmText: "保存",
         cancelText: "放弃",
         onConfirm: handleSave,
-        onCancel: handleDiscard
+        onCancel: handleDiscard,
       });
     } else {
       open = false;
@@ -445,21 +454,21 @@
   function handleSelectExistingImage(event: CustomEvent<{ url: string }>) {
     coverImage = event.detail.url;
     hasChanges = true;
-    showCoverSelector = false;
+    isCoverSelectorOpen = false;
     toast.success("封面已设置");
   }
 
   // 处理上传图片
   function handleCoverUploadFromSelector() {
     handleCoverUpload();
-    showCoverSelector = false;
+    isCoverSelectorOpen = false;
   }
 
   // 处理链接提交
   function handleCoverLinkSubmit(event: CustomEvent<{ url: string }>) {
     coverImage = event.detail.url;
     hasChanges = true;
-    showCoverSelector = false;
+    isCoverSelectorOpen = false;
     toast.success("封面链接已设置");
   }
 
@@ -471,7 +480,7 @@
   onMount(async () => {
     showContent = true;
     loadCategories();
-    
+
     // 如果是在编辑模式下，初始化事件数据
     if (event) {
       await initializeEventData(event);
@@ -492,117 +501,134 @@
   });
 </script>
 
-{#if open && showContent}
+{#snippet child()}
+  {#if showContent}
+  <!-- 使用封面区域组件 -->
   <div
-    class="fixed inset-0 z-50 bg-background"
-    in:fade={{ duration: 400, delay: 0 }}
-    out:fade={{ duration: 400 }}
+    in:fly={{ y: 20, duration: 500, delay: 200 }}
+    out:fly={{ y: 20, duration: 500 }}
   >
-    <!-- 使用封面区域组件 -->
+    <EventCoverArea
+      {coverImage}
+      {isUploading}
+      {uploadProgress}
+      hideCloseButton={mode === "embedded"}
+      onClose={handleClose}
+      on:coverUpload={handleCoverUpload}
+      on:imageError={() => {
+        console.error("Image load error");
+        console.log("Failed image src:", coverImage);
+        coverImage = "";
+      }}
+    />
+  </div>
+
+  <!-- 窗口容器 -->
+  <div
+    class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-4 p-8"
+    in:fly={{ y: 20, duration: 500, delay: 300 }}
+    out:fly={{ y: 20, duration: 500 }}
+  >
+    <!-- 属性区域 -->
     <div
-      in:fly={{ y: 20, duration: 500, delay: 200 }}
-      out:fly={{ y: 20, duration: 500 }}
+      class="w-[120px]"
+      in:fly={{ x: -20, duration: 500, delay: 400 }}
+      out:fly={{ x: -20, duration: 500 }}
     >
-      <EventCoverArea
-        {coverImage}
-        {isUploading}
-        {uploadProgress}
-        onClose={handleClose}
-        on:coverUpload={handleCoverUpload}
-        on:imageError={() => {
-          console.error("Image load error");
-          console.log("Failed image src:", coverImage);
-          coverImage = "";
-        }}
+      <EventPropertiesArea
+        {createdAt}
+        {lastModified}
+        {eventDate}
+        {locationData}
+        {selectedCategories}
+        {categories}
+        {evidenceCount}
+        {timelinePointsCount}
+        on:dateSelect={handleDateSelect}
+        on:categorySelect={handleCategorySelect}
+        on:locationSelect={handleLocationSelect}
       />
     </div>
 
-    <!-- 窗口容器 -->
+    <!-- 使用新创建的组件 -->
     <div
-      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-4 p-8"
-      in:fly={{ y: 20, duration: 500, delay: 300 }}
-      out:fly={{ y: 20, duration: 500 }}
+      class="flex h-[80vh] gap-4"
+      in:fly={{ x: 20, duration: 500, delay: 500 }}
+      out:fly={{ x: 20, duration: 500 }}
     >
-      <!-- 属性区域 -->
-      <div
-        class="w-[120px]"
-        in:fly={{ x: -20, duration: 500, delay: 400 }}
-        out:fly={{ x: -20, duration: 500 }}
-      >
-        <EventPropertiesArea
-          {createdAt}
-          {lastModified}
-          {eventDate}
-          {locationData}
-          {selectedCategories}
-          {categories}
-          {evidenceCount}
-          {timelinePointsCount}
-          on:dateSelect={handleDateSelect}
-          on:categorySelect={handleCategorySelect}
-          on:locationSelect={handleLocationSelect}
+      <!-- 编辑器区域（包含标题和封面） -->
+      <div class="w-[800px] relative">
+        <EventEditorArea
+          {title}
+          doc={newDoc}
+          {showAICard}
+          onAIGenerate={() => (showAICard = !showAICard)}
+          onEditorClick={handleEditorClick}
+          onEditorInput={handleEditorInput}
+          onCursorPosition={handleCursorPosition}
+          onSave={handleSave}
+          onTitleHover={handleTitleHover}
         />
-      </div>
 
-      <!-- 使用新创建的组件 -->
-      <div
-        class="flex h-[80vh] gap-4"
-        in:fly={{ x: 20, duration: 500, delay: 500 }}
-        out:fly={{ x: 20, duration: 500 }}
-      >
-        <!-- 编辑器区域（包含标题和封面） -->
-        <div class="w-[800px] relative">
-          <EventEditorArea
-            {title}
-            doc={newDoc}
-            {showAICard}
-            onAIGenerate={() => (showAICard = !showAICard)}
-            onEditorClick={handleEditorClick}
-            onEditorInput={handleEditorInput}
-            onCursorPosition={handleCursorPosition}
-            onSave={handleSave}
-            onTitleHover={handleTitleHover}
-          />
-          
-          <!-- 添加封面按钮 - 悬停时显示 -->
-          <div 
-            role="banner"
-            class="absolute -top-2 left-4 opacity-0 transition-opacity duration-200" 
-            class:opacity-100={showCoverButton}
-            onmouseenter={() => showCoverButton = true}
-            onmouseleave={() => showCoverButton = false}
-          >
-            <Popover bind:open={showCoverSelector}>
-              <PopoverTrigger>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  class="gap-1 bg-background/80 backdrop-blur-sm"
-                >
-                  <Plus class="h-3 w-3" />
-                  <span class="text-xs">添加封面</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent class="w-auto p-0" align="start">
-                <CoverSelector 
-                  on:select={handleSelectExistingImage}
-                  on:upload={handleCoverUploadFromSelector}
-                  on:linkSubmit={handleCoverLinkSubmit}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+        <!-- 添加封面按钮 - 悬停时显示 -->
+        <div
+          role="banner"
+          class="absolute -top-2 left-4 opacity-0 transition-opacity duration-200"
+          class:opacity-100={showCoverButton}
+          onmouseenter={() => (showCoverButton = true)}
+          onmouseleave={() => (showCoverButton = false)}
+        >
+          <Popover bind:open={isCoverSelectorOpen}>
+            <PopoverTrigger>
+              <Button
+                variant="outline"
+                size="sm"
+                class="gap-1 bg-background/80 backdrop-blur-sm"
+              >
+                <Plus class="h-3 w-3" />
+                <span class="text-xs">添加封面</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent class="w-auto p-0" align="start">
+              <CoverSelector
+                on:select={handleSelectExistingImage}
+                on:upload={handleCoverUploadFromSelector}
+                on:linkSubmit={handleCoverLinkSubmit}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
-      <!-- 操作区域 -->
-      <div
-        class="w-[80px]"
-        in:fly={{ x: 20, duration: 500, delay: 600 }}
-        out:fly={{ x: 20, duration: 500 }}
-      ></div>
     </div>
+    <!-- 操作区域 -->
+    <div
+      class="w-[80px]"
+      in:fly={{ x: 20, duration: 500, delay: 600 }}
+      out:fly={{ x: 20, duration: 500 }}
+    ></div>
   </div>
-
+  {/if}
+{/snippet}
+{#if open}
+  {#if mode === "window"}
+    <div
+      class="fixed inset-0 z-50 bg-background"
+      in:fade={{ duration: 400 }}
+      out:fade={{ duration: 400 }}
+    >
+      {#if open}
+        <div
+          class="fixed inset-0 bg-background"
+          in:fade={{ duration: 400, delay: 100 }}
+          out:fade={{ duration: 400 , delay: 100}}
+        >
+        </div>
+      {/if}
+      {@render child()}
+    </div>
+  {:else}
+    {@render child()}
+  {/if}
 {/if}
 
 <style>

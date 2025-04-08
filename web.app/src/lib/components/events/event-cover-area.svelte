@@ -21,11 +21,13 @@
     isUploading = false,
     uploadProgress = 0,
     onClose = () => {},
+    hideCloseButton = false,
   } = $props<{
     coverImage: string;
     isUploading: boolean;
     uploadProgress: number;
     onClose: () => void;
+    hideCloseButton?: boolean;
   }>();
 
   // 处理封面上传
@@ -101,15 +103,17 @@
 </div>
 
 <!-- 关闭按钮 -->
-<Button
-  variant="ghost"
-  size="icon"
-  class="absolute left-4 top-4"
-  onclick={handleCloseClick}
-  disabled={isUploading}
->
-  <X class="h-4 w-4 stroke-[3]" />
-</Button>
+{#if !hideCloseButton}
+  <Button
+    variant="ghost"
+    size="icon"
+    class="absolute left-4 top-4"
+    onclick={handleCloseClick}
+    disabled={isUploading}
+  >
+    <X class="h-4 w-4 stroke-[3]" />
+  </Button>
+{/if}
 
 <!-- 事件操作按钮 -->
 <div class="absolute right-4 top-4 flex gap-2">
