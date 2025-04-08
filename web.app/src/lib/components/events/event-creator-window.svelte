@@ -76,7 +76,7 @@
 
   const dispatch = createEventDispatcher();
 
-  let { open = $bindable(false) } = $props();
+  let { open = $bindable(false), event = $bindable(null) } = $props();
 
   // 编辑器文档
   let newDoc = $state<Doc | null>(createEmptyDoc().init());
