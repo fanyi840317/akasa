@@ -1,18 +1,26 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { Button } from "$lib/components/ui/button";
-  import { X, Eye, Copy, Twitter, Facebook, QrCode, Image as ImageIcon } from "lucide-svelte";
+  import {
+    X,
+    Eye,
+    Copy,
+    Twitter,
+    Facebook,
+    QrCode,
+    Image as ImageIcon,
+  } from "lucide-svelte";
 
   const dispatch = createEventDispatcher<{
     coverUpload: void;
     imageError: void;
   }>();
 
-  let { 
+  let {
     coverImage = "",
     isUploading = false,
     uploadProgress = 0,
-    onClose = () => {}
+    onClose = () => {},
   } = $props<{
     coverImage: string;
     isUploading: boolean;
@@ -29,12 +37,12 @@
   function handleImageError() {
     dispatch("imageError");
   }
-  
+
   // 处理关闭按钮点击
   function handleCloseClick() {
     onClose();
   }
-  
+
   // 处理空操作按钮点击
   function handleEmptyAction() {
     // 空操作，仅用于避免事件错误
@@ -105,22 +113,22 @@
 
 <!-- 事件操作按钮 -->
 <div class="absolute right-4 top-4 flex gap-2">
-  <Button variant="ghost" onclick={handleEmptyAction}>
+  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
     <Eye class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" onclick={handleEmptyAction}>
+  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
     <Copy class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" onclick={handleEmptyAction}>
+  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
     <Twitter class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" onclick={handleEmptyAction}>
+  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
     <Facebook class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" onclick={handleEmptyAction}>
+  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
     <QrCode class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" onclick={handleCoverUpload}>
+  <Button variant="ghost" size="icon" onclick={handleCoverUpload}>
     <ImageIcon class="h-4 w-4 stroke-[3]" />
   </Button>
-</div> 
+</div>

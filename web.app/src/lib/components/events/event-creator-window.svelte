@@ -21,6 +21,10 @@
     Circle,
     FileText,
     Send,
+    Plus,
+    Link,
+    Upload,
+    Image,
   } from "lucide-svelte";
   import * as Tabs from "$lib/components/ui/tabs";
   import { Button } from "$lib/components/ui/button";
@@ -57,7 +61,7 @@
     DialogFooter,
     DialogDescription,
   } from "$lib/components/ui/dialog";
-  import { exportDoc } from "$lib/components/editor/affine-editor";
+  import { exportDoc, exportDocToJson } from "$lib/components/editor/affine-editor";
   import type { EventCategory } from "$lib/types/event";
   import { databases, storage } from "$lib/appwrite";
   import { ID } from "appwrite";
@@ -68,6 +72,7 @@
   import EventPropertiesArea from "./event-properties-area.svelte";
   import EventEditorArea from "./event-editor-area.svelte";
   import EventCoverArea from "./event-cover-area.svelte";
+  import CoverSelector from "./cover-selector.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -104,6 +109,14 @@
 
   let isUploading = $state(false);
   let uploadProgress = $state(0);
+
+  // 封面选择器状态
+  let showCoverSelector = $state(false);
+  let coverSelectorTab = $state("my-images");
+  let coverLink = $state("");
+
+  // 添加封面按钮显示状态
+  let showCoverButton = $state(false);
 
   // 初始化事件数据
   function initializeEventData(event: any) {
@@ -384,7 +397,7 @@
     try {
       console.log("newDoc:", newDoc);
       if (newDoc) {
-        exportedDoc = await exportDoc(newDoc);
+        exportedDoc = await exportDocToJson(newDoc);
         console.log("Exported doc:", exportedDoc);
       } else {
         exportedDoc = { content: "" };
@@ -445,6 +458,33 @@
     hasChanges = false;
     open = false;
     dispatch("close");
+  }
+
+  // 处理选择已有图片
+  function handleSelectExistingImage(event: CustomEvent<{ url: string }>) {
+    coverImage = event.detail.url;
+    hasChanges = true;
+    showCoverSelector = false;
+    toast.success("封面已设置");
+  }
+
+  // 处理上传图片
+  function handleCoverUploadFromSelector() {
+    handleCoverUpload();
+    showCoverSelector = false;
+  }
+
+  // 处理链接提交
+  function handleCoverLinkSubmit(event: CustomEvent<{ url: string }>) {
+    coverImage = event.detail.url;
+    hasChanges = true;
+    showCoverSelector = false;
+    toast.success("封面链接已设置");
+  }
+
+  // 处理标题悬停
+  function handleTitleHover(isHovering: boolean) {
+    showCoverButton = isHovering;
   }
 
   onMount(() => {
@@ -528,7 +568,7 @@
         out:fly={{ x: 20, duration: 500 }}
       >
         <!-- 编辑器区域（包含标题和封面） -->
-        <div class="w-[800px]">
+        <div class="w-[800px] relative">
           <EventEditorArea
             {title}
             doc={newDoc}
@@ -539,7 +579,36 @@
             onEditorInput={handleEditorInput}
             onCursorPosition={handleCursorPosition}
             onSave={handleSave}
+            onTitleHover={handleTitleHover}
           />
+          
+          <!-- 添加封面按钮 - 悬停时显示 -->
+          <div 
+            class="absolute -top-2 left-4 opacity-0 transition-opacity duration-200" 
+            class:opacity-100={showCoverButton}
+            onmouseenter={() => showCoverButton = true}
+            onmouseleave={() => showCoverButton = false}
+          >
+            <Popover bind:open={showCoverSelector}>
+              <PopoverTrigger>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  class="gap-1 bg-background/80 backdrop-blur-sm"
+                >
+                  <Plus class="h-3 w-3" />
+                  <span class="text-xs">添加封面</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent class="w-auto p-0" align="start">
+                <CoverSelector 
+                  on:select={handleSelectExistingImage}
+                  on:upload={handleCoverUploadFromSelector}
+                  on:linkSubmit={handleCoverLinkSubmit}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
       <!-- 操作区域 -->
@@ -564,6 +633,7 @@
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
 {/if}
 
 <style>

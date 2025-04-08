@@ -6,7 +6,7 @@
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import type { Doc } from "@blocksuite/store";
 
-  let { 
+  let {
     title = "",
     content = "",
     doc = null,
@@ -17,7 +17,8 @@
     onSave = () => {},
     onEditorClick = () => {},
     onEditorInput = () => {},
-    onCursorPosition = (position: { top: number; left: number }) => {}
+    onCursorPosition = (position: { top: number; left: number }) => {},
+    onTitleHover = (isHovering: boolean) => {},
   } = $props<{
     title: string;
     content?: string;
@@ -30,6 +31,7 @@
     onEditorClick?: () => void;
     onEditorInput?: () => void;
     onCursorPosition?: (position: { top: number; left: number }) => void;
+    onTitleHover?: (isHovering: boolean) => void;
   }>();
 
   // 处理标题变化
@@ -64,29 +66,46 @@
   }
 
   // 处理光标位置变化
-  function handleCursorPosition(event: CustomEvent<{ top: number; left: number }>) {
+  function handleCursorPosition(
+    event: CustomEvent<{ top: number; left: number }>,
+  ) {
     onCursorPosition(event.detail);
   }
-  
+
   // 处理输入事件
   function handleInput(event: Event) {
     const target = event.target as HTMLInputElement;
     onTitleChange(target.value);
   }
-  
+
   // 处理按键事件
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === "Enter") {
       // 处理回车键
     }
   }
+
+  // 处理标题悬停
+  function handleTitleMouseEnter() {
+    onTitleHover(true);
+  }
+
+  // 处理标题离开悬停
+  function handleTitleMouseLeave() {
+    onTitleHover(false);
+  }
 </script>
 
-<div class="w-[800px] h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col">
- 
+<div
+  class="w-[800px] h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col"
+>
   <!-- 标题输入框 -->
-  <div class="py-6 mt-10">
-    <div class="px-16 max-w-4xl mx-auto">
+  <div
+    class="py-6"
+    onmouseenter={handleTitleMouseEnter}
+    onmouseleave={handleTitleMouseLeave}
+  >
+    <div class="px-16 max-w-4xl mx-auto mt-10">
       <div class="flex items-center gap-4">
         <div class="flex-1">
           <input
@@ -130,10 +149,7 @@
         onclick={handleEditorClick}
         oninput={handleEditorInput}
       >
-        <AffineEditor
-          bind:doc={doc}
-          on:cursorPosition={handleCursorPosition}
-        />
+        <AffineEditor bind:doc on:cursorPosition={handleCursorPosition} />
       </div>
     </ScrollArea>
   </div>
@@ -143,8 +159,8 @@
   :global(.event-editor-area .scroll-area-viewport) {
     height: 100%;
   }
-  
+
   :global(.event-editor-area .scroll-area-scrollbar) {
     z-index: 10;
   }
-</style> 
+</style>
