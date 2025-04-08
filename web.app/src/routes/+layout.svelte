@@ -13,6 +13,7 @@
   import { fade } from "svelte/transition";
   import { get, writable } from "svelte/store";
   import { page } from '$app/stores';
+  import AlertDialog from "$lib/components/ui/alert-dialog.svelte";
 
   let isThemeInitialized = false;
 
@@ -42,4 +43,5 @@
   <div out:fade={{ duration: 300 }}>
     {@render children()}
   </div>
+  <AlertDialog />
 {/await}

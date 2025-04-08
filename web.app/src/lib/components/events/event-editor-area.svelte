@@ -7,11 +7,10 @@
   import type { Doc } from "@blocksuite/store";
 
   let {
-    title = "",
+    title = $bindable(""),
     content = "",
     doc = null,
     showAICard = false,
-    onTitleChange = (value: string) => {},
     onContentChange = (content: { content: string }) => {},
     onAIGenerate = () => {},
     onSave = () => {},
@@ -24,7 +23,6 @@
     content?: string;
     doc: Doc | null;
     showAICard: boolean;
-    onTitleChange?: (value: string) => void;
     onContentChange?: (content: { content: string }) => void;
     onAIGenerate?: () => void;
     onSave?: () => void;
@@ -33,12 +31,6 @@
     onCursorPosition?: (position: { top: number; left: number }) => void;
     onTitleHover?: (isHovering: boolean) => void;
   }>();
-
-  // 处理标题变化
-  function handleTitleChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    onTitleChange(target.value);
-  }
 
   // 处理内容变化
   function handleContentChange(event: CustomEvent<{ content: string }>) {
@@ -72,12 +64,6 @@
     onCursorPosition(event.detail);
   }
 
-  // 处理输入事件
-  function handleInput(event: Event) {
-    const target = event.target as HTMLInputElement;
-    onTitleChange(target.value);
-  }
-
   // 处理按键事件
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === "Enter") {
@@ -102,6 +88,8 @@
   <!-- 标题输入框 -->
   <div
     class="py-6"
+    role="button"
+    tabindex="0"
     onmouseenter={handleTitleMouseEnter}
     onmouseleave={handleTitleMouseLeave}
   >
@@ -113,7 +101,6 @@
             placeholder="为你的神秘事件命名..."
             bind:value={title}
             class="event-title-input w-full bg-transparent text-4xl font-semibold border-0 outline-none shadow-none focus:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
-            oninput={handleInput}
           />
         </div>
         <div class="flex items-center gap-2 border-l border-border/40 pl-4">

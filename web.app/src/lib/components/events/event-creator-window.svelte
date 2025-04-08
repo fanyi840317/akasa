@@ -1,52 +1,15 @@
 <script lang="ts">
-  import { fade, fly, slide } from "svelte/transition";
-  import { backInOut, cubicOut } from "svelte/easing";
+  import { fade, fly } from "svelte/transition";
   import { createEventDispatcher, onDestroy, onMount } from "svelte";
   import {
-    X,
-    MapPin,
-    Save,
-    Clock,
-    Tag,
-    Calendar,
-    Image as ImageIcon,
-    Eye,
-    Share2,
-    Twitter,
-    Facebook,
-    QrCode,
-    Copy,
-    Sparkles,
-    CornerDownLeft,
-    Circle,
-    FileText,
-    Send,
     Plus,
-    Link,
-    Upload,
-    Image,
   } from "lucide-svelte";
-  import * as Tabs from "$lib/components/ui/tabs";
   import { Button } from "$lib/components/ui/button";
-  import { Input } from "$lib/components/ui/input";
-  import { ScrollArea } from "$lib/components/ui/scroll-area";
-  import { Separator } from "$lib/components/ui/separator";
-  import { Label } from "$lib/components/ui/label";
-  import AffineEditor from "$lib/components/editor/affine-editor.svelte";
-  import AICard from "$lib/components/ai/ai-card.svelte";
-  import MapPicker from "$lib/components/map/map-picker.svelte";
   import type { LocationData, LocationChangeEvent } from "$lib/components/map";
-  import * as Select from "$lib/components/ui/select";
-  import { cn } from "$lib/utils";
   import { categoryStore } from "$lib/stores/category";
   import { toast } from "svelte-sonner";
   import type { Category } from "$lib/types/category";
-  import { appStore } from "$lib/stores/appState";
   import { auth } from "$lib/stores/auth";
-  import * as Modal from "$lib/components/ui/modal";
-  import EventDetail from "./event-detail.svelte";
-  import EventDetailPanel from "./event-detail-panel.svelte";
-  import { Calendar as CalendarPicker } from "$lib/components/ui/calendar";
   import {
     Popover,
     PopoverContent,
@@ -61,27 +24,24 @@
     DialogFooter,
     DialogDescription,
   } from "$lib/components/ui/dialog";
-  import { exportDoc, exportDocToJson } from "$lib/components/editor/affine-editor";
-  import type { EventCategory } from "$lib/types/event";
-  import { databases, storage } from "$lib/appwrite";
+  import { exportDocToJson, createDocByJson } from "$lib/components/editor/affine-editor";
   import { ID } from "appwrite";
-  import { ImageGravity, ImageFormat } from "appwrite";
   import type { Doc } from "@blocksuite/store";
   import { createEmptyDoc } from "@blocksuite/presets";
-  // import EventTitleArea from "./event-title-area.svelte";
   import EventPropertiesArea from "./event-properties-area.svelte";
   import EventEditorArea from "./event-editor-area.svelte";
   import EventCoverArea from "./event-cover-area.svelte";
   import CoverSelector from "./cover-selector.svelte";
+  import { alertDialog } from "$lib/stores/alert-dialog";
 
   const dispatch = createEventDispatcher();
 
   let { open = $bindable(false), event = $bindable(null) } = $props();
 
   // 编辑器文档
-  let newDoc = $state<Doc | null>(createEmptyDoc().init());
+  let newDoc = $state<Doc | null>(null);
   let locationData: LocationData | null = null;
-  let title = "";
+  let title = $state("");
   let coverImage = $state("");
   let coverFileId = "";
   let selectedCategories: string[] = [];
@@ -119,7 +79,7 @@
   let showCoverButton = $state(false);
 
   // 初始化事件数据
-  function initializeEventData(event: any) {
+  async function initializeEventData(event: any) {
     if (event) {
       title = event.title || "";
       locationData = event.location_data
@@ -138,6 +98,20 @@
           console.error("解析封面数据失败:", e);
           coverImage = "";
           coverFileId = "";
+        }
+      }
+
+      // 初始化编辑器文档
+      if (event.content) {
+        try {
+          console.log("正在从JSON初始化文档内容");
+          const newdoc = await createDocByJson(event.content);
+          if (newdoc) {
+            console.log("文档初始化成功");
+            newDoc = newdoc;
+          }
+        } catch (e) {
+          console.error("初始化编辑器文档失败:", e);
         }
       }
 
@@ -212,7 +186,14 @@
     }
 
     if (hasChanges) {
-      showSaveDialog = true;
+      alertDialog.confirm({
+        title: "保存更改",
+        message: "您有未保存的更改，是否要保存？",
+        confirmText: "保存",
+        cancelText: "放弃",
+        onConfirm: handleSave,
+        onCancel: handleDiscard
+      });
     } else {
       open = false;
       dispatch("close");
@@ -487,16 +468,18 @@
     showCoverButton = isHovering;
   }
 
-  onMount(() => {
+  onMount(async () => {
     showContent = true;
     loadCategories();
+    
     // 如果是在编辑模式下，初始化事件数据
     if (event) {
-      initializeEventData(event);
+      await initializeEventData(event);
     } else {
       // 确保 newDoc 被正确初始化
       console.log("初始化新文档");
       newDoc = createEmptyDoc().init();
+      console.log("编辑器文档初始化后:", newDoc);
     }
   });
 
@@ -573,7 +556,6 @@
             {title}
             doc={newDoc}
             {showAICard}
-            onTitleChange={(value) => (title = value)}
             onAIGenerate={() => (showAICard = !showAICard)}
             onEditorClick={handleEditorClick}
             onEditorInput={handleEditorInput}
@@ -584,6 +566,7 @@
           
           <!-- 添加封面按钮 - 悬停时显示 -->
           <div 
+            role="banner"
             class="absolute -top-2 left-4 opacity-0 transition-opacity duration-200" 
             class:opacity-100={showCoverButton}
             onmouseenter={() => showCoverButton = true}
@@ -619,20 +602,6 @@
       ></div>
     </div>
   </div>
-
-  <!-- 保存提示对话框 -->
-  <Dialog bind:open={showSaveDialog}>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>保存更改</DialogTitle>
-        <DialogDescription>您有未保存的更改，是否要保存？</DialogDescription>
-      </DialogHeader>
-      <DialogFooter class="gap-2">
-        <Button variant="outline" onclick={handleDiscard}>放弃更改</Button>
-        <Button onclick={handleSave}>保存</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
 
 {/if}
 

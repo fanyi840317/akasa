@@ -60,10 +60,14 @@
     try {
       // 创建新的编辑器实例
       editor = new AffineEditorContainer();
+      
+      // 确保doc不为null
       if (!doc) {
+        console.log("创建新的空文档");
         doc = createEmptyDoc().init();
-        
-      } 
+      } else {
+        console.log("使用现有文档:", doc);
+      }
 
       editor.doc = doc;
 
@@ -111,6 +115,7 @@
       // 等待编辑器完全挂载后更新内容
       await editor.updateComplete;
 
+      // 确保编辑器内容可见
       setTimeout(() => {
         const richText = editor?.host?.querySelector("rich-text");
         if (richText) {
@@ -121,6 +126,9 @@
             setTimeout(updateCursorPosition, 100);
           }
         }
+        
+        // 添加调试日志
+        console.log("编辑器初始化完成，文档内容:", doc);
       }, 200);
     } catch (error) {
       console.error("Editor initialization failed:", error);
