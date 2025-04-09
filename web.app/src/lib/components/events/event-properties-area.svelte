@@ -87,7 +87,8 @@
 
 <div class="h-[80vh] flex flex-col justify-start">
   <div class="space-y-4 py-14 ">
-    <Accordion.Root type="single" class="w-full bg-background px-2 rounded-l-lg" >
+    <Accordion.Root type="single" value="event-info" class="w-full bg-background px-2 rounded-l-lg" >
+   
       <!-- 基本信息 -->
       <Accordion.Item value="basic-info">
         <Accordion.Trigger class="flex flex-col items-end gap-1">
@@ -97,7 +98,7 @@
           <div class="space-y-2">
             <div class="flex flex-col items-end gap-1">
               <span class="text-xs text-muted-foreground">创建时间</span>
-              <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2 px-0">
+              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
                 <div class="flex items-center gap-2 text-sm">
                   <Clock class="h-4 w-4 text-muted-foreground" />
                   <span>{formatDate(new Date(createdAt))}</span>
@@ -106,7 +107,7 @@
             </div>
             <div class="flex flex-col items-end gap-1">
               <span class="text-xs text-muted-foreground">最后修改</span>
-              <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2 px-0">
+              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
                 <div class="flex items-center gap-2 text-sm">
                   <Clock class="h-4 w-4 text-muted-foreground" />
                   <span>{formatDate(new Date(lastModified))}</span>
@@ -115,7 +116,7 @@
             </div>
             <div class="flex flex-col items-end gap-1">
               <span class="text-xs text-muted-foreground">创建者</span>
-              <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2 px-0">
+              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
                 <div class="flex items-center gap-2 text-sm">
                   {#if $auth.user?.prefs?.avatar}
                     <img src={$auth.user.prefs.avatar as string} alt={$auth.user.name} class="h-4 w-4 rounded-full" />
@@ -131,74 +132,73 @@
           </div>
         </Accordion.Content>
       </Accordion.Item>
-
-      <!-- 事件信息 -->
-      <Accordion.Item value="event-info">
-        <Accordion.Trigger class="flex flex-col items-end gap-1">
-          <span class="text-xs text-muted-foreground">事件信息</span>
-        </Accordion.Trigger>
-        <Accordion.Content>
-          <div class="space-y-2">
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">发生时间</span>
-              <Popover>
-                <PopoverTrigger>
-                  <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2 px-0">
-                    <div class:opacity-50={!eventDate}>
-                      <Calendar class="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <span class:opacity-50={!eventDate}>{formatDate(eventDate)}</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent class="w-auto p-0" align="end">
-                  <!-- <CalendarPicker
-                    value={eventDate ? [eventDate] : undefined}
-                    onValueChange={(dates) => handleDateSelect(dates?.[0])}
-                    initialFocus
-                  /> -->
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">发生地点</span>
-              <Popover>
-                <PopoverTrigger>
-                  <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2 px-0" onclick={onLocationSelect}>
-                    <div class:opacity-50={!locationData?.address}>
-                      <MapPin class="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <span class:opacity-50={!locationData?.address}>{locationData?.address || "未设置"}</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent class="w-[400px] p-0" align="end">
-                  <div class="w-full h-[300px] bg-muted rounded-lg">
-                    <!-- 这里可以添加地图组件 -->
-                    <div class="p-4 text-center text-muted-foreground">
-                      地图选择器
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">事件分类</span>
-              <Select.Root type="single" value={selectedCategories.length ? selectedCategories[0] : ""} onValueChange={onCategorySelect}>
-                <Select.Trigger class="w-auto justify-end gap-2 h-auto py-2 px-2 border-none ">
-                  <div class:opacity-50={!selectedCategories.length}>
-                    <Tag class="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <span class:opacity-50={!selectedCategories.length}>{selectedCategories.join(",") || "未分类"}</span>
-                </Select.Trigger>
-                <Select.Content>
-                  {#each categories as category}
-                    <Select.Item value={category.$id || ""}>{category.name.zh}</Select.Item>
-                  {/each}
-                </Select.Content>
-              </Select.Root>
-            </div>
-          </div>
-        </Accordion.Content>
-      </Accordion.Item>
+   <!-- 事件信息 -->
+   <Accordion.Item value="event-info">
+    <Accordion.Trigger class="flex flex-col items-end gap-1">
+      <span class="text-xs text-muted-foreground">事件信息</span>
+    </Accordion.Trigger>
+    <Accordion.Content>
+      <div class="space-y-2">
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-xs text-muted-foreground">发生时间</span>
+          <Popover>
+            <PopoverTrigger>
+              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
+                <div class:opacity-50={!eventDate}>
+                  <Calendar class="h-4 w-4 text-muted-foreground" />
+                </div>
+                <span class:opacity-50={!eventDate}>{formatDate(eventDate)}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent class="w-auto p-0" align="end">
+              <!-- <CalendarPicker
+                value={eventDate ? [eventDate] : undefined}
+                onValueChange={(dates) => handleDateSelect(dates?.[0])}
+                initialFocus
+              /> -->
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-xs text-muted-foreground">发生地点</span>
+          <Popover>
+            <PopoverTrigger>
+              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2" onclick={onLocationSelect}>
+                <div class:opacity-50={!locationData?.address}>
+                  <MapPin class="h-4 w-4 text-muted-foreground" />
+                </div>
+                <span class:opacity-50={!locationData?.address}>{locationData?.address || "未设置"}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent class="w-[400px] p-0" align="end">
+              <div class="w-full h-[300px] bg-muted rounded-lg">
+                <!-- 这里可以添加地图组件 -->
+                <div class="p-4 text-center text-muted-foreground">
+                  地图选择器
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-xs text-muted-foreground">事件分类</span>
+          <Select.Root type="single" value={selectedCategories.length ? selectedCategories[0] : ""} onValueChange={onCategorySelect}>
+            <Select.Trigger class="justify-end gap-2 h-auto py-1 px-2 border-none">
+              <div class:opacity-50={!selectedCategories.length}>
+                <Tag class="h-4 w-4 text-muted-foreground" />
+              </div>
+              <span class:opacity-50={!selectedCategories.length}>{selectedCategories.join(",") || "未分类"}</span>
+            </Select.Trigger>
+            <Select.Content>
+              {#each categories as category}
+                <Select.Item value={category.$id || ""}>{category.name.zh}</Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+      </div>
+    </Accordion.Content>
+  </Accordion.Item>
 
       <!-- 维度信息 -->
       <Accordion.Item value="dimensions">
@@ -226,7 +226,7 @@
           <div class="space-y-2">
             <div class="flex flex-col items-end gap-1">
               <span class="text-xs text-muted-foreground">字数统计</span>
-              <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2 px-0">
+              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
                 <div class="flex items-center gap-2 text-sm">
                   <FileText class="h-4 w-4 text-muted-foreground" />
                   <span>{0} 字</span>
@@ -235,7 +235,7 @@
             </div>
             <div class="flex flex-col items-end gap-1">
               <span class="text-xs text-muted-foreground">证据数量</span>
-              <Button variant="ghost" class="w-full justify-end gap-2 h-auto py-2 px-0">
+              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
                 <div class:opacity-50={evidenceCount === 0}>
                   <ImageIcon class="h-4 w-4 text-muted-foreground" />
                 </div>
