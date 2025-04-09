@@ -354,6 +354,7 @@
     display: none;
   }
 
+
   :global(.user-location-marker) {
     width: 15px;
     height: 15px;

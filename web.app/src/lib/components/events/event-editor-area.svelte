@@ -1,11 +1,13 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
-  import { Sparkles, Save } from "lucide-svelte";
+  import { Sparkles, Save, MapPin } from "lucide-svelte";
   import AffineEditor from "$lib/components/editor/affine-editor.svelte";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import type { Doc } from "@blocksuite/store";
-    import MapPicker from "../map/map-picker.svelte";
+  import MapBase from "$lib/components/map/map-base.svelte";
+  import type { LocationData } from "$lib/components/map/types";
 
   let {
     title = $bindable(""),
@@ -18,6 +20,8 @@
     onEditorInput = () => {},
     onCursorPosition = (position: { top: number; left: number }) => {},
     onTitleHover = (isHovering: boolean) => {},
+    locationData = $bindable(null),
+    onLocationChange = (event: CustomEvent<LocationData>) => {},
   } = $props<{
     title: string;
     content?: string;
@@ -30,6 +34,8 @@
     onEditorInput?: () => void;
     onCursorPosition?: (position: { top: number; left: number }) => void;
     onTitleHover?: (isHovering: boolean) => void;
+    locationData?: LocationData | null;
+    onLocationChange?: (event: CustomEvent<LocationData>) => void;
   }>();
 
   // 处理内容变化
@@ -83,52 +89,74 @@
 </script>
 
 <div
-  class="w-[800px] py-10 h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col"
+  class="w-[840px] py-10 h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col"
 >
   <!-- 标题输入框 -->
   <div
-    class="py-6 px-16 flex  items-center gap-4"
+    class="py-6 px-16 flex items-center gap-4"
     role="button"
     tabindex="0"
     onmouseenter={handleTitleMouseEnter}
     onmouseleave={handleTitleMouseLeave}
   >
-  <div class="flex-1">
-    <input
-      type="text"
-      placeholder="为你的神秘事件命名..."
-      bind:value={title}
-      class="event-title-input w-full bg-transparent text-4xl font-semibold border-0 outline-none shadow-none focus:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
-    />
+    <div class="flex-1">
+      <input
+        type="text"
+        placeholder="为你的神秘事件命名..."
+        bind:value={title}
+        class="event-title-input w-full bg-transparent text-4xl font-semibold border-0 outline-none shadow-none focus:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
+      />
+    </div>
+    <div class="flex items-center gap-2 border-l border-border/40 pl-4">
+      <!-- <Button
+        variant="ghost"
+        size="icon"
+        class="h-8 w-8"
+        onclick={handleAIGenerate}
+      >
+        <Sparkles class="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        class="h-8 w-8"
+        onclick={handleSave}
+      >
+        <Save class="h-4 w-4" />
+      </Button> -->
+    </div>
   </div>
-  <div class="flex items-center gap-2 border-l border-border/40 pl-4">
-    <Button
-      variant="ghost"
-      size="icon"
-      class="h-8 w-8"
-      onclick={handleAIGenerate}
-    >
-      <Sparkles class="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      class="h-8 w-8"
-      onclick={handleSave}
-    >
-      <Save class="h-4 w-4" />
-    </Button>
-  </div>
+
+  <!-- 地图组件 - 右上角 -->
+  <div class="absolute top-0 right-0 z-10">
+    <div class="w-[160px] bg-card/10 rounded-lg overflow-hidden border border-border/50">
+      <div class="h-[100px] p-2">
+        <div class="w-full h-full rounded-t-sm overflow-hidden map-container">
+          <MapBase
+            {locationData}
+            on:locationChange={onLocationChange}
+            showUserLocation={false}
+          />
+        </div>
+      </div>
+      <div class="p-2  text-xs text-muted-foreground border-border/50 flex items-center gap-1">
+        <MapPin class="h-3 w-3" />
+        {#if locationData?.address}
+          {locationData.address}
+        {:else}
+          未设置位置
+        {/if}
+      </div>
+    </div>
   </div>
 
   <!-- 编辑器区域 -->
   <div class="flex-1 relative overflow-hidden">
-    
     <!-- <MapPicker 
     placeholder="选择神秘事件发生的地点..."
     autoRequest={false}
   /> -->
-    <ScrollArea class="w-full h-full">
+    <ScrollArea class="w-full h-full pr-10">
       <div
         role="button"
         tabindex="0"
@@ -150,5 +178,17 @@
 
   :global(.event-editor-area .scroll-area-scrollbar) {
     z-index: 10;
+  }
+  
+  :global(.mapboxgl-map) {
+    border-radius: 2px !important;
+  }
+  
+  :global(.map-container .mapboxgl-canvas) {
+    border-radius: 2px !important;
+  }
+  
+  :global(.map-container .mapboxgl-canvas-container) {
+    border-radius: 2px !important;
   }
 </style>
