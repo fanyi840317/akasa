@@ -31,7 +31,7 @@
     let hasActions = actions !== undefined;
 </script>
 
-<header class="flex h-16 shrink-0 items-center gap-2" class:justify-between={hasActions} class:justify-start={!hasActions}
+<header class="flex h-12 shrink-0 items-center gap-2" class:justify-between={hasActions} class:justify-start={!hasActions}
 >
     <div class="flex items-center gap-2 px-4">
         <Sidebar.Trigger class="-ml-1" />

@@ -46,80 +46,84 @@
   }
 </script>
 
-<!-- 封面区域 -->
-<div class="absolute top-0 left-0 right-0 h-[200px] overflow-hidden">
-  {#if coverImage}
-    <img
-      src={coverImage}
-      alt="封面"
-      class="w-full h-full object-cover"
-      onerror={handleImageError}
-    />
-  {/if}
+<!-- 父容器 -->
+<div class="flex w-full">
+  <!-- 封面区域 -->
+  <div class="relative w-full h-[200px] overflow-hidden">
+    {#if coverImage}
+      <img
+        src={coverImage}
+        alt="封面"
+        class="w-full h-full object-cover"
+        onerror={handleImageError}
+      />
+    {/if}
 
-  <!-- 上传进度指示器 - 封面区右下角 -->
-  {#if isUploading}
-    <div
-      class="absolute bottom-4 right-4 bg-background/90 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3 flex items-center gap-2 z-50"
-    >
-      <div class="relative w-6 h-6">
-        <svg class="w-full h-full" viewBox="0 0 100 100">
-          <circle
-            class="text-muted-foreground/20"
-            stroke-width="6"
-            stroke="currentColor"
-            fill="transparent"
-            r="40"
-            cx="50"
-            cy="50"
-          />
-          <circle
-            class="text-primary"
-            stroke-width="6"
-            stroke-dasharray={251.2}
-            stroke-dashoffset={251.2 - (251.2 * uploadProgress) / 100}
-            stroke-linecap="round"
-            stroke="currentColor"
-            fill="transparent"
-            r="40"
-            cx="50"
-            cy="50"
-          />
-        </svg>
-        <div class="absolute inset-0 flex items-center justify-center">
-          <span class="text-[10px] font-medium"
-            >{Math.round(uploadProgress)}%</span
-          >
+    <!-- 上传进度指示器 - 封面区右下角 -->
+    {#if isUploading}
+      <div
+        class="absolute bottom-4 right-4 bg-background/90 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3 flex items-center gap-2 z-50"
+      >
+        <div class="relative w-6 h-6">
+          <svg class="w-full h-full" viewBox="0 0 100 100">
+            <circle
+              class="text-muted-foreground/20"
+              stroke-width="6"
+              stroke="currentColor"
+              fill="transparent"
+              r="40"
+              cx="50"
+              cy="50"
+            />
+            <circle
+              class="text-primary"
+              stroke-width="6"
+              stroke-dasharray={251.2}
+              stroke-dashoffset={251.2 - (251.2 * uploadProgress) / 100}
+              stroke-linecap="round"
+              stroke="currentColor"
+              fill="transparent"
+              r="40"
+              cx="50"
+              cy="50"
+            />
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-[10px] font-medium"
+              >{Math.round(uploadProgress)}%</span
+            >
+          </div>
         </div>
+        <div class="text-xs font-medium">上传中...</div>
       </div>
-      <div class="text-xs font-medium">上传中...</div>
+    {/if}
+
+    <!-- 操作按钮区域 -->
+    <div class="absolute bg-background/50 inset-0 flex items-start justify-between p-2">
+      <!-- 关闭按钮 -->
+      {#if !hideCloseButton}
+        <Button
+          variant="ghost"
+          size="icon"
+          class="bg-background/50"
+          onclick={handleCloseClick}
+          disabled={isUploading}
+        >
+          <X class="h-4 w-4 stroke-[3]" />
+        </Button>
+      {/if}
+
+      <!-- 事件操作按钮 -->
+      {#if !hideActionButtons}
+        <EventActionButtons 
+          onCoverUpload={handleCoverUpload}
+          onShare={handleEmptyAction}
+          onCopy={handleEmptyAction}
+          onTwitter={handleEmptyAction}
+          onFacebook={handleEmptyAction}
+          onQrCode={handleEmptyAction}
+        />
+      {/if}
     </div>
-  {/if}
-</div>
-
-<!-- 关闭按钮 -->
-{#if !hideCloseButton}
-  <Button
-    variant="ghost"
-    size="icon"
-    class="absolute left-4 top-4"
-    onclick={handleCloseClick}
-    disabled={isUploading}
-  >
-    <X class="h-4 w-4 stroke-[3]" />
-  </Button>
-{/if}
-
-<!-- 事件操作按钮 -->
-{#if !hideActionButtons}
-  <div class="absolute right-4 top-4">
-    <EventActionButtons 
-      onCoverUpload={handleCoverUpload}
-      onShare={handleEmptyAction}
-      onCopy={handleEmptyAction}
-      onTwitter={handleEmptyAction}
-      onFacebook={handleEmptyAction}
-      onQrCode={handleEmptyAction}
-    />
   </div>
-{/if}
+</div>

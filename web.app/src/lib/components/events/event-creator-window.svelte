@@ -453,7 +453,7 @@
 {#snippet child()}
   {#if showContent}
     <!-- 使用封面区域组件 -->
-    <div 
+    <div class="flex"
       in:fly={{ y: 20, duration: 500, delay: 200 }}
       out:fly={{ y: 20, duration: 500 }}
     >

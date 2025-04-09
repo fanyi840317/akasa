@@ -11,22 +11,22 @@
 </script>
 
 <div class="flex gap-2">
-  <Button variant="ghost" size="icon" onclick={onShare}>
+  <Button variant="ghost" class="bg-background/50" size="icon" onclick={onShare}>
     <Eye class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" size="icon" onclick={onCopy}>
+  <Button variant="ghost" class="bg-background/50" size="icon" onclick={onCopy}>
     <Copy class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" size="icon" onclick={onTwitter}>
+  <Button variant="ghost" class="bg-background/50" size="icon" onclick={onTwitter}>
     <Twitter class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" size="icon" onclick={onFacebook}>
+  <Button variant="ghost" class="bg-background/50" size="icon" onclick={onFacebook}>
     <Facebook class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" size="icon" onclick={onQrCode}>
+  <Button variant="ghost" class="bg-background/50"size="icon" onclick={onQrCode}>
     <QrCode class="h-4 w-4 stroke-[3]" />
   </Button>
-  <Button variant="ghost" size="icon" onclick={onCoverUpload}>
+  <Button variant="ghost" class="bg-background/50" size="icon" onclick={onCoverUpload}>
     <ImageIcon class="h-4 w-4 stroke-[3]" />
   </Button>
 </div> 
