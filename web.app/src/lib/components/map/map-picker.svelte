@@ -18,8 +18,12 @@
   import MapBase from "./map-base.svelte";
   import type { LocationData, LocationChangeEvent } from ".";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
-  import { getCurrentLocation, reverseGeocode, getLocationData } from '$lib/services/location';
-    import { Card } from "../ui/card";
+  import {
+    getCurrentLocation,
+    reverseGeocode,
+    getLocationData,
+  } from "$lib/services/location";
+  import { Card } from "../ui/card";
 
   interface Props {
     locationData?: LocationData;
@@ -29,7 +33,14 @@
     shouldRequest?: boolean;
   }
 
-  let { locationData = $bindable(null), placeholder = "选择位置", isLocating = false, autoRequest = true, shouldRequest = false } = $props();
+  let {
+    locationData = $bindable(null),
+    placeholder = "选择位置",
+    isLocating = false,
+    autoRequest = true,
+    shouldRequest = false,
+    class:className = "",
+  } = $props();
 
   const dispatch = createEventDispatcher<{
     locationChange: LocationChangeEvent;
@@ -87,7 +98,13 @@
 
   // 计算属性
   const selectedValue = $derived(
-    locationData ? searchResults.find((r) => r.value === `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`)?.label ?? placeholder : placeholder
+    locationData
+      ? (searchResults.find(
+          (r) =>
+            r.value ===
+            `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`,
+        )?.label ?? placeholder)
+      : placeholder,
   );
 
   // 事件处理函数
@@ -273,10 +290,17 @@
     try {
       const result = await getCurrentLocation();
       locationData = result.location;
-      handleLocationUpdate(result.address, result.location.longitude, result.location.latitude);
-      
+      handleLocationUpdate(
+        result.address,
+        result.location.longitude,
+        result.location.latitude,
+      );
+
       if (mapComponent) {
-        mapComponent.setLocation(result.location.longitude, result.location.latitude);
+        mapComponent.setLocation(
+          result.location.longitude,
+          result.location.latitude,
+        );
       }
     } catch (error) {
       console.error("获取位置失败:", error);
@@ -319,19 +343,18 @@
   // 初始化位置数据
   onMount(async () => {
     if (!autoRequest) return;
-    
+
     try {
-        const data = await getLocationData();
-        locationData = data;
+      const data = await getLocationData();
+      locationData = data;
     } catch (error) {
-        console.error("初始化位置失败:", error);
-        locationData = { longitude: 104.06, latitude: 30.67 }; // 设置默认值
+      console.error("初始化位置失败:", error);
+      locationData = { longitude: 104.06, latitude: 30.67 }; // 设置默认值
     }
   });
 </script>
 
 <div class="relative w-full h-full">
-  
   <div class="absolute top-0 left-0 right-0 px-2">
     <Popover.Root bind:open={isOpen}>
       <Popover.Trigger bind:ref={triggerRef}>
@@ -344,7 +367,9 @@
             aria-expanded={isOpen}
           >
             <MapPin class="h-4 text-primary/30 flex-shrink-0 mr-0" />
-            <span class="truncate text-primary/50 max-w-[85%] text-xs">{selectedValue}</span>
+            <span class="truncate text-primary/50 max-w-[85%] text-xs"
+              >{selectedValue}</span
+            >
           </Button>
         {/snippet}
       </Popover.Trigger>
@@ -390,7 +415,10 @@
                     <Check
                       class={cn(
                         "h-4 w-4 text-primary flex-shrink-0",
-                        locationData ? `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}` !== result.value && "text-transparent" : "text-transparent"
+                        locationData
+                          ? `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}` !==
+                              result.value && "text-transparent"
+                          : "text-transparent",
                       )}
                     />
                     <span class="text-sm truncate">{result.label}</span>
@@ -407,40 +435,40 @@
   <div class="absolute inset-0 w-full h-full py-6 pointer-events-none">
     <Card class="w-full h-full rounded-b-xl overflow-hidden">
       <MapBase
-      bind:this={mapComponent}
-      {locationData}
-      on:locationDataChange={(e) => {
-        locationData = e.detail;
-        if (locationData) {
-          handleLocationUpdate(
-            `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`,
-            locationData.longitude,
-            locationData.latitude,
-          );
-        }
-      }}
-      onClick={handleMapClick}
-      zoom={13}
-      showUserLocation={true}
-    />
+        bind:this={mapComponent}
+        {locationData}
+        on:locationDataChange={(e) => {
+          locationData = e.detail;
+          if (locationData) {
+            handleLocationUpdate(
+              `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`,
+              locationData.longitude,
+              locationData.latitude,
+            );
+          }
+        }}
+        onClick={handleMapClick}
+        zoom={13}
+        showUserLocation={true}
+      />
     </Card>
   </div>
 
   <!-- 控件层 -->
   <!-- 顶部搜索框 -->
 
-    <!-- 底部定位按钮 -->
-    <div class="absolute bottom-8 right-0 p-1">
-      <Button
-        variant="outline"
-        size="icon"
-        class="h-8 w-8 hover:bg-background/50 transition-colors bg-muted backdrop-blur-sm"
-        onclick={() => handleGetCurrentLocation()}
-        title="获取当前位置"
-      >
-        <Locate class="h-4 w-4 text-primary/70" />
-      </Button>
-    </div>
+  <!-- 底部定位按钮 -->
+  <div class="absolute bottom-8 right-0 p-1">
+    <Button
+      variant="outline"
+      size="icon"
+      class="h-8 w-8 hover:bg-background/50 transition-colors bg-muted backdrop-blur-sm"
+      onclick={() => handleGetCurrentLocation()}
+      title="获取当前位置"
+    >
+      <Locate class="h-4 w-4 text-primary/70" />
+    </Button>
+  </div>
 </div>
 
 <style>
