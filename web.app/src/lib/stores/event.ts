@@ -156,6 +156,23 @@ const createEventStore = () => {
         updateEvent: async (eventId: string, eventData: Partial<Event>) => {
             update(state => ({ ...state, eventLoading: true, error: null }));
             try {
+                // 验证事件数据
+                if (!eventData.title?.trim()) {
+                    toast.error(get(_)("validation.title_required"));
+                    return null;
+                }
+
+                if (!eventData.content?.trim()) {
+                    toast.error(get(_)("validation.content_required"));
+                    return null;
+                }
+
+                const user = get(auth).user;
+                if (!user) {
+                    toast.error(get(_)("validation.user_not_logged_in"));
+                    return null;
+                }
+
                 const updatedEvent = await databases.updateDocument(
                     databaseId,
                     eventsCollectionId,

@@ -86,8 +86,8 @@
 </script>
 
 <div class="h-[80vh] flex flex-col justify-start">
-  <div class="space-y-4 py-14">
-    <Accordion.Root type="single" class="w-full" >
+  <div class="space-y-4 py-14 ">
+    <Accordion.Root type="single" class="w-full bg-background px-2 rounded-l-lg" >
       <!-- 基本信息 -->
       <Accordion.Item value="basic-info">
         <Accordion.Trigger class="flex flex-col items-end gap-1">

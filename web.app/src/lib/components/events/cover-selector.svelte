@@ -101,7 +101,7 @@
         {:else}
           {#each coverImages as imageUrl}
             <div 
-              class="aspect-video overflow-hidden cursor-pointer hover:border-2 hover:border-primary" 
+              class="aspect-video overflow-hidden rounded-lg cursor-pointer hover:border-1 hover:border-primary" 
               onclick={() => handleSelectExistingImage(imageUrl)}
             >
               <img src={imageUrl} alt="封面图片" class="w-full h-full object-cover" />

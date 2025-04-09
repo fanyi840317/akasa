@@ -2,19 +2,32 @@
     import type { Event } from "$lib/types/event";
     import { Button } from "$lib/components/ui/button";
     import { ScrollArea } from "$lib/components/ui/scroll-area";
-    import { Calendar, MapPin, Users, Clock, Share2, Heart, Navigation } from "lucide-svelte";
+    import {
+        Calendar,
+        MapPin,
+        Users,
+        Clock,
+        Share2,
+        Heart,
+        Navigation,
+    } from "lucide-svelte";
     import { Badge } from "$lib/components/ui/badge";
     import { Separator } from "$lib/components/ui/separator";
-    import { Avatar, AvatarImage, AvatarFallback } from "$lib/components/ui/avatar";
+    import {
+        Avatar,
+        AvatarImage,
+        AvatarFallback,
+    } from "$lib/components/ui/avatar";
     import { Card } from "$lib/components/ui/card";
     import { fly } from "svelte/transition";
     import { onMount } from "svelte";
     import { Client, Storage } from "appwrite";
-    import { ImageGravity, ImageFormat } from 'appwrite';
+    import { ImageGravity, ImageFormat } from "appwrite";
     import AffineEditor from "$lib/components/editor/affine-editor.svelte";
     import { createEmptyDoc } from "@blocksuite/presets";
     import type { Doc } from "@blocksuite/store";
     import { createDocByJson } from "../editor/affine-editor";
+    import EventEditorArea from "./event-editor-area.svelte";
 
     let { event } = $props<{ event: Event }>();
 
@@ -34,52 +47,57 @@
     const storage = new Storage(client);
 
     client
-        .setEndpoint('https://cloud.appwrite.io/v1')
-        .setProject('67f13e1d003e1c7ea764');
+        .setEndpoint("https://cloud.appwrite.io/v1")
+        .setProject("67f13e1d003e1c7ea764");
 
     $effect(() => {
-        console.log('Event:', event);
+        console.log("Event:", event);
         if (event) {
             title = event.title;
             content = event.content;
             location = event.location;
             selectedCategories = event.categories || [];
             date = event.date ? new Date(event.date) : undefined;
-            console.log('Event cover data:', event.cover);
-            
+            console.log("Event cover data:", event.cover);
+
             if (event.cover) {
                 try {
                     const coverData = JSON.parse(event.cover);
-                    console.log('Parsed cover data:', coverData);
-                    
+                    console.log("Parsed cover data:", coverData);
+
                     // 直接使用 coverData.url 作为图片 URL
                     if (coverData.url) {
                         coverImageUrl = coverData.url;
-                        console.log('Cover image URL set to:', coverImageUrl);
+                        console.log("Cover image URL set to:", coverImageUrl);
                     } else {
-                        console.error('No URL found in cover data');
+                        console.error("No URL found in cover data");
                     }
                 } catch (e) {
-                    console.error('Failed to parse cover data:', e);
-                    console.error('Raw cover data:', event.cover);
+                    console.error("Failed to parse cover data:", e);
+                    console.error("Raw cover data:", event.cover);
                 }
             }
-            locationData = event.location_data ? JSON.parse(event.location_data) : null;
-            
+            locationData = event.location_data
+                ? JSON.parse(event.location_data)
+                : null;
+
             // 初始化编辑器文档
             if (content) {
                 try {
                     // 创建新文档
-                    createDocByJson(content).then((newdoc)=>{
+                    createDocByJson(content).then((newdoc) => {
                         if (newdoc) {
                             doc = newdoc;
-                            doc.awarenessStore.setReadonly(doc.blockCollection, true);
+                            doc.awarenessStore.setReadonly(
+                                doc.blockCollection,
+                                true,
+                            );
                         }
                     });
                     // 这里应该设置文档内容，但需要根据 AffineEditor 的 API 来实现
                     // 可能需要使用 importDoc 或其他方法
                 } catch (e) {
-                    console.error('Failed to initialize editor document:', e);
+                    console.error("Failed to initialize editor document:", e);
                 }
             }
         }
@@ -90,7 +108,7 @@
             try {
                 mapLocation = JSON.parse(event.location_data);
             } catch (e) {
-                console.error('Failed to parse location data:', e);
+                console.error("Failed to parse location data:", e);
             }
         }
     });
@@ -108,7 +126,10 @@
 
     function handleNavigate() {
         if (mapLocation) {
-            window.open(`https://uri.amap.com/navigation?to=${mapLocation.lng},${mapLocation.lat},${encodeURIComponent(event.title)}&mode=car&coordinate=gaode`, '_blank');
+            window.open(
+                `https://uri.amap.com/navigation?to=${mapLocation.lng},${mapLocation.lat},${encodeURIComponent(event.title)}&mode=car&coordinate=gaode`,
+                "_blank",
+            );
         }
     }
 </script>
@@ -117,20 +138,24 @@
     <!-- 封面区域 -->
     <div class="relative h-[240px] bg-muted" in:fly={{ y: 20, duration: 300 }}>
         {#if coverImageUrl}
-            <img 
-                src={coverImageUrl} 
-                alt={event.title} 
+            <img
+                src={coverImageUrl}
+                alt={event.title}
                 class="w-full h-full object-cover"
             />
         {/if}
-        <div class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-        
+        <div
+            class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
+        />
+
         <!-- 标题和操作按钮 -->
         <div class="absolute bottom-0 left-0 right-0 p-6">
             <div class="flex items-start justify-between">
                 <div class="flex-1">
                     <h1 class="text-2xl font-semibold mb-2">{event.title}</h1>
-                    <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div
+                        class="flex items-center gap-4 text-sm text-muted-foreground"
+                    >
                         <div class="flex items-center gap-1">
                             <Clock class="h-4 w-4" />
                             <span>{formatDate(event.date)}</span>
@@ -164,14 +189,23 @@
             <div class="flex items-center gap-3">
                 <Avatar class="h-8 w-8">
                     {#if event.creator_avatar}
-                        <AvatarImage src={event.creator_avatar} alt={event.creator_name || '创建者'} />
-                        <AvatarFallback>{event.creator_name?.[0] || '?'}</AvatarFallback>
+                        <AvatarImage
+                            src={event.creator_avatar}
+                            alt={event.creator_name || "创建者"}
+                        />
+                        <AvatarFallback
+                            >{event.creator_name?.[0] || "?"}</AvatarFallback
+                        >
                     {:else}
-                        <AvatarFallback class="bg-primary/10 text-primary">{event.creator_name?.[0] || '?'}</AvatarFallback>
+                        <AvatarFallback class="bg-primary/10 text-primary"
+                            >{event.creator_name?.[0] || "?"}</AvatarFallback
+                        >
                     {/if}
                 </Avatar>
                 <div>
-                    <div class="font-medium">{event.creator_name || '未知创建者'}</div>
+                    <div class="font-medium">
+                        {event.creator_name || "未知创建者"}
+                    </div>
                     <div class="text-sm text-muted-foreground">
                         创建于 {formatDate(event.$createdAt)}
                     </div>
@@ -184,9 +218,8 @@
             <div class="prose dark:prose-invert max-w-none">
                 {#if doc}
                     <div class="h-[500px] border rounded-md overflow-hidden">
-                        <AffineEditor
-                            bind:doc={doc}
-                        />
+                        <AffineEditor bind:doc />
+                        <!-- <EventEditorArea {title} {doc} showAICard={false} /> -->
                     </div>
                 {:else if event.content}
                     <p class="text-muted-foreground">正在加载内容...</p>
@@ -209,7 +242,9 @@
                             }]}
                             class="w-full h-full"
                         /> -->
-                        <div class="w-full h-full bg-muted flex items-center justify-center">
+                        <div
+                            class="w-full h-full bg-muted flex items-center justify-center"
+                        >
                             <p class="text-muted-foreground">地图加载中...</p>
                         </div>
                         <Button
@@ -240,4 +275,4 @@
         pointer-events: none;
         user-select: none;
     }
-</style> 
+</style>

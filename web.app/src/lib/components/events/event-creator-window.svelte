@@ -86,6 +86,7 @@
 
   // 添加封面按钮显示状态
   let showCoverButton = $state(false);
+  let showEditor = $state(event?.content ? false : true);
 
   // 初始化事件数据
   async function initializeEventData(event: any) {
@@ -114,10 +115,11 @@
       if (event.content) {
         try {
           console.log("正在从JSON初始化文档内容");
-          const newdoc = await createDocByJson(event.content);
-          if (newdoc) {
+          const doc = await createDocByJson(event.content);
+          if (doc) {
             console.log("文档初始化成功");
-            newDoc = newdoc;
+            newDoc = doc;
+            showEditor = true;
           }
         } catch (e) {
           console.error("初始化编辑器文档失败:", e);
@@ -137,11 +139,6 @@
       month: "2-digit",
       day: "2-digit",
     });
-  }
-
-  // 处理标题变化
-  function handleTitleChange(event: CustomEvent<string>) {
-    title = event.detail;
   }
 
   // 处理 AI 生成
@@ -218,16 +215,12 @@
     console.log("ai-card 位置:");
     console.log(position);
     if (position && position.top > 0 && position.left > 0) {
-      if (cursorPosition.top === 0 && cursorPosition.left === 0) {
-        // 计算 AI 面板的位置，考虑右侧面板的影响
-        const baseLeft = position.left;
-        const adjustedLeft = showEventDetail ? baseLeft - 400 : baseLeft; // 如果右侧面板显示，向左偏移
-        cursorPosition = {
-          top: position.top + 40,
-          left: baseLeft + 100,
-        };
-        showAICard = true;
-      }
+      // 直接使用传入的top和left属性
+      cursorPosition = {
+        top: position.top,
+        left: position.left
+      };
+      showAICard = true;
     }
   }
 
@@ -377,64 +370,25 @@
 
   // 处理保存
   async function handleSave() {
-    if (!title?.trim()) {
-      toast.error("请输入事件标题");
-      return;
-    }
-
     // 检查文档内容
-    let exportedDoc;
-    try {
-      console.log("newDoc:", newDoc);
-      if (newDoc) {
-        exportedDoc = await exportDocToJson(newDoc);
-        console.log("Exported doc:", exportedDoc);
-      } else {
-        exportedDoc = { content: "" };
-      }
-    } catch (error) {
-      console.error("导出文档失败:", error);
-      exportedDoc = { content: "" };
-    }
-
-    if (!exportedDoc?.content?.trim()) {
-      toast.error("请输入事件内容");
-      return;
-    }
-
-    if (title.length > 100) {
-      toast.error("标题长度不能超过100个字符");
-      return;
-    }
-
-    isPublishing = true;
-    try {
-      const eventData = {
-        title: title.trim(),
-        content: exportedDoc.content.trim(),
-        location: locationData?.address || "",
-        categories: selectedCategories,
-        date: eventDate?.toISOString() || "",
-        user_id: $auth.user?.$id || "",
-        cover: JSON.stringify({
-          fileId: coverFileId,
-          url: coverImage,
-        }),
-        location_data: locationData ? JSON.stringify(locationData) : "",
-      };
-
-      const result = await eventStore.createEvent(eventData);
-      if (result) {
-        toast.success("事件保存成功！");
-        hasChanges = false;
-        open = false;
-        dispatch("close", { result });
-      }
-    } catch (error: any) {
-      console.error("保存事件失败:", error);
-      toast.error(error.message || "保存事件失败");
-    } finally {
-      isPublishing = false;
+    let exportedDoc = newDoc ? await exportDocToJson(newDoc) : { content: "" };
+    const eventData = {
+      title: title.trim(),
+      content: exportedDoc.content.trim(),
+      location: locationData?.address || "",
+      categories: selectedCategories,
+      date: eventDate?.toISOString() || "",
+      user_id: $auth.user?.$id || "",
+      cover: JSON.stringify({
+        fileId: coverFileId,
+        url: coverImage,
+      }),
+      location_data: locationData ? JSON.stringify(locationData) : "",
+    };
+    if (event?.$id) {
+      await eventStore.updateEvent(event.$id, eventData);
+    } else {
+      await eventStore.createEvent(eventData);
     }
   }
 
@@ -484,11 +438,6 @@
     // 如果是在编辑模式下，初始化事件数据
     if (event) {
       await initializeEventData(event);
-    } else {
-      // 确保 newDoc 被正确初始化
-      console.log("初始化新文档");
-      newDoc = createEmptyDoc().init();
-      console.log("编辑器文档初始化后:", newDoc);
     }
   });
 
@@ -503,110 +452,112 @@
 
 {#snippet child()}
   {#if showContent}
-  <!-- 使用封面区域组件 -->
-  <div
-    in:fly={{ y: 20, duration: 500, delay: 200 }}
-    out:fly={{ y: 20, duration: 500 }}
-  >
-    <EventCoverArea
-      {coverImage}
-      {isUploading}
-      {uploadProgress}
-      hideCloseButton={mode === "embedded"}
-      onClose={handleClose}
-      on:coverUpload={handleCoverUpload}
-      on:imageError={() => {
-        console.error("Image load error");
-        console.log("Failed image src:", coverImage);
-        coverImage = "";
-      }}
-    />
-  </div>
-
-  <!-- 窗口容器 -->
-  <div
-    class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex gap-4 p-8"
-    in:fly={{ y: 20, duration: 500, delay: 300 }}
-    out:fly={{ y: 20, duration: 500 }}
-  >
-    <!-- 属性区域 -->
-    <div
-      class="w-[120px]"
-      in:fly={{ x: -20, duration: 500, delay: 400 }}
-      out:fly={{ x: -20, duration: 500 }}
+    <!-- 使用封面区域组件 -->
+    <div 
+      in:fly={{ y: 20, duration: 500, delay: 200 }}
+      out:fly={{ y: 20, duration: 500 }}
     >
-      <EventPropertiesArea
-        {createdAt}
-        {lastModified}
-        {eventDate}
-        {locationData}
-        {selectedCategories}
-        {categories}
-        {evidenceCount}
-        {timelinePointsCount}
-        on:dateSelect={handleDateSelect}
-        on:categorySelect={handleCategorySelect}
-        on:locationSelect={handleLocationSelect}
+      <EventCoverArea
+        {coverImage}
+        {isUploading}
+        {uploadProgress}
+        hideCloseButton={mode === "embedded"}
+        hideActionButtons={mode === "embedded"}
+        onClose={handleClose}
+        on:coverUpload={handleCoverUpload}
+        on:imageError={() => {
+          console.error("Image load error");
+          console.log("Failed image src:", coverImage);
+          coverImage = "";
+        }}
       />
     </div>
 
-    <!-- 使用新创建的组件 -->
+    <!-- 窗口容器 -->
     <div
-      class="flex h-[80vh] gap-4"
-      in:fly={{ x: 20, duration: 500, delay: 500 }}
-      out:fly={{ x: 20, duration: 500 }}
+      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex p-8"
+      in:fly={{ y: 20, duration: 500, delay: 300 }}
+      out:fly={{ y: 20, duration: 500 }}
     >
-      <!-- 编辑器区域（包含标题和封面） -->
-      <div class="w-[800px] relative">
-        <EventEditorArea
-          {title}
-          doc={newDoc}
-          {showAICard}
-          onAIGenerate={() => (showAICard = !showAICard)}
-          onEditorClick={handleEditorClick}
-          onEditorInput={handleEditorInput}
-          onCursorPosition={handleCursorPosition}
-          onSave={handleSave}
-          onTitleHover={handleTitleHover}
+      <!-- 属性区域 -->
+      <div
+        class="w-[140px]"
+        in:fly={{ x: -20, duration: 500, delay: 400 }}
+        out:fly={{ x: -20, duration: 500 }}
+      >
+        <EventPropertiesArea
+          {createdAt}
+          {lastModified}
+          {eventDate}
+          {locationData}
+          {selectedCategories}
+          {categories}
+          {evidenceCount}
+          {timelinePointsCount}
+          on:dateSelect={handleDateSelect}
+          on:categorySelect={handleCategorySelect}
+          on:locationSelect={handleLocationSelect}
         />
+      </div>
 
-        <!-- 添加封面按钮 - 悬停时显示 -->
-        <div
-          role="banner"
-          class="absolute -top-2 left-4 opacity-0 transition-opacity duration-200"
-          class:opacity-100={showCoverButton}
-          onmouseenter={() => (showCoverButton = true)}
-          onmouseleave={() => (showCoverButton = false)}
-        >
-          <Popover bind:open={isCoverSelectorOpen}>
-            <PopoverTrigger>
-              <Button
-                variant="outline"
-                size="sm"
-                class="gap-1 bg-background/80 backdrop-blur-sm"
-              >
-                <Plus class="h-3 w-3" />
-                <span class="text-xs">添加封面</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-auto p-0" align="start">
-              <CoverSelector
-                on:select={handleSelectExistingImage}
-                on:upload={handleCoverUploadFromSelector}
-                on:linkSubmit={handleCoverLinkSubmit}
-              />
-            </PopoverContent>
-          </Popover>
+      <!-- 使用新创建的组件 -->
+      <div
+        class="flex h-[80vh] gap-4"
+        in:fly={{ x: 20, duration: 500, delay: 500 }}
+        out:fly={{ x: 20, duration: 500 }}
+      >
+        <!-- 编辑器区域（包含标题和封面） -->
+        <div class="w-[800px] relative">
+          {#if showEditor}
+            <EventEditorArea
+              bind:title
+              bind:doc={newDoc}
+              {showAICard}
+              onAIGenerate={() => (showAICard = !showAICard)}
+              onEditorClick={handleEditorClick}
+              onEditorInput={handleEditorInput}
+              onCursorPosition={handleCursorPosition}
+              onSave={handleSave}
+              onTitleHover={handleTitleHover}
+            />
+          {/if}
+          <!-- 添加封面按钮 - 悬停时显示 -->
+          <div
+            role="banner"
+            class="absolute -top-2 left-4 opacity-0 transition-opacity duration-200"
+            class:opacity-100={showCoverButton}
+            onmouseenter={() => (showCoverButton = true)}
+            onmouseleave={() => (showCoverButton = false)}
+          >
+            <Popover bind:open={isCoverSelectorOpen}>
+              <PopoverTrigger>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  class="gap-1 bg-background/80 backdrop-blur-sm"
+                >
+                  <Plus class="h-3 w-3" />
+                  <span class="text-xs">添加封面</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent class="w-auto p-0" align="start">
+                <CoverSelector
+                  on:select={handleSelectExistingImage}
+                  on:upload={handleCoverUploadFromSelector}
+                  on:linkSubmit={handleCoverLinkSubmit}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
+      <!-- 操作区域 -->
+      <div
+        class="w-[80px]"
+        in:fly={{ x: 20, duration: 500, delay: 600 }}
+        out:fly={{ x: 20, duration: 500 }}
+      ></div>
     </div>
-    <!-- 操作区域 -->
-    <div
-      class="w-[80px]"
-      in:fly={{ x: 20, duration: 500, delay: 600 }}
-      out:fly={{ x: 20, duration: 500 }}
-    ></div>
-  </div>
   {/if}
 {/snippet}
 {#if open}
@@ -616,14 +567,6 @@
       in:fade={{ duration: 400 }}
       out:fade={{ duration: 400 }}
     >
-      {#if open}
-        <div
-          class="fixed inset-0 bg-background"
-          in:fade={{ duration: 400, delay: 100 }}
-          out:fade={{ duration: 400 , delay: 100}}
-        >
-        </div>
-      {/if}
       {@render child()}
     </div>
   {:else}

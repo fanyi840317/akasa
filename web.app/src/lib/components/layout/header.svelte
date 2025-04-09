@@ -32,7 +32,7 @@
 </script>
 
 <header class="flex h-16 shrink-0 items-center gap-2" class:justify-between={hasActions} class:justify-start={!hasActions}
-class:z-10={!hasActions} >
+>
     <div class="flex items-center gap-2 px-4">
         <Sidebar.Trigger class="-ml-1" />
         <Separator orientation="vertical" class="mr-2 h-4" />

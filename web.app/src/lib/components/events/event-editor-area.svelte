@@ -8,8 +8,7 @@
 
   let {
     title = $bindable(""),
-    content = "",
-    doc = null,
+    doc = $bindable(null),
     showAICard = false,
     onContentChange = (content: { content: string }) => {},
     onAIGenerate = () => {},

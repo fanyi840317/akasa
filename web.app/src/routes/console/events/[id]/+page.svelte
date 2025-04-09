@@ -9,6 +9,7 @@
   import { Save } from "lucide-svelte";
   import { Button } from "$lib/components/ui/button";
   import { Loader2 } from "lucide-svelte";
+  import EventActionButtons from "$lib/components/events/event-action-buttons.svelte";
 
   // 事件数据
   let event: Event | null = null;
@@ -73,9 +74,11 @@
     isEditing = false;
   }
 </script>
-
+{#snippet actions()}
+  <EventActionButtons></EventActionButtons>
+{/snippet}
 <div class="flex flex-col h-full">
-  <Header {titles}>
+  <Header {titles} actions={actions}>
   </Header>
 
   <div class="flex-1">

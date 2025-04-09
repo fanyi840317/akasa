@@ -1,15 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { Button } from "$lib/components/ui/button";
-  import {
-    X,
-    Eye,
-    Copy,
-    Twitter,
-    Facebook,
-    QrCode,
-    Image as ImageIcon,
-  } from "lucide-svelte";
+  import { X } from "lucide-svelte";
+  import EventActionButtons from "./event-action-buttons.svelte";
 
   const dispatch = createEventDispatcher<{
     coverUpload: void;
@@ -22,12 +15,14 @@
     uploadProgress = 0,
     onClose = () => {},
     hideCloseButton = false,
+    hideActionButtons = false,
   } = $props<{
     coverImage: string;
     isUploading: boolean;
     uploadProgress: number;
     onClose: () => void;
     hideCloseButton?: boolean;
+    hideActionButtons?: boolean;
   }>();
 
   // 处理封面上传
@@ -116,23 +111,15 @@
 {/if}
 
 <!-- 事件操作按钮 -->
-<div class="absolute right-4 top-4 flex gap-2">
-  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
-    <Eye class="h-4 w-4 stroke-[3]" />
-  </Button>
-  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
-    <Copy class="h-4 w-4 stroke-[3]" />
-  </Button>
-  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
-    <Twitter class="h-4 w-4 stroke-[3]" />
-  </Button>
-  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
-    <Facebook class="h-4 w-4 stroke-[3]" />
-  </Button>
-  <Button variant="ghost" size="icon" onclick={handleEmptyAction}>
-    <QrCode class="h-4 w-4 stroke-[3]" />
-  </Button>
-  <Button variant="ghost" size="icon" onclick={handleCoverUpload}>
-    <ImageIcon class="h-4 w-4 stroke-[3]" />
-  </Button>
-</div>
+{#if !hideActionButtons}
+  <div class="absolute right-4 top-4">
+    <EventActionButtons 
+      onCoverUpload={handleCoverUpload}
+      onShare={handleEmptyAction}
+      onCopy={handleEmptyAction}
+      onTwitter={handleEmptyAction}
+      onFacebook={handleEmptyAction}
+      onQrCode={handleEmptyAction}
+    />
+  </div>
+{/if}
