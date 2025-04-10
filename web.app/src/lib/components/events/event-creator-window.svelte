@@ -34,6 +34,7 @@
   import EventCoverArea from "./event-cover-area.svelte";
   import CoverSelector from "./cover-selector.svelte";
   import { alertDialog } from "$lib/stores/alert-dialog";
+  import EventActionsWidget from "./event-actions-widget.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -218,7 +219,7 @@
       // 直接使用传入的top和left属性
       cursorPosition = {
         top: position.top,
-        left: position.left
+        left: position.left,
       };
       showAICard = true;
     }
@@ -431,6 +432,25 @@
     showCoverButton = isHovering;
   }
 
+  // 处理操作事件
+  function handleAction(event: CustomEvent<{ type: string }>) {
+    const { type } = event.detail;
+    switch (type) {
+      case "addRelatedEvent":
+        // 处理添加相关事件
+        break;
+      case "addEvidence":
+        // 处理添加证据
+        break;
+      case "addTimelinePoint":
+        // 处理添加时间点
+        break;
+      case "addDimension":
+        // 处理添加维度
+        break;
+    }
+  }
+
   onMount(async () => {
     showContent = true;
     loadCategories();
@@ -453,7 +473,8 @@
 {#snippet child()}
   {#if showContent}
     <!-- 使用封面区域组件 -->
-    <div class="flex"
+    <div
+      class="flex"
       in:fly={{ y: 20, duration: 500, delay: 200 }}
       out:fly={{ y: 20, duration: 500 }}
     >
@@ -481,7 +502,6 @@
     >
       <!-- 属性区域 -->
       <div
-        class="w-[140px]"
         in:fly={{ x: -20, duration: 500, delay: 400 }}
         out:fly={{ x: -20, duration: 500 }}
       >
@@ -521,6 +541,18 @@
               onTitleHover={handleTitleHover}
             />
           {/if}
+          <div
+          class="fixed right-[calc(50%-400px)] top-[calc(50%)] translate-y-[-50%] flex flex-col gap-4 z-10"
+          in:fly={{ y: 100, duration: 500, delay: 600 }}
+          out:fly={{ y: 100, duration: 500 }}
+        >
+        <EventActionsWidget
+          {locationData}
+          on:action={handleAction}
+          on:locationChange={handleLocationChange}
+        />
+          
+        </div>
           <!-- 添加封面按钮 - 悬停时显示 -->
           <div
             role="banner"
