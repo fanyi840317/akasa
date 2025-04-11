@@ -61,6 +61,7 @@
     {/if}
   </div>
 </div>
+
 <style>
   :global(.mapboxgl-map) {
     border-radius: 2px !important;
