@@ -89,7 +89,7 @@
 </script>
 
 <div
-  class="w-full py-10 h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col"
+  class="w-full py-8  h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col"
 >
   <!-- 标题输入框 -->
   <div
@@ -130,12 +130,12 @@
 
   <!-- 编辑器区域 -->
   <div class="flex-1 relative overflow-hidden">
-    <ScrollArea class="w-full h-full pr-20">
+    <ScrollArea class="w-full h-full px-14">
       <div
         role="button"
         tabindex="0"
         onkeydown={handleKeydown}
-        class="w-full h-full -ml-10"
+        class="w-full h-full"
         onclick={handleEditorClick}
         oninput={handleEditorInput}
       >
@@ -146,23 +146,4 @@
 </div>
 
 <style>
-  :global(.event-editor-area .scroll-area-viewport) {
-    height: 100%;
-  }
-
-  :global(.event-editor-area .scroll-area-scrollbar) {
-    z-index: 10;
-  }
-  
-  :global(.mapboxgl-map) {
-    border-radius: 2px !important;
-  }
-  
-  :global(.map-container .mapboxgl-canvas) {
-    border-radius: 2px !important;
-  }
-  
-  :global(.map-container .mapboxgl-canvas-container) {
-    border-radius: 2px !important;
-  }
 </style>

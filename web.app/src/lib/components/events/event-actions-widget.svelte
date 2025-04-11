@@ -3,14 +3,14 @@
   import { fade, fly } from "svelte/transition";
   import { MapPin } from "lucide-svelte";
   import MapBase from "$lib/components/map/map-base.svelte";
-  import type { LocationData } from "$lib/components/map/types";
+  import type { Location } from "$lib/types/map";
 
   const dispatch = createEventDispatcher();
 
   let {
     locationData = $bindable(null),
   } = $props<{
-    locationData?: LocationData | null;
+    locationData?: Location | null;
   }>();
 
   // 处理点击事件
@@ -26,7 +26,7 @@
 
 
 <!-- 地图组件 -->
-<div class="w-[160px] bg-card/40 rounded-sm overflow-hidden">
+<!-- <div class="w-[160px] bg-card/40 rounded-sm overflow-hidden">
   <div class="h-[100px] p-1">
     <div class="w-full h-full rounded-t-sm overflow-hidden map-container">
       <MapBase
@@ -44,9 +44,9 @@
       未设置位置
     {/if}
   </div>
-</div>
+</div> -->
  <!-- 地图组件 -->
- <div class="w-[160px] bg-card/40 rounded-sm overflow-hidden">
+  <!-- <div class="w-[160px] bg-card/40 rounded-sm overflow-hidden">
   <div class="h-[100px] p-1">
     <div class="w-full h-full bg-muted rounded-t-sm overflow-hidden map-container">
       
@@ -60,7 +60,7 @@
       未设置位置
     {/if}
   </div>
-</div>
+</div> -->
 
 <style>
   :global(.mapboxgl-map) {

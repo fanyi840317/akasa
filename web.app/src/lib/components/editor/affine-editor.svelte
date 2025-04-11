@@ -179,6 +179,10 @@
   :global(.affine-editor-container) {
     position: relative !important;
   }
+  :global(affine-page-root .affine-page-root-block-container) {
+    padding: 0px;
+  }
+  
   /* 完全隐藏文档标题 */
   :global(doc-title) {
     display: none !important;

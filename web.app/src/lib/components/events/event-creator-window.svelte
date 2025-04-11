@@ -3,7 +3,7 @@
   import { createEventDispatcher, onDestroy, onMount } from "svelte";
   import { Plus } from "lucide-svelte";
   import { Button } from "$lib/components/ui/button";
-  import type { LocationData, LocationChangeEvent } from "$lib/components/map";
+  import type { Location } from "$lib/types/map";
   import { categoryStore } from "$lib/stores/category";
   import { toast } from "svelte-sonner";
   import type { Category } from "$lib/types/category";
@@ -52,7 +52,7 @@
 
   // 编辑器文档
   let newDoc = $state<Doc | null>(null);
-  let locationData: LocationData | null = $state(null);
+  let locationData: Location | null = $state(null);
   let title = $state("");
   let coverImage = $state("");
   let coverFileId = "";
@@ -149,26 +149,6 @@
     showAICard = !showAICard;
   }
 
-  // 处理日期选择
-  function handleDateSelect(event: CustomEvent<DateValue | undefined>) {
-    eventDate = event.detail;
-  }
-
-  // 处理分类选择
-  function handleCategorySelect(event: CustomEvent<string>) {
-    const value = event.detail;
-    if (!value) return;
-    selectedCategories = value.split(",");
-    const category = categories.find((c) => c.$id === value);
-    if (category) {
-      selectedCategories = [category.name.zh];
-    }
-  }
-
-  // 处理位置选择
-  function handleLocationSelect(event: CustomEvent<LocationData>) {
-    locationData = event.detail;
-  }
 
   let cursorPosition = $state({ top: 0, left: 0 });
   let showAICard = $state(false);
@@ -207,11 +187,6 @@
       open = false;
       dispatch("close");
     }
-  }
-
-  function handleLocationChange(event: CustomEvent<LocationChangeEvent>) {
-    const { location } = event.detail;
-    locationData = location;
   }
 
   function handleCursorPosition(position: { top: number; left: number }) {
@@ -464,6 +439,7 @@
     if (event) {
       await initializeEventData(event);
     }
+    
   });
 
   // 组件销毁时清理
@@ -513,15 +489,12 @@
         <EventPropertiesArea
           {createdAt}
           {lastModified}
-          {eventDate}
-          {locationData}
-          {selectedCategories}
+          bind:eventDate
+          bind:locationData
+          bind:selectedCategories
           {categories}
           {evidenceCount}
           {timelinePointsCount}
-          on:dateSelect={handleDateSelect}
-          on:categorySelect={handleCategorySelect}
-          on:locationSelect={handleLocationSelect}
         />
       </div>
 
@@ -554,7 +527,6 @@
         <EventActionsWidget
           {locationData}
           on:action={handleAction}
-          on:locationChange={handleLocationChange}
         />
           
         </div>

@@ -5,7 +5,7 @@ import initI18n from '$lib/i18n';
 import { auth } from '$lib/stores/auth';
 import { get } from 'svelte/store';
 import type { LayoutLoad } from './$types';
-import { DEFAULT_LOCATION } from '$lib/types/location.types';
+import { DEFAULT_LOCATION } from '$lib/types/map';
 
 injectAnalytics({ mode: dev ? 'development' : 'production' });
 

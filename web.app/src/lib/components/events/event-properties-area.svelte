@@ -1,29 +1,44 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
-  import { Clock, Calendar as CalendarIcon, MapPin, Tag, FileText, Image as ImageIcon } from "lucide-svelte";
+  import {
+    Clock,
+    Calendar as CalendarIcon,
+    MapPin,
+    Tag,
+    FileText,
+    Image as ImageIcon,
+    User,
+  } from "lucide-svelte";
   import * as Select from "$lib/components/ui/select";
   import * as Accordion from "$lib/components/ui/accordion";
-  import { Popover, PopoverContent, PopoverTrigger } from "$lib/components/ui/popover";
+  import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+  } from "$lib/components/ui/popover";
   import { auth } from "$lib/stores/auth";
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import type { Category } from "$lib/types/category";
-  import type { LocationData } from "$lib/components/map";
+  import { MapBase } from "$lib/components/map";
   import DimensionPicker from "./dimension-picker.svelte";
   import { Calendar } from "$lib/components/ui/calendar";
   import { getLocalTimeZone, parseDate } from "@internationalized/date";
   import type { DateValue } from "@internationalized/date";
   import { DateFormatter } from "@internationalized/date";
+  import { formatSystemDate } from "$lib/utils";
+  import Separator from "../ui/separator/separator.svelte";
+  import type { Location } from "$lib/types/map";
 
   const dispatch = createEventDispatcher();
 
   const df = new DateFormatter("zh-CN", {
-    dateStyle: "long"
+    dateStyle: "long",
   });
 
   const shortDf = new DateFormatter("zh-CN", {
     year: "numeric",
     month: "2-digit",
-    day: "2-digit"
+    day: "2-digit",
   });
 
   // 定义维度类型
@@ -34,220 +49,173 @@
     hypotheses: string[];
   };
 
-  let { 
+  let {
     createdAt = new Date().toISOString(),
     lastModified = new Date().toISOString(),
-    eventDate = undefined,
-    locationData = null,
-    selectedCategories = [],
+    eventDate = $bindable(undefined),
+    locationData = $bindable(null),
+    selectedCategories = $bindable([]),
     categories = [],
     evidenceCount = 0,
     timelinePointsCount = 0,
     dimensions = [],
-    onDateSelect = (date: Date | undefined) => {},
     onCategorySelect = (value: string) => {},
     onLocationSelect = () => {},
-    onDimensionsChange = (dimensions: Dimension[]) => {}
+    onDimensionsChange = (dimensions: Dimension[]) => {},
   } = $props<{
     createdAt: string;
     lastModified: string;
     eventDate?: DateValue;
-    locationData: LocationData | null;
+    locationData: Location | null;
     selectedCategories: string[];
     categories: Category[];
     evidenceCount: number;
     timelinePointsCount: number;
     dimensions?: Dimension[];
-    onDateSelect?: (date: Date | undefined) => void;
     onCategorySelect?: (value: string) => void;
     onLocationSelect?: () => void;
     onDimensionsChange?: (dimensions: Dimension[]) => void;
   }>();
 
-  // 将 Date 转换为 DateValue
-  $effect(() => {
-    if (eventDate) {
-      const dateStr = eventDate.toDate(getLocalTimeZone()).toISOString().split('T')[0];
-      eventDate = parseDate(dateStr);
-    }
-  });
-
   // 格式化日期
   function formatDate(date: DateValue | undefined) {
-    if (!date) return "未设置";
-    return shortDf.format(date.toDate(getLocalTimeZone()));
-  }
-
-  // 格式化创建和修改时间
-  function formatSystemDate(dateStr: string) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  }
-
-  // 处理日期选择
-  function handleDateSelect(date: DateValue | undefined) {
-    dispatch("dateSelect", { date });
-  }
-
-  // 处理分类选择
-  function handleCategorySelect(value: string) {
-    if (!value) return;
-    dispatch("categorySelect", { value });
-  }
-
-  // 处理位置选择
-  function handleLocationSelect() {
-    dispatch("locationSelect");
-  }
-
-  // 默认展开事件信息
-  let activeAccordion = "event-info";
-  
-  // 处理维度变化
-  function handleDimensionsChange(updatedDimensions: Dimension[]) {
-    onDimensionsChange(updatedDimensions);
+    if (!date) return "未设置发生时间";
+    return df.format(date.toDate(getLocalTimeZone()));
   }
 </script>
 
-<div class="h-[80vh] flex flex-col justify-start w-full min-w-[120px] sm:min-w-[140px] md:min-w-[160px]">
-  <div class="space-y-4 py-4 sm:py-8 md:py-16">
-    <Accordion.Root type="single" value="event-info" class="w-full bg-background px-2 rounded-l-lg" >
-   
-      <!-- 基本信息 -->
-      <Accordion.Item value="basic-info">
-        <Accordion.Trigger class="flex flex-col items-end gap-1">
-          <span class="text-xs text-muted-foreground">基本信息</span>
-        </Accordion.Trigger>
-        <Accordion.Content>
-          <div class="space-y-2">
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">创建时间</span>
-              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
-                <div class="flex items-center gap-2 text-sm">
-                  <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span>{formatSystemDate(createdAt)}</span>
-                </div>
-              </Button>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">最后修改</span>
-              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
-                <div class="flex items-center gap-2 text-sm">
-                  <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span>{formatSystemDate(lastModified)}</span>
-                </div>
-              </Button>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">创建者</span>
-              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
-                <div class="flex items-center gap-2 text-sm">
-                  {#if $auth.user?.prefs?.avatar}
-                    <img src={$auth.user.prefs.avatar as string} alt={$auth.user.name} class="h-4 w-4 rounded-full" />
-                  {:else}
-                    <div class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span class="text-[10px] text-primary">{$auth.user?.name?.[0] || "?"}</span>
-                    </div>
-                  {/if}
-                  <span>{$auth.user?.name || "神秘探索者"}</span>
-                </div>
-              </Button>
-            </div>
-          </div>
-        </Accordion.Content>
-      </Accordion.Item>
-   <!-- 事件信息 -->
-   <Accordion.Item value="event-info">
-    <Accordion.Trigger class="flex flex-col items-end gap-1">
-      <span class="text-xs text-muted-foreground">事件信息</span>
-    </Accordion.Trigger>
-    <Accordion.Content>
-      <div class="space-y-2">
+<div
+  class="h-[80vh] py-12 sm:py-8 md:py-14 flex flex-col justify-start w-full min-w-[120px] sm:min-w-[140px] md:min-w-[160px]"
+>
+  <div class="space-y-4 py-4 bg-background rounded-l-lg">
+    <!-- 事件信息 -->
+    <div class="w-full bg-background px-2 rounded-l-lg">
+      <div class="space-y-4">
         <div class="flex flex-col items-end gap-1">
-          <span class="text-xs text-muted-foreground">发生时间</span>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-muted-foreground">事件分类</span>
+          </div>
+          <div class="px-1">
+            <Select.Root type="multiple" bind:value={selectedCategories}>
+              <Select.Trigger
+                class="justify-end gap-2 h-auto py-1 px-2 border-none"
+              >
+                <Tag class="h-3 w-3 text-muted-foreground" />
+                <span class:opacity-50={!selectedCategories.length}
+                  >{selectedCategories.length || "0"}</span
+                >
+              </Select.Trigger>
+              <Select.Content>
+                {#each categories as category}
+                  <Select.Item value={category.$id || ""}
+                    >{category.name.zh}</Select.Item
+                  >
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex items-center gap-2">
+            <CalendarIcon class="h-3 w-3 text-muted-foreground" />
+            <span class="text-xs text-muted-foreground">发生时间</span>
+          </div>
           <Popover>
             <PopoverTrigger>
-              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
-                <div class:opacity-50={!eventDate}>
-                  <CalendarIcon class="h-4 w-4 text-muted-foreground" />
-                </div>
-                <span class:opacity-50={!eventDate}>{formatDate(eventDate)}</span>
+              <Button variant="link" class="justify-end gap-2 h-auto py-1 px-0">
+                <span class:opacity-50={!eventDate}
+                  >{formatDate(eventDate)}</span
+                >
               </Button>
             </PopoverTrigger>
             <PopoverContent class="w-auto p-0">
               <div class="p-3">
-                <Calendar 
-                  type="single"
-                  bind:value={eventDate}
-                />
+                <Calendar type="single" bind:value={eventDate} />
               </div>
             </PopoverContent>
           </Popover>
         </div>
-        <div class="flex flex-col items-end gap-1">
-          <span class="text-xs text-muted-foreground">事件分类</span>
-          <div class="px-1">
-            <Select.Root type="single"  value={selectedCategories.length ? selectedCategories[0] : ""} onValueChange={onCategorySelect}>
-              <Select.Trigger class="justify-end gap-2 h-auto py-1 px-2 border-none">
-                <div class:opacity-50={!selectedCategories.length}>
-                  <Tag class="h-4 w-4 text-muted-foreground" />
-                </div>
-                <span class:opacity-50={!selectedCategories.length}>{selectedCategories.join(",") || "未分类"}</span>
-              </Select.Trigger>
-              <Select.Content>
-                {#each categories as category}
-                  <Select.Item value={category.$id || ""}>{category.name.zh}</Select.Item>
-                {/each}
-              </Select.Content>
-            </Select.Root>
 
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex items-center gap-2">
+            <!-- <CalendarIcon class="h-3 w-3 text-muted-foreground" /> -->
+            <MapPin class="h-3 w-3" />
+            <span class="text-xs text-muted-foreground">发生地点</span>
+          </div>
+
+          <div class="w-[120px] bg-muted/40 rounded-sm overflow-hidden">
+            <div class="h-[60px] p-1">
+              <div
+                class="w-full h-full rounded-t-sm overflow-hidden map-container"
+              >
+                <MapBase {locationData} showUserLocation={true} />
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-1">
+              <div
+                class="flex text-xs p-2 items-center gap-2 text-muted-foreground/80"
+              >
+                {#if locationData?.address}
+                  {locationData.address}
+                {:else}
+                  <span>未设置发生位置</span>
+                {/if}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </Accordion.Content>
-  </Accordion.Item>
+    </div>
 
-      <!-- 统计信息 -->
-      <Accordion.Item value="statistics">
-        <Accordion.Trigger class="flex flex-col items-end gap-1">
-          <span class="text-xs text-muted-foreground">统计信息</span>
-        </Accordion.Trigger>
-        <Accordion.Content>
-          <div class="space-y-2">
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">字数统计</span>
-              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
-                <div class="flex items-center gap-2 text-sm">
-                  <FileText class="h-4 w-4 text-muted-foreground" />
-                  <span>{0} 字</span>
-                </div>
-              </Button>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">证据数量</span>
-              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
-                <div class:opacity-50={evidenceCount === 0}>
-                  <ImageIcon class="h-4 w-4 text-muted-foreground" />
-                </div>
-                <span class:opacity-50={evidenceCount === 0}>{evidenceCount} 个</span>
-              </Button>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-xs text-muted-foreground">时间点数量</span>
-              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
-                <div class:opacity-50={timelinePointsCount === 0}>
-                  <Clock class="h-4 w-4 text-muted-foreground" />
-                </div>
-                <span class:opacity-50={timelinePointsCount === 0}>{timelinePointsCount} 个</span>
-              </Button>
-            </div>
+    <!-- 基本信息 -->
+    <Separator></Separator>
+    <div class="w-full px-2">
+      <div class="space-y-4">
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex items-center gap-2">
+            <Clock class="h-3 w-3 text-muted-foreground/50" />
+            <span class="text-xs text-muted-foreground/50">创建时间</span>
           </div>
-        </Accordion.Content>
-      </Accordion.Item>
-    </Accordion.Root>
+          <span class="text-sm text-muted-foreground/50"
+            >{formatSystemDate(createdAt)}</span
+          >
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex items-center gap-2">
+            <Clock class="h-3 w-3 text-muted-foreground/50" />
+            <span class="text-xs text-muted-foreground/50">最后修改</span>
+          </div>
+          <span class="text-sm text-muted-foreground/50"
+            >{formatSystemDate(lastModified)}</span
+          >
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex items-center gap-2">
+            <User class="h-3 w-3 text-muted-foreground/50" />
+            <span class="text-xs text-muted-foreground/50">创建者</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            {#if $auth.user?.prefs?.avatar}
+              <img
+                src={$auth.user.prefs.avatar as string}
+                alt={$auth.user.name}
+                class="h-6 w-6 rounded-full"
+              />
+            {:else}
+              <div
+                class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center"
+              >
+                <span class="text-[10px] text-primary"
+                  >{$auth.user?.name?.[0] || "?"}</span
+                >
+              </div>
+            {/if}
+            <span class="text-xs text-muted-foreground/50"
+              >{$auth.user?.name || "神秘探索者"}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div> 
+</div>
