@@ -139,7 +139,7 @@
         <div class="flex flex-col items-end gap-1">
           <div class="flex items-center gap-2">
             <!-- <CalendarIcon class="h-3 w-3 text-muted-foreground" /> -->
-            <MapPin class="h-3 w-3" />
+            <MapPin class="h-3 w-3 text-muted-foreground" />
             <span class="text-xs text-muted-foreground">发生地点</span>
           </div>
 
@@ -148,7 +148,7 @@
               <div
                 class="w-full h-full rounded-t-sm overflow-hidden map-container"
               >
-                <MapBase {locationData} showUserLocation={true} />
+                <MapBase bind:locationData showUserLocation={true} />
               </div>
             </div>
             <div class="flex flex-col items-end gap-1">

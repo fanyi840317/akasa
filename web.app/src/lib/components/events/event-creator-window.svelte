@@ -188,7 +188,11 @@
       dispatch("close");
     }
   }
-
+ $effect(()=>{
+    if(locationData){
+      alert();
+    }
+ })
   function handleCursorPosition(position: { top: number; left: number }) {
     console.log("ai-card 位置:");
     console.log(position);
