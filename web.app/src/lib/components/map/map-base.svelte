@@ -179,7 +179,6 @@
 </script>
 
 <div bind:this={container} class="map-container">
-  <slot />
 </div>
 
 <style>

@@ -143,10 +143,10 @@
             <span class="text-xs text-muted-foreground">发生地点</span>
           </div>
 
-          <div class="w-[120px] bg-muted/40 rounded-sm overflow-hidden">
-            <div class="h-[60px] p-1">
+          <div class="w-[140px] md:w-[120px] lg:w-[120px] bg-muted/40 rounded-sm overflow-hidden">
+            <div class="h-[80px] md:h-[60px] lg:h-[60px] p-1">
               <div
-                class="w-full h-full rounded-t-sm overflow-hidden map-container"
+                class="w-full h-full rounded-t-sm overflow-hidden"
               >
                 <MapBase bind:locationData showUserLocation={true} />
               </div>
@@ -155,6 +155,7 @@
               <div
                 class="flex text-xs p-2 items-center gap-2 text-muted-foreground/80"
               >
+              
                 {#if locationData?.address}
                   {locationData.address}
                 {:else}
