@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
-  import { Clock, Calendar, MapPin, Tag, FileText, Image as ImageIcon } from "lucide-svelte";
+  import { Clock, Calendar as CalendarIcon, MapPin, Tag, FileText, Image as ImageIcon } from "lucide-svelte";
   import * as Select from "$lib/components/ui/select";
   import * as Accordion from "$lib/components/ui/accordion";
   import { Popover, PopoverContent, PopoverTrigger } from "$lib/components/ui/popover";
@@ -9,8 +9,22 @@
   import type { Category } from "$lib/types/category";
   import type { LocationData } from "$lib/components/map";
   import DimensionPicker from "./dimension-picker.svelte";
+  import { Calendar } from "$lib/components/ui/calendar";
+  import { getLocalTimeZone, parseDate } from "@internationalized/date";
+  import type { DateValue } from "@internationalized/date";
+  import { DateFormatter } from "@internationalized/date";
 
   const dispatch = createEventDispatcher();
+
+  const df = new DateFormatter("zh-CN", {
+    dateStyle: "long"
+  });
+
+  const shortDf = new DateFormatter("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
 
   // 定义维度类型
   type Dimension = {
@@ -37,7 +51,7 @@
   } = $props<{
     createdAt: string;
     lastModified: string;
-    eventDate?: Date;
+    eventDate?: DateValue;
     locationData: LocationData | null;
     selectedCategories: string[];
     categories: Category[];
@@ -50,9 +64,23 @@
     onDimensionsChange?: (dimensions: Dimension[]) => void;
   }>();
 
+  // 将 Date 转换为 DateValue
+  $effect(() => {
+    if (eventDate) {
+      const dateStr = eventDate.toDate(getLocalTimeZone()).toISOString().split('T')[0];
+      eventDate = parseDate(dateStr);
+    }
+  });
+
   // 格式化日期
-  function formatDate(date: Date | undefined) {
+  function formatDate(date: DateValue | undefined) {
     if (!date) return "未设置";
+    return shortDf.format(date.toDate(getLocalTimeZone()));
+  }
+
+  // 格式化创建和修改时间
+  function formatSystemDate(dateStr: string) {
+    const date = new Date(dateStr);
     return date.toLocaleDateString("zh-CN", {
       year: "numeric",
       month: "2-digit",
@@ -85,8 +113,8 @@
   }
 </script>
 
-<div class="h-[80vh] flex flex-col justify-start">
-  <div class="space-y-4 py-16 ">
+<div class="h-[80vh] flex flex-col justify-start w-full min-w-[120px] sm:min-w-[140px] md:min-w-[160px]">
+  <div class="space-y-4 py-4 sm:py-8 md:py-16">
     <Accordion.Root type="single" value="event-info" class="w-full bg-background px-2 rounded-l-lg" >
    
       <!-- 基本信息 -->
@@ -101,7 +129,7 @@
               <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
                 <div class="flex items-center gap-2 text-sm">
                   <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span>{formatDate(new Date(createdAt))}</span>
+                  <span>{formatSystemDate(createdAt)}</span>
                 </div>
               </Button>
             </div>
@@ -110,7 +138,7 @@
               <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
                 <div class="flex items-center gap-2 text-sm">
                   <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span>{formatDate(new Date(lastModified))}</span>
+                  <span>{formatSystemDate(lastModified)}</span>
                 </div>
               </Button>
             </div>
@@ -145,77 +173,43 @@
             <PopoverTrigger>
               <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2">
                 <div class:opacity-50={!eventDate}>
-                  <Calendar class="h-4 w-4 text-muted-foreground" />
+                  <CalendarIcon class="h-4 w-4 text-muted-foreground" />
                 </div>
                 <span class:opacity-50={!eventDate}>{formatDate(eventDate)}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent class="w-auto p-0" align="end">
-              <!-- <CalendarPicker
-                value={eventDate ? [eventDate] : undefined}
-                onValueChange={(dates) => handleDateSelect(dates?.[0])}
-                initialFocus
-              /> -->
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div class="flex flex-col items-end gap-1">
-          <span class="text-xs text-muted-foreground">发生地点</span>
-          <Popover>
-            <PopoverTrigger>
-              <Button variant="ghost" class="justify-end gap-2 h-auto py-1 px-2" onclick={onLocationSelect}>
-                <div class:opacity-50={!locationData?.address}>
-                  <MapPin class="h-4 w-4 text-muted-foreground" />
-                </div>
-                <span class:opacity-50={!locationData?.address}>{locationData?.address || "未设置"}</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-[400px] p-0" align="end">
-              <div class="w-full h-[300px] bg-muted rounded-lg">
-                <!-- 这里可以添加地图组件 -->
-                <div class="p-4 text-center text-muted-foreground">
-                  地图选择器
-                </div>
+            <PopoverContent class="w-auto p-0">
+              <div class="p-3">
+                <Calendar 
+                  type="single"
+                  bind:value={eventDate}
+                />
               </div>
             </PopoverContent>
           </Popover>
         </div>
         <div class="flex flex-col items-end gap-1">
           <span class="text-xs text-muted-foreground">事件分类</span>
-          <Select.Root type="single" value={selectedCategories.length ? selectedCategories[0] : ""} onValueChange={onCategorySelect}>
-            <Select.Trigger class="justify-end gap-2 h-auto py-1 px-2 border-none">
-              <div class:opacity-50={!selectedCategories.length}>
-                <Tag class="h-4 w-4 text-muted-foreground" />
-              </div>
-              <span class:opacity-50={!selectedCategories.length}>{selectedCategories.join(",") || "未分类"}</span>
-            </Select.Trigger>
-            <Select.Content>
-              {#each categories as category}
-                <Select.Item value={category.$id || ""}>{category.name.zh}</Select.Item>
-              {/each}
-            </Select.Content>
-          </Select.Root>
+          <div class="px-1">
+            <Select.Root type="single"  value={selectedCategories.length ? selectedCategories[0] : ""} onValueChange={onCategorySelect}>
+              <Select.Trigger class="justify-end gap-2 h-auto py-1 px-2 border-none">
+                <div class:opacity-50={!selectedCategories.length}>
+                  <Tag class="h-4 w-4 text-muted-foreground" />
+                </div>
+                <span class:opacity-50={!selectedCategories.length}>{selectedCategories.join(",") || "未分类"}</span>
+              </Select.Trigger>
+              <Select.Content>
+                {#each categories as category}
+                  <Select.Item value={category.$id || ""}>{category.name.zh}</Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
+
+          </div>
         </div>
       </div>
     </Accordion.Content>
   </Accordion.Item>
-
-      <!-- 维度信息 -->
-      <Accordion.Item value="dimensions">
-        <Accordion.Trigger class="flex flex-col items-end gap-1">
-          <span class="text-xs text-muted-foreground">维度分析</span>
-        </Accordion.Trigger>
-        <Accordion.Content>
-          <div class="space-y-2">
-            <div class="flex flex-col items-end gap-1">
-              <DimensionPicker 
-                dimensions={dimensions} 
-                onDimensionsChange={handleDimensionsChange} 
-              />
-            </div>
-          </div>
-        </Accordion.Content>
-      </Accordion.Item>
 
       <!-- 统计信息 -->
       <Accordion.Item value="statistics">

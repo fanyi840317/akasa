@@ -35,6 +35,8 @@
   import CoverSelector from "./cover-selector.svelte";
   import { alertDialog } from "$lib/stores/alert-dialog";
   import EventActionsWidget from "./event-actions-widget.svelte";
+  import { parseDate, getLocalTimeZone } from "@internationalized/date";
+  import type { DateValue } from "@internationalized/date";
 
   const dispatch = createEventDispatcher();
 
@@ -55,7 +57,7 @@
   let coverImage = $state("");
   let coverFileId = "";
   let selectedCategories: string[] = [];
-  let eventDate = $state<Date | undefined>();
+  let eventDate = $state<DateValue | undefined>();
   let categories = $state<Category[]>([]);
   let activeTab = $state("content");
   let isPublishing = $state(false);
@@ -97,7 +99,7 @@
         ? JSON.parse(event.location_data)
         : null;
       selectedCategories = event.categories || [];
-      eventDate = event.date ? new Date(event.date) : undefined;
+      eventDate = event.date ? parseDate(event.date.split('T')[0]) : undefined;
 
       // 解析封面信息
       if (event.cover) {
@@ -148,7 +150,7 @@
   }
 
   // 处理日期选择
-  function handleDateSelect(event: CustomEvent<Date | undefined>) {
+  function handleDateSelect(event: CustomEvent<DateValue | undefined>) {
     eventDate = event.detail;
   }
 
@@ -378,7 +380,7 @@
       content: exportedDoc.content.trim(),
       location: locationData?.address || "",
       categories: selectedCategories,
-      date: eventDate?.toISOString() || "",
+      date: eventDate ? eventDate.toDate(getLocalTimeZone()).toISOString() : "",
       user_id: $auth.user?.$id || "",
       cover: JSON.stringify({
         fileId: coverFileId,
