@@ -89,7 +89,7 @@
   }
 
   // 处理日期选择
-  function handleDateSelect(date: Date | undefined) {
+  function handleDateSelect(date: DateValue | undefined) {
     dispatch("dateSelect", { date });
   }
 

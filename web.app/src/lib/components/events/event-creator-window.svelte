@@ -52,11 +52,11 @@
 
   // 编辑器文档
   let newDoc = $state<Doc | null>(null);
-  let locationData: LocationData | null = null;
+  let locationData: LocationData | null = $state(null);
   let title = $state("");
   let coverImage = $state("");
   let coverFileId = "";
-  let selectedCategories: string[] = [];
+  let selectedCategories: string[] = $state([]);
   let eventDate = $state<DateValue | undefined>();
   let categories = $state<Category[]>([]);
   let activeTab = $state("content");
@@ -380,7 +380,7 @@
       content: exportedDoc.content.trim(),
       location: locationData?.address || "",
       categories: selectedCategories,
-      date: eventDate ? eventDate.toDate(getLocalTimeZone()).toISOString() : "",
+      date: eventDate ? eventDate.toString() : "",
       user_id: $auth.user?.$id || "",
       cover: JSON.stringify({
         fileId: coverFileId,
@@ -393,6 +393,9 @@
     } else {
       await eventStore.createEvent(eventData);
     }
+    hasChanges = false;
+    open = false;
+    dispatch("close");
   }
 
   // 处理放弃保存

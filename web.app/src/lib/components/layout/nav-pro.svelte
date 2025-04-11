@@ -16,7 +16,6 @@
   import { appStore } from "$lib/stores/appState";
   import type { Event } from "$lib/types/event";
   import { goto } from '$app/navigation';
-  import EventCreatorSelector from "$lib/components/events/event-creator-selector.svelte";
   import EventCreatorWindow from "$lib/components/events/event-creator-window.svelte";
 
   // 组件属性
@@ -101,12 +100,6 @@
     unsubscribe();
   });
 </script>
-
-<EventCreatorSelector
-  open={showEventTypeSelector}
-  on:select={handleEventTypeSelect}
-  on:close={() => showEventTypeSelector = false}
-/>
 
 {#if showEventCreatorWindow}
 <EventCreatorWindow
