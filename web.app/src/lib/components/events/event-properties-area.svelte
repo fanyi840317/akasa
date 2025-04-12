@@ -10,6 +10,7 @@
     User,
     Loader2,
     X,
+    Search,
   } from "lucide-svelte";
   import * as Select from "$lib/components/ui/select";
   import * as Accordion from "$lib/components/ui/accordion";
@@ -34,6 +35,7 @@
   import { Card } from "$lib/components/ui/card";
   import { cn } from "$lib/utils";
   import { map } from "leaflet";
+    import Input from "../ui/input/input.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -111,17 +113,40 @@
     }
   });
   $effect(() => {
-    if (showFullMap) {
-      mapContainer.style =
-        +"top: " +
-        mapPosition.top +
-        "px; left: " +
-        mapPosition.left +
-        "px; width: " +
-        mapPosition.width * 3 +
-        "px; height: " +
-        mapPosition.height * 3 +
-        "px;";
+    if (mapContainer) {
+      // 设置基础样式和过渡效果
+      // mapContainer.classList.add("transition-all");
+      // mapContainer.classList.add("duration-500");
+      // mapContainer.classList.add("ease-in-out");
+
+      if (showFullMap) {
+        mapContainer.style.position = "absolute";
+        mapContainer.style.top = mapPosition.top + "px";
+        mapContainer.style.left = mapPosition.left + "px";
+        mapContainer.style.zIndex = "50";
+        mapContainer.style.overflow = "hidden";
+
+        // 延迟设置最终尺寸
+        setTimeout(() => {
+          mapContainer.style.width = mapPosition.width * 4 + "px";
+          mapContainer.style.height = mapPosition.height * 4 + "px";
+        }, 0);
+      } else {
+        // 恢复初始状态
+        setTimeout(() => {
+          mapContainer.style.width = mapPosition.width + "px";
+          mapContainer.style.height = mapPosition.height + "px";
+        }, 0);
+
+        // 等待动画完成后再移除定位
+        setTimeout(() => {
+          mapContainer.style.position = "";
+          mapContainer.style.top = "";
+          mapContainer.style.left = "";
+          mapContainer.style.zIndex = "";
+          mapContainer.style.overflow = "";
+        }, 500);
+      }
     }
   });
 </script>
@@ -187,10 +212,16 @@
             class="overflow-hidden w-[120px] h-[100px] lg:w-[140px] lg:h-[120px]"
           >
             <div
+              role="tooltip"
               bind:this={mapContainer}
-              class={cn("rounded-sm h-full"),showFullMap?"bg-muted/40":"")}
+              class={cn(
+                "rounded-sm h-full transition-all duration-500 ease-in-out p-1",
+                showFullMap ? "bg-muted" : "bg-muted/40",
+              )}
               class:absolute={showFullMap}
               class:z-50={showFullMap}
+              onmouseenter={() => (showFullMap = true)}
+              onmouseleave={() => (showFullMap = false)}
             >
               <div
                 class="w-full h-[60%] rounded-t-sm overflow-hidden cursor-pointer"
@@ -199,13 +230,28 @@
                   zoom={6}
                   bind:locationData
                   showUserLocation={true}
-                  clickable={false}
+                  clickable={showFullMap}
                 />
               </div>
-              <div class="flex flex-col items-end gap-1">
-                <button
-                  class="flex text-xs p-2 items-center gap-2 w-full justify-start"
-                  onclick={() => (showFullMap = true)}
+              <div class="flex flex-col items-start gap-1"
+                  class:p-6={showFullMap}
+                  >
+                {#if showFullMap}
+                <div class="relative w-full md:w-[300px] pointer-events-auto">
+                  <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-foreground/30" />
+                  <Input
+                      type="search"
+                      placeholder="搜寻神秘..."
+                      class="mysterious-search pl-8"
+                  />
+              </div>
+                
+                {/if}
+                <div
+                  class={cn(
+                    "flex p-2 items-center gap-2 w-full justify-start",
+                    showFullMap ? "text-ls" : "text-xs",
+                  )}
                 >
                   {#if isLocation}
                     <Loader2 class="h-3 w-3 animate-spin flex-shrink-0" />
@@ -221,7 +267,7 @@
                       >未设置事件发生位置</span
                     >
                   {/if}
-                </button>
+                </div>
               </div>
             </div>
           </div>

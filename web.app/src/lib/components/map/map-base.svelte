@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import mapboxgl from 'mapbox-gl';
-  import 'mapbox-gl/dist/mapbox-gl.css';
-  import { mode } from 'mode-watcher';
-  import { get } from 'svelte/store';
+  import { onMount, onDestroy } from "svelte";
+  import mapboxgl from "mapbox-gl";
+  import "mapbox-gl/dist/mapbox-gl.css";
+  import { mode } from "mode-watcher";
+  import { get } from "svelte/store";
   import type { Location } from "$lib/types/map";
-  import { createEventDispatcher } from 'svelte';
-  import { PUBLIC_MAPBOX_TOKEN } from '$env/static/public';
+  import { createEventDispatcher } from "svelte";
+  import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import { DEFAULT_LOCATION } from "$lib/types/map";
 
   const dispatch = createEventDispatcher();
@@ -16,7 +16,7 @@
     zoom = 13,
     showUserLocation = true,
     onClick = undefined,
-    clickable = true
+    clickable = $bindable(true),
   } = $props<{
     locationData?: Location;
     zoom?: number;
@@ -51,55 +51,96 @@
 
   function initMap() {
     if (!container) return;
-    
+
     // 清理现有实例
     cleanupMap();
-    
+
     // 如果没有位置数据，使用默认值
     // const defaultLocation = { longitude: 104.06, latitude: 30.67 };
     const currentLocation = locationData || DEFAULT_LOCATION;
-    
-    console.log('Initializing map with location:', currentLocation);
-    
+
+    console.log("Initializing map with location:", currentLocation);
+
     const newMap = new mapboxgl.Map({
       container,
-      style: get(mode) === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11',
+      style:
+        get(mode) === "light"
+          ? "mapbox://styles/mapbox/light-v10"
+          : "mapbox://styles/mapbox/dark-v11",
       zoom,
       center: [currentLocation.longitude!, currentLocation.latitude!],
       pitch: 0,
-      antialias: true
+      antialias: true,
     });
 
     map = newMap;
 
     // 等待地图加载完成
-    newMap.on('load', () => {
-      console.log('Map loaded successfully');
-      console.log('Current center:', newMap.getCenter());
-      console.log('Current zoom:', newMap.getZoom());
-      dispatch('mapLoad', { map: newMap });
+    newMap.on("load", () => {
+      console.log("Map loaded successfully");
+      console.log("Current center:", newMap.getCenter());
+      console.log("Current zoom:", newMap.getZoom());
+      dispatch("mapLoad", { map: newMap });
     });
 
     // 添加错误处理
-    newMap.on('error', (e) => {
-      console.error('Map error:', e);
+    newMap.on("error", (e) => {
+      console.error("Map error:", e);
     });
 
     if (showUserLocation) {
-      const userMarkerElement = document.createElement('div');
-      userMarkerElement.className = 'user-location-marker';
+      const userMarkerElement = document.createElement("div");
+      userMarkerElement.className = "user-location-marker";
       marker = new mapboxgl.Marker({
         element: userMarkerElement,
-        anchor: 'center'
+        anchor: "center",
       })
         .setLngLat([currentLocation.longitude!, currentLocation.latitude!])
         .addTo(newMap);
     }
+    // 点击事件处理
+    newMap.on("click", (e) => {
+      if (!clickable) return;
+      console.log("Map clicked at:", e.lngLat);
+      if (onClick) {
+        onClick(e);
+      }
+      if (marker) {
+        marker.setLngLat(e.lngLat);
+      } else {
+        const userMarkerElement = document.createElement("div");
+        userMarkerElement.className = "user-location-marker";
+        marker = new mapboxgl.Marker({
+          element: userMarkerElement,
+          anchor: "center",
+        })
+          .setLngLat(e.lngLat)
+          .addTo(newMap);
+      }
+      // 更新位置数据
+      locationData = {
+        longitude: e.lngLat.lng,
+        latitude: e.lngLat.lat,
+      };
+      dispatch("locationDataChange", locationData);
+    });
 
+    // 添加鼠标样式
+    newMap.on("mouseenter", () => {
+      newMap.getCanvas().style.cursor = "crosshair";
+    });
+
+    newMap.on("mouseleave", () => {
+      newMap.getCanvas().style.cursor = "";
+    });
     // 监听主题变化
-    const unsubscribe = mode.subscribe(currentMode => {
+    const unsubscribe = mode.subscribe((currentMode) => {
       if (newMap) {
-        newMap.setStyle(currentMode === 'light' ? 'mapbox://styles/mapbox/light-v10' : 'mapbox://styles/mapbox/dark-v11');
+        newMap.setStyle(
+          currentMode === "light"
+            ? "mapbox://styles/mapbox/light-v10"
+            : "mapbox://styles/mapbox/dark-v11",
+        );
       }
     });
 
@@ -107,46 +148,9 @@
     resizeObserver = new ResizeObserver(() => {
       if (newMap) newMap.resize();
     });
-    
+
     if (container) {
       resizeObserver.observe(container);
-    }
-
-    // 点击事件处理
-    if (clickable) {
-      newMap.on('click', (e) => {
-        console.log('Map clicked at:', e.lngLat);
-        if (onClick) {
-          onClick(e);
-        }
-        if (marker) {
-          marker.setLngLat(e.lngLat);
-        } else {
-          const userMarkerElement = document.createElement('div');
-          userMarkerElement.className = 'user-location-marker';
-          marker = new mapboxgl.Marker({
-            element: userMarkerElement,
-            anchor: 'center'
-          })
-            .setLngLat(e.lngLat)
-            .addTo(newMap);
-        }
-        // 更新位置数据
-        locationData = {
-          longitude: e.lngLat.lng,
-          latitude: e.lngLat.lat,
-        };
-        dispatch('locationDataChange', locationData);
-      });
-
-      // 添加鼠标样式
-      newMap.on('mouseenter', () => {
-        newMap.getCanvas().style.cursor = 'crosshair';
-      });
-
-      newMap.on('mouseleave', () => {
-        newMap.getCanvas().style.cursor = '';
-      });
     }
 
     return () => {
@@ -182,8 +186,7 @@
   }
 </script>
 
-<div bind:this={container} class="map-container">
-</div>
+<div bind:this={container} class="map-container"></div>
 
 <style>
   .map-container {
@@ -208,9 +211,9 @@
     cursor: pointer;
     position: relative;
   }
-  
+
   :global(.user-location-marker::after) {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
@@ -221,7 +224,7 @@
     transform: translate(-50%, -50%);
     animation: pulse-scale 2s infinite;
   }
-  
+
   @keyframes pulse-scale {
     0% {
       transform: translate(-50%, -50%) scale(1);
@@ -236,4 +239,4 @@
       opacity: 0;
     }
   }
-</style> 
+</style>
