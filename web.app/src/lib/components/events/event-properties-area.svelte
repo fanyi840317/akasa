@@ -209,7 +209,7 @@
             <span class="text-xs text-muted-foreground">发生地点</span>
           </div>
           <div
-            class="overflow-hidden w-[120px] h-[100px] lg:w-[140px] lg:h-[120px]"
+            class="overflow-hidden w-[100px] h-[80px] lg:w-[140px] lg:h-[120px]"
           >
             <div
               role="tooltip"
