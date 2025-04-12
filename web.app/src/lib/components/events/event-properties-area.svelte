@@ -8,6 +8,8 @@
     FileText,
     Image as ImageIcon,
     User,
+    Loader2,
+    X,
   } from "lucide-svelte";
   import * as Select from "$lib/components/ui/select";
   import * as Accordion from "$lib/components/ui/accordion";
@@ -28,6 +30,10 @@
   import { formatSystemDate } from "$lib/utils";
   import Separator from "../ui/separator/separator.svelte";
   import type { Location } from "$lib/types/map";
+  import { fade, fly, scale } from "svelte/transition";
+  import { Card } from "$lib/components/ui/card";
+  import { cn } from "$lib/utils";
+  import { map } from "leaflet";
 
   const dispatch = createEventDispatcher();
 
@@ -62,6 +68,7 @@
     onCategorySelect = (value: string) => {},
     onLocationSelect = () => {},
     onDimensionsChange = (dimensions: Dimension[]) => {},
+    isLocation = $bindable(false),
   } = $props<{
     createdAt: string;
     lastModified: string;
@@ -75,13 +82,48 @@
     onCategorySelect?: (value: string) => void;
     onLocationSelect?: () => void;
     onDimensionsChange?: (dimensions: Dimension[]) => void;
+    isLocation?: boolean;
   }>();
+
+  let showFullMap = $state(false);
+  let mapContainer: HTMLElement;
+  let mapPosition = $state({ top: 0, left: 0, width: 0, height: 0 });
 
   // 格式化日期
   function formatDate(date: DateValue | undefined) {
     if (!date) return "未设置发生时间";
     return df.format(date.toDate(getLocalTimeZone()));
   }
+
+  onMount(() => {
+    if (mapContainer) {
+      const windowContainer = document.querySelector(".event-creator-window");
+      const windowRect = windowContainer?.getBoundingClientRect();
+      const rect = mapContainer.getBoundingClientRect();
+      if (windowRect) {
+        mapPosition = {
+          top: rect.top - windowRect.top,
+          left: rect.left - windowRect.left,
+          width: rect.width,
+          height: rect.height,
+        };
+      }
+    }
+  });
+  $effect(() => {
+    if (showFullMap) {
+      mapContainer.style =
+        +"top: " +
+        mapPosition.top +
+        "px; left: " +
+        mapPosition.left +
+        "px; width: " +
+        mapPosition.width * 3 +
+        "px; height: " +
+        mapPosition.height * 3 +
+        "px;";
+    }
+  });
 </script>
 
 <div
@@ -138,29 +180,48 @@
 
         <div class="flex flex-col items-end gap-1">
           <div class="flex items-center gap-2">
-            <!-- <CalendarIcon class="h-3 w-3 text-muted-foreground" /> -->
             <MapPin class="h-3 w-3 text-muted-foreground" />
             <span class="text-xs text-muted-foreground">发生地点</span>
           </div>
-
-          <div class="w-[140px] md:w-[120px] lg:w-[120px] bg-muted/40 rounded-sm overflow-hidden">
-            <div class="h-[80px] md:h-[60px] lg:h-[60px] p-1">
+          <div
+            class="overflow-hidden w-[120px] h-[100px] lg:w-[140px] lg:h-[120px]"
+          >
+            <div
+              bind:this={mapContainer}
+              class={cn("rounded-sm h-full"),showFullMap?"bg-muted/40":"")}
+              class:absolute={showFullMap}
+              class:z-50={showFullMap}
+            >
               <div
-                class="w-full h-full rounded-t-sm overflow-hidden"
+                class="w-full h-[60%] rounded-t-sm overflow-hidden cursor-pointer"
               >
-                <MapBase bind:locationData showUserLocation={true} />
+                <MapBase
+                  zoom={6}
+                  bind:locationData
+                  showUserLocation={true}
+                  clickable={false}
+                />
               </div>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <div
-                class="flex text-xs p-2 items-center gap-2 text-muted-foreground/80"
-              >
-              
-                {#if locationData?.address}
-                  {locationData.address}
-                {:else}
-                  <span>未设置发生位置</span>
-                {/if}
+              <div class="flex flex-col items-end gap-1">
+                <button
+                  class="flex text-xs p-2 items-center gap-2 w-full justify-start"
+                  onclick={() => (showFullMap = true)}
+                >
+                  {#if isLocation}
+                    <Loader2 class="h-3 w-3 animate-spin flex-shrink-0" />
+                  {/if}
+                  {#if locationData?.address}
+                    <span
+                      class="text-muted-foreground/90 break-words text-left"
+                    >
+                      {locationData.address}
+                    </span>
+                  {:else}
+                    <span class="text-muted-foreground/80"
+                      >未设置事件发生位置</span
+                    >
+                  {/if}
+                </button>
               </div>
             </div>
           </div>
@@ -211,7 +272,7 @@
                 >
               </div>
             {/if}
-            <span class="text-xs text-muted-foreground/50"
+            <span class="text-sm text-muted-foreground/50"
               >{$auth.user?.name || "神秘探索者"}</span
             >
           </div>

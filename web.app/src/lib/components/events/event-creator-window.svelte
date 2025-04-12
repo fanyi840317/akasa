@@ -37,6 +37,7 @@
   import EventActionsWidget from "./event-actions-widget.svelte";
   import { parseDate, getLocalTimeZone } from "@internationalized/date";
   import type { DateValue } from "@internationalized/date";
+  import { reverseGeocodeLocation } from "$lib/services/location";
 
   const dispatch = createEventDispatcher();
 
@@ -91,6 +92,7 @@
   let showCoverButton = $state(false);
   let showEditor = $state(event?.content ? false : true);
 
+  let isLocation = $state(false);
   // 初始化事件数据
   async function initializeEventData(event: any) {
     if (event) {
@@ -99,7 +101,7 @@
         ? JSON.parse(event.location_data)
         : null;
       selectedCategories = event.categories || [];
-      eventDate = event.date ? parseDate(event.date.split('T')[0]) : undefined;
+      eventDate = event.date ? parseDate(event.date.split("T")[0]) : undefined;
 
       // 解析封面信息
       if (event.cover) {
@@ -149,7 +151,6 @@
     showAICard = !showAICard;
   }
 
-
   let cursorPosition = $state({ top: 0, left: 0 });
   let showAICard = $state(false);
   let isAICardMinimized = $state(false);
@@ -188,11 +189,18 @@
       dispatch("close");
     }
   }
- $effect(()=>{
-    if(locationData){
-      alert();
+  $effect(() => {
+    if (locationData) {
+      isLocation = true;
+      reverseGeocodeLocation(
+        locationData.latitude!,
+        locationData.longitude!,
+      ).then((address) => {
+        locationData!.address = address;
+        isLocation = false;
+      });
     }
- })
+  });
   function handleCursorPosition(position: { top: number; left: number }) {
     console.log("ai-card 位置:");
     console.log(position);
@@ -443,7 +451,6 @@
     if (event) {
       await initializeEventData(event);
     }
-    
   });
 
   // 组件销毁时清理
@@ -481,7 +488,7 @@
 
     <!-- 窗口容器 -->
     <div
-      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex p-8"
+      class="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex p-8 event-creator-window"
       in:fly={{ y: 20, duration: 500, delay: 300 }}
       out:fly={{ y: 20, duration: 500 }}
     >
@@ -495,6 +502,7 @@
           {lastModified}
           bind:eventDate
           bind:locationData
+          bind:isLocation
           bind:selectedCategories
           {categories}
           {evidenceCount}
@@ -524,16 +532,12 @@
             />
           {/if}
           <div
-          class="fixed right-[calc(50%-400px)] top-[calc(50%)] translate-y-[-50%] flex flex-col gap-4 z-10"
-          in:fly={{ y: 100, duration: 500, delay: 600 }}
-          out:fly={{ y: 100, duration: 500 }}
-        >
-        <EventActionsWidget
-          {locationData}
-          on:action={handleAction}
-        />
-          
-        </div>
+            class="fixed right-[calc(50%-400px)] top-[calc(50%)] translate-y-[-50%] flex flex-col gap-4 z-10"
+            in:fly={{ y: 100, duration: 500, delay: 600 }}
+            out:fly={{ y: 100, duration: 500 }}
+          >
+            <EventActionsWidget {locationData} on:action={handleAction} />
+          </div>
           <!-- 添加封面按钮 - 悬停时显示 -->
           <div
             role="banner"

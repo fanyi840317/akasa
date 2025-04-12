@@ -15,12 +15,14 @@
     locationData = $bindable(DEFAULT_LOCATION),
     zoom = 13,
     showUserLocation = true,
-    onClick = undefined
+    onClick = undefined,
+    clickable = true
   } = $props<{
     locationData?: Location;
     zoom?: number;
     showUserLocation?: boolean;
     onClick?: (e: { lngLat: { lng: number; lat: number } }) => void;
+    clickable?: boolean;
   }>();
 
   let container: HTMLDivElement;
@@ -111,39 +113,41 @@
     }
 
     // 点击事件处理
-    newMap.on('click', (e) => {
-      console.log('Map clicked at:', e.lngLat);
-      if (onClick) {
-        onClick(e);
-      }
-      if (marker) {
-        marker.setLngLat(e.lngLat);
-      } else {
-        const userMarkerElement = document.createElement('div');
-        userMarkerElement.className = 'user-location-marker';
-        marker = new mapboxgl.Marker({
-          element: userMarkerElement,
-          anchor: 'center'
-        })
-          .setLngLat(e.lngLat)
-          .addTo(newMap);
-      }
-      // 更新位置数据
-      locationData = {
-        longitude: e.lngLat.lng,
-        latitude: e.lngLat.lat,
-      };
-      dispatch('locationDataChange', locationData);
-    });
+    if (clickable) {
+      newMap.on('click', (e) => {
+        console.log('Map clicked at:', e.lngLat);
+        if (onClick) {
+          onClick(e);
+        }
+        if (marker) {
+          marker.setLngLat(e.lngLat);
+        } else {
+          const userMarkerElement = document.createElement('div');
+          userMarkerElement.className = 'user-location-marker';
+          marker = new mapboxgl.Marker({
+            element: userMarkerElement,
+            anchor: 'center'
+          })
+            .setLngLat(e.lngLat)
+            .addTo(newMap);
+        }
+        // 更新位置数据
+        locationData = {
+          longitude: e.lngLat.lng,
+          latitude: e.lngLat.lat,
+        };
+        dispatch('locationDataChange', locationData);
+      });
 
-    // 添加鼠标样式
-    newMap.on('mouseenter', () => {
-      newMap.getCanvas().style.cursor = 'crosshair';
-    });
+      // 添加鼠标样式
+      newMap.on('mouseenter', () => {
+        newMap.getCanvas().style.cursor = 'crosshair';
+      });
 
-    newMap.on('mouseleave', () => {
-      newMap.getCanvas().style.cursor = '';
-    });
+      newMap.on('mouseleave', () => {
+        newMap.getCanvas().style.cursor = '';
+      });
+    }
 
     return () => {
       cleanupMap();

@@ -27,7 +27,7 @@ const DEFAULT_LOCATION: LocationData = {
 };
 
 // 统一的反向地理编码函数
-async function reverseGeocodeLocation(lat: number, lon: number): Promise<string> {
+export async function reverseGeocodeLocation(lat: number, lon: number): Promise<string> {
   try {
     const response = await fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${PUBLIC_MAPBOX_TOKEN}&language=zh`
