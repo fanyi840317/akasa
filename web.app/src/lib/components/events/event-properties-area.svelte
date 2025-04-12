@@ -209,14 +209,14 @@
             <span class="text-xs text-muted-foreground">发生地点</span>
           </div>
           <div
-            class="overflow-hidden w-[100px] h-[80px] lg:w-[140px] lg:h-[120px]"
+            class="overflow-hidden w-[120px] h-[100px] "
           >
             <div
               role="tooltip"
               bind:this={mapContainer}
               class={cn(
                 "rounded-sm h-full transition-all duration-500 ease-in-out p-1",
-                showFullMap ? "bg-muted" : "bg-muted/40",
+                showFullMap ? "dark:bg-neutral-900 border border-neutral " : "bg-muted/40",
               )}
               class:absolute={showFullMap}
               class:z-50={showFullMap}
@@ -237,13 +237,22 @@
                   class:p-6={showFullMap}
                   >
                 {#if showFullMap}
-                <div class="relative w-full md:w-[300px] pointer-events-auto">
-                  <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-foreground/30" />
+                  <!-- <div class="flex items-center gap-2">
+                    <span class="text-xs text-muted-foreground">搜索地点</span>
+                  </div> -->
+                <div class="flex items-center gap-2 w-full pointer-events-auto">
+                  <!-- <Search class="absolute left-2.5 top-2.5 h-4 w-4 " /> -->
                   <Input
-                      type="search"
-                      placeholder="搜寻神秘..."
-                      class="mysterious-search pl-8"
+                      placeholder="输入地点名称或地址"
+                      class="flex-1"
                   />
+                  <span class="text-xs text-muted-foreground/50 px-2">or</span>
+                  <Button
+                    variant="outline"
+                    onclick={() => dispatch("select-location")}
+                  >
+                    定位到当前位置
+                  </Button>
               </div>
                 
                 {/if}
