@@ -4,7 +4,7 @@
   import { Check, Undo2, Pencil } from "lucide-svelte";
   import { fade } from "svelte/transition";
   import { createEventDispatcher } from "svelte";
-    import { bind } from "leaflet";
+  import { bind } from "leaflet";
 
   const dispatch = createEventDispatcher();
 
@@ -69,28 +69,20 @@
           </Button>
         {/if}
       </div>
-      <Button
-        variant="outline"
-        size="icon"
-        onclick={confirmEdit}
-        {disabled}
-      >
+      <Button variant="outline" size="icon" onclick={confirmEdit} {disabled}>
         <Check class="h-4 w-4" />
       </Button>
     </div>
   {:else}
-    <div class="flex items-center gap-2 w-full" in:fade={{ duration: 300 }}>
+    <div role="button" class="flex items-center gap-2 w-full" in:fade={{ duration: 300 }}   onclick={() => {
+      isEditing = true;
+    }}>
       {#if value}
         <span class="flex-1">{value}</span>
       {:else}
         <span class="flex-1 text-muted-foreground/80">{placeholder}</span>
       {/if}
-      <Button
-        variant="ghost"
-        size="icon"
-        onclick={startEditing}
-        {disabled}
-      >
+      <Button variant="ghost" size="icon" onclick={startEditing} {disabled}>
         <Pencil class="h-4 w-4" />
       </Button>
     </div>

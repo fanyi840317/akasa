@@ -15,29 +15,19 @@
   } from "$lib/components/ui/popover";
   import { eventStore } from "$lib/stores/event";
   import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogDescription,
-  } from "$lib/components/ui/dialog";
-  import {
     exportDocToJson,
     createDocByJson,
   } from "$lib/components/editor/affine-editor";
   import { ID } from "appwrite";
   import type { Doc } from "@blocksuite/store";
-  import { createEmptyDoc } from "@blocksuite/presets";
   import EventPropertiesArea from "./event-properties-area.svelte";
   import EventEditorArea from "./event-editor-area.svelte";
   import EventCoverArea from "./event-cover-area.svelte";
   import CoverSelector from "./cover-selector.svelte";
   import { alertDialog } from "$lib/stores/alert-dialog";
   import EventActionsWidget from "./event-actions-widget.svelte";
-  import { parseDate, getLocalTimeZone } from "@internationalized/date";
-  import type { DateValue } from "@internationalized/date";
   import { reverseGeocodeLocation } from "$lib/services/location";
+  import { uploadToImgBB } from "$lib/services/image";
 
   const dispatch = createEventDispatcher();
 
@@ -264,90 +254,27 @@
 
           // 创建新的本地预览
           localPreviewUrl = URL.createObjectURL(file);
-          console.log("Local preview URL created:", localPreviewUrl);
-
-          // 确保 coverImage 被正确设置
           coverImage = localPreviewUrl;
-          console.log("Cover image set to:", coverImage);
 
           // 强制更新 UI
           await new Promise((resolve) => setTimeout(resolve, 0));
 
-          // 准备上传到 ImgBB
-          const formData = new FormData();
-          formData.append("image", file);
-
-          // 使用 XMLHttpRequest 来获取上传进度
-          const xhr = new XMLHttpRequest();
-
-          // 创建一个 Promise 来处理 XHR 请求
-          const uploadPromise = new Promise<{
-            success: boolean;
-            data: { url: string };
-            error?: { message: string };
-          }>((resolve, reject) => {
-            xhr.open(
-              "POST",
-              "https://api.imgbb.com/1/upload?key=dc1398dd7ba5dc154d50c82c42bf18c6",
-              true,
-            );
-
-            // 监听上传进度
-            xhr.upload.addEventListener("progress", (event) => {
-              if (event.lengthComputable) {
-                uploadProgress = Math.round((event.loaded / event.total) * 100);
-                console.log(`Upload progress: ${uploadProgress}%`);
-              }
-            });
-
-            // 监听请求完成
-            xhr.addEventListener("load", () => {
-              if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                  const result = JSON.parse(xhr.responseText);
-                  resolve(result);
-                } catch (e) {
-                  reject(new Error("Failed to parse response"));
-                }
-              } else {
-                reject(
-                  new Error(`HTTP error: ${xhr.status} ${xhr.statusText}`),
-                );
-              }
-            });
-
-            // 监听请求错误
-            xhr.addEventListener("error", () => {
-              reject(new Error("Network error"));
-            });
-
-            // 发送请求
-            xhr.send(formData);
+          // 使用封装的上传服务
+          const result = await uploadToImgBB(file, (progress) => {
+            uploadProgress = progress.percentage;
           });
 
-          // 等待上传完成
-          const result = await uploadPromise;
-          console.log("ImgBB upload result:", result);
-
           if (result.success) {
-            // 使用 ImgBB 返回的 URL
-            coverImage = result.data.url;
-            console.log("Cover image set to ImgBB URL:", coverImage);
-
-            // 标记有更改
+            coverImage = result.data!.url;
             hasChanges = true;
-
             toast.success("封面上传成功");
           } else {
             throw new Error(result.error?.message || "上传失败");
           }
         } catch (error: any) {
           console.error("上传封面失败:", error);
-          // 显示更详细的错误信息
-          const errorMessage =
-            error.message || error.response?.message || "上传封面失败";
+          const errorMessage = error.message || error.response?.message || "上传封面失败";
           toast.error(`上传失败: ${errorMessage}`);
-          // 如果上传失败，清除本地预览
           if (localPreviewUrl) {
             URL.revokeObjectURL(localPreviewUrl);
             localPreviewUrl = "";
@@ -385,8 +312,12 @@
       await eventStore.createEvent(eventData);
     }
     hasChanges = false;
-    open = false;
-    dispatch("close");
+    
+    // 只在窗口模式下关闭
+    if (mode === "window") {
+      open = false;
+      dispatch("close");
+    }
   }
 
   // 处理放弃保存

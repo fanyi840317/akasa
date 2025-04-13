@@ -178,6 +178,9 @@
         console.error("日期解析错误:", error);
       }
     }
+    if(locationData){
+      originalAddress=locationData.address;
+    }
     // if (selectedDate) {
     //   eventDate = formatDate(selectedDate);
     // }
@@ -256,15 +259,21 @@
               role="tooltip"
               bind:this={mapContainer}
               class={cn(
-                "rounded-sm h-full transition-all duration-500 ease-in-out p-1",
+                "rounded-sm h-full transition-all border-[0.5px] duration-500 ease-in-out p-1",
                 showFullMap
-                  ? "bg-card border border-neutral rounded-lg"
+                  ? "absolute z-50 bg-card border rounded-lg shadow-md"
                   : "bg-muted/40",
               )}
-              class:absolute={showFullMap}
-              class:z-50={showFullMap}
               onmouseenter={() => (showFullMap = true)}
-              onmouseleave={() => (showFullMap = false)}
+              onmouseleave={(e) => {
+                // alert(e.relatedTarget);
+                // 检查事件目标是否为EditableInput或其子元素
+                const target = e.relatedTarget as Element;
+                if (target && target.closest('.editable-input')) {
+                  return;
+                }
+                showFullMap = false;
+              }}
             >
               <div
                 class="w-full h-[60%] rounded-t-sm overflow-hidden cursor-pointer"
@@ -294,7 +303,10 @@
                       <EditableInput
                         bind:value={originalAddress}
                         placeholder="未设置事件发生位置"
-                        class="h-9"
+                        class="h-9 editable-input"
+                        on:change={(e) => {
+                          locationData.address = e.detail.value;
+                        }}
                       />
                     </div>
                   </div>
