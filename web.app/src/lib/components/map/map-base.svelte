@@ -8,6 +8,9 @@
   import { createEventDispatcher } from "svelte";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import { DEFAULT_LOCATION } from "$lib/types/map";
+  import { Button } from "$lib/components/ui/button";
+  import { Locate } from "lucide-svelte";
+  import { LoadingCircle } from "$lib/components/icons";
 
   const dispatch = createEventDispatcher();
 
@@ -17,12 +20,14 @@
     showUserLocation = true,
     onClick = undefined,
     clickable = $bindable(true),
+    showLocateButton = $bindable(true),
   } = $props<{
     locationData?: Location;
     zoom?: number;
     showUserLocation?: boolean;
     onClick?: (e: { lngLat: { lng: number; lat: number } }) => void;
     clickable?: boolean;
+    showLocateButton?: boolean;
   }>();
 
   let container: HTMLDivElement;
@@ -30,6 +35,7 @@
   let resizeObserver: ResizeObserver | undefined;
   let marker: mapboxgl.Marker | undefined;
   let cleanup: (() => void) | undefined;
+  let isLocating = $state(false);
 
   // 设置 Mapbox token
   mapboxgl.accessToken = PUBLIC_MAPBOX_TOKEN;
@@ -117,6 +123,7 @@
           .setLngLat(e.lngLat)
           .addTo(newMap);
       }
+      newMap.setCenter(e.lngLat);
       // 更新位置数据
       locationData = {
         longitude: e.lngLat.lng,
@@ -184,9 +191,54 @@
   export function getMap() {
     return map;
   }
+
+  // 获取用户位置并更新地图
+  async function getUserLocation() {
+    isLocating = true;
+    if (!navigator.geolocation) {
+      console.error("浏览器不支持地理位置服务");
+      return;
+    }
+
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      setLocation(longitude, latitude);
+      locationData = { longitude, latitude };
+      dispatch("locationDataChange", locationData);
+    } catch (error) {
+      console.error("获取位置失败:", error);
+    } finally {
+      isLocating = false;
+    }
+  }
 </script>
 
-<div bind:this={container} class="map-container"></div>
+<div bind:this={container} class="map-container">
+  {#if showLocateButton}
+    <Button
+      variant="outline"
+      size="icon"
+      class="absolute top-2 right-2 z-10"
+      onclick={getUserLocation}
+      disabled={isLocating}
+      title="定位到当前位置"
+    >
+      {#if isLocating}
+        <LoadingCircle />
+      {:else}
+        <Locate class="h-4 w-4 text-primary/70" />
+      {/if}
+    </Button>
+  {/if}
+</div>
 
 <style>
   .map-container {
@@ -239,4 +291,5 @@
       opacity: 0;
     }
   }
+
 </style>

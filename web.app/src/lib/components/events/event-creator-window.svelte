@@ -58,7 +58,7 @@
   let coverImage = $state("");
   let coverFileId = "";
   let selectedCategories: string[] = $state([]);
-  let eventDate = $state<DateValue | undefined>();
+  let eventDate = $state("");
   let categories = $state<Category[]>([]);
   let activeTab = $state("content");
   let isPublishing = $state(false);
@@ -101,7 +101,7 @@
         ? JSON.parse(event.location_data)
         : null;
       selectedCategories = event.categories || [];
-      eventDate = event.date ? parseDate(event.date.split("T")[0]) : undefined;
+      eventDate = event.date ;
 
       // 解析封面信息
       if (event.cover) {
@@ -192,6 +192,10 @@
   $effect(() => {
     if (locationData) {
       isLocation = true;
+      if(locationData.latitude===0&&locationData.longitude===0){
+        isLocation = false;
+        return;
+      }
       reverseGeocodeLocation(
         locationData.latitude!,
         locationData.longitude!,

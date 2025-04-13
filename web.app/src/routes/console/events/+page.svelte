@@ -108,18 +108,7 @@
 
 <ModeWatcher />
 <ScrollArea class="h-[calc(100vh-1rem)] relative">
-    <!-- 粒子效果容器 -->
-    <div class="particle-container">
-        {#each Array(20) as _, i}
-            <div
-                class="particle"
-                style="
-                    left: {Math.random() * 100}%;
-                    animation-delay: {Math.random() * 2}s;
-                "
-            />
-        {/each}
-    </div>
+
 
     <!-- Hero 区域 -->
     <div class="relative w-full">

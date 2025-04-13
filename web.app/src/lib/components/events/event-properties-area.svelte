@@ -1,5 +1,7 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
+  import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
+  import * as Command from "$lib/components/ui/command";
   import {
     Clock,
     Calendar as CalendarIcon,
@@ -8,10 +10,14 @@
     FileText,
     Image as ImageIcon,
     User,
-    Loader2,
     X,
     Search,
+    Undo2,
+    Redo2,
+    Pencil,
+    Check,
   } from "lucide-svelte";
+  import { LoadingCircle } from "$lib/components/icons";
   import * as Select from "$lib/components/ui/select";
   import * as Accordion from "$lib/components/ui/accordion";
   import {
@@ -25,7 +31,7 @@
   import { MapBase } from "$lib/components/map";
   import DimensionPicker from "./dimension-picker.svelte";
   import { Calendar } from "$lib/components/ui/calendar";
-  import { getLocalTimeZone, parseDate } from "@internationalized/date";
+  import { fromDate, getLocalTimeZone, parseDate } from "@internationalized/date";
   import type { DateValue } from "@internationalized/date";
   import { DateFormatter } from "@internationalized/date";
   import { formatSystemDate } from "$lib/utils";
@@ -35,19 +41,10 @@
   import { Card } from "$lib/components/ui/card";
   import { cn } from "$lib/utils";
   import { map } from "leaflet";
-    import Input from "../ui/input/input.svelte";
+  import Input from "../ui/input/input.svelte";
+  import EditableInput from "../ui/editable-input/editable-input.svelte";
 
   const dispatch = createEventDispatcher();
-
-  const df = new DateFormatter("zh-CN", {
-    dateStyle: "long",
-  });
-
-  const shortDf = new DateFormatter("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
 
   // 定义维度类型
   type Dimension = {
@@ -74,7 +71,7 @@
   } = $props<{
     createdAt: string;
     lastModified: string;
-    eventDate?: DateValue;
+    eventDate?: string;
     locationData: Location | null;
     selectedCategories: string[];
     categories: Category[];
@@ -91,10 +88,39 @@
   let mapContainer: HTMLElement;
   let mapPosition = $state({ top: 0, left: 0, width: 0, height: 0 });
 
-  // 格式化日期
-  function formatDate(date: DateValue | undefined) {
-    if (!date) return "未设置发生时间";
-    return df.format(date.toDate(getLocalTimeZone()));
+  let originalAddress = $state(locationData?.address || "");
+
+  const df = new DateFormatter("zh-CN", {
+    dateStyle: "long",
+  });
+
+  const shortDf = new DateFormatter("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  let originalDate = $state(toDate(eventDate));
+  // let selectedDate = $state(
+  //   eventDate ? formatDate(eventDate).toString() : undefined,
+  // );
+  
+  function toDate(date: string | undefined) {
+    if (!date) return undefined;
+    try {
+      return parseDate(date);
+    } catch (error) {
+      return undefined
+    }
+  }  
+  function formatDate(date: string | undefined) {
+    if (!date|| date==="") return "未设置发生时间";
+    try {
+      return df.format(parseDate(date.split("T")[0]).toDate(getLocalTimeZone()));
+    } catch (error) {
+      // console.error("格式化日期时发生错误:", error);
+      return date;
+    }
   }
 
   onMount(() => {
@@ -112,13 +138,9 @@
       }
     }
   });
+
   $effect(() => {
     if (mapContainer) {
-      // 设置基础样式和过渡效果
-      // mapContainer.classList.add("transition-all");
-      // mapContainer.classList.add("duration-500");
-      // mapContainer.classList.add("ease-in-out");
-
       if (showFullMap) {
         mapContainer.style.position = "absolute";
         mapContainer.style.top = mapPosition.top + "px";
@@ -128,8 +150,8 @@
 
         // 延迟设置最终尺寸
         setTimeout(() => {
-          mapContainer.style.width = mapPosition.width * 4 + "px";
-          mapContainer.style.height = mapPosition.height * 4 + "px";
+          mapContainer.style.width = mapPosition.width * 3 + "px";
+          mapContainer.style.height = mapPosition.height * 3 + "px";
         }, 0);
       } else {
         // 恢复初始状态
@@ -148,6 +170,17 @@
         }, 500);
       }
     }
+    if (originalDate) {
+      try {
+        // const parsedDate = parseDate(originalDate);
+        eventDate = df.format(originalDate.toDate(getLocalTimeZone()));
+      } catch (error) {
+        console.error("日期解析错误:", error);
+      }
+    }
+    // if (selectedDate) {
+    //   eventDate = formatDate(selectedDate);
+    // }
   });
 </script>
 
@@ -172,7 +205,7 @@
                   >{selectedCategories.length || "0"}</span
                 >
               </Select.Trigger>
-              <Select.Content>
+              <Select.Content align="start">
                 {#each categories as category}
                   <Select.Item value={category.$id || ""}
                     >{category.name.zh}</Select.Item
@@ -195,9 +228,19 @@
                 >
               </Button>
             </PopoverTrigger>
-            <PopoverContent class="w-auto p-0">
+            <PopoverContent class="w-auto p-0" align="start">
               <div class="p-3">
-                <Calendar type="single" bind:value={eventDate} />
+                <div class="flex items-center gap-2 px-2">
+                  <EditableInput
+                    value={eventDate}
+                    placeholder="未设置发生时间"
+                    class="h-9"
+                    on:change={(e) => {
+                      eventDate = e.detail.value;
+                    }}
+                  />
+                </div>
+                <Calendar type="single" bind:value={originalDate} />
               </div>
             </PopoverContent>
           </Popover>
@@ -208,15 +251,15 @@
             <MapPin class="h-3 w-3 text-muted-foreground" />
             <span class="text-xs text-muted-foreground">发生地点</span>
           </div>
-          <div
-            class="overflow-hidden w-[120px] h-[100px] "
-          >
+          <div class="overflow-hidden w-[130px] h-[110px]">
             <div
               role="tooltip"
               bind:this={mapContainer}
               class={cn(
                 "rounded-sm h-full transition-all duration-500 ease-in-out p-1",
-                showFullMap ? "dark:bg-neutral-900 border border-neutral " : "bg-muted/40",
+                showFullMap
+                  ? "bg-card border border-neutral rounded-lg"
+                  : "bg-muted/40",
               )}
               class:absolute={showFullMap}
               class:z-50={showFullMap}
@@ -231,52 +274,52 @@
                   bind:locationData
                   showUserLocation={true}
                   clickable={showFullMap}
+                  showLocateButton={showFullMap}
                 />
               </div>
-              <div class="flex flex-col items-start gap-1"
-                  class:p-6={showFullMap}
-                  >
+              <div
+                class="flex flex-col items-start gap-1"
+                class:p-6={showFullMap}
+              >
                 {#if showFullMap}
-                  <!-- <div class="flex items-center gap-2">
-                    <span class="text-xs text-muted-foreground">搜索地点</span>
-                  </div> -->
-                <div class="flex items-center gap-2 w-full pointer-events-auto">
-                  <!-- <Search class="absolute left-2.5 top-2.5 h-4 w-4 " /> -->
-                  <Input
-                      placeholder="输入地点名称或地址"
-                      class="flex-1"
-                  />
-                  <span class="text-xs text-muted-foreground/50 px-2">or</span>
-                  <Button
-                    variant="outline"
-                    onclick={() => dispatch("select-location")}
+                  <div
+                    class="flex-clos items-center gap-2 w-full pointer-events-auto"
                   >
-                    定位到当前位置
-                  </Button>
-              </div>
-                
+                    <div
+                      class="flex py-4 items-center gap-2 w-full justify-start"
+                    >
+                      {#if isLocation}
+                        <LoadingCircle dimensions="h-3 w-3" />
+                      {/if}
+                      <EditableInput
+                        bind:value={originalAddress}
+                        placeholder="未设置事件发生位置"
+                        class="h-9"
+                      />
+                    </div>
+                  </div>
+                {:else}
+                  <div
+                    class={cn(
+                      "flex p-2 items-center gap-2 w-full justify-start text-xs",
+                    )}
+                  >
+                    {#if isLocation}
+                      <LoadingCircle dimensions="h-3 w-3" />
+                    {/if}
+                    {#if locationData?.address}
+                      <span
+                        class="text-muted-foreground/90 break-words line-clamp-2"
+                      >
+                        {locationData.address}
+                      </span>
+                    {:else}
+                      <span class="text-muted-foreground/80"
+                        >未设置事件发生位置</span
+                      >
+                    {/if}
+                  </div>
                 {/if}
-                <div
-                  class={cn(
-                    "flex p-2 items-center gap-2 w-full justify-start",
-                    showFullMap ? "text-ls" : "text-xs",
-                  )}
-                >
-                  {#if isLocation}
-                    <Loader2 class="h-3 w-3 animate-spin flex-shrink-0" />
-                  {/if}
-                  {#if locationData?.address}
-                    <span
-                      class="text-muted-foreground/90 break-words text-left"
-                    >
-                      {locationData.address}
-                    </span>
-                  {:else}
-                    <span class="text-muted-foreground/80"
-                      >未设置事件发生位置</span
-                    >
-                  {/if}
-                </div>
               </div>
             </div>
           </div>

@@ -95,7 +95,7 @@ export async function getCurrentLocation(): Promise<LocationResult> {
     .catch(error => {
       console.log("浏览器定位失败，尝试使用IP定位:", error);
       return getLocationByIP()
-        .then(ipLocation => 
+        .then(ipLocation =>
           reverseGeocodeLocation(ipLocation.latitude, ipLocation.longitude)
             .then(address => ({
               location: ipLocation,
@@ -128,5 +128,80 @@ export async function getLocationData(): Promise<LocationData> {
   }
 }
 
+async function debouncedSearch(search: string) {
+  let isSearching = $state(false);
+  let searchTimeout: number | undefined;
+  let currentController: AbortController | null = null;
+  let searchQuery = $state("");
+  let isEditing = $state(false);
+  let searchResults = $state<
+    Array<{ value: string; label: string; lat: number; lon: number }>
+  >([]);
+
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  if (currentController) {
+    // currentController.abort();
+  }
+
+  if (!search.trim()) {
+    isSearching = false;
+    searchResults = [];
+    return;
+  }
+
+  isSearching = true;
+  try {
+    currentController = new AbortController();
+
+    const timeoutId = setTimeout(() => {
+      if (currentController) {
+        currentController.abort();
+      }
+    }, 500);
+
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(search)}.json?access_token=${PUBLIC_MAPBOX_TOKEN}&country=cn&bbox=103.6,30.2,104.5,31.2&language=zh`,
+        {
+          signal: currentController.signal,
+        },
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.features && data.features.length > 0) {
+        searchResults = data.features.map((item: any) => ({
+          value: item.place_name,
+          label: item.text,
+          lat: item.center[1],
+          lon: item.center[0],
+        }));
+      } else {
+        searchResults = [];
+      }
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        console.log("请求已取消或超时");
+      } else {
+        console.error("搜索地址失败:", error.message);
+      }
+      searchResults = [];
+    }
+  } finally {
+    isSearching = false;
+    currentController = null;
+  }
+}
 // 导出反向地理编码函数供外部使用
 export { reverseGeocodeLocation as reverseGeocode };
