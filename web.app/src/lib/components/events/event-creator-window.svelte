@@ -26,6 +26,7 @@
   import CoverSelector from "./cover-selector.svelte";
   import { alertDialog } from "$lib/stores/alert-dialog";
   import EventActionsWidget from "./event-actions-widget.svelte";
+  import TimelineHypothesisPanel from "./timeline-hypothesis-panel.svelte";
   import { reverseGeocodeLocation } from "$lib/services/location";
   import { uploadToImgBB } from "$lib/services/image";
 
@@ -69,6 +70,10 @@
   );
   let evidenceCount = $state(0);
   let timelinePointsCount = $state(0);
+
+  // 时间线和假说状态
+  let timelineEvents = $state([]);
+  let hypotheses = $state([]);
 
   let isUploading = $state(false);
   let uploadProgress = $state(0);
@@ -123,6 +128,26 @@
 
       createdAt = event.$createdAt || new Date().toISOString();
       lastModified = event.$updatedAt || new Date().toISOString();
+
+      // 初始化时间线和假说数据
+      if (event.timeline_data) {
+        try {
+          timelineEvents = JSON.parse(event.timeline_data);
+          timelinePointsCount = timelineEvents.length;
+        } catch (e) {
+          console.error("解析时间线数据失败:", e);
+          timelineEvents = [];
+        }
+      }
+
+      if (event.hypothesis_data) {
+        try {
+          hypotheses = JSON.parse(event.hypothesis_data);
+        } catch (e) {
+          console.error("解析假说数据失败:", e);
+          hypotheses = [];
+        }
+      }
     }
   }
 
@@ -305,6 +330,9 @@
         url: coverImage,
       }),
       location_data: locationData ? JSON.stringify(locationData) : "",
+      // 添加时间线和假说数据
+      timeline_data: timelineEvents.length ? JSON.stringify(timelineEvents) : "",
+      hypothesis_data: hypotheses.length ? JSON.stringify(hypotheses) : "",
     };
     if (event?.$id) {
       await eventStore.updateEvent(event.$id, eventData);
@@ -312,7 +340,7 @@
       await eventStore.createEvent(eventData);
     }
     hasChanges = false;
-    
+
     // 只在窗口模式下关闭
     if (mode === "window") {
       open = false;
@@ -445,7 +473,7 @@
         />
       </div>
 
-      <!-- 使用新创建的组件 -->
+      <!-- 主要内容区域 -->
       <div
         class="flex h-[80vh] gap-4"
         in:fly={{ x: 20, duration: 500, delay: 500 }}
@@ -503,12 +531,25 @@
           </div>
         </div>
       </div>
-      <!-- 操作区域 -->
+      <!-- 时间线和假说操作区域 -->
       <div
-        class="w-[80px]"
         in:fly={{ x: 20, duration: 500, delay: 600 }}
         out:fly={{ x: 20, duration: 500 }}
-      ></div>
+      >
+        <TimelineHypothesisPanel
+          bind:timelineEvents
+          bind:hypotheses
+          on:timelineChange={({ detail }) => {
+            timelineEvents = detail.timelineEvents;
+            timelinePointsCount = timelineEvents.length;
+            hasChanges = true;
+          }}
+          on:hypothesisChange={({ detail }) => {
+            hypotheses = detail.hypotheses;
+            hasChanges = true;
+          }}
+        />
+      </div>
     </div>
   {/if}
 {/snippet}

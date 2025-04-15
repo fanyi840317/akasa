@@ -38,6 +38,14 @@ export type RelatedPerson = {
   anonymous: boolean;
 };
 
+export type Hypothesis = {
+  id: string;
+  title: string;
+  description: string;
+  evidence: string[];
+  createdAt: Date;
+};
+
 export interface Event {
   $id?: string;
   $createdAt?: string;
@@ -51,6 +59,8 @@ export interface Event {
   user_id: string;
   cover?: string;
   location_data?: string;
+  timeline_data?: string;
+  hypothesis_data?: string;
   status?: string;
   creator_name?: string;
   creator_avatar?: string;

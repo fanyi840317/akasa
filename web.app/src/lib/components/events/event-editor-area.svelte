@@ -7,7 +7,6 @@
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import type { Doc } from "@blocksuite/store";
   import MapBase from "$lib/components/map/map-base.svelte";
-  import type { LocationData } from "$lib/components/map/types";
 
   let {
     title = $bindable(""),
@@ -21,7 +20,6 @@
     onCursorPosition = (position: { top: number; left: number }) => {},
     onTitleHover = (isHovering: boolean) => {},
     locationData = $bindable(null),
-    onLocationChange = (event: CustomEvent<LocationData>) => {},
   } = $props<{
     title: string;
     content?: string;
@@ -34,8 +32,6 @@
     onEditorInput?: () => void;
     onCursorPosition?: (position: { top: number; left: number }) => void;
     onTitleHover?: (isHovering: boolean) => void;
-    locationData?: LocationData | null;
-    onLocationChange?: (event: CustomEvent<LocationData>) => void;
   }>();
 
   // 处理内容变化
