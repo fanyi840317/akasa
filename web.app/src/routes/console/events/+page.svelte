@@ -194,11 +194,12 @@
                     </div>
                 {:else}
                     {#each filteredEvents as event (event.$id)}
-                        <div
+                        <button
                             in:fade={fadeConfig}
                             out:slide={slideConfig}
-                            on:click={() => handleEventClick(event)}
-                            class="hover-lift"
+                            onclick={() => handleEventClick(event)}
+                            onkeydown={(e) => e.key === 'Enter' && handleEventClick(event)}
+                            class="hover-lift w-full text-left"
                         >
                             <div class="glow-effect">
                                 <EventCard
@@ -209,7 +210,7 @@
                                     rating={0}
                                 />
                             </div>
-                        </div>
+                        </button>
                     {/each}
                 {/if}
             </div>
