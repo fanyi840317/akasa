@@ -206,7 +206,7 @@
                                     title={event.title || ''}
                                     image={event.cover ? JSON.parse(event.cover).url : ''}
                                     avatarSrc={event.creator_avatar}
-                                    tags={event.categories ? event.categories : []}
+                                    tags={event.tags ? event.tags: []}
                                     rating={0}
                                 />
                             </div>
