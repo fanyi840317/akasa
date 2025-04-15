@@ -7,15 +7,58 @@
   import { Textarea } from "$lib/components/ui/textarea";
   import * as Tabs from "$lib/components/ui/tabs";
   import * as Accordion from "$lib/components/ui/accordion";
+  import * as Popover from "$lib/components/ui/popover";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import { Separator } from "$lib/components/ui/separator";
   import type { TimelineEvent, Hypothesis } from "$lib/types/event";
 
   const dispatch = createEventDispatcher();
 
+  // 模拟数据
+  const mockTimelineEvents: TimelineEvent[] = [
+    {
+      id: "1",
+      timestamp: new Date("2024-01-15T09:30:00"),
+      description: "发现可疑人员在案发现场附近徘徊",
+      evidenceIds: [],
+      witnessIds: []
+    },
+    {
+      id: "2",
+      timestamp: new Date("2024-01-15T10:15:00"),
+      description: "接到报警电话，报案人称听到可疑声响",
+      evidenceIds: [],
+      witnessIds: []
+    },
+    {
+      id: "3",
+      timestamp: new Date("2024-01-15T11:00:00"),
+      description: "警方到达现场开始初步调查",
+      evidenceIds: [],
+      witnessIds: []
+    }
+  ];
+
+  const mockHypotheses: Hypothesis[] = [
+    {
+      id: "1",
+      title: "预谋作案假说",
+      description: "根据现场痕迹分析，嫌疑人可能提前踩点并精心策划了这起案件。现场未发现明显的强行闯入痕迹，说明嫌疑人对现场环境非常熟悉。",
+      evidence: [],
+      createdAt: new Date("2024-01-15T14:30:00")
+    },
+    {
+      id: "2",
+      title: "内部人员作案假说",
+      description: "考虑到案发时间和地点的特殊性，不排除内部人员作案的可能。需要重点调查近期离职或与受害者有矛盾的相关人员。",
+      evidence: [],
+      createdAt: new Date("2024-01-15T16:45:00")
+    }
+  ];
+
   let {
-    timelineEvents = $bindable([]),
-    hypotheses = $bindable([]),
+    timelineEvents = mockTimelineEvents,
+    hypotheses = $bindable(mockHypotheses),
   } = $props<{
     timelineEvents?: TimelineEvent[];
     hypotheses?: Hypothesis[];
@@ -117,20 +160,20 @@
   }
 </script>
 
-<div class="h-[80vh] w-[320px] border-l border-border/30 flex flex-col">
-  <div class="p-4 border-b border-border/30">
+<div class="h-[80vh] w-[320px] flex flex-col bg-card py-4 rounded-r-lg">
+  <!-- <div class="p-4 border-b border-border/30">
     <h3 class="text-lg font-medium">操作区</h3>
     <p class="text-sm text-muted-foreground">添加时间线和假说</p>
-  </div>
+  </div> -->
 
-  <Tabs.Root value={activeTab} class="flex-1 flex flex-col" onValueChange={(value) => activeTab = value}>
-    <Tabs.List class="px-4 pt-2">
-      <Tabs.Trigger value="timeline" class="flex items-center gap-2">
-        <Clock class="h-4 w-4" />
+  <Tabs.Root value={activeTab} class="flex-1 flex flex-col " onValueChange={(value) => activeTab = value}>
+    <Tabs.List class="px-2 pt-2 bg-tr flex justify-start" >
+      <Tabs.Trigger value="timeline" class="flex items-center gap-2 data-[state=active]:bg-muted">
+        <Clock class="h-3 w-3" />
         时间线
       </Tabs.Trigger>
-      <Tabs.Trigger value="hypothesis" class="flex items-center gap-2">
-        <Lightbulb class="h-4 w-4" />
+      <Tabs.Trigger value="hypothesis" class="flex items-center gap-2 data-[state=active]:bg-muted">
+        <Lightbulb class="h-3 w-3 data-[state=active]:h-4 w-4" />
         假说
       </Tabs.Trigger>
     </Tabs.List>
@@ -162,45 +205,91 @@
                 </div>
               </div>
             {/each}
+            <!-- Add Timeline Entry Button -->
+            <Popover.Root>
+              <Popover.Trigger>
+                <div class="flex gap-4 group cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors" >
+                  <div class="flex flex-col items-center">
+                    <div class="w-px h-3 bg-border" />
+                    <div class="w-2 h-2 rounded-full bg-muted-foreground" />
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Plus class="h-4 w-4" />
+                    <span>添加时间点</span>
+                  </div>
+                </div>
+              </Popover.Trigger>
+              <Popover.Content class="w-80">
+                <div class="space-y-3">
+                  <h4 class="text-sm font-medium">添加时间点</h4>
+                  <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                      <Calendar class="h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="datetime-local"
+                        placeholder="选择日期和时间"
+                        bind:value={newTimelineDate}
+                      />
+                    </div>
+                    <Textarea
+                      placeholder="描述这个时间点发生了什么..."
+                      bind:value={newTimelineDescription}
+                      rows={3}
+                    />
+                  </div>
+                  <div class="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onclick={cancelAddTimeline}>
+                      取消
+                    </Button>
+                    <Button size="sm" onclick={handleAddTimeline}>
+                      添加
+                    </Button>
+                  </div>
+                </div>
+              </Popover.Content>
+            </Popover.Root>
           </div>
         {:else}
-          <div class="flex flex-col items-center justify-center h-[200px] text-center text-muted-foreground">
-            <Clock class="h-8 w-8 mb-2 opacity-50" />
-            <p>暂无时间线条目</p>
-            <p class="text-xs">点击下方按钮添加</p>
-          </div>
-        {/if}
-
-        {#if isAddingTimeline}
-          <div class="space-y-3 border border-border rounded-md p-3 mb-4" in:fade={{ duration: 200 }}>
-            <h4 class="text-sm font-medium">添加时间点</h4>
-            <div class="space-y-2">
-              <div class="flex items-center gap-2">
-                <Calendar class="h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="datetime-local"
-                  placeholder="选择日期和时间"
-                  bind:value={newTimelineDate}
-                />
+          <Popover.Root>
+            <Popover.Trigger>
+              <div class="flex flex-col items-center justify-center h-[200px] text-center text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" >
+                <Clock class="h-8 w-8 mb-2 opacity-50" />
+                <p>暂无时间线条目</p>
+                <p class="text-xs">点击添加</p>
               </div>
-              <Textarea
-                placeholder="描述这个时间点发生了什么..."
-                bind:value={newTimelineDescription}
-                rows={3}
-              />
-            </div>
-            <div class="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onclick={cancelAddTimeline}>
-                取消
-              </Button>
-              <Button size="sm" onclick={handleAddTimeline}>
-                添加
-              </Button>
-            </div>
-          </div>
+            </Popover.Trigger>
+            <Popover.Content class="w-80">
+              <div class="space-y-3">
+                <h4 class="text-sm font-medium">添加时间点</h4>
+                <div class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <Calendar class="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="datetime-local"
+                      placeholder="选择日期和时间"
+                      bind:value={newTimelineDate}
+                    />
+                  </div>
+                  <Textarea
+                    placeholder="描述这个时间点发生了什么..."
+                    bind:value={newTimelineDescription}
+                    rows={3}
+                  />
+                </div>
+                <div class="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onclick={cancelAddTimeline}>
+                    取消
+                  </Button>
+                  <Button size="sm" onclick={handleAddTimeline}>
+                    添加
+                  </Button>
+                </div>
+              </div>
+            </Popover.Content>
+          </Popover.Root>
         {/if}
 
-        <Button
+        <!-- <Button
           variant={isAddingTimeline ? "secondary" : "outline"}
           class="w-full"
           onclick={() => isAddingTimeline = !isAddingTimeline}
@@ -212,7 +301,7 @@
             <Plus class="h-4 w-4 mr-2" />
             添加时间点
           {/if}
-        </Button>
+        </Button> -->
       </Tabs.Content>
 
       <Tabs.Content value="hypothesis" class="p-4 h-full">
@@ -225,7 +314,10 @@
                     variant="ghost"
                     size="icon"
                     class="absolute right-8 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-                    onclick={() => removeHypothesis(hypothesis.id)}
+                    onclick={(e) => {
+                      e.stopPropagation();
+                      removeHypothesis(hypothesis.id);
+                    }}
                   >
                     <X class="h-3 w-3" />
                   </Button>
@@ -241,53 +333,77 @@
                 </Accordion.Content>
               </Accordion.Item>
             {/each}
+            <!-- Add Hypothesis Button -->
+            <Popover.Root>
+              <Popover.Trigger>
+                <div class="flex items-center gap-2 p-3 cursor-pointer hover:bg-muted/50 rounded-lg transition-colors mt-2">
+                  <Plus class="h-4 w-4 text-muted-foreground" />
+                  <span class="text-sm text-muted-foreground">添加假说</span>
+                </div>
+              </Popover.Trigger>
+              <Popover.Content class="w-80">
+                <div class="space-y-3">
+                  <h4 class="text-sm font-medium">添加假说</h4>
+                  <div class="space-y-2">
+                    <Input
+                      placeholder="假说标题"
+                      bind:value={newHypothesisTitle}
+                    />
+                    <Textarea
+                      placeholder="详细描述你的假说..."
+                      bind:value={newHypothesisDescription}
+                      rows={4}
+                    />
+                  </div>
+                  <div class="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onclick={cancelAddHypothesis}>
+                      取消
+                    </Button>
+                    <Button size="sm" onclick={handleAddHypothesis}>
+                      添加
+                    </Button>
+                  </div>
+                </div>
+              </Popover.Content>
+            </Popover.Root>
           </Accordion.Root>
         {:else}
-          <div class="flex flex-col items-center justify-center h-[200px] text-center text-muted-foreground">
-            <Lightbulb class="h-8 w-8 mb-2 opacity-50" />
-            <p>暂无假说</p>
-            <p class="text-xs">点击下方按钮添加</p>
-          </div>
+          <Popover.Root>
+            <Popover.Trigger>
+              <div class="flex flex-col items-center justify-center h-[200px] text-center text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" >
+                <Lightbulb class="h-8 w-8 mb-2 opacity-50" />
+                <p>暂无假说</p>
+                <p class="text-xs">点击添加</p>
+              </div>
+            </Popover.Trigger>
+            <Popover.Content class="w-80">
+              <div class="space-y-3">
+                <h4 class="text-sm font-medium">添加假说</h4>
+                <div class="space-y-2">
+                  <Input
+                    placeholder="假说标题"
+                    bind:value={newHypothesisTitle}
+                  />
+                  <Textarea
+                    placeholder="详细描述你的假说..."
+                    bind:value={newHypothesisDescription}
+                    rows={4}
+                  />
+                </div>
+                <div class="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onclick={cancelAddHypothesis}>
+                    取消
+                  </Button>
+                  <Button size="sm" onclick={handleAddHypothesis}>
+                    添加
+                  </Button>
+                </div>
+              </div>
+            </Popover.Content>
+          </Popover.Root>
         {/if}
 
-        {#if isAddingHypothesis}
-          <div class="space-y-3 border border-border rounded-md p-3 mb-4" in:fade={{ duration: 200 }}>
-            <h4 class="text-sm font-medium">添加假说</h4>
-            <div class="space-y-2">
-              <Input
-                placeholder="假说标题"
-                bind:value={newHypothesisTitle}
-              />
-              <Textarea
-                placeholder="详细描述你的假说..."
-                bind:value={newHypothesisDescription}
-                rows={4}
-              />
-            </div>
-            <div class="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onclick={cancelAddHypothesis}>
-                取消
-              </Button>
-              <Button size="sm" onclick={handleAddHypothesis}>
-                添加
-              </Button>
-            </div>
-          </div>
-        {/if}
 
-        <Button
-          variant={isAddingHypothesis ? "secondary" : "outline"}
-          class="w-full"
-          onclick={() => isAddingHypothesis = !isAddingHypothesis}
-        >
-          {#if isAddingHypothesis}
-            <X class="h-4 w-4 mr-2" />
-            取消添加
-          {:else}
-            <Plus class="h-4 w-4 mr-2" />
-            添加假说
-          {/if}
-        </Button>
       </Tabs.Content>
     </ScrollArea>
   </Tabs.Root>
