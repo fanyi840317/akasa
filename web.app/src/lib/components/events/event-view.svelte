@@ -28,10 +28,12 @@
     import type { Doc } from "@blocksuite/store";
     import { createDocByJson } from "../editor/affine-editor";
     import EventEditorArea from "./event-editor-area.svelte";
+    import {MapBase} from "$lib/components/map"
+    import type { Location } from "$lib/types/map";
 
     let { event } = $props<{ event: Event }>();
 
-    let mapLocation: { lat: number; lng: number } | null = null;
+    let mapLocation:Location | null = null;
 
     let title = "";
     let content = "";
@@ -217,10 +219,7 @@
             <!-- 事件内容 - 使用 AffineEditor 只读模式 -->
             <div class="prose dark:prose-invert max-w-none">
                 {#if doc}
-                    <div class="h-[500px] border rounded-md overflow-hidden">
-                        <AffineEditor bind:doc />
-                        <!-- <EventEditorArea {title} {doc} showAICard={false} /> -->
-                    </div>
+                <AffineEditor bind:doc />
                 {:else if event.content}
                     <p class="text-muted-foreground">正在加载内容...</p>
                 {:else}
@@ -233,15 +232,11 @@
                 <Card class="overflow-hidden">
                     <div class="relative h-[240px]">
                         <!-- 地图组件暂时注释掉，因为存在类型错误 -->
-                        <!-- <Map 
-                            center={mapLocation}
+                        <MapBase 
+                            locationData={mapLocation}
                             zoom={15}
-                            markers={[{
-                                position: mapLocation,
-                                title: event.title
-                            }]}
                             class="w-full h-full"
-                        /> -->
+                        />
                         <div
                             class="w-full h-full bg-muted flex items-center justify-center"
                         >

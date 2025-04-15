@@ -46,6 +46,7 @@ export interface Event {
   content: string;
   location: string;
   categories?: string[];
+  tags?:string[];
   date: string;
   user_id: string;
   cover?: string;
