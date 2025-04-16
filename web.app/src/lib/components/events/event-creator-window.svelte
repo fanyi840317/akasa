@@ -496,7 +496,7 @@
           <!-- 添加封面按钮 - 悬停时显示 -->
           <div
             role="banner"
-            class="absolute -top-2 left-4 opacity-0 transition-opacity duration-200"
+            class="absolute top-2 left-2 opacity-0 transition-opacity duration-200"
             class:opacity-100={showCoverButton}
             onmouseenter={() => (showCoverButton = true)}
             onmouseleave={() => (showCoverButton = false)}
