@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
-  import { Sparkles, Save, MapPin } from "lucide-svelte";
+  import { Sparkles, Save, MapPin, MapPinIcon, CalendarIcon } from "lucide-svelte";
   import AffineEditor from "$lib/components/editor/affine-editor.svelte";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import type { Doc } from "@blocksuite/store";
@@ -40,9 +40,6 @@
   }
 
   // 处理AI生成
-  function handleAIGenerate() {
-    onAIGenerate();
-  }
 
   // 处理保存
   function handleSave() {
@@ -85,7 +82,7 @@
 </script>
 
 <div
-  class="w-full py-8  h-[80vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col"
+  class="w-full py-8 h-[90vh] bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col"
 >
   <!-- 标题输入框 -->
   <div
@@ -108,36 +105,56 @@
         variant="ghost"
         size="icon"
         class="h-8 w-8"
-        onclick={handleAIGenerate}
+        onclick={onAIGenerate}
       >
         <Sparkles class="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        class="h-8 w-8"
-        onclick={handleSave}
-      >
+      <Button variant="ghost" size="icon" class="h-8 w-8" onclick={handleSave}>
         <Save class="h-4 w-4" />
       </Button>
     </div>
   </div>
 
-
   <!-- 编辑器区域 -->
   <div class="flex-1 relative overflow-hidden">
-    <ScrollArea class="w-full h-full px-14">
+    <ScrollArea class="w-full h-full pl-12 pr-4">
       <div
         role="button"
         tabindex="0"
         onkeydown={handleKeydown}
-        class="w-full h-full"
+        class="w-full h-full flex gap-4"
         onclick={handleEditorClick}
         oninput={handleEditorInput}
       >
-        <AffineEditor bind:doc on:cursorPosition={handleCursorPosition} />
-        <div class="absolute bottom-0 right-0 p-4">
-          
+        <AffineEditor
+          class="flex-1"
+          bind:doc
+          on:cursorPosition={handleCursorPosition}
+        />
+        <div class="flex w-[140px]  flex-col gap-4">
+         
+          <div class=" h-[100px] p-1 rounded-sm bg-card/40">
+            <div class="w-full rounded-t-sm h-[60%] bg-muted/10  font-bold items-center justify-center flex">
+              <!-- <h1>公元前2012年</h1> -->
+            </div>
+            <div
+              class="flex items-center gap-1 p-1 mt-2 text-xs text-muted-foreground/50"
+            >
+            <CalendarIcon class="h-3 w-3" />
+            假设
+            </div>
+          </div>
+          <div class=" h-[100px] p-1 rounded-sm bg-muted/40">
+            <div class="w-full rounded-t-sm h-[60%] bg-muted/10  font-bold items-center justify-center flex">
+              <!-- <h1>公元前2012年</h1> -->
+            </div>
+            <div
+              class="flex items-center gap-1 p-1 mt-2 text-xs text-muted-foreground/50"
+            >
+            <CalendarIcon class="h-3 w-3" />
+            线索
+            </div>
+          </div>
         </div>
       </div>
     </ScrollArea>

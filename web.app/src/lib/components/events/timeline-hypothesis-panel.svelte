@@ -160,89 +160,74 @@
   }
 </script>
 
-<div class="h-full w-full min-w-[200px] flex flex-col bg-card py-4 rounded-r-lg ">
+<div class="h-full w-full w-[300px] flex flex-col bg-card py-4 rounded-r-lg py-4 px-2">
   <!-- <div class="p-4 border-b border-border/30">
     <h3 class="text-lg font-medium">操作区</h3>
     <p class="text-sm text-muted-foreground">添加时间线和假说</p>
   </div> -->
 
-  <Tabs.Root value={activeTab} class="flex-1 flex flex-col " onValueChange={(value) => activeTab = value}>
-    <Tabs.List class="px-2 pt-2 bg-tr flex justify-start" >
-      <Tabs.Trigger value="timeline" class="flex items-center gap-2 data-[state=active]:bg-muted">
-        <Clock class="h-3 w-3" />
-        时间线
-      </Tabs.Trigger>
-    </Tabs.List>
-
-    <Tabs.Content value="timeline" class="p-4 h-full">
-      
-    <ScrollArea >
-      <div class="space-y-4 mb-4">
-        {#each timelineEvents.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) as entry (entry.id)}
-          <div class="flex gap-4 group" in:fade={{ duration: 200 }}>
-            <div class="flex flex-col items-center">
-              <div class="w-px h-3 bg-border" />
-              <div class="w-2 h-2 rounded-full bg-primary" />
-              <div class="flex-1 w-px bg-border" />
-            </div>
-            <div class="flex-1 pb-4 relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                class="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-                onclick={() => removeTimelineEntry(entry.id)}
-              >
-                <X class="h-3 w-3" />
-              </Button>
-              <p class="text-xs text-muted-foreground">
-                {formatDate(entry.timestamp)}
-              </p>
-              <p class="text-sm mt-1">{entry.description}</p>
-            </div>
-          </div>
-        {/each}
-        <!-- Add Timeline Entry Button -->
-        <Popover.Root>
-          <Popover.Trigger>
-            <div class="flex gap-4 group cursor-pointer py-2 rounded-lg transition-colors" >
-              
-              <Button variant="outline" class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Plus class="h-4 w-4" />
-                <span>添加时间点</span>
-              </Button>
-            </div>
-          </Popover.Trigger>
-          <Popover.Content class="w-80">
-            <div class="space-y-3">
-              <h4 class="text-sm font-medium">添加时间点</h4>
-              <div class="space-y-2">
-                <div class="flex items-center gap-2">
-                  <Calendar class="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="datetime-local"
-                    placeholder="选择日期和时间"
-                    bind:value={newTimelineDate}
-                  />
-                </div>
-                <Textarea
-                  placeholder="描述这个时间点发生了什么..."
-                  bind:value={newTimelineDescription}
-                  rows={3}
+      <!-- Add Timeline Entry Button -->
+      <Popover.Root>
+        <Popover.Trigger>
+          <Button variant="outline" class="flex items-center gap-2 text-sm text-muted-foreground">
+            <Plus class="h-4 w-4" />
+            <span>添加时间点</span>
+          </Button>
+        </Popover.Trigger>
+        <Popover.Content class="w-80">
+          <div class="space-y-3">
+            <h4 class="text-sm font-medium">添加时间点</h4>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <!-- <Calendar class="h-4 w-4 text-muted-foreground" /> -->
+                <Input
+                  type="datetime-local"
+                  placeholder="选择日期和时间"
+                  bind:value={newTimelineDate}
                 />
               </div>
-              <div class="flex justify-end gap-2">
-                <Button variant="outline" size="sm" onclick={cancelAddTimeline}>
-                  取消
-                </Button>
-                <Button size="sm" onclick={handleAddTimeline}>
-                  添加
-                </Button>
-              </div>
+              <Textarea
+                placeholder="描述这个时间点发生了什么..."
+                bind:value={newTimelineDescription}
+                rows={3}
+              />
             </div>
-          </Popover.Content>
-        </Popover.Root>
-      </div>
-    </ScrollArea>
-    </Tabs.Content>
-  </Tabs.Root>
+            <div class="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onclick={cancelAddTimeline}>
+                取消
+              </Button>
+              <Button size="sm" onclick={handleAddTimeline}>
+                添加
+              </Button>
+            </div>
+          </div>
+        </Popover.Content>
+      </Popover.Root>
+  <ScrollArea >
+    <div class="space-y-4 my-4">
+      {#each timelineEvents.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) as entry (entry.id)}
+        <div class="flex gap-4 group" in:fade={{ duration: 200 }}>
+          <div class="flex flex-col items-center">
+            <div class="w-px h-3 bg-border" />
+            <div class="w-2 h-2 rounded-full bg-primary" />
+            <div class="flex-1 w-px bg-border" />
+          </div>
+          <div class="flex-1 pb-4 relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              class="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+              onclick={() => removeTimelineEntry(entry.id)}
+            >
+              <X class="h-3 w-3" />
+            </Button>
+            <p class="text-xs text-muted-foreground">
+              {formatDate(entry.timestamp)}
+            </p>
+            <p class="text-sm mt-1 break-words line-clamp-2">{entry.description}</p>
+          </div>
+        </div>
+      {/each}
+    </div>
+  </ScrollArea>
 </div>

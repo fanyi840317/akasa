@@ -16,6 +16,14 @@
     Redo2,
     Pencil,
     Check,
+    Link,
+    Video,
+    Users,
+    UserCheck,
+    UserCog,
+    Link2,
+    Lightbulb,
+    FileIcon,
   } from "lucide-svelte";
   import { LoadingCircle } from "$lib/components/icons";
   import * as Select from "$lib/components/ui/select";
@@ -31,7 +39,11 @@
   import { MapBase } from "$lib/components/map";
   import DimensionPicker from "./dimension-picker.svelte";
   import { Calendar } from "$lib/components/ui/calendar";
-  import { fromDate, getLocalTimeZone, parseDate } from "@internationalized/date";
+  import {
+    fromDate,
+    getLocalTimeZone,
+    parseDate,
+  } from "@internationalized/date";
   import type { DateValue } from "@internationalized/date";
   import { DateFormatter } from "@internationalized/date";
   import { formatSystemDate } from "$lib/utils";
@@ -43,6 +55,7 @@
   import { map } from "leaflet";
   import Input from "../ui/input/input.svelte";
   import EditableInput from "../ui/editable-input/editable-input.svelte";
+  import ClueStack from "./clue-stack.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -61,8 +74,23 @@
     locationData = $bindable(null),
     selectedCategories = $bindable([]),
     categories = [],
-    evidenceCount = 0,
+    evidenceCount = {
+      video: 0,
+      image: 0,
+      document: 0
+    },
+    personCount = {
+      witness: 0,
+      investigator: 0,
+      expert: 0
+    },
+    linkCount = {
+      external: 0,
+      reference: 0,
+      related: 0
+    },
     timelinePointsCount = 0,
+    hypothesisCount = 0,
     dimensions = [],
     onCategorySelect = (value: string) => {},
     onLocationSelect = () => {},
@@ -75,8 +103,23 @@
     locationData: Location | null;
     selectedCategories: string[];
     categories: Category[];
-    evidenceCount: number;
+    evidenceCount: {
+      video: number;
+      image: number;
+      document: number;
+    };
+    personCount: {
+      witness: number;
+      investigator: number;
+      expert: number;
+    };
+    linkCount: {
+      external: number;
+      reference: number;
+      related: number;
+    };
     timelinePointsCount: number;
+    hypothesisCount: number;
     dimensions?: Dimension[];
     onCategorySelect?: (value: string) => void;
     onLocationSelect?: () => void;
@@ -110,13 +153,15 @@
     try {
       return parseDate(date);
     } catch (error) {
-      return undefined
+      return undefined;
     }
   }
   function formatDate(date: string | undefined) {
-    if (!date|| date==="") return "未设置发生时间";
+    if (!date || date === "") return "未设置发生时间";
     try {
-      return df.format(parseDate(date.split("T")[0]).toDate(getLocalTimeZone()));
+      return df.format(
+        parseDate(date.split("T")[0]).toDate(getLocalTimeZone()),
+      );
     } catch (error) {
       // console.error("格式化日期时发生错误:", error);
       return date;
@@ -180,18 +225,52 @@
         console.error("日期解析错误:", error);
       }
     }
-    if(locationData){
-      originalAddress=locationData.address;
+    if (locationData) {
+      originalAddress = locationData.address;
     }
     // if (selectedDate) {
     //   eventDate = formatDate(selectedDate);
     // }
   });
+
+  let clues = [
+    {
+      id: "1",
+      title: "目击者陈述",
+      creator: {
+        name: "张三",
+        avatar: "/avatars/1.jpg"
+      }
+    },
+    {
+      id: "2",
+      title: "现场照片",
+      cover: "/evidence/photo1.jpg",
+      creator: {
+        name: "李四"
+      }
+    },
+    {
+      id: "3",
+      title: "调查报告",
+      creator: {
+        name: "王五",
+        avatar: "/avatars/2.jpg"
+      }
+    },
+    {
+      id: "4",
+      title: "专家分析",
+      creator: {
+        name: "赵六"
+      }
+    }
+  ];
 </script>
 
 <div class="space-y-4 py-4 bg-background rounded-l-lg">
   <!-- 事件信息 -->
-  <!-- <div class="w-full bg-background px-2 rounded-l-lg">
+  <div class="w-full min-w-[180px] bg-background px-2 rounded-l-lg">
     <div class="space-y-4">
       <div class="flex flex-col items-end gap-1">
         <div class="flex items-center gap-2">
@@ -225,25 +304,22 @@
         <Popover>
           <PopoverTrigger>
             <Button variant="link" class="justify-end gap-2 h-auto py-1 px-0">
-              <span class:opacity-50={!eventDate}
-                >{formatDate(eventDate)}</span
-              >
+              <span class:opacity-50={!eventDate}>{formatDate(eventDate)}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent class="w-auto p-0" align="start">
-            <div class="p-3">
-              <div class="flex items-center gap-2 px-2">
-                <EditableInput
-                  value={eventDate}
-                  placeholder="未设置发生时间"
-                  class="h-9"
-                  on:change={(e) => {
-                    eventDate = e.detail.value;
-                  }}
-                />
-              </div>
-              <Calendar type="single" bind:value={originalDate} />
+          <PopoverContent class="flex flex-col w-auto p-0 gap-2" align="start">
+            <div class="flex items-center gap-2 pt-2 px-2 bg-muted/10 rounded-sm">
+              <EditableInput
+                value={eventDate}
+                placeholder="未设置发生时间"
+                class="h-9"
+                on:change={(e) => {
+                  eventDate = e.detail.value;
+                }}
+              />
             </div>
+            <Separator></Separator>
+            <Calendar type="single" bind:value={originalDate} />
           </PopoverContent>
         </Popover>
       </div>
@@ -253,29 +329,30 @@
           <MapPin class="h-3 w-3 text-muted-foreground" />
           <span class="text-xs text-muted-foreground">发生地点</span>
         </div>
-        <div class="overflow-hidden w-[130px] h-[110px]">
+        <div class="overflow-hidden w-[130px] h-[120px]">
           <div
             role="tooltip"
             bind:this={mapContainer}
             class={cn(
-              "rounded-sm h-full transition-all border-[0.5px] duration-500 ease-in-out p-1",
+              "rounded-sm h-full transition-all duration-500 ease-in-out p-1",
               showFullMap
                 ? "absolute z-50 bg-card border rounded-lg shadow-md"
-                : "bg-muted/40",
+                : "",
             )}
             onmouseenter={() => (showFullMap = true)}
             onmouseleave={(e) => {
               // alert(e.relatedTarget);
               // 检查事件目标是否为EditableInput或其子元素
               const target = e.relatedTarget as Element;
-              if (target && target.closest('.editable-input')) {
+              if (target && target.closest(".editable-input")) {
                 return;
               }
               showFullMap = false;
             }}
           >
             <div
-              class="w-full h-[60%] rounded-t-sm overflow-hidden cursor-pointer"
+              class="w-full h-[70%] rounded-t-sm overflow-hidden cursor-pointer"
+              class:rounded-sm={!showFullMap}
             >
               <MapBase
                 zoom={6}
@@ -285,62 +362,57 @@
                 showLocateButton={showFullMap}
               />
             </div>
+            {#if showFullMap}
+            <div class="flex h-[30%] px-2 items-center gap-2 w-full justify-start">
+              {#if isLocation}
+                <LoadingCircle dimensions="h-3 w-3" />
+              {/if}
+              <EditableInput
+                bind:value={originalAddress}
+                placeholder="未设置事件发生位置"
+                class="h-9 editable-input"
+                on:change={(e) => {
+                  locationData.address = e.detail.value;
+                }}
+              />
+            </div>
+          {:else}
             <div
-              class="flex flex-col items-start gap-1"
-              class:p-6={showFullMap}
+              class={cn(
+                "flex p-2 items-center gap-2 w-full justify-end text-xs",
+              )}
             >
-              {#if showFullMap}
-                <div
-                  class="flex-clos items-center gap-2 w-full pointer-events-auto"
+              {#if isLocation}
+                <LoadingCircle dimensions="h-3 w-3" />
+              {/if}
+              {#if locationData?.address}
+                <span
+                  class="text-muted-foreground/90 text-right break-words line-clamp-2"
                 >
-                  <div
-                    class="flex py-4 items-center gap-2 w-full justify-start"
-                  >
-                    {#if isLocation}
-                      <LoadingCircle dimensions="h-3 w-3" />
-                    {/if}
-                    <EditableInput
-                      bind:value={originalAddress}
-                      placeholder="未设置事件发生位置"
-                      class="h-9 editable-input"
-                      on:change={(e) => {
-                        locationData.address = e.detail.value;
-                      }}
-                    />
-                  </div>
-                </div>
+                  {locationData.address}
+                </span>
               {:else}
-                <div
-                  class={cn(
-                    "flex p-2 items-center gap-2 w-full justify-start text-xs",
-                  )}
+                <span class="text-muted-foreground/80"
+                  >未设置事件发生位置</span
                 >
-                  {#if isLocation}
-                    <LoadingCircle dimensions="h-3 w-3" />
-                  {/if}
-                  {#if locationData?.address}
-                    <span
-                      class="text-muted-foreground/90 break-words line-clamp-2"
-                    >
-                      {locationData.address}
-                    </span>
-                  {:else}
-                    <span class="text-muted-foreground/80"
-                      >未设置事件发生位置</span
-                    >
-                  {/if}
-                </div>
               {/if}
             </div>
+          {/if}
           </div>
         </div>
       </div>
     </div>
   </div>
-  <Separator></Separator> -->
+  <Separator></Separator>
 
+  <!-- <div class="flex flex-col items-center justify-between">
+    <span class="text-xs text-muted-foreground/50">线索列表</span>
+    <div class="w-full mt-2">
+      <ClueStack {clues} />
+    </div>
+  </div> -->
   <!-- 基本信息 -->
-  <div class="w-full px-2">
+  <!-- <div class="w-full px-2">
     <div class="space-y-4">
       <div class="flex flex-col items-end gap-1">
         <div class="flex items-center gap-2">
@@ -387,5 +459,65 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
+
+  <!-- 统计信息 -->
+  <!-- <div class="flex flex-col gap-3">
+    <div class="flex flex-col items-center justify-between text-xs text-muted-foreground/50">
+      <span>证据统计</span>
+      <div class="flex flex-col items-center gap-4">
+        <div class="flex items-center gap-1">
+          <Video class="h-3 w-3" />
+          <span>{evidenceCount.video || 0} 个视频</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <ImageIcon class="h-3 w-3" />
+          <span>{evidenceCount.image || 0} 张图片</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <FileText class="h-3 w-3" />
+          <span>{evidenceCount.document || 0} 份文档</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center justify-between text-xs text-muted-foreground/50">
+      <span>人物统计</span>
+      <div class="flex  flex-col items-center gap-4">
+        <div class="flex items-center gap-1">
+          <Users class="h-3 w-3" />
+          <span>{personCount.witness || 0} 位目击者</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <UserCheck class="h-3 w-3" />
+          <span>{personCount.investigator || 0} 位调查员</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <UserCog class="h-3 w-3" />
+          <span>{personCount.expert || 0} 位专家</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center justify-between text-xs text-muted-foreground/50">
+      <span>链接统计</span>
+      <div class="flex flex-col items-center gap-4">
+        <div class="flex items-center gap-1">
+          <Link class="h-3 w-3" />
+          <span>{linkCount.external || 0} 个外部链接</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <FileIcon class="h-3 w-3" />
+          <span>{linkCount.reference || 0} 个参考资料</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <Link2 class="h-3 w-3" />
+          <span>{linkCount.related || 0} 个关联事件</span>
+        </div>
+      </div>
+    </div>
+
+    
+  </div> -->
+  
 </div>

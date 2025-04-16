@@ -162,8 +162,8 @@
   }
 
   // 处理 AI 生成
-  function handleAIGenerate(event: CustomEvent<void>) {
-    showAICard = !showAICard;
+  function handleAIGenerate() {
+    
   }
 
   let cursorPosition = $state({ top: 0, left: 0 });
@@ -450,7 +450,7 @@
     </div>
 
     <!-- 窗口容器 -->
-    <div class={mode==="window"?"fixed left-[50%] top-[50%] translate-y-[-50%] translate-x-[-50%] flex z-50 event-creator-window"
+    <div class={mode==="window"?"absolute left-[50%] top-[50%] translate-y-[-50%] translate-x-[-50%] flex z-50 event-creator-window"
       : "flex translate-y-[-20%] event-creator-window"}
       in:fly={{ y: 20, duration: 500, delay: 300 }}
       out:fly={{ y: 20, duration: 500 }}
@@ -468,7 +468,6 @@
           bind:isLocation
           bind:selectedCategories
           {categories}
-          {evidenceCount}
           {timelinePointsCount}
         />
       </div>
@@ -486,21 +485,14 @@
               bind:title
               bind:doc={newDoc}
               {showAICard}
-              onAIGenerate={() => (showAICard = !showAICard)}
               onEditorClick={handleEditorClick}
               onEditorInput={handleEditorInput}
+              onAIGenerate={handleAIGenerate}
               onCursorPosition={handleCursorPosition}
               onSave={handleSave}
               onTitleHover={handleTitleHover}
             />
           {/if}
-          <div
-            class="fixed right-[calc(50%-400px)] top-[calc(50%)] translate-y-[-50%] flex flex-col gap-4 z-10"
-            in:fly={{ y: 100, duration: 500, delay: 600 }}
-            out:fly={{ y: 100, duration: 500 }}
-          >
-            <EventActionsWidget {locationData} on:action={handleAction} />
-          </div>
           <!-- 添加封面按钮 - 悬停时显示 -->
           <div
             role="banner"
@@ -557,7 +549,7 @@
 {#if open}
   {#if mode === "window"}
     <div
-      class="fixed inset-0 z-50 bg-background "
+      class="fixed inset-0 z-50 bg-background"
       in:fade={{ duration: 400 }}
       out:fade={{ duration: 400 }}
     >
@@ -570,9 +562,7 @@
 
 <style>
   :global(.event-creator-window) {
-    min-height: 100%;
-    height: 100%;
-    position: relative;
+    max-height: 90vh;
     overflow: hidden;
   }
 </style>
