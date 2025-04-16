@@ -17,7 +17,6 @@
   import { setContext } from "svelte";
   import { NotionPanel } from "$lib/components/layout";
   import PanelContent from "./panel-content.svelte";
-  import EventDetail from "../events/event-detail.svelte";
   import * as Modal from "$lib/components/ui/modal";
   import type { Event } from "$lib/types/event";
 

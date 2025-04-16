@@ -1,12 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
-  import { Sparkles, Save, MapPin, MapPinIcon, CalendarIcon } from "lucide-svelte";
+  import { MapPin, MapPinIcon, CalendarIcon } from "lucide-svelte";
+  import EventTitleActions from "./event-title-actions.svelte";
   import AffineEditor from "$lib/components/editor/affine-editor.svelte";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import type { Doc } from "@blocksuite/store";
   import MapBase from "$lib/components/map/map-base.svelte";
+  import EventAnalysisCards from "./event-analysis-cards.svelte";
 
   let {
     title = $bindable(""),
@@ -100,19 +101,7 @@
         class="event-title-input w-full bg-transparent text-4xl font-semibold border-0 outline-none shadow-none focus:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
       />
     </div>
-    <div class="flex items-center gap-2 border-l border-border/40 pl-4">
-      <Button
-        variant="ghost"
-        size="icon"
-        class="h-8 w-8"
-        onclick={onAIGenerate}
-      >
-        <Sparkles class="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="icon" class="h-8 w-8" onclick={handleSave}>
-        <Save class="h-4 w-4" />
-      </Button>
-    </div>
+    <EventTitleActions {onAIGenerate} onSave={handleSave} />
   </div>
 
   <!-- 编辑器区域 -->
@@ -131,31 +120,7 @@
           bind:doc
           on:cursorPosition={handleCursorPosition}
         />
-        <div class="flex w-[140px]  flex-col gap-4">
-         
-          <div class=" h-[100px] p-1 rounded-sm bg-card/40">
-            <div class="w-full rounded-t-sm h-[60%] bg-muted/10  font-bold items-center justify-center flex">
-              <!-- <h1>公元前2012年</h1> -->
-            </div>
-            <div
-              class="flex items-center gap-1 p-1 mt-2 text-xs text-muted-foreground/50"
-            >
-            <CalendarIcon class="h-3 w-3" />
-            假设
-            </div>
-          </div>
-          <div class=" h-[100px] p-1 rounded-sm bg-muted/40">
-            <div class="w-full rounded-t-sm h-[60%] bg-muted/10  font-bold items-center justify-center flex">
-              <!-- <h1>公元前2012年</h1> -->
-            </div>
-            <div
-              class="flex items-center gap-1 p-1 mt-2 text-xs text-muted-foreground/50"
-            >
-            <CalendarIcon class="h-3 w-3" />
-            线索
-            </div>
-          </div>
-        </div>
+        <EventAnalysisCards />
       </div>
     </ScrollArea>
   </div>

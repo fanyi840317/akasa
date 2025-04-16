@@ -96,7 +96,7 @@
         ? JSON.parse(event.location_data)
         : null;
       selectedCategories = event.categories || [];
-      eventDate = event.date ;
+      eventDate = event.date;
 
       // 解析封面信息
       if (event.cover) {
@@ -162,9 +162,7 @@
   }
 
   // 处理 AI 生成
-  function handleAIGenerate() {
-    
-  }
+  function handleAIGenerate() {}
 
   let cursorPosition = $state({ top: 0, left: 0 });
   let showAICard = $state(false);
@@ -207,7 +205,7 @@
   $effect(() => {
     if (locationData) {
       isLocation = true;
-      if(locationData.latitude===0&&locationData.longitude===0){
+      if (locationData.latitude === 0 && locationData.longitude === 0) {
         isLocation = false;
         return;
       }
@@ -298,7 +296,8 @@
           }
         } catch (error: any) {
           console.error("上传封面失败:", error);
-          const errorMessage = error.message || error.response?.message || "上传封面失败";
+          const errorMessage =
+            error.message || error.response?.message || "上传封面失败";
           toast.error(`上传失败: ${errorMessage}`);
           if (localPreviewUrl) {
             URL.revokeObjectURL(localPreviewUrl);
@@ -331,20 +330,26 @@
       }),
       location_data: locationData ? JSON.stringify(locationData) : "",
       // 添加时间线和假说数据
-      timeline_data: timelineEvents.length ? JSON.stringify(timelineEvents) : "",
-      hypothesis_data: hypotheses.length ? JSON.stringify(hypotheses) : "",
+      // timeline_data: timelineEvents.length ? JSON.stringify(timelineEvents) : "",
+      // hypothesis_data: hypotheses.length ? JSON.stringify(hypotheses) : "",
     };
-    if (event?.$id) {
-      await eventStore.updateEvent(event.$id, eventData);
-    } else {
-      await eventStore.createEvent(eventData);
-    }
-    hasChanges = false;
+    let obj = null;
+    try {
+      if (event?.$id) {
+        event = await eventStore.updateEvent(event.$id, eventData);
+      } else {
+        event = await eventStore.createEvent(eventData);
+      }
+      hasChanges = false;
 
-    // 只在窗口模式下关闭
-    if (mode === "window") {
-      open = false;
-      dispatch("close");
+      // 只在窗口模式下关闭
+      if (obj && mode === "window") {
+        open = false;
+        dispatch("close");
+      }
+    } catch (e) {
+      alert(e);
+      console.error(e);
     }
   }
 
@@ -450,13 +455,16 @@
     </div>
 
     <!-- 窗口容器 -->
-    <div class={mode==="window"?"absolute left-[50%] top-[50%] translate-y-[-50%] translate-x-[-50%] flex z-50 event-creator-window"
-      : "flex translate-y-[-20%] event-creator-window"}
+    <div
+      class={mode === "window"
+        ? "absolute left-[50%] top-[50%] translate-y-[-50%] translate-x-[-50%] flex z-50 event-creator-window"
+        : "flex translate-y-[-10%] event-creator-window"}
       in:fly={{ y: 20, duration: 500, delay: 300 }}
       out:fly={{ y: 20, duration: 500 }}
     >
       <!-- 属性区域 -->
-      <div class="py-16"
+      <div
+        class="py-16"
         in:fly={{ x: -20, duration: 500, delay: 400 }}
         out:fly={{ x: -20, duration: 500 }}
       >
@@ -474,7 +482,7 @@
 
       <!-- 主要内容区域 -->
       <div
-        class="flex  gap-4 overflow-hidden"
+        class="flex gap-4 overflow-hidden"
         in:fly={{ x: 20, duration: 500, delay: 500 }}
         out:fly={{ x: 20, duration: 500 }}
       >
@@ -530,7 +538,6 @@
         out:fly={{ y: 20, duration: 500 }}
       >
         <TimelineHypothesisPanel
-          
           bind:hypotheses
           on:timelineChange={({ detail }) => {
             timelineEvents = detail.timelineEvents;
