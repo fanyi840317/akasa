@@ -104,7 +104,7 @@
   // let selectedDate = $state(
   //   eventDate ? formatDate(eventDate).toString() : undefined,
   // );
-  
+
   function toDate(date: string | undefined) {
     if (!date) return undefined;
     try {
@@ -112,7 +112,7 @@
     } catch (error) {
       return undefined
     }
-  }  
+  }
   function formatDate(date: string | undefined) {
     if (!date|| date==="") return "未设置发生时间";
     try {
@@ -132,6 +132,8 @@
         mapPosition = {
           top: rect.top - windowRect.top,
           left: rect.left - windowRect.left,
+          // top: rect.top,
+          // left: rect.left,
           width: rect.width,
           height: rect.height,
         };
@@ -187,205 +189,201 @@
   });
 </script>
 
-<div
-  class="h-[80vh] py-12 sm:py-8 md:py-14 flex flex-col justify-start w-full min-w-[120px] sm:min-w-[140px] md:min-w-[160px]"
->
-  <div class="space-y-4 py-4 bg-background rounded-l-lg">
-    <!-- 事件信息 -->
-    <div class="w-full bg-background px-2 rounded-l-lg">
-      <div class="space-y-4">
-        <div class="flex flex-col items-end gap-1">
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-muted-foreground">事件分类</span>
-          </div>
-          <div class="px-1">
-            <Select.Root type="multiple" bind:value={selectedCategories}>
-              <Select.Trigger
-                class="justify-end gap-2 h-auto py-1 px-2 border-none"
-              >
-                <Tag class="h-3 w-3 text-muted-foreground" />
-                <span class:opacity-50={!selectedCategories.length}
-                  >{selectedCategories.length || "0"}</span
-                >
-              </Select.Trigger>
-              <Select.Content align="start">
-                {#each categories as category}
-                  <Select.Item value={category.$id || ""}
-                    >{category.name.zh}</Select.Item
-                  >
-                {/each}
-              </Select.Content>
-            </Select.Root>
-          </div>
+<div class="space-y-4 py-4 bg-background rounded-l-lg">
+  <!-- 事件信息 -->
+  <!-- <div class="w-full bg-background px-2 rounded-l-lg">
+    <div class="space-y-4">
+      <div class="flex flex-col items-end gap-1">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-muted-foreground">事件分类</span>
         </div>
-        <div class="flex flex-col items-end gap-1">
-          <div class="flex items-center gap-2">
-            <CalendarIcon class="h-3 w-3 text-muted-foreground" />
-            <span class="text-xs text-muted-foreground">发生时间</span>
-          </div>
-          <Popover>
-            <PopoverTrigger>
-              <Button variant="link" class="justify-end gap-2 h-auto py-1 px-0">
-                <span class:opacity-50={!eventDate}
-                  >{formatDate(eventDate)}</span
-                >
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-auto p-0" align="start">
-              <div class="p-3">
-                <div class="flex items-center gap-2 px-2">
-                  <EditableInput
-                    value={eventDate}
-                    placeholder="未设置发生时间"
-                    class="h-9"
-                    on:change={(e) => {
-                      eventDate = e.detail.value;
-                    }}
-                  />
-                </div>
-                <Calendar type="single" bind:value={originalDate} />
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div class="flex flex-col items-end gap-1">
-          <div class="flex items-center gap-2">
-            <MapPin class="h-3 w-3 text-muted-foreground" />
-            <span class="text-xs text-muted-foreground">发生地点</span>
-          </div>
-          <div class="overflow-hidden w-[130px] h-[110px]">
-            <div
-              role="tooltip"
-              bind:this={mapContainer}
-              class={cn(
-                "rounded-sm h-full transition-all border-[0.5px] duration-500 ease-in-out p-1",
-                showFullMap
-                  ? "absolute z-50 bg-card border rounded-lg shadow-md"
-                  : "bg-muted/40",
-              )}
-              onmouseenter={() => (showFullMap = true)}
-              onmouseleave={(e) => {
-                // alert(e.relatedTarget);
-                // 检查事件目标是否为EditableInput或其子元素
-                const target = e.relatedTarget as Element;
-                if (target && target.closest('.editable-input')) {
-                  return;
-                }
-                showFullMap = false;
-              }}
+        <div class="px-1">
+          <Select.Root type="multiple" bind:value={selectedCategories}>
+            <Select.Trigger
+              class="justify-end gap-2 h-auto py-1 px-2 border-none"
             >
-              <div
-                class="w-full h-[60%] rounded-t-sm overflow-hidden cursor-pointer"
+              <Tag class="h-3 w-3 text-muted-foreground" />
+              <span class:opacity-50={!selectedCategories.length}
+                >{selectedCategories.length || "0"}</span
               >
-                <MapBase
-                  zoom={6}
-                  bind:locationData
-                  showUserLocation={true}
-                  clickable={showFullMap}
-                  showLocateButton={showFullMap}
+            </Select.Trigger>
+            <Select.Content align="start">
+              {#each categories as category}
+                <Select.Item value={category.$id || ""}
+                  >{category.name.zh}</Select.Item
+                >
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+      </div>
+      <div class="flex flex-col items-end gap-1">
+        <div class="flex items-center gap-2">
+          <CalendarIcon class="h-3 w-3 text-muted-foreground" />
+          <span class="text-xs text-muted-foreground">发生时间</span>
+        </div>
+        <Popover>
+          <PopoverTrigger>
+            <Button variant="link" class="justify-end gap-2 h-auto py-1 px-0">
+              <span class:opacity-50={!eventDate}
+                >{formatDate(eventDate)}</span
+              >
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent class="w-auto p-0" align="start">
+            <div class="p-3">
+              <div class="flex items-center gap-2 px-2">
+                <EditableInput
+                  value={eventDate}
+                  placeholder="未设置发生时间"
+                  class="h-9"
+                  on:change={(e) => {
+                    eventDate = e.detail.value;
+                  }}
                 />
               </div>
-              <div
-                class="flex flex-col items-start gap-1"
-                class:p-6={showFullMap}
-              >
-                {#if showFullMap}
+              <Calendar type="single" bind:value={originalDate} />
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <div class="flex flex-col items-end gap-1">
+        <div class="flex items-center gap-2">
+          <MapPin class="h-3 w-3 text-muted-foreground" />
+          <span class="text-xs text-muted-foreground">发生地点</span>
+        </div>
+        <div class="overflow-hidden w-[130px] h-[110px]">
+          <div
+            role="tooltip"
+            bind:this={mapContainer}
+            class={cn(
+              "rounded-sm h-full transition-all border-[0.5px] duration-500 ease-in-out p-1",
+              showFullMap
+                ? "absolute z-50 bg-card border rounded-lg shadow-md"
+                : "bg-muted/40",
+            )}
+            onmouseenter={() => (showFullMap = true)}
+            onmouseleave={(e) => {
+              // alert(e.relatedTarget);
+              // 检查事件目标是否为EditableInput或其子元素
+              const target = e.relatedTarget as Element;
+              if (target && target.closest('.editable-input')) {
+                return;
+              }
+              showFullMap = false;
+            }}
+          >
+            <div
+              class="w-full h-[60%] rounded-t-sm overflow-hidden cursor-pointer"
+            >
+              <MapBase
+                zoom={6}
+                bind:locationData
+                showUserLocation={true}
+                clickable={showFullMap}
+                showLocateButton={showFullMap}
+              />
+            </div>
+            <div
+              class="flex flex-col items-start gap-1"
+              class:p-6={showFullMap}
+            >
+              {#if showFullMap}
+                <div
+                  class="flex-clos items-center gap-2 w-full pointer-events-auto"
+                >
                   <div
-                    class="flex-clos items-center gap-2 w-full pointer-events-auto"
-                  >
-                    <div
-                      class="flex py-4 items-center gap-2 w-full justify-start"
-                    >
-                      {#if isLocation}
-                        <LoadingCircle dimensions="h-3 w-3" />
-                      {/if}
-                      <EditableInput
-                        bind:value={originalAddress}
-                        placeholder="未设置事件发生位置"
-                        class="h-9 editable-input"
-                        on:change={(e) => {
-                          locationData.address = e.detail.value;
-                        }}
-                      />
-                    </div>
-                  </div>
-                {:else}
-                  <div
-                    class={cn(
-                      "flex p-2 items-center gap-2 w-full justify-start text-xs",
-                    )}
+                    class="flex py-4 items-center gap-2 w-full justify-start"
                   >
                     {#if isLocation}
                       <LoadingCircle dimensions="h-3 w-3" />
                     {/if}
-                    {#if locationData?.address}
-                      <span
-                        class="text-muted-foreground/90 break-words line-clamp-2"
-                      >
-                        {locationData.address}
-                      </span>
-                    {:else}
-                      <span class="text-muted-foreground/80"
-                        >未设置事件发生位置</span
-                      >
-                    {/if}
+                    <EditableInput
+                      bind:value={originalAddress}
+                      placeholder="未设置事件发生位置"
+                      class="h-9 editable-input"
+                      on:change={(e) => {
+                        locationData.address = e.detail.value;
+                      }}
+                    />
                   </div>
-                {/if}
-              </div>
+                </div>
+              {:else}
+                <div
+                  class={cn(
+                    "flex p-2 items-center gap-2 w-full justify-start text-xs",
+                  )}
+                >
+                  {#if isLocation}
+                    <LoadingCircle dimensions="h-3 w-3" />
+                  {/if}
+                  {#if locationData?.address}
+                    <span
+                      class="text-muted-foreground/90 break-words line-clamp-2"
+                    >
+                      {locationData.address}
+                    </span>
+                  {:else}
+                    <span class="text-muted-foreground/80"
+                      >未设置事件发生位置</span
+                    >
+                  {/if}
+                </div>
+              {/if}
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+  <Separator></Separator> -->
 
-    <!-- 基本信息 -->
-    <Separator></Separator>
-    <div class="w-full px-2">
-      <div class="space-y-4">
-        <div class="flex flex-col items-end gap-1">
-          <div class="flex items-center gap-2">
-            <Clock class="h-3 w-3 text-muted-foreground/50" />
-            <span class="text-xs text-muted-foreground/50">创建时间</span>
-          </div>
-          <span class="text-sm text-muted-foreground/50"
-            >{formatSystemDate(createdAt)}</span
-          >
+  <!-- 基本信息 -->
+  <div class="w-full px-2">
+    <div class="space-y-4">
+      <div class="flex flex-col items-end gap-1">
+        <div class="flex items-center gap-2">
+          <Clock class="h-3 w-3 text-muted-foreground/50" />
+          <span class="text-xs text-muted-foreground/50">创建时间</span>
         </div>
-        <div class="flex flex-col items-end gap-1">
-          <div class="flex items-center gap-2">
-            <Clock class="h-3 w-3 text-muted-foreground/50" />
-            <span class="text-xs text-muted-foreground/50">最后修改</span>
-          </div>
-          <span class="text-sm text-muted-foreground/50"
-            >{formatSystemDate(lastModified)}</span
-          >
+        <span class="text-sm text-muted-foreground/50"
+          >{formatSystemDate(createdAt)}</span
+        >
+      </div>
+      <div class="flex flex-col items-end gap-1">
+        <div class="flex items-center gap-2">
+          <Clock class="h-3 w-3 text-muted-foreground/50" />
+          <span class="text-xs text-muted-foreground/50">最后修改</span>
         </div>
-        <div class="flex flex-col items-end gap-1">
-          <div class="flex items-center gap-2">
-            <User class="h-3 w-3 text-muted-foreground/50" />
-            <span class="text-xs text-muted-foreground/50">创建者</span>
-          </div>
-          <div class="flex items-center gap-2 text-sm">
-            {#if $auth.user?.prefs?.avatar}
-              <img
-                src={$auth.user.prefs.avatar as string}
-                alt={$auth.user.name}
-                class="h-6 w-6 rounded-full"
-              />
-            {:else}
-              <div
-                class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center"
-              >
-                <span class="text-[10px] text-primary"
-                  >{$auth.user?.name?.[0] || "?"}</span
-                >
-              </div>
-            {/if}
-            <span class="text-sm text-muted-foreground/50"
-              >{$auth.user?.name || "神秘探索者"}</span
+        <span class="text-sm text-muted-foreground/50"
+          >{formatSystemDate(lastModified)}</span
+        >
+      </div>
+      <div class="flex flex-col items-end gap-1">
+        <div class="flex items-center gap-2">
+          <User class="h-3 w-3 text-muted-foreground/50" />
+          <span class="text-xs text-muted-foreground/50">创建者</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          {#if $auth.user?.prefs?.avatar}
+            <img
+              src={$auth.user.prefs.avatar as string}
+              alt={$auth.user.name}
+              class="h-6 w-6 rounded-full"
+            />
+          {:else}
+            <div
+              class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center"
             >
-          </div>
+              <span class="text-[10px] text-primary"
+                >{$auth.user?.name?.[0] || "?"}</span
+              >
+            </div>
+          {/if}
+          <span class="text-sm text-muted-foreground/50"
+            >{$auth.user?.name || "神秘探索者"}</span
+          >
         </div>
       </div>
     </div>

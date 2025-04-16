@@ -19,6 +19,7 @@
   import PanelContent from "./panel-content.svelte";
   import EventDetail from "../events/event-detail.svelte";
   import * as Modal from "$lib/components/ui/modal";
+  import type { Event } from "$lib/types/event";
 
   interface NavSidebarEvents {
     navItemClick: CustomEvent<NavItem>;
@@ -101,7 +102,7 @@
 
   // 订阅 appStore 以获取事件创建器状态
   let showEventCreator = $state(false);
-  let currentEvent = $state(null);
+  let currentEvent:Event|null = $state(null);
 
   appStore.subscribe(state => {
     showEventCreator = state.showEventCreator;
@@ -169,7 +170,7 @@
 <!-- Dialog组件 -->
 
 
-<Sidebar.Provider open={showRightView} style="--sidebar-width: {400}px">
+<Sidebar.Provider open={showRightView}  style="--sidebar-width: {400}px">
   <Sidebar.Provider open={sidebarCollapsed} style="--sidebar-width: {sidebarWidth}px">
     <NavSidebar 
       collapsible="icon" 
@@ -179,7 +180,7 @@
     />
 
     <!-- 主内容区域 -->
-    <Sidebar.Inset>
+    <Sidebar.Inset class="overflow-hidden">
       {#if showHeader}
         <Header titles={titles} actions={actions} />
       {/if}
@@ -203,15 +204,6 @@
   </Sidebar.Root>
 </Sidebar.Provider>
 
-<!-- 事件创建器模态框 -->
-<Modal.Root bind:open={showEventCreator} class="sm:max-w-[900px] h-[80vh]">
-  <Modal.Content>
-    <EventDetail
-      x_event={currentEvent}
-      on:close={() => appStore.closeEventCreator()}
-    />
-  </Modal.Content>
-</Modal.Root>
 
 <!-- 事件详情面板 -->
 <NotionPanel 

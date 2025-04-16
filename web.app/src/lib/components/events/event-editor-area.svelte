@@ -136,6 +136,9 @@
         oninput={handleEditorInput}
       >
         <AffineEditor bind:doc on:cursorPosition={handleCursorPosition} />
+        <div class="absolute bottom-0 right-0 p-4">
+          
+        </div>
       </div>
     </ScrollArea>
   </div>

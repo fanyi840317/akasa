@@ -450,13 +450,13 @@
     </div>
 
     <!-- 窗口容器 -->
-    <div
-      class="fixed left-[50%] top-[50%] translate-x-[-50%] z-4 translate-y-[-50%] flex p-8 event-creator-window"
+    <div class={mode==="window"?"fixed left-[50%] top-[50%] translate-y-[-50%] translate-x-[-50%] flex z-50 event-creator-window"
+      : "flex translate-y-[-20%] event-creator-window"}
       in:fly={{ y: 20, duration: 500, delay: 300 }}
       out:fly={{ y: 20, duration: 500 }}
     >
       <!-- 属性区域 -->
-      <div
+      <div class="py-16"
         in:fly={{ x: -20, duration: 500, delay: 400 }}
         out:fly={{ x: -20, duration: 500 }}
       >
@@ -475,7 +475,7 @@
 
       <!-- 主要内容区域 -->
       <div
-        class="flex h-[80vh] gap-4"
+        class="flex  gap-4 overflow-hidden"
         in:fly={{ x: 20, duration: 500, delay: 500 }}
         out:fly={{ x: 20, duration: 500 }}
       >
@@ -531,33 +531,33 @@
           </div>
         </div>
       </div>
-    </div>
-    <!-- 时间线和假说操作区域 -->
-    <div
-      class="absolute bottom-0 right-0 z-2 p-4 translate-x-[-40%]  transition-all duration-200 hover:z-50"
-      in:fly={{ y: 20, duration: 500, delay: 600 }}
-      out:fly={{ y: 20, duration: 500 }}
-    >
-      <TimelineHypothesisPanel
-        
-        bind:hypotheses
-        on:timelineChange={({ detail }) => {
-          timelineEvents = detail.timelineEvents;
-          timelinePointsCount = timelineEvents.length;
-          hasChanges = true;
-        }}
-        on:hypothesisChange={({ detail }) => {
-          hypotheses = detail.hypotheses;
-          hasChanges = true;
-        }}
-      />
+      <!-- 时间线和假说操作区域 -->
+      <div
+        class="flex py-20 transition-all duration-200"
+        in:fly={{ y: 20, duration: 500, delay: 600 }}
+        out:fly={{ y: 20, duration: 500 }}
+      >
+        <TimelineHypothesisPanel
+          
+          bind:hypotheses
+          on:timelineChange={({ detail }) => {
+            timelineEvents = detail.timelineEvents;
+            timelinePointsCount = timelineEvents.length;
+            hasChanges = true;
+          }}
+          on:hypothesisChange={({ detail }) => {
+            hypotheses = detail.hypotheses;
+            hasChanges = true;
+          }}
+        />
+      </div>
     </div>
   {/if}
 {/snippet}
 {#if open}
   {#if mode === "window"}
     <div
-      class="fixed inset-0 z-50 bg-background"
+      class="fixed inset-0 z-50 bg-background "
       in:fade={{ duration: 400 }}
       out:fade={{ duration: 400 }}
     >
@@ -569,9 +569,10 @@
 {/if}
 
 <style>
-  :global(.event-creator-window .affine-editor) {
+  :global(.event-creator-window) {
     min-height: 100%;
     height: 100%;
     position: relative;
+    overflow: hidden;
   }
 </style>

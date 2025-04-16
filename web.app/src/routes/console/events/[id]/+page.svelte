@@ -77,7 +77,7 @@
 {#snippet actions()}
   <EventActionButtons></EventActionButtons>
 {/snippet}
-<div class="flex flex-col h-full">
+<div class="flex flex-col h-full overflow-hidden">
   <Header {titles} actions={actions}>
   </Header>
 
