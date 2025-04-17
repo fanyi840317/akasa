@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
-  import { Sparkles, Save, Network, Clock, Lightbulb, Search, Type, FileText } from "lucide-svelte";
+  import { Sparkles, Save, Network, Clock, Lightbulb, Search, Type, FileText, Tag } from "lucide-svelte";
   import * as Popover from "$lib/components/ui/popover";
 
   let {
@@ -18,6 +18,7 @@
     { icon: Clock, label: "生成时间线", action: "timeline", group: "analyze" },
     { icon: Lightbulb, label: "生成假设", action: "hypothesis", group: "analyze" },
     { icon: Search, label: "提取线索", action: "clues", group: "analyze" },
+    { icon: Tag, label: "提取实体", action: "entities", group: "analyze" },
   ];
 
   function handleAIAction(action: string) {
