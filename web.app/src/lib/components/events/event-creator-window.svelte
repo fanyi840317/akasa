@@ -458,7 +458,7 @@
     <div
       class={mode === "window"
         ? "absolute left-[50%] top-[50%] translate-y-[-50%] translate-x-[-50%] flex z-50 event-creator-window"
-        : "flex translate-y-[-10%] event-creator-window"}
+        : "flex translate-y-[-120px] event-creator-window"}
       in:fly={{ y: 20, duration: 500, delay: 300 }}
       out:fly={{ y: 20, duration: 500 }}
     >
@@ -487,7 +487,7 @@
         out:fly={{ x: 20, duration: 500 }}
       >
         <!-- 编辑器区域（包含标题和封面） -->
-        <div class="w-[800px] relative">
+        <div class="w-[800px] h-[86vh] relative">
           {#if showEditor}
             <EventEditorArea
               bind:title
