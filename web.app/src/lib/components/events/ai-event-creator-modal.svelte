@@ -23,6 +23,7 @@
   let eventInput = $state("");
   let generatedTitle = $state("");
   let generatedContent = $state("");
+  let generatedEventTime = $state<string | undefined>(undefined); // 新增：存储事件时间
   let generatedEntities = $state<{
     people?: Array<{ name: string; role: string }>;
     locations?: Array<{ name: string; description: string; coordinates?: [number, number] }>;
@@ -68,6 +69,9 @@
       });
       generationStep = 1;
 
+      // 存储事件时间
+      generatedEventTime = result.eventTime;
+
       // 检查是否需要额外解析
       if (
         result.content &&
@@ -82,6 +86,7 @@
             generatedTitle = parsedContent.title;
             generatedContent = parsedContent.content;
             generatedEntities = parsedContent.entities || {};
+            generatedEventTime = parsedContent.eventTime || result.eventTime; // 优先使用解析出的，否则用原始的
             console.log("成功从 content 中解析出 JSON 数据", {
               generatedTitle,
               generatedContent,
@@ -92,6 +97,7 @@
             generatedTitle = result.title;
             generatedContent = result.content;
             generatedEntities = result.entities || {};
+            generatedEventTime = result.eventTime;
           }
         } catch (e) {
           console.error("解析 content 中的 JSON 失败", e);
@@ -174,6 +180,7 @@
     dispatch("save", {
       title: generatedTitle,
       content: generatedContent,
+      eventTime: generatedEventTime, // 添加 eventTime 到保存数据
       entities: generatedEntities,
     });
     closeModalAndReset();
@@ -206,6 +213,7 @@
     eventInput = "";
     generatedTitle = "";
     generatedContent = "";
+    generatedEventTime = undefined; // 重置事件时间
     generatedEntities = {};
     displayedTitle = "";
     displayedContent = "";
@@ -349,7 +357,7 @@
       {/if}
     </div>
   {:else if mode === "loading" || mode === "result"}
-    <div class="flex flex-row w-full h-[calc(75vh-10px)] gap-6 p-4">
+    <div class="flex flex-row w-full h-[calc(75vh-10px)] p-4">
       <!-- 左侧：生成状态或实体信息卡片 -->
       {#if mode === "loading" || (mode === "result" && !animationCompleted)}
         <!-- 在生成过程中显示生成状态 -->
@@ -372,12 +380,54 @@
       {:else if mode === "result" && animationCompleted && (generatedEntities.people?.length || generatedEntities.locations?.length || generatedEntities.timeline?.length)}
         <!-- 在生成完成后显示实体信息卡片 -->
         <div
-          class="w-1/3 flex flex-col h-full justify-between my-6"
+          class="w-1/3 flex flex-col h-full justify-between mt-6 "
           in:fly={{ x: -20, duration: 400, delay: 200, easing: quintOut }}
           out:fade={{ duration: 200 }}
         >
-          <ScrollArea class="flex-1 pr-2 max-h-[calc(75vh-100px)]">
+          <ScrollArea class="flex-1 max-h-[calc(75vh-120px)] pr-2">
             <div class="space-y-6 p-2">
+
+            <!-- 事件时间 -->
+            {#if generatedEventTime}
+              <div>
+                <h3 class="text-lg font-bold text-white mb-4">
+                  事件时间
+                </h3>
+                <div class="grid grid-cols-1 gap-3">
+                  <div
+                    class="bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg"
+                    in:fly={{ y: 10, x: 0, duration: 300, delay: 300 }}
+                  >
+                    <div class="flex items-center p-3">
+                      <div
+                        class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-4 w-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                          <line x1="16" x2="16" y1="2" y2="6" />
+                          <line x1="8" x2="8" y1="2" y2="6" />
+                          <line x1="3" x2="21" y1="10" y2="10" />
+                        </svg>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-white truncate">
+                          {generatedEventTime}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/if}
 
             <!-- 人物信息 -->
             {#if generatedEntities.people?.length}
@@ -527,13 +577,13 @@
             </div>
           </ScrollArea>
           <!-- 保存按钮 -->
-          <div class="p-2 mt-2" in:fade={{ duration: 300, delay: 1000 }}>
+          <div class="p-2 mb-4" in:fade={{ duration: 300, delay: 1000 }}>
             <Button
               variant="outline"
               onclick={handleSave}
               class="w-full disabled:opacity-50 disabled:bg-neutral-400 disabled:cursor-not-allowed"
             >
-              保存事件
+              采用此内容
             </Button>
           </div>
         </div>
@@ -542,7 +592,7 @@
       <!-- 生成结果 -->
       <ScrollArea
         bind:ref={scrollAreaRef}
-        class="{(mode === 'loading' || (mode === 'result' && !animationCompleted)) || (mode === 'result' && animationCompleted && (generatedEntities.people?.length || generatedEntities.locations?.length || generatedEntities.timeline?.length)) ? 'w-2/3' : 'w-full'} bg-neutral-900 rounded-md border border-neutral-800/50"
+        class="flex-1 w-full bg-neutral-900 rounded-md border border-neutral-800/50"
       >
         <div class="flex flex-col" bind:this={contentContainer}>
           <div class="flex flex-col h-full">
@@ -555,9 +605,12 @@
                 <h2 class="text-3xl font-bold">
                   {displayedTitle}<span
                     class="animate-caret-blink"
-                    class:hidden={displayedTitle === generatedTitle}>|</span
-                  >
+                    class:hidden={displayedTitle === generatedTitle}>|</span>
+                  
                 </h2>
+                {#if mode === "result" && generatedEventTime}
+                  <p class="text-sm text-neutral-400 mt-2">{generatedEventTime}</p>
+                {/if}
               {/if}
             </div>
 

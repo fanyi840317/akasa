@@ -160,7 +160,7 @@
   }
 </script>
 
-<div class="h-full w-full w-[300px] flex flex-col bg-card py-4 rounded-r-lg py-4 px-2">
+<div class="h-full w-full w-[300px] flex flex-col py-4 rounded-r-lg py-4 px-2">
   <!-- <div class="p-4 border-b border-border/30">
     <h3 class="text-lg font-medium">操作区</h3>
     <p class="text-sm text-muted-foreground">添加时间线和假说</p>
