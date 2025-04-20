@@ -5,18 +5,20 @@
   import { onMount, onDestroy, type ComponentProps } from "svelte";
   import { Button } from "$lib/components/ui/button";
   import * as Card from "$lib/components/ui/card";
-  import { Ellipsis, Forward, Plus, Trash2, Sparkles } from "lucide-svelte";
+  import { Ellipsis, Forward, Plus, Trash2, Sparkles, BookOpen, Link, FilePlus } from "lucide-svelte"; // Import new icons
+  import AiEventCreatorModal from "$lib/components/events/ai-event-creator-modal.svelte"; // Import the new modal
   import { auth } from "$lib/stores/auth";
   import { get } from "svelte/store";
   import { eventStore } from "$lib/stores/event";
   import { Skeleton } from "$lib/components/ui/skeleton";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+  // Popover import removed as it's no longer used here
   import { useSidebar } from "$lib/components/ui/sidebar/index.js";
   import { page } from "$app/stores";
   import { appStore } from "$lib/stores/appState";
   import type { Event } from "$lib/types/event";
   import { goto } from '$app/navigation';
-  import EventCreatorWindow from "$lib/components/events/event-creator-window.svelte";
+
 
   // 组件属性
   let {
@@ -29,7 +31,7 @@
 
   // 状态
   let showEventTypeSelector = $state(false);
-  let showEventCreatorWindow = $state(false);
+  let showAiCreatorModal = $state(false); // State for the new AI creator modal
 
   // 从 eventStore 获取状态
   let userEvents: Event[] = $state([]);
@@ -37,23 +39,61 @@
   let isLoading = $state(false);
 
   // 事件处理函数
-  function handleOpenEventCreator() {
-    // 直接打开创建窗口而不是选择器
-    showEventCreatorWindow = true;
+  function openAiEventCreator() {
+    showAiCreatorModal = true;
   }
 
-  function handleEventSave(event: CustomEvent) {
-    // 保存事件
-    const eventData = event.detail;
-    console.log('保存事件:', eventData);
-    
+  function handleOrganizeEvents() {
+    console.log("整理已知事件 clicked");
+    // TODO: Implement logic for organizing events
+  }
+
+  function handleImportFromUrl() {
+    console.log("从url导入 clicked");
+    // TODO: Implement logic for importing from URL
+  }
+
+  function handleAiEventSave(event: CustomEvent<{ title: string; content: string; entities?: any }>) {
+    // 保存由 AI 生成或用户修改后的事件
+    const { title, content, entities } = event.detail;
+    console.log('保存 AI 生成的事件:', { title, content, entities });
+
+    // 构建完整的 Event 对象
+    const eventData = {
+      title: title,
+      // 使用 Markdown 格式的内容
+      content: content,
+      category_id: '', // TODO: Allow category selection or use a default
+      tags: [],
+      location: entities?.locations?.[0]?.name || '',
+      location_data: entities?.locations ? JSON.stringify(entities.locations) : undefined,
+      cover_image_url: '',
+      date: entities?.timeline?.[0]?.time || new Date().toISOString(), // 添加 date 字段
+      start_date: entities?.timeline?.[0]?.time ? new Date(entities.timeline[0].time).toISOString() : new Date().toISOString(),
+      end_date: entities?.timeline?.[entities.timeline.length - 1]?.time ? new Date(entities.timeline[entities.timeline.length - 1].time).toISOString() : undefined,
+      status: 'draft',
+      privacy: 'private',
+      significance_level: 1,
+      confidence_level: 1,
+      uncertainty_level: 1,
+      hypothesis_id: undefined,
+      timeline_id: undefined,
+      // 存储实体信息
+      entities_data: entities ? JSON.stringify(entities) : undefined,
+      user_id: get(auth).user?.$id ?? ''
+    };
+
     eventStore.createEvent(eventData)
-      .then(() => {
-        // 成功创建事件后刷新列表
-        eventStore.fetchEvents();
+      .then((newEvent) => {
+        eventStore.fetchEvents(); // 刷新列表
+        if (newEvent && newEvent.$id) {
+           goto(`/console/events/${newEvent.$id}`); // Navigate to the newly created event
+        }
+        // Modal closing is handled by bind:open
       })
       .catch(error => {
         console.error('创建事件失败:', error);
+        // TODO: Add user feedback (e.g., toast message)
       });
   }
 
@@ -101,13 +141,8 @@
   });
 </script>
 
-{#if showEventCreatorWindow}
-<EventCreatorWindow
-  open={showEventCreatorWindow}
-  on:save={handleEventSave}
-  on:close={() => showEventCreatorWindow = false}
-/>
-{/if}
+
+<AiEventCreatorModal bind:open={showAiCreatorModal} on:save={handleAiEventSave} />
 
 <Sidebar.Group>
   {#if isLoading}
@@ -133,7 +168,7 @@
           variant="outline"
           class="w-full "
           size="sm"
-          onclick={() => handleOpenEventCreator()}
+          onclick={openAiEventCreator}
         >
           <Sparkles class="mr-2 h-4 w-4" />
           我要爆料
@@ -143,12 +178,26 @@
   </Card.Root>
   {:else}
   <Sidebar.GroupLabel>私人</Sidebar.GroupLabel>
-    <Sidebar.GroupAction
-      title="Add Project"
-      onclick={() => handleOpenEventCreator()}
-    >
-      <Plus /> <span class="sr-only">Add Project</span>
-    </Sidebar.GroupAction>
+    <!-- Use DropdownMenu for adding events -->
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>
+        <Sidebar.GroupAction
+          title="添加事件"
+        >
+          <Plus /> <span class="sr-only">添加事件</span>
+        </Sidebar.GroupAction>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content class="w-48 p-1" side="right" align="start">
+        <DropdownMenu.Item onclick={openAiEventCreator}>
+          <Sparkles class="mr-2 h-4 w-4 text-muted-foreground" />
+          用AI创建
+        </DropdownMenu.Item>
+        <DropdownMenu.Item onclick={() => appStore.openEventCreator('documentation')}>
+          <FilePlus class="mr-2 h-4 w-4 text-muted-foreground" />
+          全新创建
+        </DropdownMenu.Item>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
 
     <Sidebar.GroupContent>
       <Sidebar.Menu>
