@@ -15,6 +15,7 @@
   import { MapBase } from "$lib/components/map";
   import { fade, fly, slide } from "svelte/transition";
   import { quintOut } from "svelte/easing";
+  import { cn } from "$lib/utils"; // Import cn utility
 
   let { open = $bindable(false) } = $props<{ open: boolean }>();
 
@@ -32,6 +33,8 @@
   let displayedTitle = $state("");
   let displayedContent = $state("");
   let isLoading = $state(false);
+  let isSaving = $state(false); // Add saving state
+  let selectedLocationIndex = $state<number | null>(null); // Add state for selected location index
   let error = $state<string | null>(null);
   let mode: "input" | "loading" | "result" = $state("input");
   let typingInterval: ReturnType<typeof setInterval> | null = null;
@@ -171,18 +174,45 @@
             typingInterval = null;
           }
           isLoading = false;
+          // Automatically select the first location with coordinates if only one exists
+          const locationsWithCoords = generatedEntities.locations?.filter(l => l.coordinates);
+          if (locationsWithCoords?.length === 1) {
+            selectedLocationIndex = generatedEntities.locations?.findIndex(l => l.coordinates) ?? null;
+          }
         }
       }
     }, 20); // 调整为适中的打字速度，平衡效果和速度
   }
 
-  function handleSave() {
+  async function handleSave() {
+    if (isSaving) return;
+
+    // Check if selection is required
+    const locationsWithCoords = generatedEntities.locations?.filter(l => l.coordinates);
+    if (locationsWithCoords && locationsWithCoords.length > 1 && selectedLocationIndex === null) {
+      error = "请选择一个主要事件地点。";
+      return;
+    }
+    error = null;
+    isSaving = true;
+
+    let primaryLocation = null;
+    if (selectedLocationIndex !== null && generatedEntities.locations) {
+      primaryLocation = generatedEntities.locations[selectedLocationIndex];
+    }
+
+    // Simulate saving delay
+    await sleep(500);
+
     dispatch("save", {
       title: generatedTitle,
       content: generatedContent,
-      eventTime: generatedEventTime, // 添加 eventTime 到保存数据
+      eventTime: generatedEventTime,
       entities: generatedEntities,
+      primaryLocation: primaryLocation, // Add selected primary location
     });
+
+    isSaving = false;
     closeModalAndReset();
   }
 
@@ -218,6 +248,8 @@
     displayedTitle = "";
     displayedContent = "";
     isLoading = false;
+    isSaving = false; // Reset saving state
+    selectedLocationIndex = null; // Reset selected location
     error = null;
     mode = "input";
     generationStep = 0;
@@ -466,17 +498,34 @@
             {#if generatedEntities.locations?.length}
               <div>
                 <h3 class="text-lg font-bold text-white mb-4">
-                  相关地点
+                  相关地点 {#if (generatedEntities.locations?.filter(l => l.coordinates)?.length || 0) > 1}
+                    <span class="text-sm font-normal text-neutral-400">(请选择主要地点)</span>
+                  {/if}
                 </h3>
                 <div class="grid grid-cols-1 gap-3">
                   {#each generatedEntities.locations as location, index}
+                    {@const hasCoordinates = !!location.coordinates}
+                    {@const isSelected = selectedLocationIndex === index}
                     <div
-                      class="bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg"
+                      class={cn(
+                        "bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg",
+                        hasCoordinates && "cursor-pointer hover:border-blue-500",
+                        isSelected && "border-2 border-blue-500 ring-2 ring-blue-500/50"
+                      )}
                       in:fly={{ y: 10, x: 0, duration: 300, delay: 500 + index * 100 }}
+                      onclick={() => {
+                        if (hasCoordinates) {
+                          selectedLocationIndex = index;
+                          error = null; // Clear error on selection
+                        }
+                      }}
+                      role={hasCoordinates ? "button" : undefined}
+                      tabindex={hasCoordinates ? 0 : -1}
+                      aria-pressed={isSelected}
                     >
                       <!-- 如果有坐标，显示地图 -->
                       {#if location.coordinates}
-                        <div class="w-full h-24 relative">
+                        <div class="w-full h-24 relative pointer-events-none"> <!-- Disable map interaction -->
                           <MapBase
                             locationData={{
                               latitude: location.coordinates[0],
@@ -513,6 +562,9 @@
                         <div class="flex-1 min-w-0">
                           <div class="text-sm font-medium text-white truncate">
                             {location.name}
+                            {#if isSelected}
+                              <span class="ml-2 text-xs text-blue-400">(已选)</span>
+                            {/if}
                           </div>
                           <div class="text-xs text-neutral-400 truncate">
                             {location.description}

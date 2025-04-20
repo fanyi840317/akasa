@@ -53,10 +53,10 @@
     // TODO: Implement logic for importing from URL
   }
 
-  function handleAiEventSave(event: CustomEvent<{ title: string; content: string; entities?: any }>) {
+  function handleAiEventSave(event: CustomEvent<{ title: string; content: string; eventTime?: string; entities?: any }>) {
     // 保存由 AI 生成或用户修改后的事件
-    const { title, content, entities } = event.detail;
-    console.log('保存 AI 生成的事件:', { title, content, entities });
+    const { title, content, eventTime, entities } = event.detail;
+    console.log('保存 AI 生成的事件:', { title, content, eventTime, entities });
 
     // 构建完整的 Event 对象
     const eventData = {
@@ -68,8 +68,9 @@
       location: entities?.locations?.[0]?.name || '',
       location_data: entities?.locations ? JSON.stringify(entities.locations) : undefined,
       cover_image_url: '',
-      date: entities?.timeline?.[0]?.time || new Date().toISOString(), // 添加 date 字段
-      start_date: entities?.timeline?.[0]?.time ? new Date(entities.timeline[0].time).toISOString() : new Date().toISOString(),
+      // 优先使用 eventTime，然后是 timeline 的第一个时间，最后是当前时间
+      date: eventTime || entities?.timeline?.[0]?.time || new Date().toISOString(),
+      start_date: entities?.timeline?.[0]?.time ? new Date(entities.timeline[0].time).toISOString() : (eventTime ? new Date(eventTime).toISOString() : new Date().toISOString()),
       end_date: entities?.timeline?.[entities.timeline.length - 1]?.time ? new Date(entities.timeline[entities.timeline.length - 1].time).toISOString() : undefined,
       status: 'draft',
       privacy: 'private',
