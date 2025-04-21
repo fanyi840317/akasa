@@ -92,9 +92,17 @@
   async function initializeEventData(event: any) {
     if (event) {
       title = event.title || "";
-      locationData = event.location_data
-        ? JSON.parse(event.location_data)
-        : null;
+      if (event.location_data) {
+        // 检查 location_data 是否已经是对象
+        if (typeof event.location_data === 'object') {
+          locationData = event.location_data;
+        } else {
+          // 尝试解析 JSON 字符串
+          locationData = JSON.parse(event.location_data);
+        }
+      } else {
+        locationData = null;
+      }
       selectedCategories = event.categories || [];
       eventDate = event.date;
 
@@ -328,7 +336,7 @@
         fileId: coverFileId,
         url: coverImage,
       }),
-      location_data: locationData ? JSON.stringify(locationData) : "",
+      location_data: locationData || null,
       // 添加时间线和假说数据
       // timeline_data: timelineEvents.length ? JSON.stringify(timelineEvents) : "",
       // hypothesis_data: hypotheses.length ? JSON.stringify(hypotheses) : "",

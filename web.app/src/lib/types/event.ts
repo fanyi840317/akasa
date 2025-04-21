@@ -1,4 +1,4 @@
-import type { LocationData } from '$lib/components/ui/map';
+import type { Location } from '$lib/types/map';
 
 export type EventStatus = 'unverified' | 'confirmed' | 'closed';
 export type EventCategory = 'urban' | 'paranormal' | 'supernatural' | 'mysterious' | 'unexplained' | 'phenomena';
@@ -52,16 +52,15 @@ export interface Event {
   $updatedAt?: string;
   title: string;
   content: string;
-  location: string;
   categories?: string[];
   tags?:string[];
   date: string;
+  privacy?: string;
   user_id: string;
   cover?: string;
-  location_data?: string;
-  timeline_data?: string;
-  hypothesis_data?: string;
+  location_data?: Location;
   status?: string;
+  entities_data?: string[];
   creator_name?: string;
   creator_avatar?: string;
   folder_id?: string;

@@ -3,13 +3,12 @@
     import { Button } from "$lib/components/ui/button";
     import { ScrollArea } from "$lib/components/ui/scroll-area";
     import {
-        Calendar,
         MapPin,
-        Users,
         Clock,
         Share2,
         Heart,
         Navigation,
+        FileDown,
     } from "lucide-svelte";
     import { Badge } from "$lib/components/ui/badge";
     import { Separator } from "$lib/components/ui/separator";
@@ -21,45 +20,23 @@
     import { Card } from "$lib/components/ui/card";
     import { fly } from "svelte/transition";
     import { onMount } from "svelte";
-    import { Client, Storage } from "appwrite";
-    import { ImageGravity, ImageFormat } from "appwrite";
     import AffineEditor from "$lib/components/editor/affine-editor.svelte";
-    import { createEmptyDoc } from "@blocksuite/presets";
     import type { Doc } from "@blocksuite/store";
-    import { createDocByJson } from "../editor/affine-editor";
-    import EventEditorArea from "./event-editor-area.svelte";
+    import { createDocByJson, downloadDocAsMarkdown } from "../editor/affine-editor";
     import {MapBase} from "$lib/components/map"
     import type { Location } from "$lib/types/map";
 
     let { event } = $props<{ event: Event }>();
 
-    let mapLocation:Location | null = null;
-
-    let title = "";
-    let content = "";
-    let location = "";
-    let selectedCategories: string[] = [];
-    let date: Date | undefined;
+    let mapLocation = $state<Location | null>(null);
     let coverImageUrl = $state("");
-    let locationData: any = null;
     let doc = $state<Doc | null>(null);
 
-    // 初始化 Appwrite 客户端
-    const client = new Client();
-    const storage = new Storage(client);
-
-    client
-        .setEndpoint("https://cloud.appwrite.io/v1")
-        .setProject("67f13e1d003e1c7ea764");
+    // 初始化状态
 
     $effect(() => {
         console.log("Event:", event);
         if (event) {
-            title = event.title;
-            content = event.content;
-            location = event.location;
-            selectedCategories = event.categories || [];
-            date = event.date ? new Date(event.date) : undefined;
             console.log("Event cover data:", event.cover);
 
             if (event.cover) {
@@ -79,15 +56,12 @@
                     console.error("Raw cover data:", event.cover);
                 }
             }
-            locationData = event.location_data
-                ? JSON.parse(event.location_data)
-                : null;
 
             // 初始化编辑器文档
-            if (content) {
+            if (event.content) {
                 try {
                     // 创建新文档
-                    createDocByJson(content).then((newdoc) => {
+                    createDocByJson(event.content).then((newdoc) => {
                         if (newdoc) {
                             doc = newdoc;
                             doc.awarenessStore.setReadonly(
@@ -96,8 +70,6 @@
                             );
                         }
                     });
-                    // 这里应该设置文档内容，但需要根据 AffineEditor 的 API 来实现
-                    // 可能需要使用 importDoc 或其他方法
                 } catch (e) {
                     console.error("Failed to initialize editor document:", e);
                 }
@@ -108,7 +80,13 @@
     onMount(() => {
         if (event.location_data) {
             try {
-                mapLocation = JSON.parse(event.location_data);
+                // 检查 location_data 是否已经是对象
+                if (typeof event.location_data === 'object') {
+                    mapLocation = event.location_data;
+                } else {
+                    // 尝试解析 JSON 字符串
+                    mapLocation = JSON.parse(event.location_data as unknown as string);
+                }
             } catch (e) {
                 console.error("Failed to parse location data:", e);
             }
@@ -128,10 +106,19 @@
 
     function handleNavigate() {
         if (mapLocation) {
+            // 使用类型断言来确保类型安全
+            const location = mapLocation as any;
             window.open(
-                `https://uri.amap.com/navigation?to=${mapLocation.lng},${mapLocation.lat},${encodeURIComponent(event.title)}&mode=car&coordinate=gaode`,
+                `https://uri.amap.com/navigation?to=${location.lng},${location.lat},${encodeURIComponent(event.title)}&mode=car&coordinate=gaode`,
                 "_blank",
             );
+        }
+    }
+
+    // 导出为 Markdown
+    function handleExportMarkdown() {
+        if (doc) {
+            downloadDocAsMarkdown(doc);
         }
     }
 </script>
@@ -148,7 +135,7 @@
         {/if}
         <div
             class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
-        />
+        ></div>
 
         <!-- 标题和操作按钮 -->
         <div class="absolute bottom-0 left-0 right-0 p-6">
@@ -178,6 +165,16 @@
                     <Button variant="secondary" size="sm" class="gap-1">
                         <Share2 class="h-4 w-4" />
                         <span>分享</span>
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        class="gap-1"
+                        onclick={handleExportMarkdown}
+                        disabled={!doc}
+                    >
+                        <FileDown class="h-4 w-4" />
+                        <span>导出 Markdown</span>
                     </Button>
                 </div>
             </div>
@@ -232,11 +229,11 @@
                 <Card class="overflow-hidden">
                     <div class="relative h-[240px]">
                         <!-- 地图组件暂时注释掉，因为存在类型错误 -->
-                        <MapBase 
+                        <MapBase
                             locationData={mapLocation}
                             zoom={15}
-                            class="w-full h-full"
-                        />
+                            --class="w-full h-full"
+                        ></MapBase>
                         <div
                             class="w-full h-full bg-muted flex items-center justify-center"
                         >

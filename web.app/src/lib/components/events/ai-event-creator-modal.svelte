@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { Button } from "$lib/components/ui/button";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import { Textarea } from "$lib/components/ui/textarea";
-  import { Loader2, ArrowLeft, Send } from "lucide-svelte";
+  import { Loader2, ArrowLeft, Send, Sparkles, FileText, MapPin, Users, Clock } from "lucide-svelte";
   import { aiService } from "$lib/services/ai";
   import { PUBLIC_GEMINI_API_KEY } from "$env/static/public";
   import Modal from "$lib/components/ui/modal/modal.svelte";
@@ -17,9 +17,32 @@
   import { quintOut } from "svelte/easing";
   import { cn } from "$lib/utils"; // Import cn utility
 
-  let { open = $bindable(false) } = $props<{ open: boolean }>();
+  let {
+    open = $bindable(false),
+    onSave,
+    onClose
+  } = $props<{
+    open?: boolean;
+    onSave?: (data: {
+      title: string;
+      content: string;
+      eventTime?: string;
+      entities: any;
+      primaryLocation?: any;
+    }) => void;
+    onClose?: () => void;
+  }>();
 
-  const dispatch = createEventDispatcher();
+
+  // 默认回调函数
+  function defaultSaveCallback(data: any) {
+    console.log('保存数据:', data);
+  }
+
+  function defaultCloseCallback() {
+    console.log('关闭模态窗口');
+    open = false;
+  }
 
   let eventInput = $state("");
   let generatedTitle = $state("");
@@ -27,7 +50,11 @@
   let generatedEventTime = $state<string | undefined>(undefined); // 新增：存储事件时间
   let generatedEntities = $state<{
     people?: Array<{ name: string; role: string }>;
-    locations?: Array<{ name: string; description: string; coordinates?: [number, number] }>;
+    locations?: Array<{
+      name: string;
+      description: string;
+      coordinates?: [number, number];
+    }>;
     timeline?: Array<{ time: string; event: string }>;
   }>({});
   let displayedTitle = $state("");
@@ -175,9 +202,13 @@
           }
           isLoading = false;
           // Automatically select the first location with coordinates if only one exists
-          const locationsWithCoords = generatedEntities.locations?.filter(l => l.coordinates);
+          const locationsWithCoords = generatedEntities.locations?.filter(
+            (l) => l.coordinates,
+          );
           if (locationsWithCoords?.length === 1) {
-            selectedLocationIndex = generatedEntities.locations?.findIndex(l => l.coordinates) ?? null;
+            selectedLocationIndex =
+              generatedEntities.locations?.findIndex((l) => l.coordinates) ??
+              null;
           }
         }
       }
@@ -185,16 +216,28 @@
   }
 
   async function handleSave() {
-    if (isSaving) return;
+    console.log('handleSave 被调用');
+    if (isSaving) {
+      console.log('正在保存中，忽略重复点击');
+      return;
+    }
 
     // Check if selection is required
-    const locationsWithCoords = generatedEntities.locations?.filter(l => l.coordinates);
-    if (locationsWithCoords && locationsWithCoords.length > 1 && selectedLocationIndex === null) {
+    const locationsWithCoords = generatedEntities.locations?.filter(
+      (l) => l.coordinates,
+    );
+    if (
+      locationsWithCoords &&
+      locationsWithCoords.length > 1 &&
+      selectedLocationIndex === null
+    ) {
       error = "请选择一个主要事件地点。";
+      console.log('需要选择主要地点');
       return;
     }
     error = null;
     isSaving = true;
+    console.log('开始保存...');
 
     let primaryLocation = null;
     if (selectedLocationIndex !== null && generatedEntities.locations) {
@@ -204,16 +247,35 @@
     // Simulate saving delay
     await sleep(500);
 
-    dispatch("save", {
+    // 准备要保存的数据
+    const saveData = {
       title: generatedTitle,
       content: generatedContent,
       eventTime: generatedEventTime,
       entities: generatedEntities,
       primaryLocation: primaryLocation, // Add selected primary location
-    });
+    };
+
+    console.log('调用 onSave 回调函数', saveData);
+
+    // 调用传入的 onSave 回调函数，如果没有提供，则使用默认回调
+    if (onSave) {
+      onSave(saveData);
+    } else {
+      defaultSaveCallback(saveData);
+    }
 
     isSaving = false;
-    closeModalAndReset();
+
+    // 在测试模式下，显示成功消息而不是关闭模态窗口
+    if (window.location.search.includes('test=true')) {
+      error = '成功采用内容！在测试模式下不会关闭窗口。';
+      setTimeout(() => {
+        error = null;
+      }, 3000);
+    } else {
+      closeModalAndReset();
+    }
   }
 
   function handleBack() {
@@ -223,7 +285,12 @@
 
   function handleClose() {
     closeModalAndReset();
-    dispatch("close");
+    // 调用传入的 onClose 回调函数，如果没有提供，则使用默认回调
+    if (onClose) {
+      onClose();
+    } else {
+      defaultCloseCallback();
+    }
   }
 
   function closeModalAndReset() {
@@ -233,7 +300,14 @@
       typingInterval = null;
     }
 
-    open = false;
+    // 在测试模式下不关闭模态窗口
+    if (!window.location.search.includes('test=true') && open !== undefined) {
+      // 通过回调函数通知父组件关闭模态窗口
+      if (onClose) {
+        onClose();
+      }
+    }
+
     setTimeout(() => {
       resetState();
     }, 300);
@@ -259,7 +333,6 @@
   // 监听 displayedContent 变化，始终保持滚动条在底部
   $effect(() => {
     if (displayedContent && mode === "result" && scrollAreaRef) {
-
       // 使用 requestAnimationFrame 确保在渲染周期中执行滚动
       requestAnimationFrame(() => {
         try {
@@ -300,6 +373,53 @@
       autoResizeTextarea(new Event("input"));
     }
 
+    // 添加测试模式 URL 参数
+    if (!window.location.search.includes('test=true')) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('test', 'true');
+      window.history.replaceState({}, '', url.toString());
+    }
+
+    // 模拟数据模式下，直接设置为结果模式
+    if (window.location.search.includes('test=true') && mode === "input") {
+      // 设置模拟数据
+      generatedTitle = "不明飞行物目击事件调查报告";
+      generatedContent = "这是一份关于不明飞行物目击事件的调查报告。多位目击者报告在北京市海淀区上空看到不明飞行物...";
+      displayedTitle = generatedTitle;
+      displayedContent = generatedContent;
+      generatedEventTime = "2023年10月15日";
+
+      // 设置模拟实体数据
+      generatedEntities = {
+        people: [
+          { name: "张三", role: "目击者" },
+          { name: "李四", role: "研究员" },
+          { name: "王五", role: "专家" }
+        ],
+        locations: [
+          {
+            name: "北京市海淀区",
+            description: "事件发生地点",
+            coordinates: [39.9631, 116.3586] as [number, number]
+          },
+          {
+            name: "上海市浦东新区",
+            description: "相关调查地点",
+            coordinates: [31.2304, 121.5404] as [number, number]
+          }
+        ],
+        timeline: [
+          { time: "2023年10月15日", event: "首次目击不明现象" },
+          { time: "2023年10月16日", event: "多位目击者报告类似现象" },
+          { time: "2023年10月20日", event: "专家团队开始调查" },
+          { time: "2023年11月05日", event: "发布初步调查报告" }
+        ]
+      };
+
+      mode = "result";
+      animationCompleted = true;
+    }
+
     return () => {
       if (typingInterval) {
         clearInterval(typingInterval);
@@ -308,7 +428,7 @@
   });
 </script>
 
-<Modal bind:open class="h-[75vh] w-[75vw] max-w-[960px]">
+<Modal bind:open={open} class="h-[75vh] w-[75vw] max-w-[960px]">
   <!-- Header -->
   <div class="absolute top-2 left-2 z-10">
     {#if mode === "input"}
@@ -407,225 +527,205 @@
               }}
             />
           </div>
-
         </div>
       {:else if mode === "result" && animationCompleted && (generatedEntities.people?.length || generatedEntities.locations?.length || generatedEntities.timeline?.length)}
         <!-- 在生成完成后显示实体信息卡片 -->
         <div
-          class="w-1/3 flex flex-col h-full justify-between mt-6 "
+          class="w-1/3 flex flex-col h-full justify-between mt-6"
           in:fly={{ x: -20, duration: 400, delay: 200, easing: quintOut }}
           out:fade={{ duration: 200 }}
         >
           <ScrollArea class="flex-1 max-h-[calc(75vh-120px)] pr-2">
             <div class="space-y-6 p-2">
-
-            <!-- 事件时间 -->
-            {#if generatedEventTime}
-              <div>
-                <h3 class="text-lg font-bold text-white mb-4">
-                  事件时间
-                </h3>
-                <div class="grid grid-cols-1 gap-3">
-                  <div
-                    class="bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg"
-                    in:fly={{ y: 10, x: 0, duration: 300, delay: 300 }}
-                  >
-                    <div class="flex items-center p-3">
-                      <div
-                        class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          class="h-4 w-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+              <!-- 事件时间 -->
+              {#if generatedEventTime}
+                <div>
+                  <h3 class="text-lg font-bold text-white mb-4">事件时间</h3>
+                  <div class="grid grid-cols-1 gap-3">
+                    <div
+                      class="bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg"
+                      in:fly={{ y: 10, x: 0, duration: 300, delay: 300 }}
+                    >
+                      <div class="flex items-center p-3">
+                        <div
+                          class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
                         >
-                          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                          <line x1="16" x2="16" y1="2" y2="6" />
-                          <line x1="8" x2="8" y1="2" y2="6" />
-                          <line x1="3" x2="21" y1="10" y2="10" />
-                        </svg>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium text-white truncate">
-                          {generatedEventTime}
+                          <Clock class="h-4 w-4" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="text-sm font-medium text-white truncate">
+                            {generatedEventTime}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            {/if}
+              {/if}
 
-            <!-- 人物信息 -->
-            {#if generatedEntities.people?.length}
-              <div>
-                <h3 class="text-lg font-bold text-white mb-4">
-                  相关人物
-                </h3>
-                <div class="grid grid-cols-1 gap-3">
-                  {#each generatedEntities.people as person, index}
-                    <div
-                      class="bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg"
-                      in:fly={{ y: 10, x: 0, duration: 300, delay: 300 + index * 100 }}
-                    >
-                      <div class="flex items-center p-3">
-                        <div
-                          class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
-                        >
-                          {person.name[0] || "?"}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <div class="text-sm font-medium text-white truncate">
-                            {person.name}
+              <!-- 人物信息 -->
+              {#if generatedEntities.people?.length}
+                <div>
+                  <h3 class="text-lg font-bold text-white mb-4">相关人物</h3>
+                  <div class="grid grid-cols-1 gap-3">
+                    {#each generatedEntities.people as person, index}
+                      <div
+                        class="bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg"
+                        in:fly={{
+                          y: 10,
+                          x: 0,
+                          duration: 300,
+                          delay: 300 + index * 100,
+                        }}
+                      >
+                        <div class="flex items-center p-3">
+                          <div
+                            class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
+                          >
+                            {person.name[0] || "?"}
                           </div>
-                          <div class="text-xs text-neutral-400 truncate">
-                            {person.role}
+                          <div class="flex-1 min-w-0">
+                            <div
+                              class="text-sm font-medium text-white truncate"
+                            >
+                              {person.name}
+                            </div>
+                            <div class="text-xs text-neutral-400 truncate">
+                              {person.role}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  {/each}
+                    {/each}
+                  </div>
                 </div>
-              </div>
-            {/if}
+              {/if}
 
-            <!-- 地点信息 -->
-            {#if generatedEntities.locations?.length}
-              <div>
-                <h3 class="text-lg font-bold text-white mb-4">
-                  相关地点 {#if (generatedEntities.locations?.filter(l => l.coordinates)?.length || 0) > 1}
-                    <span class="text-sm font-normal text-neutral-400">(请选择主要地点)</span>
-                  {/if}
-                </h3>
-                <div class="grid grid-cols-1 gap-3">
-                  {#each generatedEntities.locations as location, index}
-                    {@const hasCoordinates = !!location.coordinates}
-                    {@const isSelected = selectedLocationIndex === index}
-                    <div
-                      class={cn(
-                        "bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg",
-                        hasCoordinates && "cursor-pointer hover:border-blue-500",
-                        isSelected && "border-2 border-blue-500 ring-2 ring-blue-500/50"
-                      )}
-                      in:fly={{ y: 10, x: 0, duration: 300, delay: 500 + index * 100 }}
-                      onclick={() => {
-                        if (hasCoordinates) {
-                          selectedLocationIndex = index;
-                          error = null; // Clear error on selection
-                        }
-                      }}
-                      role={hasCoordinates ? "button" : undefined}
-                      tabindex={hasCoordinates ? 0 : -1}
-                      aria-pressed={isSelected}
-                    >
-                      <!-- 如果有坐标，显示地图 -->
-                      {#if location.coordinates}
-                        <div class="w-full h-24 relative pointer-events-none"> <!-- Disable map interaction -->
-                          <MapBase
-                            locationData={{
-                              latitude: location.coordinates[0],
-                              longitude: location.coordinates[1]
-                            }}
-                            zoom={11}
-                            showUserLocation={false}
-                            showLocateButton={false}
-                            clickable={false}
-                          />
-                        </div>
-                      {/if}
+              <!-- 地点信息 -->
+              {#if generatedEntities.locations?.length}
+                <div>
+                  <h3 class="text-lg font-bold text-white mb-4">
+                    相关地点 {#if (generatedEntities.locations?.filter((l) => l.coordinates)?.length || 0) > 1}
+                      <span class="text-sm font-normal text-neutral-400"
+                        >(请选择主要地点)</span
+                      >
+                    {/if}
+                  </h3>
+                  <div class="grid grid-cols-1 gap-3">
+                    {#each generatedEntities.locations as location, index}
+                      {@const hasCoordinates = !!location.coordinates}
+                      {@const isSelected = selectedLocationIndex === index}
+                      <button
+                        class={cn(
+                          "bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg",
+                          hasCoordinates &&
+                            "cursor-pointer hover:border-blue-500",
+                          isSelected &&
+                            "border-2 border-blue-500 ring-2 ring-blue-500/50",
+                        )}
+                        in:fly={{
+                          y: 10,
+                          x: 0,
+                          duration: 300,
+                          delay: 500 + index * 100,
+                        }}
+                        onclick={() => {
+                          if (hasCoordinates) {
+                            selectedLocationIndex = index;
+                            error = null; // Clear error on selection
+                          }
+                        }}
+                        aria-pressed={isSelected}
+                      >
+                        <!-- 如果有坐标，显示地图 -->
+                        {#if location.coordinates}
+                          <div class="w-full h-24 relative pointer-events-none">
+                            <!-- Disable map interaction -->
+                            <MapBase
+                              locationData={{
+                                latitude: location.coordinates[0],
+                                longitude: location.coordinates[1],
+                              }}
+                              zoom={11}
+                              showUserLocation={false}
+                              showLocateButton={false}
+                              clickable={false}
+                            />
+                          </div>
+                        {/if}
 
-                      <div class="flex items-center p-3">
-                        <div
-                          class="w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-4 w-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+                        <div class="flex items-start p-3">
+                          <div
+                            class="w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
                           >
-                            <path
-                              d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
-                            ></path>
-                            <circle cx="12" cy="10" r="3"></circle>
-                          </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <div class="text-sm font-medium text-white truncate">
-                            {location.name}
-                            {#if isSelected}
-                              <span class="ml-2 text-xs text-blue-400">(已选)</span>
+                            <MapPin class="h-4 w-4" />
+                          </div>
+                          <div class="flex-1 min-w-0 justify-start items-start flex flex-col">
+                            <div
+                              class="text-sm font-medium text-white truncate"
+                            >
+                              {location.name}
+                              {#if isSelected}
+                                <span class="ml-2 text-xs text-blue-400"
+                                  >(已选)</span
+                                >
+                              {/if}
+                            </div>
+                            <div class="text-xs text-neutral-400 truncate">
+                              {location.description}
+                            </div>
+                            {#if location.coordinates}
+                              <div class="text-xs text-blue-400 mt-1">
+                                {location.coordinates[0].toFixed(4)}, {location.coordinates[1].toFixed(
+                                  4,
+                                )}
+                              </div>
                             {/if}
                           </div>
-                          <div class="text-xs text-neutral-400 truncate">
-                            {location.description}
-                          </div>
-                          {#if location.coordinates}
-                            <div class="text-xs text-blue-400 mt-1">
-                              {location.coordinates[0].toFixed(4)}, {location.coordinates[1].toFixed(4)}
-                            </div>
-                          {/if}
                         </div>
-                      </div>
-                    </div>
-                  {/each}
+                      </button>
+                    {/each}
+                  </div>
                 </div>
-              </div>
-            {/if}
+              {/if}
 
-            <!-- 时间线信息 -->
-            {#if generatedEntities.timeline?.length}
-              <div>
-                <h3 class="text-lg font-bold text-white mb-4">
-                  时间线
-                </h3>
-                <div class="grid grid-cols-1 gap-3">
-                  {#each generatedEntities.timeline as timepoint, index}
-                    <div
-                      class="bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg"
-                      in:fly={{ y: 10, x: 0, duration: 300, delay: 700 + index * 100 }}
-                    >
-                      <div class="flex items-center p-3">
-                        <div
-                          class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-4 w-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+              <!-- 时间线信息 -->
+              {#if generatedEntities.timeline?.length}
+                <div>
+                  <h3 class="text-lg font-bold text-white mb-4">时间线</h3>
+                  <div class="grid grid-cols-1 gap-3">
+                    {#each generatedEntities.timeline as timepoint, index}
+                      <div
+                        class="bg-neutral-800 rounded-md shadow-md border border-neutral-700 overflow-hidden transform transition-all hover:shadow-lg"
+                        in:fly={{
+                          y: 10,
+                          x: 0,
+                          duration: 300,
+                          delay: 700 + index * 100,
+                        }}
+                      >
+                        <div class="flex items-center p-3">
+                          <div
+                            class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
                           >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                          </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <div class="text-sm font-medium text-white truncate">
-                            {timepoint.time}
+                            <Clock class="h-4 w-4" />
                           </div>
-                          <div class="text-xs text-neutral-400 truncate">
-                            {timepoint.event}
+                          <div class="flex-1 min-w-0">
+                            <div
+                              class="text-sm font-medium text-white truncate"
+                            >
+                              {timepoint.time}
+                            </div>
+                            <div class="text-xs text-neutral-400 truncate">
+                              {timepoint.event}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  {/each}
+                    {/each}
+                  </div>
                 </div>
-              </div>
-            {/if}
+              {/if}
             </div>
           </ScrollArea>
           <!-- 保存按钮 -->
@@ -657,11 +757,19 @@
                 <h2 class="text-3xl font-bold">
                   {displayedTitle}<span
                     class="animate-caret-blink"
-                    class:hidden={displayedTitle === generatedTitle}>|</span>
-                  
+                    class:hidden={displayedTitle === generatedTitle}>|</span
+                  >
                 </h2>
                 {#if mode === "result" && generatedEventTime}
-                  <p class="text-sm text-neutral-400 mt-2">{generatedEventTime}</p>
+                  <p class="text-sm text-neutral-400 mt-2">
+                    {generatedEventTime}
+                  </p>
+                {/if}
+
+                {#if error && mode === "result"}
+                  <p class="text-sm text-green-500 mt-2 font-medium">
+                    {error}
+                  </p>
                 {/if}
               {/if}
             </div>

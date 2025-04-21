@@ -6,6 +6,7 @@ export interface Location {
   latitude?: number;
   longitude?: number;
   address?: string;
+  description?: string;
 }
 
 export const DEFAULT_LOCATION: Location = {

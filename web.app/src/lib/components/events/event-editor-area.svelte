@@ -120,7 +120,7 @@
           bind:doc
           on:cursorPosition={handleCursorPosition}
         />
-        <EventAnalysisCards />
+        <!-- <EventAnalysisCards /> -->
       </div>
     </ScrollArea>
   </div>
