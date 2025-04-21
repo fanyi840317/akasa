@@ -3,7 +3,16 @@
   import { Button } from "$lib/components/ui/button";
   import { ScrollArea } from "$lib/components/ui/scroll-area";
   import { Textarea } from "$lib/components/ui/textarea";
-  import { Loader2, ArrowLeft, Send, Sparkles, FileText, MapPin, Users, Clock } from "lucide-svelte";
+  import {
+    Loader2,
+    ArrowLeft,
+    Send,
+    Sparkles,
+    FileText,
+    MapPin,
+    Users,
+    Clock,
+  } from "lucide-svelte";
   import { aiService } from "$lib/services/ai";
   import { PUBLIC_GEMINI_API_KEY } from "$env/static/public";
   import Modal from "$lib/components/ui/modal/modal.svelte";
@@ -20,7 +29,7 @@
   let {
     open = $bindable(false),
     onSave,
-    onClose
+    onClose,
   } = $props<{
     open?: boolean;
     onSave?: (data: {
@@ -33,14 +42,13 @@
     onClose?: () => void;
   }>();
 
-
   // 默认回调函数
   function defaultSaveCallback(data: any) {
-    console.log('保存数据:', data);
+    console.log("保存数据:", data);
   }
 
   function defaultCloseCallback() {
-    console.log('关闭模态窗口');
+    console.log("关闭模态窗口");
     open = false;
   }
 
@@ -53,7 +61,7 @@
     locations?: Array<{
       name: string;
       description: string;
-      coordinates?: [number, number];
+      coordinates?: { lat: number; lng: number }; // Updated coordinate format
     }>;
     timeline?: Array<{ time: string; event: string }>;
   }>({});
@@ -216,9 +224,9 @@
   }
 
   async function handleSave() {
-    console.log('handleSave 被调用');
+    console.log("handleSave 被调用");
     if (isSaving) {
-      console.log('正在保存中，忽略重复点击');
+      console.log("正在保存中，忽略重复点击");
       return;
     }
 
@@ -232,12 +240,12 @@
       selectedLocationIndex === null
     ) {
       error = "请选择一个主要事件地点。";
-      console.log('需要选择主要地点');
+      console.log("需要选择主要地点");
       return;
     }
     error = null;
     isSaving = true;
-    console.log('开始保存...');
+    console.log("开始保存...");
 
     let primaryLocation = null;
     if (selectedLocationIndex !== null && generatedEntities.locations) {
@@ -256,7 +264,7 @@
       primaryLocation: primaryLocation, // Add selected primary location
     };
 
-    console.log('调用 onSave 回调函数', saveData);
+    console.log("调用 onSave 回调函数", saveData);
 
     // 调用传入的 onSave 回调函数，如果没有提供，则使用默认回调
     if (onSave) {
@@ -268,8 +276,8 @@
     isSaving = false;
 
     // 在测试模式下，显示成功消息而不是关闭模态窗口
-    if (window.location.search.includes('test=true')) {
-      error = '成功采用内容！在测试模式下不会关闭窗口。';
+    if (window.location.search.includes("test=true")) {
+      error = "成功采用内容！在测试模式下不会关闭窗口。";
       setTimeout(() => {
         error = null;
       }, 3000);
@@ -301,7 +309,7 @@
     }
 
     // 在测试模式下不关闭模态窗口
-    if (!window.location.search.includes('test=true') && open !== undefined) {
+    if (!window.location.search.includes("test=true") && open !== undefined) {
       // 通过回调函数通知父组件关闭模态窗口
       if (onClose) {
         onClose();
@@ -374,17 +382,18 @@
     }
 
     // 添加测试模式 URL 参数
-    if (!window.location.search.includes('test=true')) {
+    if (!window.location.search.includes("test=true")) {
       const url = new URL(window.location.href);
-      url.searchParams.set('test', 'true');
-      window.history.replaceState({}, '', url.toString());
+      url.searchParams.set("test", "true");
+      window.history.replaceState({}, "", url.toString());
     }
 
     // 模拟数据模式下，直接设置为结果模式
-    if (window.location.search.includes('test=true') && mode === "input") {
+    if (window.location.search.includes("test=true") && mode === "input") {
       // 设置模拟数据
       generatedTitle = "不明飞行物目击事件调查报告";
-      generatedContent = "这是一份关于不明飞行物目击事件的调查报告。多位目击者报告在北京市海淀区上空看到不明飞行物...";
+      generatedContent =
+        "这是一份关于不明飞行物目击事件的调查报告。多位目击者报告在北京市海淀区上空看到不明飞行物...";
       displayedTitle = generatedTitle;
       displayedContent = generatedContent;
       generatedEventTime = "2023年10月15日";
@@ -394,26 +403,26 @@
         people: [
           { name: "张三", role: "目击者" },
           { name: "李四", role: "研究员" },
-          { name: "王五", role: "专家" }
+          { name: "王五", role: "专家" },
         ],
         locations: [
           {
             name: "北京市海淀区",
             description: "事件发生地点",
-            coordinates: [39.9631, 116.3586] as [number, number]
+            coordinates: { lat: 39.9631, lng: 116.3586 }, // Updated coordinate format
           },
           {
             name: "上海市浦东新区",
             description: "相关调查地点",
-            coordinates: [31.2304, 121.5404] as [number, number]
-          }
+            coordinates: { lat: 31.2304, lng: 121.5404 }, // Updated coordinate format
+          },
         ],
         timeline: [
           { time: "2023年10月15日", event: "首次目击不明现象" },
           { time: "2023年10月16日", event: "多位目击者报告类似现象" },
           { time: "2023年10月20日", event: "专家团队开始调查" },
-          { time: "2023年11月05日", event: "发布初步调查报告" }
-        ]
+          { time: "2023年11月05日", event: "发布初步调查报告" },
+        ],
       };
 
       mode = "result";
@@ -428,7 +437,7 @@
   });
 </script>
 
-<Modal bind:open={open} class="h-[75vh] w-[75vw] max-w-[960px]">
+<Modal bind:open class="h-[75vh] w-[75vw] max-w-[960px]">
   <!-- Header -->
   <div class="absolute top-2 left-2 z-10">
     {#if mode === "input"}
@@ -642,10 +651,7 @@
                           <div class="w-full h-24 relative pointer-events-none">
                             <!-- Disable map interaction -->
                             <MapBase
-                              locationData={{
-                                latitude: location.coordinates[0],
-                                longitude: location.coordinates[1],
-                              }}
+                              locationData={location}
                               zoom={11}
                               showUserLocation={false}
                               showLocateButton={false}
@@ -660,7 +666,9 @@
                           >
                             <MapPin class="h-4 w-4" />
                           </div>
-                          <div class="flex-1 min-w-0 justify-start items-start flex flex-col">
+                          <div
+                            class="flex-1 min-w-0 justify-start items-start flex flex-col"
+                          >
                             <div
                               class="text-sm font-medium text-white truncate"
                             >
@@ -676,7 +684,7 @@
                             </div>
                             {#if location.coordinates}
                               <div class="text-xs text-blue-400 mt-1">
-                                {location.coordinates[0].toFixed(4)}, {location.coordinates[1].toFixed(
+                                {location.coordinates.lat.toFixed(4)}, {location.coordinates.lng.toFixed(
                                   4,
                                 )}
                               </div>

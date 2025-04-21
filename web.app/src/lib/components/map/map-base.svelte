@@ -74,7 +74,7 @@
           ? "mapbox://styles/mapbox/light-v10"
           : "mapbox://styles/mapbox/dark-v11",
       zoom,
-      center: [currentLocation.longitude!, currentLocation.latitude!],
+      center: [currentLocation.coordinates?.lng!, currentLocation.coordinates?.lat!],
       pitch: 0,
       antialias: true,
     });
@@ -101,7 +101,7 @@
         element: userMarkerElement,
         anchor: "center",
       })
-        .setLngLat([currentLocation.longitude!, currentLocation.latitude!])
+        .setLngLat([currentLocation.coordinates?.lng!, currentLocation.coordinates?.lat!])
         .addTo(newMap);
     }
     // 点击事件处理

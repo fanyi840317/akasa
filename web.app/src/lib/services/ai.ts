@@ -49,7 +49,7 @@ interface GenerateEventResult {
   eventTime?: string; // 新增：事件发生时间
   entities?: {
     people?: Array<{name: string; role: string}>;
-    locations?: Array<{name: string; description: string; coordinates?: [number, number]}>;
+    locations?: Array<{name: string; description: string; coordinates?: {lat: number; lng: number}}>;
     timeline?: Array<{time: string; event: string}>;
   };
 }
@@ -62,7 +62,7 @@ const JSON_FORMAT_INSTRUCTION = `
 - eventTime: 事件发生的时间或时间段 (例如: '2023年5月', '1945年8月15日', '公元前221年')
 - entities: 包含以下子字段的JSON对象：
   - people: 人物数组，每个人物包含name（姓名）和role（角色）
-  - locations: 地点数组，每个地点包含name（地点名称）、description（简短描述），如果是真实地点还要包含coordinates（地理坐标，格式为[latitude, longitude]）
+  - locations: 地点数组，每个地点包含name（地点名称）、description（简短描述），如果是真实地点还要包含coordinates（地理坐标，格式为{lat: number, lng: number}）
   - timeline: 时间线数组，每个时间点包含time（时间）和event（事件描述）`;
 
 const JSON_EXAMPLE = `
@@ -78,8 +78,8 @@ const JSON_EXAMPLE = `
       {"name": "王五", "role": "医疗顾问"}
     ],
     "locations": [
-      {"name": "珠穆朗玛峰", "description": "世界最高峰，海拔8848.86米", "coordinates": [27.9881, 86.9250]},
-      {"name": "珠峰大本营", "description": "登山起点，海拔5200米", "coordinates": [28.0025, 86.8530]}
+      {"name": "珠穆朗玛峰", "description": "世界最高峰，海拔8848.86米", "coordinates": {"lat": 27.9881, "lng": 86.9250}},
+      {"name": "珠峰大本营", "description": "登山起点，海拔5200米", "coordinates": {"lat": 28.0025, "lng": 86.8530}}
     ],
     "timeline": [
       {"time": "2023-05-01", "event": "抵达珠峰大本营"},

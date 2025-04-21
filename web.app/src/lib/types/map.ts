@@ -3,9 +3,8 @@ export interface Location {
   city?: string;
   region?: string;
   timezone?: string;
-  latitude?: number;
-  longitude?: number;
-  address?: string;
+  coordinates?: {lat: number; lng : number};
+  name?: string;
   description?: string;
 }
 
@@ -14,8 +13,7 @@ export const DEFAULT_LOCATION: Location = {
   city: '',
   region: '',
   timezone: 'Asia/Shanghai',
-  latitude: 39.9042,
-  longitude: 116.4074
+  coordinates: { lat: 39.9042, lng: 116.4074 },
 }; 
 export interface MapMarker {
   position: [number, number];
