@@ -50,6 +50,9 @@ importers:
       cesium:
         specifier: ^1.125.0
         version: 1.127.0
+      cobe:
+        specifier: ^0.6.3
+        version: 0.6.3
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -59,9 +62,15 @@ importers:
       marked:
         specifier: ^15.0.8
         version: 15.0.8
+      mini-svg-data-uri:
+        specifier: ^1.4.4
+        version: 1.4.4
       svelte-i18n:
         specifier: ^4.0.1
         version: 4.0.1(svelte@5.23.1)
+      svelte-motion:
+        specifier: ^0.12.2
+        version: 0.12.2(svelte@5.23.1)
       svelte-moveable:
         specifier: ^0.45.0
         version: 0.45.0(svelte@5.23.1)
@@ -124,7 +133,7 @@ importers:
         specifier: ^2.24.1
         version: 2.24.1(@sveltejs/kit@2.19.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.23.1)(vite@5.4.14(@types/node@22.13.10)))(svelte@5.23.1)(vite@5.4.14(@types/node@22.13.10)))(@types/json-schema@7.0.15)(svelte@5.23.1)(typescript@5.8.2)
       tailwind-merge:
-        specifier: ^3.0.1
+        specifier: ^3.0.2
         version: 3.0.2
       tailwind-variants:
         specifier: ^0.3.1
@@ -1237,6 +1246,9 @@ packages:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
 
+  cobe@0.6.3:
+    resolution: {integrity: sha512-WHr7X4o1ym94GZ96h7b1pNemZJacbOzd02dZtnVwuC4oWBaLg96PBmp2rIS1SAhUDhhC/QyS9WEqkpZIs/ZBTg==}
+
   collapse-white-space@2.1.0:
     resolution: {integrity: sha512-loKTxY1zCOuG4j9f6EPnuyyYkf58RnhhWTvRoZEokgB+WbdXehfjFviyOVYkqzEWz1Q5kRiZdBYS5SwxbQYwzw==}
 
@@ -1545,6 +1557,9 @@ packages:
     resolution: {integrity: sha512-PcOxmqwYCW7O2ovKRU8OoQQj2yqTfEB/yeTYk4gPid6dN5ODRfU1hXd9tTVZzax/0NkO7AxpHykvZnT1aYp/BQ==}
     engines: {node: ^14.13.1 || >=16.0.0}
 
+  framesync@6.1.2:
+    resolution: {integrity: sha512-jBTqhX6KaQVDyus8muwZbBeGGP0XgujBRbQ7gM7BRdS3CadCZIHiawyzYLnafYcvZIh5j8WE7cxZKFn7dXhu9g==}
+
   framework-utils@1.1.0:
     resolution: {integrity: sha512-KAfqli5PwpFJ8o3psRNs8svpMGyCSAe8nmGcjQ0zZBWN2H6dZDnq+ABp3N3hdUmFeMrLtjOCTXD4yplUJIWceg==}
 
@@ -1634,6 +1649,9 @@ packages:
 
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
+
+  hey-listen@1.0.8:
+    resolution: {integrity: sha512-COpmrF2NOg4TBWUJ5UVyaCU2A88wEMkUPK4hNqyCkqHbxT92BbvfjoSozkAIIm6XhicGlJHhFdullInrdhwU8Q==}
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
@@ -1980,6 +1998,10 @@ packages:
     resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
     engines: {node: '>= 0.6'}
 
+  mini-svg-data-uri@1.4.4:
+    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
+    hasBin: true
+
   minimatch@10.0.1:
     resolution: {integrity: sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==}
     engines: {node: 20 || >=22}
@@ -2110,6 +2132,9 @@ packages:
     resolution: {integrity: sha512-peBp3qZyuS6cNIJ2akRNG1uo1WJ1d0wTxg/fxMdZ0BqCVhx242bSFHM9eNqflfJVS9SsgkzgT/1UgnsurBOTMg==}
     engines: {node: '>=14.16'}
 
+  phenomenon@1.6.0:
+    resolution: {integrity: sha512-7h9/fjPD3qNlgggzm88cY58l9sudZ6Ey+UmZsizfhtawO6E3srZQXywaNm2lBwT72TbpHYRPy7ytIHeBUD/G0A==}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -2124,6 +2149,9 @@ packages:
   pirates@4.0.6:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
+
+  popmotion@11.0.5:
+    resolution: {integrity: sha512-la8gPM1WYeFznb/JqF4GiTkRRPZsfaj2+kCxqQgr2MJylMmIKUwBfWW8Wa5fml/8gmtlD5yI01MP1QCZPWmppA==}
 
   postcss-import@15.1.0:
     resolution: {integrity: sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew==}
@@ -2356,6 +2384,9 @@ packages:
   style-to-object@1.0.8:
     resolution: {integrity: sha512-xT47I/Eo0rwJmaXC4oilDGDWLohVhR6o/xAQcPQN8q6QBuZVL8qMYL85kLmST5cPjAorwvqIA4qXTRQoYHaL6g==}
 
+  style-value-types@5.1.2:
+    resolution: {integrity: sha512-Vs9fNreYF9j6W2VvuDTP7kepALi7sk0xtk2Tu8Yxi9UoajJdEVpNpCov0HsLTqXvNGKX+Uv09pkozVITi1jf3Q==}
+
   sucrase@3.35.0:
     resolution: {integrity: sha512-8EbVDiu9iN/nESwxeSxDKe0dunta1GOlHufmSSXxMD2z2/tMZpDMpvXQGsc+ajGo8y2uYUmixaSRUc/QPoQ0GA==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -2386,6 +2417,11 @@ packages:
     hasBin: true
     peerDependencies:
       svelte: ^3 || ^4 || ^5
+
+  svelte-motion@0.12.2:
+    resolution: {integrity: sha512-7RrdRz9iVP55B9HT/C0hYW3pyrKlF61kAby/AkDtOAP0uHFQDrfd0qQetDC81cEsK9b40jt+jfcqSAXcA7LPEw==}
+    peerDependencies:
+      svelte: '>=3.35.0 || ^4.0.0 || ^5.0.0 || ^5.0.0-next.0'
 
   svelte-moveable@0.45.0:
     resolution: {integrity: sha512-1zGk11Dhq2IJMS7c0Y0BK5Km4a1B0pzHHC3wKoecByHYcoyPI/lzabdC32YjyH1SyTN5HGmQUNFEB7WiADvJ7Q==}
@@ -3940,6 +3976,10 @@ snapshots:
 
   clsx@2.1.1: {}
 
+  cobe@0.6.3:
+    dependencies:
+      phenomenon: 1.6.0
+
   collapse-white-space@2.1.0: {}
 
   color-convert@2.0.1:
@@ -4296,6 +4336,10 @@ snapshots:
 
   fractional-indexing@3.2.0: {}
 
+  framesync@6.1.2:
+    dependencies:
+      tslib: 2.4.0
+
   framework-utils@1.1.0: {}
 
   fsevents@2.3.3:
@@ -4421,6 +4465,8 @@ snapshots:
       hast-util-parse-selector: 4.0.0
       property-information: 7.0.0
       space-separated-tokens: 2.0.2
+
+  hey-listen@1.0.8: {}
 
   html-void-elements@3.0.0: {}
 
@@ -4943,6 +4989,8 @@ snapshots:
     dependencies:
       mime-db: 1.52.0
 
+  mini-svg-data-uri@1.4.4: {}
+
   minimatch@10.0.1:
     dependencies:
       brace-expansion: 2.0.1
@@ -5052,6 +5100,8 @@ snapshots:
 
   peek-readable@5.4.2: {}
 
+  phenomenon@1.6.0: {}
+
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
@@ -5059,6 +5109,13 @@ snapshots:
   pify@2.3.0: {}
 
   pirates@4.0.6: {}
+
+  popmotion@11.0.5:
+    dependencies:
+      framesync: 6.1.2
+      hey-listen: 1.0.8
+      style-value-types: 5.1.2
+      tslib: 2.4.0
 
   postcss-import@15.1.0(postcss@8.5.3):
     dependencies:
@@ -5366,6 +5423,11 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.4
 
+  style-value-types@5.1.2:
+    dependencies:
+      hey-listen: 1.0.8
+      tslib: 2.4.0
+
   sucrase@3.35.0:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.8
@@ -5407,6 +5469,15 @@ snapshots:
       sade: 1.8.1
       svelte: 5.23.1
       tiny-glob: 0.2.9
+
+  svelte-motion@0.12.2(svelte@5.23.1):
+    dependencies:
+      '@types/react': 18.3.19
+      framesync: 6.1.2
+      popmotion: 11.0.5
+      style-value-types: 5.1.2
+      svelte: 5.23.1
+      tslib: 2.8.1
 
   svelte-moveable@0.45.0(svelte@5.23.1):
     dependencies:
@@ -5592,8 +5663,7 @@ snapshots:
 
   tslib@1.14.1: {}
 
-  tslib@2.4.0:
-    optional: true
+  tslib@2.4.0: {}
 
   tslib@2.8.1: {}
 

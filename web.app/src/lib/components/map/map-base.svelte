@@ -61,23 +61,60 @@
     // 清理现有实例
     cleanupMap();
 
-    // 如果没有位置数据，使用默认值
-    // const defaultLocation = { longitude: 104.06, latitude: 30.67 };
-    const currentLocation = locationData || DEFAULT_LOCATION;
+    let newMap;
+    try {
+      // 如果没有位置数据或坐标数据，使用默认值
+      const currentLocation = locationData || DEFAULT_LOCATION;
+      // 确保有有效的坐标
+      const coordinates = currentLocation.coordinates || DEFAULT_LOCATION.coordinates;
+      const lng = coordinates?.lng ?? DEFAULT_LOCATION.coordinates!.lng;
+      const lat = coordinates?.lat ?? DEFAULT_LOCATION.coordinates!.lat;
 
-    console.log("Initializing map with location:", currentLocation);
+      console.log("Initializing map with location:", { currentLocation, coordinates, lng, lat });
 
-    const newMap = new mapboxgl.Map({
-      container,
-      style:
-        get(mode) === "light"
-          ? "mapbox://styles/mapbox/light-v10"
-          : "mapbox://styles/mapbox/dark-v11",
-      zoom,
-      center: [currentLocation.coordinates?.lng!, currentLocation.coordinates?.lat!],
-      pitch: 0,
-      antialias: true,
-    });
+      // 防止无效的经纬度值
+      if (isNaN(lng) || isNaN(lat)) {
+        console.error("Invalid coordinates:", { lng, lat });
+        // 使用北京的坐标作为默认值
+        const defaultLng = 116.4074;
+        const defaultLat = 39.9042;
+        console.log("Using Beijing coordinates:", { lng: defaultLng, lat: defaultLat });
+
+        newMap = new mapboxgl.Map({
+          container,
+          style: get(mode) === "light" ? "mapbox://styles/mapbox/light-v10" : "mapbox://styles/mapbox/dark-v11",
+          zoom,
+          center: [defaultLng, defaultLat],
+          pitch: 0,
+          antialias: true,
+        });
+      } else {
+        newMap = new mapboxgl.Map({
+          container,
+          style:
+            get(mode) === "light"
+              ? "mapbox://styles/mapbox/light-v10"
+              : "mapbox://styles/mapbox/dark-v11",
+          zoom,
+          center: [lng, lat],
+          pitch: 0,
+          antialias: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error initializing map:", error);
+      // 创建一个带有默认坐标的地图
+      const defaultLng = 116.4074;
+      const defaultLat = 39.9042;
+      newMap = new mapboxgl.Map({
+        container,
+        style: get(mode) === "light" ? "mapbox://styles/mapbox/light-v10" : "mapbox://styles/mapbox/dark-v11",
+        zoom,
+        center: [defaultLng, defaultLat],
+        pitch: 0,
+        antialias: true,
+      });
+    }
 
     map = newMap;
 
@@ -95,14 +132,24 @@
     });
 
     if (showUserLocation) {
-      const userMarkerElement = document.createElement("div");
-      userMarkerElement.className = "user-location-marker";
-      marker = new mapboxgl.Marker({
-        element: userMarkerElement,
-        anchor: "center",
-      })
-        .setLngLat([currentLocation.coordinates?.lng!, currentLocation.coordinates?.lat!])
-        .addTo(newMap);
+      try {
+        const userMarkerElement = document.createElement("div");
+        userMarkerElement.className = "user-location-marker";
+
+        // 获取地图当前中心点的坐标
+        const center = newMap.getCenter();
+        const markerLng = center.lng;
+        const markerLat = center.lat;
+
+        marker = new mapboxgl.Marker({
+          element: userMarkerElement,
+          anchor: "center",
+        })
+          .setLngLat([markerLng, markerLat])
+          .addTo(newMap);
+      } catch (error) {
+        console.error("Error creating user location marker:", error);
+      }
     }
     // 点击事件处理
     newMap.on("click", (e) => {
@@ -126,8 +173,10 @@
       newMap.setCenter(e.lngLat);
       // 更新位置数据
       locationData = {
-        longitude: e.lngLat.lng,
-        latitude: e.lngLat.lat,
+        coordinates: {
+          lng: e.lngLat.lng,
+          lat: e.lngLat.lat
+        }
       };
       dispatch("locationDataChange", locationData);
     });
@@ -160,14 +209,17 @@
       resizeObserver.observe(container);
     }
 
-    return () => {
+    // 设置清理函数
+    cleanup = () => {
       cleanupMap();
       unsubscribe();
     };
+
+    return cleanup;
   }
 
   onMount(() => {
-    cleanup = initMap();
+    initMap();
     return () => {
       if (cleanup) cleanup();
       cleanupMap();
@@ -211,7 +263,9 @@
 
       const { latitude, longitude } = position.coords;
       setLocation(longitude, latitude);
-      locationData = { longitude, latitude };
+      locationData = {
+        coordinates: { lat: latitude, lng: longitude }
+      };
       dispatch("locationDataChange", locationData);
     } catch (error) {
       console.error("获取位置失败:", error);

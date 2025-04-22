@@ -83,11 +83,11 @@
 </script>
 
 <div
-  class="w-full py-8 h-full bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800/50 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] duration-300 rounded-xl overflow-hidden flex flex-col"
+  class="w-full h-full py-16 duration-300 rounded-xl overflow-hidden flex flex-col"
 >
   <!-- 标题输入框 -->
   <div
-    class="py-6 px-14 flex items-center gap-4"
+    class="w-full py-6 px-14 flex items-center gap-4"
     role="button"
     tabindex="0"
     onmouseenter={handleTitleMouseEnter}
@@ -101,12 +101,12 @@
         class="event-title-input w-full bg-transparent text-4xl font-semibold border-0 outline-none shadow-none focus:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
       />
     </div>
-    <EventTitleActions {onAIGenerate} onSave={handleSave} />
+    <!-- 按钮已移至顶部工具栏 -->
   </div>
 
   <!-- 编辑器区域 -->
   <div class="flex-1 relative overflow-hidden">
-    <ScrollArea class="w-full h-full pl-12 pr-4">
+    <ScrollArea class="w-full h-full px-14">
       <div
         role="button"
         tabindex="0"

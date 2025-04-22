@@ -127,6 +127,7 @@ const createEventStore = () => {
                     {
                         ...event,
                         user_id: user.$id,
+                        location_data: JSON.stringify(event.location_data || null),
                         $createdAt: new Date().toISOString(),
                         $updatedAt: new Date().toISOString(),
                     }

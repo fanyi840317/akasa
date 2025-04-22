@@ -14,55 +14,48 @@
 
   const dispatch = createEventDispatcher();
 
-  // 模拟数据
-  const mockTimelineEvents: TimelineEvent[] = [
-    {
-      id: "1",
-      timestamp: new Date("2024-01-15T09:30:00"),
-      description: "发现可疑人员在案发现场附近徘徊",
-      evidenceIds: [],
-      witnessIds: []
-    },
-    {
-      id: "2",
-      timestamp: new Date("2024-01-15T10:15:00"),
-      description: "接到报警电话，报案人称听到可疑声响",
-      evidenceIds: [],
-      witnessIds: []
-    },
-    {
-      id: "3",
-      timestamp: new Date("2024-01-15T11:00:00"),
-      description: "警方到达现场开始初步调查",
-      evidenceIds: [],
-      witnessIds: []
-    }
-  ];
-
-  const mockHypotheses: Hypothesis[] = [
-    {
-      id: "1",
-      title: "预谋作案假说",
-      description: "根据现场痕迹分析，嫌疑人可能提前踩点并精心策划了这起案件。现场未发现明显的强行闯入痕迹，说明嫌疑人对现场环境非常熟悉。",
-      evidence: [],
-      createdAt: new Date("2024-01-15T14:30:00")
-    },
-    {
-      id: "2",
-      title: "内部人员作案假说",
-      description: "考虑到案发时间和地点的特殊性，不排除内部人员作案的可能。需要重点调查近期离职或与受害者有矛盾的相关人员。",
-      evidence: [],
-      createdAt: new Date("2024-01-15T16:45:00")
-    }
-  ];
-
   let {
-    timelineEvents = mockTimelineEvents,
-    hypotheses = $bindable(mockHypotheses),
+    timelineEvents = $bindable([]),
+    hypotheses = $bindable([]),
+    entitiesData,
   } = $props<{
     timelineEvents?: TimelineEvent[];
     hypotheses?: Hypothesis[];
+    entitiesData?: string;
   }>();
+
+  // 如果提供了 entitiesData，则从中提取时间线数据
+  $effect(() => {
+    if (entitiesData) {
+      try {
+        // 检查 entitiesData 是否已经是对象
+        let entities;
+        if (typeof entitiesData === 'object') {
+          entities = entitiesData;
+        } else if (entitiesData.startsWith('[') && entitiesData.endsWith(']')) {
+          // 如果是数组格式的 JSON 字符串
+          const entitiesArray = JSON.parse(entitiesData);
+          entities = entitiesArray[0]; // 取第一个元素
+        } else {
+          // 尝试解析为 JSON 对象
+          entities = JSON.parse(entitiesData);
+        }
+
+        if (entities && entities.timeline && Array.isArray(entities.timeline)) {
+          // 将 entities.timeline 转换为 TimelineEvent 格式
+          timelineEvents = entities.timeline.map((item: any, index: number) => ({
+            id: item.id || `timeline-${index}`,
+            timestamp: new Date(item.time),
+            description: item.event,
+            evidenceIds: [],
+            witnessIds: []
+          }));
+        }
+      } catch (error) {
+        console.error('解析 entities_data 失败:', error);
+      }
+    }
+  });
 
   // Active tab state
   let activeTab = $state("timeline");
@@ -203,14 +196,14 @@
           </div>
         </Popover.Content>
       </Popover.Root>
-  <ScrollArea >
+  <ScrollArea>
     <div class="space-y-4 my-4">
-      {#each timelineEvents.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) as entry (entry.id)}
+      {#each [...timelineEvents].sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) as entry (entry.id)}
         <div class="flex gap-4 group" in:fade={{ duration: 200 }}>
           <div class="flex flex-col items-center">
-            <div class="w-px h-3 bg-border" />
-            <div class="w-2 h-2 rounded-full bg-primary" />
-            <div class="flex-1 w-px bg-border" />
+            <div class="w-px h-3 bg-border"></div>
+            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="flex-1 w-px bg-border"></div>
           </div>
           <div class="flex-1 pb-4 relative">
             <Button

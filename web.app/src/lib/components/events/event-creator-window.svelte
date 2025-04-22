@@ -1,7 +1,19 @@
 <script lang="ts">
   import { fade, fly } from "svelte/transition";
   import { createEventDispatcher, onDestroy, onMount } from "svelte";
-  import { Plus } from "lucide-svelte";
+  import {
+    Plus,
+    Sparkles,
+    Save,
+    Network,
+    Clock,
+    Lightbulb,
+    Search,
+    Type,
+    FileText,
+    Tag,
+    MessageSquare,
+  } from "lucide-svelte";
   import { Button } from "$lib/components/ui/button";
   import type { Location } from "$lib/types/map";
   import { categoryStore } from "$lib/stores/category";
@@ -20,13 +32,14 @@
   } from "$lib/components/editor/affine-editor";
   import { ID } from "appwrite";
   import type { Doc } from "@blocksuite/store";
-  import EventPropertiesArea from "./event-properties-area.svelte";
+  import EventSidePanel from "./event-side-panel.svelte";
   import EventEditorArea from "./event-editor-area.svelte";
   import EventCoverArea from "./event-cover-area.svelte";
   import CoverSelector from "./cover-selector.svelte";
+  import EventCommentsPanel from "./event-comments-panel.svelte";
   import { alertDialog } from "$lib/stores/alert-dialog";
   import EventActionsWidget from "./event-actions-widget.svelte";
-  import TimelineHypothesisPanel from "./timeline-hypothesis-panel.svelte";
+  // TimelineHypothesisPanel 已集成到 EventSidePanel 中
   import { reverseGeocodeLocation } from "$lib/services/location";
   import { uploadToImgBB } from "$lib/services/image";
 
@@ -36,10 +49,12 @@
     open = $bindable(false),
     event,
     mode = "window",
+    isSidebarOpen = $bindable(true),
   } = $props<{
     open?: boolean;
     event?: import("$lib/types/event").Event;
     mode?: "window" | "embedded";
+    isSidebarOpen?: boolean;
   }>();
 
   // 编辑器文档
@@ -75,6 +90,43 @@
   let timelineEvents = $state([]);
   let hypotheses = $state([]);
 
+  // 评论状态
+  let comments = $state([
+    {
+      id: "1",
+      author: {
+        name: "张三",
+        avatar: "/images/avatars/user1.png",
+      },
+      content: "这个事件非常有趣，我想了解更多细节。",
+      timestamp: new Date(Date.now() - 3600000 * 24),
+      likes: 5,
+      replies: [
+        {
+          id: "1-1",
+          author: {
+            name: "李四",
+            avatar: "/images/avatars/user2.png",
+          },
+          content: "我同意，特别是关于时间线的部分很精彩。",
+          timestamp: new Date(Date.now() - 3600000 * 12),
+          likes: 2,
+        },
+      ],
+    },
+    {
+      id: "2",
+      author: {
+        name: "王五",
+        avatar: "/images/avatars/user3.png",
+      },
+      content: "我有一些补充资料可以分享，希望对研究有帮助。",
+      timestamp: new Date(Date.now() - 3600000 * 48),
+      likes: 3,
+      replies: [],
+    },
+  ]);
+
   let isUploading = $state(false);
   let uploadProgress = $state(0);
 
@@ -94,14 +146,12 @@
       title = event.title || "";
       if (event.location_data) {
         // 检查 location_data 是否已经是对象
-        if (typeof event.location_data === 'object') {
+        if (typeof event.location_data === "object") {
           locationData = event.location_data;
         } else {
           // 尝试解析 JSON 字符串
           locationData = JSON.parse(event.location_data);
         }
-      } else {
-        locationData = null;
       }
       selectedCategories = event.categories || [];
       eventDate = event.date;
@@ -138,7 +188,36 @@
       lastModified = event.$updatedAt || new Date().toISOString();
 
       // 初始化时间线和假说数据
-      if (event.timeline_data) {
+      if (event.entities_data) {
+        try {
+          // 如果 entities_data 是字符串数组，取第一个元素
+          const entitiesDataStr = Array.isArray(event.entities_data)
+            ? event.entities_data[0]
+            : event.entities_data;
+          const entities = JSON.parse(entitiesDataStr);
+
+          // 如果有时间线数据，则提取并转换为 TimelineEvent 格式
+          if (
+            entities &&
+            entities.timeline &&
+            Array.isArray(entities.timeline)
+          ) {
+            timelineEvents = entities.timeline.map(
+              (item: any, index: number) => ({
+                id: `timeline-${index}`,
+                timestamp: new Date(item.time),
+                description: item.event,
+                evidenceIds: [],
+                witnessIds: [],
+              }),
+            );
+            timelinePointsCount = timelineEvents.length;
+          }
+        } catch (e) {
+          console.error("解析 entities_data 失败:", e);
+          timelineEvents = [];
+        }
+      } else if (event.timeline_data) {
         try {
           timelineEvents = JSON.parse(event.timeline_data);
           timelinePointsCount = timelineEvents.length;
@@ -171,6 +250,22 @@
 
   // 处理 AI 生成
   function handleAIGenerate() {}
+
+  // AI 操作列表
+  const aiActions = [
+    { icon: Type, label: "生成标题", action: "title", group: "generate" },
+    { icon: FileText, label: "生成内容", action: "content", group: "generate" },
+    { icon: Network, label: "提取关系图谱", action: "graph", group: "analyze" },
+    { icon: Clock, label: "生成时间线", action: "timeline", group: "analyze" },
+    {
+      icon: Lightbulb,
+      label: "生成假设",
+      action: "hypothesis",
+      group: "analyze",
+    },
+    { icon: Search, label: "提取线索", action: "clues", group: "analyze" },
+    { icon: Tag, label: "提取实体", action: "entities", group: "analyze" },
+  ];
 
   let cursorPosition = $state({ top: 0, left: 0 });
   let showAICard = $state(false);
@@ -213,17 +308,26 @@
   $effect(() => {
     if (locationData) {
       isLocation = true;
-      if (locationData.latitude === 0 && locationData.longitude === 0) {
+      if (
+        locationData.coordinates?.lat === 0 &&
+        locationData.coordinates?.lng === 0
+      ) {
         isLocation = false;
         return;
       }
-      reverseGeocodeLocation(
-        locationData.latitude!,
-        locationData.longitude!,
-      ).then((address) => {
-        locationData!.address = address;
-        isLocation = false;
-      });
+      if (locationData.coordinates && !locationData.name) {
+        reverseGeocodeLocation(
+          locationData.coordinates.lat,
+          locationData.coordinates.lng,
+        ).then((address) => {
+          // 创建一个新的对象而不是修改原来的对象
+          locationData = {
+            ...locationData,
+            name: address
+          };
+          isLocation = false;
+        });
+      }
     }
   });
   function handleCursorPosition(position: { top: number; left: number }) {
@@ -328,7 +432,7 @@
     const eventData = {
       title: title.trim(),
       content: exportedDoc.content.trim(),
-      location: locationData?.address || "",
+      location: locationData?.name || "",
       categories: selectedCategories,
       date: eventDate ? eventDate.toString() : "",
       user_id: $auth.user?.$id || "",
@@ -336,17 +440,18 @@
         fileId: coverFileId,
         url: coverImage,
       }),
-      location_data: locationData || null,
+      location_data: locationData || undefined,
       // 添加时间线和假说数据
       // timeline_data: timelineEvents.length ? JSON.stringify(timelineEvents) : "",
       // hypothesis_data: hypotheses.length ? JSON.stringify(hypotheses) : "",
     };
     let obj = null;
     try {
+      let updatedEvent;
       if (event?.$id) {
-        event = await eventStore.updateEvent(event.$id, eventData);
+        updatedEvent = await eventStore.updateEvent(event.$id, eventData);
       } else {
-        event = await eventStore.createEvent(eventData);
+        updatedEvent = await eventStore.createEvent(eventData);
       }
       hasChanges = false;
 
@@ -400,6 +505,17 @@
     showCoverButton = isHovering;
   }
 
+  // 处理评论相关操作
+  function handleCommentAdded(event: CustomEvent<{ comment: any }>) {
+    hasChanges = true;
+    // 这里可以添加将评论保存到数据库的逻辑
+  }
+
+  function handleCommentLiked(event: CustomEvent<{ commentId: string }>) {
+    hasChanges = true;
+    // 这里可以添加将点赞保存到数据库的逻辑
+  }
+
   // 处理操作事件
   function handleAction(event: CustomEvent<{ type: string }>) {
     const { type } = event.detail;
@@ -442,7 +558,7 @@
   {#if showContent}
     <!-- 使用封面区域组件 -->
     <div
-      class="flex"
+      class="fixed inset-0 top-12 left-0 z-0"
       in:fly={{ y: 20, duration: 500, delay: 200 }}
       out:fly={{ y: 20, duration: 500 }}
     >
@@ -466,36 +582,41 @@
     <div
       class={mode === "window"
         ? "absolute left-[50%] top-[50%] translate-y-[-50%] translate-x-[-50%] flex z-50 event-creator-window"
-        : "flex translate-y-[-120px] event-creator-window"}
+        : "flex item-center justify-center event-creator-window"}
       in:fly={{ y: 20, duration: 500, delay: 300 }}
       out:fly={{ y: 20, duration: 500 }}
     >
-      <!-- 属性区域 -->
+      <!-- 属性和时间线区域 -->
       <div
-        class="py-16"
+        class="py-[48px]"
         in:fly={{ x: -20, duration: 500, delay: 400 }}
         out:fly={{ x: -20, duration: 500 }}
       >
-        <EventPropertiesArea
-          {createdAt}
-          {lastModified}
+        <!-- <EventSidePanel
           bind:eventDate
           bind:locationData
           bind:isLocation
           bind:selectedCategories
           {categories}
-          {timelinePointsCount}
-        />
+          bind:timelineEvents
+          bind:hypotheses
+          entitiesData={event?.entities_data?.[0]}
+          on:timelineChange={() => {
+            timelinePointsCount = timelineEvents.length;
+            hasChanges = true;
+          }}
+        /> -->
       </div>
 
       <!-- 主要内容区域 -->
       <div
-        class="flex gap-4 overflow-hidden"
+        class="flex gap-4 overflow-hidden flex-1 item-center justify-center transition-all duration-300"
+        style:width={isSidebarOpen ? 'auto' : '100%'}
         in:fly={{ x: 20, duration: 500, delay: 500 }}
         out:fly={{ x: 20, duration: 500 }}
       >
-        <!-- 编辑器区域（包含标题和封面） -->
-        <div class="w-[800px] h-[86vh] relative">
+        <!-- 编辑器工具栏 -->
+        <div class="min-w-[800px] w-full h-[100vh] border border-l-0 rounded-tr-xl relative">
           {#if showEditor}
             <EventEditorArea
               bind:title
@@ -503,61 +624,50 @@
               {showAICard}
               onEditorClick={handleEditorClick}
               onEditorInput={handleEditorInput}
-              onAIGenerate={handleAIGenerate}
               onCursorPosition={handleCursorPosition}
-              onSave={handleSave}
               onTitleHover={handleTitleHover}
+              onSave={handleSave}
             />
           {/if}
-          <!-- 添加封面按钮 - 悬停时显示 -->
-          <div
-            role="banner"
-            class="absolute top-2 left-2 opacity-0 transition-opacity duration-200"
-            class:opacity-100={showCoverButton}
-            onmouseenter={() => (showCoverButton = true)}
-            onmouseleave={() => (showCoverButton = false)}
-          >
-            <Popover bind:open={isCoverSelectorOpen}>
-              <PopoverTrigger>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  class="gap-1 bg-background/80 backdrop-blur-sm"
-                >
-                  <Plus class="h-3 w-3" />
-                  <span class="text-xs">添加封面</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent class="w-auto p-0" align="start">
-                <CoverSelector
-                  on:select={handleSelectExistingImage}
-                  on:upload={handleCoverUploadFromSelector}
-                  on:linkSubmit={handleCoverLinkSubmit}
-                />
-              </PopoverContent>
-            </Popover>
+
+          <!-- 保存按钮 -->
+          <div class="absolute top-0 right-0 z-10 border-b border-l rounded-tr-xl rounded-bl-xl bg-background 
+          flex items-center px-6 py-4 text-xs text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors">
+            <Save class="h-4 w-4 mr-2" />
+              保存
           </div>
         </div>
       </div>
-      <!-- 时间线和假说操作区域 -->
+
+      <!-- 评论区域 -->
+      {#if isSidebarOpen}
       <div
-        class="flex py-20 transition-all duration-200"
-        in:fly={{ y: 20, duration: 500, delay: 600 }}
-        out:fly={{ y: 20, duration: 500 }}
+        class="py-[48px] z-4 px-2"
+        in:fly={{ x: 20, duration: 300 }}
+        out:fly={{ x: 20, duration: 300 }}
       >
-        <TimelineHypothesisPanel
+        <EventSidePanel
+          bind:eventDate
+          bind:locationData
+          bind:isLocation
+          bind:selectedCategories
+          {categories}
+          bind:timelineEvents
           bind:hypotheses
-          on:timelineChange={({ detail }) => {
-            timelineEvents = detail.timelineEvents;
+          entitiesData={event?.entities_data?.[0]}
+          on:timelineChange={() => {
             timelinePointsCount = timelineEvents.length;
             hasChanges = true;
           }}
-          on:hypothesisChange={({ detail }) => {
-            hypotheses = detail.hypotheses;
-            hasChanges = true;
-          }}
         />
+        <!-- <EventCommentsPanel
+          bind:comments
+          eventId={event?.$id || eventId}
+        /> -->
       </div>
+      {/if}
+      <!-- 时间线和假说操作区域已移动到左侧面板 -->
+      <!-- 已删除 -->
     </div>
   {/if}
 {/snippet}
@@ -577,7 +687,7 @@
 
 <style>
   :global(.event-creator-window) {
-    max-height: 90vh;
+    /* max-height: 90vh; */
     overflow: hidden;
   }
 </style>

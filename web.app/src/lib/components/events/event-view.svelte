@@ -25,6 +25,7 @@
     import { createDocByJson, downloadDocAsMarkdown } from "../editor/affine-editor";
     import {MapBase} from "$lib/components/map"
     import type { Location } from "$lib/types/map";
+    import TimelineHypothesisPanel from "./timeline-hypothesis-panel.svelte";
 
     let { event } = $props<{ event: Event }>();
 
@@ -182,8 +183,8 @@
     </div>
 
     <!-- 内容区域 -->
-    <ScrollArea class="flex-1">
-        <div class="p-6 space-y-6">
+    <ScrollArea class="flex-1 bg-card">
+        <div class="p-6 space-y-6 bg-background/10">
             <!-- 创建者信息 -->
             <div class="flex items-center gap-3">
                 <Avatar class="h-8 w-8">
@@ -250,6 +251,14 @@
                         </Button>
                     </div>
                 </Card>
+            {/if}
+
+            <!-- 时间线组件 -->
+            {#if event.entities_data}
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium mb-4">事件时间线</h3>
+                    <TimelineHypothesisPanel entitiesData={event.entities_data} />
+                </div>
             {/if}
 
             <!-- 事件标签 -->

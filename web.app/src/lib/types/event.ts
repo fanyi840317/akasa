@@ -58,9 +58,9 @@ export interface Event {
   privacy?: string;
   user_id: string;
   cover?: string;
-  location_data?: string;
+  location_data?: Location;
   status?: string;
-  entities_data?: string[];
+  entities_data?: string;
   creator_name?: string;
   creator_avatar?: string;
   folder_id?: string;

@@ -90,7 +90,7 @@
         date: eventTime || entities?.timeline?.[0]?.time || new Date().toISOString(),
         status: 'draft',
         privacy: 'private',
-        entities_data: entities ? [JSON.stringify(entities)] : undefined,
+        entities_data: JSON.stringify(entities ? entities : undefined),
         user_id: get(auth).user?.$id ?? ''
       };
 
@@ -178,7 +178,20 @@
   }
 
   function handleEventDelete(eventId: string) {
-    eventStore.deleteEvent(eventId);
+    // 检查当前页面是否是正在被删除的事件页面
+    const isCurrentEvent = isEventActive(eventId);
+
+    // 删除事件
+    eventStore.deleteEvent(eventId)
+      .then(() => {
+        // 如果当前页面是正在被删除的事件页面，则导航到主页面
+        if (isCurrentEvent) {
+          goto('/console/events');
+        }
+      })
+      .catch(error => {
+        console.error('删除事件失败:', error);
+      });
   }
 
   // 判断事件是否激活
@@ -302,7 +315,7 @@
       class={isEventActive(id) ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}
     >
       {#snippet child({ props })}
-        <a href="/console/events" {...props}>
+        <a href="/console/events/{id}" {...props}>
           <File />
           <span>{title}</span>
         </a>
