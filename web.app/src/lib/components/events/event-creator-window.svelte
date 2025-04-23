@@ -442,8 +442,8 @@
       }),
       location_data: locationData || undefined,
       // 添加时间线和假说数据
-      // timeline_data: timelineEvents.length ? JSON.stringify(timelineEvents) : "",
-      // hypothesis_data: hypotheses.length ? JSON.stringify(hypotheses) : "",
+      timeline_data: timelineEvents.length ? JSON.stringify(timelineEvents) : "",
+      hypothesis_data: hypotheses.length ? JSON.stringify(hypotheses) : "",
     };
     let obj = null;
     try {
@@ -587,31 +587,20 @@
       out:fly={{ y: 20, duration: 500 }}
     >
       <!-- 属性和时间线区域 -->
+      {#if isSidebarOpen}
       <div
         class="py-[48px]"
-        in:fly={{ x: -20, duration: 500, delay: 400 }}
-        out:fly={{ x: -20, duration: 500 }}
+        in:fly={{ x: -20, duration: 300 }}
+        out:fly={{ x: -20, duration: 300 }}
       >
-        <!-- <EventSidePanel
-          bind:eventDate
-          bind:locationData
-          bind:isLocation
-          bind:selectedCategories
-          {categories}
-          bind:timelineEvents
-          bind:hypotheses
-          entitiesData={event?.entities_data?.[0]}
-          on:timelineChange={() => {
-            timelinePointsCount = timelineEvents.length;
-            hasChanges = true;
-          }}
-        /> -->
+        <!-- 左侧面板内容已移动到右侧 -->
       </div>
+      {/if}
 
       <!-- 主要内容区域 -->
       <div
         class="flex gap-4 overflow-hidden flex-1 item-center justify-center transition-all duration-300"
-        style:width={isSidebarOpen ? 'auto' : '100%'}
+        style="width: {isSidebarOpen ? 'auto' : '100%'};"
         in:fly={{ x: 20, duration: 500, delay: 500 }}
         out:fly={{ x: 20, duration: 500 }}
       >
@@ -631,7 +620,7 @@
           {/if}
 
           <!-- 保存按钮 -->
-          <div class="absolute top-0 right-0 z-10 border-b border-l rounded-tr-xl rounded-bl-xl bg-background 
+          <div class="absolute top-0 right-0 z-10 border-b border-l rounded-tr-xl rounded-bl-xl bg-background
           flex items-center px-6 py-4 text-xs text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors">
             <Save class="h-4 w-4 mr-2" />
               保存
@@ -642,7 +631,7 @@
       <!-- 评论区域 -->
       {#if isSidebarOpen}
       <div
-        class="py-[48px] z-4 px-2"
+        class="h-full"
         in:fly={{ x: 20, duration: 300 }}
         out:fly={{ x: 20, duration: 300 }}
       >
@@ -655,9 +644,8 @@
           bind:timelineEvents
           bind:hypotheses
           entitiesData={event?.entities_data?.[0]}
-          on:timelineChange={() => {
-            timelinePointsCount = timelineEvents.length;
-            hasChanges = true;
+          onToggleSidebar={() => {
+            isSidebarOpen = !isSidebarOpen;
           }}
         />
         <!-- <EventCommentsPanel

@@ -33,7 +33,7 @@
 
 {#if comments.length > 0}
   <div
-    class="mt-4 p-3 rounded-xl border border-gray-700/70 bg-background relative"
+    class="mt-4 p-3 rounded-xl border border-gray-700/70 bg-neutral-900 relative"
     in:fly={{ y: 10, duration: 300 }}
   >
     <BorderBeam size={100} duration={10} />
