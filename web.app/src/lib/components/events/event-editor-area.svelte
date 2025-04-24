@@ -87,20 +87,19 @@
 >
   <!-- 标题输入框 -->
   <div
-    class="w-full py-6 px-14 flex items-center gap-4"
+    class="w-full py-6 px-14 flex items-center justify-center gap-4"
     role="button"
     tabindex="0"
     onmouseenter={handleTitleMouseEnter}
     onmouseleave={handleTitleMouseLeave}
   >
-    <div class="flex-1">
-      <input
-        type="text"
-        placeholder="为你的神秘事件命名..."
-        bind:value={title}
-        class="event-title-input w-full bg-transparent text-4xl font-semibold border-0 outline-none shadow-none focus:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
-      />
-    </div>
+  <input
+  type="text"
+  placeholder="为你的神秘事件命名..."
+  style="max-width: var(--affine-editor-width);"
+  bind:value={title}
+  class="event-title-input bg-transparent text-4xl font-semibold border-0 outline-none shadow-none focus:ring-0 px-0 py-0 h-auto placeholder:text-muted-foreground/40"
+/>
     <!-- 按钮已移至顶部工具栏 -->
   </div>
 

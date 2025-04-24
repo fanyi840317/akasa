@@ -245,7 +245,7 @@
             >
               <div
                 class={cn(
-                  "relative w-12 h-12 flex items-center justify-center rounded-full transition-all duration-300",
+                  "relative w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300",
                   isSelected
                     ? "bg-background shadow-lg"
                     : "bg-background/80"
@@ -340,13 +340,13 @@
     <Button
       variant="outline"
       size="sm"
-      class="flex-shrink-0 gap-1"
+      class="flex-shrink-0 gap-1 text-xs"
       onclick={() => {
         isAddingNew = true;
         selectedHypothesisId = null;
       }}
     >
-      <Plus class="h-3.5 w-3.5" />
+      <Plus class="h-3 w-3" />
       <span>添加假说</span>
     </Button>
   </div>

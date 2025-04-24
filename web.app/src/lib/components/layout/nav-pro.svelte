@@ -5,7 +5,17 @@
   import { onMount, onDestroy, type ComponentProps } from "svelte";
   import { Button } from "$lib/components/ui/button";
   import * as Card from "$lib/components/ui/card";
-  import { Ellipsis, Forward, Plus, Trash2, Sparkles, BookOpen, Link, FilePlus, FileText } from "lucide-svelte"; // Import new icons
+  import {
+    Ellipsis,
+    Forward,
+    Plus,
+    Trash2,
+    Sparkles,
+    BookOpen,
+    Link,
+    FilePlus,
+    FileText,
+  } from "lucide-svelte"; // Import new icons
   import AiEventCreatorModal from "$lib/components/events/ai-event-creator-modal.svelte"; // Import the new modal
   import { auth } from "$lib/stores/auth";
   import { get } from "svelte/store";
@@ -17,10 +27,12 @@
   import { page } from "$app/stores";
   import { appStore } from "$lib/stores/appState";
   import type { Event } from "$lib/types/event";
-  import { goto } from '$app/navigation';
-  import { createDocByMarkdown, exportDocToJson } from "$lib/components/editor/affine-editor";
+  import { goto } from "$app/navigation";
+  import {
+    createDocByMarkdown,
+    exportDocToJson,
+  } from "$lib/components/editor/affine-editor";
   import { Job } from "@blocksuite/store";
-
 
   // 组件属性
   let {
@@ -44,29 +56,37 @@
     showAiCreatorModal = true;
   }
 
-
-  async function handleAiEventSave(event: CustomEvent<{
-    title: string;
-    content: string;
-    eventTime?: string;
-    entities?: any;
-    primaryLocation?: any;
-  }>) {
-    const { title, content, eventTime, entities, primaryLocation } = event.detail;
-    console.log('保存 AI 生成的事件:', { title, content, eventTime, entities, primaryLocation });
+  async function handleAiEventSave(
+    event: CustomEvent<{
+      title: string;
+      content: string;
+      eventTime?: string;
+      entities?: any;
+      primaryLocation?: any;
+    }>,
+  ) {
+    const { title, content, eventTime, entities, primaryLocation } =
+      event.detail;
+    console.log("保存 AI 生成的事件:", {
+      title,
+      content,
+      eventTime,
+      entities,
+      primaryLocation,
+    });
 
     try {
       // 使用 createDocByMarkdown 处理 markdown 格式的内容
       const doc = await createDocByMarkdown(content, title);
       if (!doc) {
-        console.error('创建文档失败');
+        console.error("创建文档失败");
         return;
       }
 
       // 使用 exportDocToJson 将文档转换为 JSON 格式
       const jsonData = await exportDocToJson(doc);
       if (!jsonData) {
-        console.error('导出文档为 JSON 失败');
+        console.error("导出文档为 JSON 失败");
         return;
       }
 
@@ -75,38 +95,46 @@
         title: title,
         content: jsonData.content, // 使用 JSON 格式的内容
         // 转换位置数据为 Location 类型
-        location_data: primaryLocation ? {
-          address: primaryLocation.name,
-          description: primaryLocation.description,
-          latitude: primaryLocation.coordinates?.[0],
-          longitude: primaryLocation.coordinates?.[1]
-        } : entities?.locations?.[0] ? {
-          address: entities.locations[0].name,
-          description: entities.locations[0].description,
-          latitude: entities.locations[0].coordinates?.[0],
-          longitude: entities.locations[0].coordinates?.[1]
-        } : undefined,
+        location_data: primaryLocation
+          ? {
+              address: primaryLocation.name,
+              description: primaryLocation.description,
+              latitude: primaryLocation.coordinates?.[0],
+              longitude: primaryLocation.coordinates?.[1],
+            }
+          : entities?.locations?.[0]
+            ? {
+                address: entities.locations[0].name,
+                description: entities.locations[0].description,
+                latitude: entities.locations[0].coordinates?.[0],
+                longitude: entities.locations[0].coordinates?.[1],
+              }
+            : undefined,
         // location_data: entities?.locations ? JSON.stringify(entities.locations) : undefined,
-        date: eventTime || entities?.timeline?.[0]?.time || new Date().toISOString(),
-        status: 'draft',
-        privacy: 'private',
+        date:
+          eventTime ||
+          entities?.timeline?.[0]?.time ||
+          new Date().toISOString(),
+        status: "draft",
+        privacy: "private",
         entities_data: JSON.stringify(entities ? entities : undefined),
-        user_id: get(auth).user?.$id ?? ''
+        user_id: get(auth).user?.$id ?? "",
       };
 
-      eventStore.createEvent(eventData)
+      eventStore
+        .createEvent(eventData)
         .then((newEvent) => {
           eventStore.fetchEvents(); // 刷新列表
           if (newEvent && newEvent.$id) {
-             goto(`/console/events/${newEvent.$id}`); // Navigate to the newly created event
+            goto(`/console/events/${newEvent.$id}`); // Navigate to the newly created event
           }
           showAiCreatorModal = false;
         })
-        .catch(error => {
-          console.error('创建事件失败:', error);
+        .catch((error) => {
+          console.error("创建事件失败:", error);
         });
     } catch (error) {
-      console.error('处理 Markdown 内容失败:', error);
+      console.error("处理 Markdown 内容失败:", error);
     }
   }
 
@@ -125,19 +153,19 @@
         if (!markdown) return;
 
         // 从文件名中提取标题（去掉扩展名）
-        const title = file.name.replace(/\.md$|\.markdown$/i, '');
+        const title = file.name.replace(/\.md$|\.markdown$/i, "");
 
         // 使用 createDocByMarkdown 创建文档
         const doc = await createDocByMarkdown(markdown, title);
         if (!doc) {
-          console.error('创建文档失败');
+          console.error("创建文档失败");
           return;
         }
 
         // 使用 exportDocToJson 导出为 JSON
         const jsonData = await exportDocToJson(doc);
         if (!jsonData) {
-          console.error('导出文档为 JSON 失败');
+          console.error("导出文档为 JSON 失败");
           return;
         }
 
@@ -146,34 +174,36 @@
           title: title,
           content: jsonData.content,
           date: new Date().toISOString(),
-          status: 'draft',
-          privacy: 'private',
-          user_id: get(auth).user?.$id ?? ''
+          status: "draft",
+          privacy: "private",
+          user_id: get(auth).user?.$id ?? "",
         };
 
         // 保存事件
-        eventStore.createEvent(eventData)
+        eventStore
+          .createEvent(eventData)
           .then((newEvent) => {
             eventStore.fetchEvents(); // 刷新列表
             if (newEvent && newEvent.$id) {
               goto(`/console/events/${newEvent.$id}`); // 导航到新创建的事件
             }
           })
-          .catch(error => {
-            console.error('创建事件失败:', error);
+          .catch((error) => {
+            console.error("创建事件失败:", error);
           });
       } catch (error) {
-        console.error('处理Markdown文件失败:', error);
+        console.error("处理Markdown文件失败:", error);
       }
     };
 
     reader.readAsText(file);
 
     // 重置文件输入，以便可以再次选择同一文件
-    fileInput.value = '';
+    fileInput.value = "";
   }
 
   function handleEventSelect(eventId: string) {
+    // alert(eventId);
     goto(`/console/events/${eventId}`);
   }
 
@@ -182,15 +212,16 @@
     const isCurrentEvent = isEventActive(eventId);
 
     // 删除事件
-    eventStore.deleteEvent(eventId)
+    eventStore
+      .deleteEvent(eventId)
       .then(() => {
         // 如果当前页面是正在被删除的事件页面，则导航到主页面
         if (isCurrentEvent) {
-          goto('/console/events');
+          goto("/console/events");
         }
       })
-      .catch(error => {
-        console.error('删除事件失败:', error);
+      .catch((error) => {
+        console.error("删除事件失败:", error);
       });
   }
 
@@ -214,7 +245,7 @@
       try {
         await eventStore.fetchEvents(userId);
       } catch (error) {
-        console.error('获取用户事件失败:', error);
+        console.error("获取用户事件失败:", error);
       }
     }
   });
@@ -224,10 +255,10 @@
   });
 </script>
 
-
 <AiEventCreatorModal
   bind:open={showAiCreatorModal}
-  onSave={(data) => handleAiEventSave(new CustomEvent('save', { detail: data }))}
+  onSave={(data) =>
+    handleAiEventSave(new CustomEvent("save", { detail: data }))}
 />
 
 <Sidebar.Group>
@@ -241,35 +272,35 @@
       </div>
     </div>
   {:else if !hasEvents}
-  <Card.Root class="shadow-none bg-muted/10 border-primary/10">
-    <form>
-      <Card.Header class="p-4 pb-0">
-        <Card.Title class="text-sm  text-primary/70">探索未知的世界</Card.Title>
-        <Card.Description class="text-xs">
-          每一个神秘事件背后都有一个等待被讲述的故事，分享你的发现
-        </Card.Description>
-      </Card.Header>
-      <Card.Content class="grid px-2 py-4">
-        <Button
-          variant="outline"
-          class="w-full "
-          size="sm"
-          onclick={openAiEventCreator}
-        >
-          <Sparkles class="mr-2 h-4 w-4" />
-          我要爆料
-        </Button>
-      </Card.Content>
-    </form>
-  </Card.Root>
+    <Card.Root class="shadow-none bg-muted/10 border-primary/10">
+      <form>
+        <Card.Header class="p-4 pb-0">
+          <Card.Title class="text-sm  text-primary/70"
+            >探索未知的世界</Card.Title
+          >
+          <Card.Description class="text-xs">
+            每一个神秘事件背后都有一个等待被讲述的故事，分享你的发现
+          </Card.Description>
+        </Card.Header>
+        <Card.Content class="grid px-2 py-4">
+          <Button
+            variant="outline"
+            class="w-full "
+            size="sm"
+            onclick={openAiEventCreator}
+          >
+            <Sparkles class="mr-2 h-4 w-4" />
+            我要爆料
+          </Button>
+        </Card.Content>
+      </form>
+    </Card.Root>
   {:else}
-  <Sidebar.GroupLabel>私人</Sidebar.GroupLabel>
+    <Sidebar.GroupLabel>私人</Sidebar.GroupLabel>
     <!-- Use DropdownMenu for adding events -->
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <Sidebar.GroupAction
-          title="添加事件"
-        >
+        <Sidebar.GroupAction title="添加事件">
           <Plus /> <span class="sr-only">添加事件</span>
         </Sidebar.GroupAction>
       </DropdownMenu.Trigger>
@@ -278,12 +309,17 @@
           <Sparkles class="mr-2 h-4 w-4 text-muted-foreground" />
           用AI创建
         </DropdownMenu.Item>
-        <DropdownMenu.Item onclick={() => appStore.openEventCreator('documentation')}>
+        <DropdownMenu.Item
+          onclick={() => appStore.openEventCreator("documentation")}
+        >
           <FilePlus class="mr-2 h-4 w-4 text-muted-foreground" />
           全新创建
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item onclick={() => document.getElementById('markdown-file-input')?.click()}>
+        <DropdownMenu.Item
+          onclick={() =>
+            document.getElementById("markdown-file-input")?.click()}
+        >
           <FileText class="mr-2 h-4 w-4 text-muted-foreground" />
           导入Markdown
         </DropdownMenu.Item>
@@ -300,7 +336,7 @@
     <Sidebar.GroupContent>
       <Sidebar.Menu>
         {#each userEvents as event}
-          {@render events({ id: event.$id ?? '', title: event.title ?? '' })}
+          {@render events({ id: event.$id ?? "", title: event.title ?? "" })}
         {/each}
       </Sidebar.Menu>
     </Sidebar.GroupContent>
@@ -312,10 +348,12 @@
     <Sidebar.MenuButton
       isActive={isEventActive(id)}
       onclick={() => handleEventSelect(id)}
-      class={isEventActive(id) ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}
+      class={isEventActive(id)
+        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+        : ""}
     >
       {#snippet child({ props })}
-        <a href="/console/events/{id}" {...props}>
+        <a href="javascript:void(0)" {...props}>
           <File />
           <span>{title}</span>
         </a>
