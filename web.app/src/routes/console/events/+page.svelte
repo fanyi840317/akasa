@@ -14,8 +14,7 @@
     import type { Event } from "$lib/types/event";
     import type { Category } from "$lib/types/category";
     import { fade, slide } from 'svelte/transition';
-    import { GridBackground } from "$lib/components/ui/grid-background";
-    import LightGridBackground from "$lib/components/ui/grid-background/light-grid-background.svelte";
+    import { GridBackground } from "$lib/components/ui/background";
     import { onMount } from 'svelte';
     import { ModeWatcher, mode } from "mode-watcher";
     import { NotionPanel } from "$lib/components/layout";

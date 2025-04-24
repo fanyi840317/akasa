@@ -1,6 +1,5 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
-  import BorderBeam from "$lib/components/ui/grid-background/border-beam.svelte";
 
   // Define the comment type
   type Comment = {
@@ -33,10 +32,10 @@
 
 {#if comments.length > 0}
   <div
-    class="mt-4 p-3 rounded-xl border border-gray-700/70 bg-neutral-900 relative"
+    class=" p-3 rounded-xl border border-gray-700/70 bg-neutral-900 w-full"
     in:fly={{ y: 10, duration: 300 }}
   >
-    <BorderBeam size={100} duration={10} />
+    <!-- Border effect -->
 
     <div class="flex items-center justify-between">
       <div class="flex items-center">

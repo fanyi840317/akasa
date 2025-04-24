@@ -9,7 +9,7 @@
   import type { Category } from "$lib/types/category";
   import type { Location } from "$lib/types/map";
   import type { Hypothesis, TimelineEvent } from "$lib/types/timeline";
-  import EventPropertyCard from "./event-property-card.svelte";
+  import EventPropertyStackedCard from "./event-property-stacked-card.svelte";
   import EventTimelineCard from "./event-timeline-card.svelte";
   import EventCommentsCard from "./event-comments-card.svelte";
 
@@ -194,116 +194,29 @@
 </script>
 
 <div
-  class="flex flex-col w-[320px] px-3 rounded-l-lg relative h-[calc(100vh-120px)]"
+  class="flex flex-col w-[420px] px-12 py-10 rounded-l-lg
+  items-center justify-between
+   relative h-[calc(100vh-20px)] mx-auto"
 >
-  <!-- 收起按钮 -->
-  <div class="absolute -right-4 top-1/2 transform -translate-y-1/2 z-50">
-    <Button
-      variant="outline"
-      size="icon"
-      class="h-8 w-8 rounded-full shadow-md bg-card hover:bg-card"
-      onclick={toggleSidebar}
-    >
-      <ChevronLeft class="h-4 w-4" />
-    </Button>
-  </div>
-  <!-- 卡片容器 -->
-  <div class="relative w-full h-full flex flex-col">
-    <!-- 卡片标签切换器 -->
-    <div class="flex gap-2 px-4 mb-2 z-10 relative">
-      <button
-        class="text-xs font-medium px-3 py-1 rounded-md transition-all duration-200 flex items-center gap-1 relative"
-        class:text-primary={activeCard === "property"}
-        class:font-medium={activeCard === "property"}
-        class:text-muted-foreground={activeCard !== "property"}
-        class:hover:text-primary={activeCard !== "property"}
-        onclick={() => setActiveCard("property")}
-      >
-        {#if activeCard === "property"}
-          <div
-            class="absolute inset-0 rounded-md bg-primary/5 border-[0.5px]
-            border-primary/10 dark:bg-primary/10 dark:border-primary/20
-            backdrop-filter backdrop-blur-[2px] shadow-sm"
-            in:send={{ key: "activetab" }}
-            out:receive={{ key: "activetab" }}
-          ></div>
-        {/if}
-        <Settings class="h-3 w-3" />
-        <span class="relative">属性</span>
-      </button>
-
-      <button
-        class="text-xs font-medium px-3 py-1 rounded-md transition-all duration-200 flex items-center gap-1 relative"
-        class:text-primary={activeCard === "timeline"}
-        class:font-medium={activeCard === "timeline"}
-        class:text-muted-foreground={activeCard !== "timeline"}
-        class:hover:text-primary={activeCard !== "timeline"}
-        onclick={() => setActiveCard("timeline")}
-      >
-        {#if activeCard === "timeline"}
-          <div
-            class="absolute inset-0 rounded-md bg-primary/5 border-[0.5px] border-primary/10 dark:bg-primary/10 dark:border-primary/20 backdrop-filter backdrop-blur-[2px] shadow-sm"
-            in:send={{ key: "activetab" }}
-            out:receive={{ key: "activetab" }}
-          ></div>
-        {/if}
-        <span class="relative">时间线</span>
-      </button>
-    </div>
-
-    <!-- 卡片叠加区域 -->
-    <div class="relative w-full flex-1">
-      <!-- 属性卡片 -->
-      <div
-        role="button"
-        tabindex="0"
-        class="absolute inset-0 transition-all duration-300 ease-out cursor-pointer"
-        style:transform={getCardTransform("property")}
-        style:z-index={activeCard === "property" ? "20" : "10"}
-        style:opacity={getCardOpacity("property")}
-        onmouseenter={() => setHoverCard("property")}
-        onmouseleave={() => setHoverCard(null)}
-        onclick={() => setActiveCard("property")}
-        onkeydown={(e) => e.key === "Enter" && setActiveCard("property")}
-      >
-        <EventPropertyCard
-          bind:eventDate
-          bind:locationData
-          bind:selectedCategories
-          bind:isLocation
-          {categories}
-        />
-      </div>
-
-      <!-- 时间线卡片 -->
-      <div
-        role="button"
-        tabindex="0"
-        class="absolute inset-0 transition-all duration-300 ease-out cursor-pointer"
-        style:transform={getCardTransform("timeline")}
-        style:z-index={activeCard === "timeline" ? "20" : "10"}
-        style:opacity={getCardOpacity("timeline")}
-        onmouseenter={() => setHoverCard("timeline")}
-        onmouseleave={() => setHoverCard(null)}
-        onclick={() => setActiveCard("timeline")}
-        onkeydown={(e) => e.key === "Enter" && setActiveCard("timeline")}
-      >
-        <EventTimelineCard
-          bind:timelineEvents
-          on:timelineChange={handleTimelineChange}
-        />
-      </div>
-    </div>
-  </div>
-
-  <!-- 假说卡片 -->
-  <EventHypothesisStackedCard
-    bind:hypotheses
-    on:hypothesisChange={(event: CustomEvent<{ hypotheses: Hypothesis[] }>) => {
-      dispatch("hypothesisChange", { hypotheses: event.detail.hypotheses });
-    }}
-    on:toggleCard={() => (isHypothesisCardVisible = !isHypothesisCardVisible)}
+  <EventPropertyStackedCard
+    bind:eventDate
+    bind:locationData
+    bind:selectedCategories
+    bind:isLocation
+    {categories}
   />
+  <!-- 假说卡片 -->
+  <div class="flex-1 w-full items-center justify-start">
+    <EventHypothesisStackedCard
+      bind:hypotheses
+      on:hypothesisChange={(
+        event: CustomEvent<{ hypotheses: Hypothesis[] }>,
+      ) => {
+        dispatch("hypothesisChange", { hypotheses: event.detail.hypotheses });
+      }}
+      on:toggleCard={() => (isHypothesisCardVisible = !isHypothesisCardVisible)}
+    />
+  </div>
 
   <!-- 评论卡片 -->
   <EventCommentsCard {comments} />

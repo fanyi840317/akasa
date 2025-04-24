@@ -7,8 +7,8 @@ const config: Config = {
 	content: ["./src/**/*.{html,js,svelte,ts}"],
 	safelist: ["dark"],
 	fontFamily: {
-        sans: ['Geist', '-apple-system', 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC', 'sans-serif'],
-      },
+		sans: ['Geist', '-apple-system', 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC', 'sans-serif'],
+	},
 	theme: {
 		container: {
 			center: true,
@@ -61,7 +61,7 @@ const config: Config = {
 					"accent-foreground": "hsl(var(--sidebar-accent-foreground))",
 					border: "hsl(var(--sidebar-border))",
 					ring: "hsl(var(--sidebar-ring))",
-        		},
+				},
 			},
 			borderRadius: {
 				xl: "calc(var(--radius) + 4px)",
@@ -87,16 +87,37 @@ const config: Config = {
 				},
 				"border-beam": {
 					"100%": {
-					  "offset-distance": "100%",
+						"offset-distance": "100%",
 					},
-				  },
+				},
+				meteor: {
+					"0%": { transform: "rotate(215deg) translateX(0)", opacity: "1" },
+					"70%": { opacity: "1" },
+					"100%": {
+						transform: "rotate(215deg) translateX(-500px)",
+						opacity: "0",
+					},
+				},
+
+				"shine-pulse": {
+					"0%": {
+						"background-position": "0% 0%",
+					},
+					"50%": {
+						"background-position": "100% 100%",
+					},
+					to: {
+						"background-position": "0% 0%",
+					},
+				},
 			},
 			animation: {
-        		"accordion-down": "accordion-down 0.2s ease-out",
-        		"accordion-up": "accordion-up 0.2s ease-out",
-       			"caret-blink": "caret-blink 1.25s ease-out infinite",
+				"accordion-down": "accordion-down 0.2s ease-out",
+				"accordion-up": "accordion-up 0.2s ease-out",
+				"caret-blink": "caret-blink 1.25s ease-out infinite",
 				"border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
-      		},
+				meteor: "meteor 5s linear infinite",
+			},
 		},
 	},
 	plugins: [tailwindcssAnimate],
