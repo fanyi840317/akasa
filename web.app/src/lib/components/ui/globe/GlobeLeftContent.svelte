@@ -15,14 +15,19 @@
 
   let searchQuery = '';
   let totalEvents = 0;
+  let totalContributors = 0; // 新增：存储贡献者数量
 
   // Fetch events count on mount
   onMount(async () => {
     try {
       const events = await eventStore.fetchEvents();
       totalEvents = events.length;
+      // 假设有一个方法获取贡献者数量
+      // totalContributors = await eventStore.fetchContributorCount();
+      // 暂时使用模拟数据
+      totalContributors = 123; // 替换为实际获取逻辑
     } catch (error) {
-      console.error("Error fetching events:", error);
+      console.error("Error fetching stats:", error);
     }
   });
 
@@ -51,7 +56,7 @@
     >
       <h1 use:motion class="text-5xl font-bold mb-4 text-white">
         探索神秘 <br />
-        未知的 <span class="bg-blue-800 px-2 py-1 rounded">世界</span>
+        未知的 <span class="bg-neutral-800 px-2 py-1 rounded">世界</span>
       </h1>
     </Motion>
 
@@ -74,7 +79,7 @@
       transition={{ duration: 0.6, delay: 0.3 }}
       let:motion
     >
-      <div use:motion class="relative mb-6">
+      <!-- <div use:motion class="relative mb-6">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
@@ -83,7 +88,7 @@
           bind:value={searchQuery}
           onkeypress={(e) => e.key === 'Enter' && handleSearch()}
         />
-      </div>
+      </div> -->
     </Motion>
 
     <!-- Buttons with animation -->
@@ -95,7 +100,7 @@
     >
       <div use:motion class="flex gap-4">
         <!-- <Button class="bg-purple-500 hover:bg-purple-600 text-white" onclick={handleSearch}>探索</Button> -->
-        <Button variant="ghost" class="text-white hover:bg-gray-800/30" onclick={() => window.location.href = '/console/events/create'}>
+        <Button variant="outline" class="text-white hover:bg-gray-800/30" onclick={() => window.location.href = '/console/events/create'}>
           <span class="mr-2 text-xs">+</span> 创建事件
         </Button>
       </div>
@@ -111,17 +116,17 @@
       <div use:motion class="flex items-center mt-6">
         <div class="flex -space-x-2">
           <Avatar class="h-6 w-6 border-2 border-background">
-            <AvatarImage src="https://api.dicebear.com/7.x/bottts/svg?seed=explore" alt="User Avatar" />
+            <AvatarImage src="https://api.dicebear.com/7.x/personas/svg?seed=explore" alt="User Avatar" />
             <AvatarFallback>U</AvatarFallback>
-
           </Avatar>
           <Avatar class="h-6 w-6 border-2 border-background">
-            <AvatarImage src="https://api.dicebear.com/7.x/bottts/svg?seed=explore" alt="User Avatar" />
-            <AvatarFallback>U</AvatarFallback>
-
+            <AvatarImage src="https://api.dicebear.com/7.x/personas/svg?seed=share" alt="User Avatar" />
+            <AvatarFallback>S</AvatarFallback>
           </Avatar>
        </div>
-        <span class="ml-2 text-sm text-gray-400">已收录 {totalEvents || '...'} 个神秘事件 <span class="ml-1">→</span></span>
+        <span class="ml-2 text-sm text-gray-400">
+          由 {totalContributors || '...'} 位探索者分享了 {totalEvents || '...'} 个神秘事件 <span class="ml-1">→</span>
+        </span>
       </div>
     </Motion>
   </div>

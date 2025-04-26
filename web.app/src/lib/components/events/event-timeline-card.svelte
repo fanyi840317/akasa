@@ -81,17 +81,17 @@
 </script>
 
 <Card class="shadow-sm bg-neutral-900 h-[320px]">
-  <CardHeader class="p-3 pb-1">
-    <CardTitle class="text-xs font-bold flex items-center justify-between">
-      <div class="flex items-center gap-2 font-bold">
-        <Layers class="h-3 w-3" />
-        <span>时间线</span>
+  <CardHeader class="p-6 pb-1">
+    <CardTitle class=" font-bold flex items-center justify-between">
+      <div class="flex items-center gap-2 font-bold text-muted-foreground">
+        <Layers class="h-4 w-4" />
+        <span class="text-sm">时间线</span>
       </div>
       <Popover>
         <PopoverTrigger>
-          <Button variant="outline" size="sm" class="h-7 px-2 py-0 gap-0">
+          <Button variant="outline" size="sm" class=" px-4 py-0 gap-0">
             <Plus class="h-3 w-3" />
-            <span class="text-xs">添加时间点</span>
+            <span class="text-xs">添加</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent class="w-80">
@@ -122,7 +122,7 @@
       </Popover>
     </CardTitle>
   </CardHeader>
-  <CardContent class="p-3 pt-1">
+  <CardContent class="px-6 pt-1">
     <ScrollArea class="h-[260px]">
       <div class="space-y-4 my-2">
         {#each [...timelineEvents].sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) as entry (entry.id)}
@@ -134,23 +134,26 @@
             </div>
             <div class="flex-1 pb-3 relative">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                class="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5"
+                class="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
                 onclick={() => removeTimelineEntry(entry.id)}
               >
                 <X class="h-2 w-2" />
               </Button>
-              <p class="text-xs text-muted-foreground">
-                {formatTimelineDate(entry.timestamp)}
-              </p>
-              <p class="text-xs mt-1 break-words line-clamp-2">
-                {entry.description}
-              </p>
+              <div class="rounded-full px-6 py-2 border bg-neutral-900/90">
+
+                <p class="text-xs text-muted-foreground">
+                  {formatTimelineDate(entry.timestamp)}
+                </p>
+                <p class="text-xs mt-1 break-words line-clamp-2">
+                  {entry.description}
+                </p>
+              </div>
             </div>
           </div>
         {:else}
-          <div class="text-xs text-center text-muted-foreground py-4">
+          <div class="text-sm text-center text-muted-foreground py-4">
             暂无时间线数据
           </div>
         {/each}

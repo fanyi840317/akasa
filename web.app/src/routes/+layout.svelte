@@ -40,7 +40,7 @@
     <Loading size="lg" />
   </div>
 {:then}
-  <div out:fade={{ duration: 300 }}>
+  <div class="flex flex-col h-[100vh]" out:fade={{ duration: 300 }}>
     {@render children()}
   </div>
   <AlertDialog />
