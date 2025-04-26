@@ -1,11 +1,11 @@
 <script lang="ts">
     import { cn } from "$lib/utils";
-    import { M, Motion } from "svelte-motion";
-  
+    import { Motion } from "svelte-motion";
+
     let className: any = "";
     export { className as class };
   </script>
-  
+
   <div class={cn("relative w-full h-full", className)}>
     <svg
       width="156"
@@ -21,24 +21,19 @@
         stroke-width={1.5}
       />
       <defs>
-        <M.linearGradient />
         <Motion
-          variants={{
-            initial: {
-              x1: "40%",
-              x2: "50%",
-              y1: "160%",
-              y2: "180%",
-            },
-            animate: {
-              x1: "0%",
-              x2: "10%",
-              y1: "-40%",
-              y2: "-20%",
-            },
+          animate={{
+            x1: "0%",
+            x2: "10%",
+            y1: "-40%",
+            y2: "-20%"
           }}
-          animate="animate"
-          initial="initial"
+          initial={{
+            x1: "40%",
+            x2: "50%",
+            y1: "160%",
+            y2: "180%"
+          }}
           transition={{
             duration: 1.8,
             repeat: Infinity,
@@ -49,7 +44,7 @@
           isSVG={true}
           let:motion
         >
-          <linearGradient id="grad1" use:motion>
+          <linearGradient id="grad1" {...motion}>
             <stop stop-color="#18CCFC" stop-opacity="0" />
             <stop stop-color="#18CCFC" />
             <stop offset="0.325" stop-color="#6344F5" />
@@ -60,4 +55,3 @@
     </svg>
     <slot>Helo</slot>
   </div>
-  

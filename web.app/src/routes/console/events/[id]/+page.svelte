@@ -28,7 +28,7 @@
     if (!eventId) return;
     isLoading = true;
     try {
-      await eventStore.fetchEvent(eventId);
+      event = await eventStore.fetchEvent(eventId);
     } catch (error) {
       console.error("加载事件失败:", error);
       toast.error("加载事件失败");
@@ -37,17 +37,23 @@
     }
   }
 
-  // 加载事件数据
-  const eventId = $page.params.id;
-  if (eventId) {
-    loadEventData(eventId);
-  }
+  // // 加载事件数据
+  // const eventId = $page.params.id;
+  // if (eventId) {
+  //   loadEventData(eventId);
+  // }
 
   // 订阅事件数据变化
   const unsubscribe = eventStore.subscribe((state) => {
-    event = state.currentEvent;
+    // event = state.currentEvent;
   });
-
+  // // 监听 URL 变化
+  // $effect(() => {
+  //   const eventId = $page.params.id;
+  //   if (eventId) {
+  //     loadEventData(eventId);
+  //   }
+  // });
   // 监听事件标题变化更新面包屑
   $effect(() => {
     if (event?.title) {
@@ -55,6 +61,11 @@
         { name: "事件", path: "/console/events" },
         { name: event.title, path: `/console/events/${$page.params.id}` },
       ];
+    }
+    const eventId = $page.params.id;
+    if (eventId&& eventId !== event?.$id) {
+      // console.log(eventId);
+      loadEventData(eventId);
     }
   });
 
@@ -77,34 +88,34 @@
     isEditing = false;
   }
 </script>
+
 {#snippet actions()}
   <EventHeaderActions
     bind:isSidebarOpen
     bind:isShareOpen
     onEdit={handleEdit}
-    onShare={() => toast.info('分享功能开发中')}
-    onCopy={() => toast.info('复制链接开发中')}
-    onTwitter={() => toast.info('Twitter分享开发中')}
-    onFacebook={() => toast.info('Facebook分享开发中')}
-    onQrCode={() => toast.info('二维码分享开发中')}
-    onCoverUpload={() => toast.info('更换封面开发中')}
-    onExport={() => toast.info('导出功能开发中')}
-    onDelete={() => toast.info('删除功能开发中')}
+    onShare={() => toast.info("分享功能开发中")}
+    onCopy={() => toast.info("复制链接开发中")}
+    onTwitter={() => toast.info("Twitter分享开发中")}
+    onFacebook={() => toast.info("Facebook分享开发中")}
+    onQrCode={() => toast.info("二维码分享开发中")}
+    onCoverUpload={() => toast.info("更换封面开发中")}
+    onExport={() => toast.info("导出功能开发中")}
+    onDelete={() => toast.info("删除功能开发中")}
     onToggleSidebar={() => {
       // 侧边栏状态已经通过 bind:isSidebarOpen 自动同步
       // 不需要额外的操作
     }}
     creator={{
       name: event?.creator_name || "未知用户",
-      avatar: event?.creator_avatar || null
+      avatar: event?.creator_avatar || null,
     }}
     lastModified={event?.$updatedAt || new Date().toISOString()}
     createdAt={event?.$createdAt || new Date().toISOString()}
   />
 {/snippet}
 <div class="flex flex-col h-full overflow-hidden">
-  <Header {titles} actions={actions}>
-  </Header>
+  <Header {titles} {actions}></Header>
 
   <div class="flex-1">
     {#if isLoading}

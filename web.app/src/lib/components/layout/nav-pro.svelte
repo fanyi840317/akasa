@@ -30,7 +30,7 @@
   import { goto } from "$app/navigation";
   import {
     createDocByMarkdown,
-    exportDocToJson,
+    exportDocToJson,  
   } from "$lib/components/editor/affine-editor";
   import { Job } from "@blocksuite/store";
 

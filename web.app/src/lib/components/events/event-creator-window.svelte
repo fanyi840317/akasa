@@ -38,7 +38,6 @@
   import CoverSelector from "./cover-selector.svelte";
   import EventCommentsPanel from "./event-comments-panel.svelte";
   import { alertDialog } from "$lib/stores/alert-dialog";
-  import EventActionsWidget from "./event-actions-widget.svelte";
   // TimelineHypothesisPanel 已集成到 EventSidePanel 中
   import { reverseGeocodeLocation } from "$lib/services/location";
   import { uploadToImgBB } from "$lib/services/image";

@@ -25,7 +25,6 @@
     import { createDocByJson, downloadDocAsMarkdown } from "../editor/affine-editor";
     import {MapBase} from "$lib/components/map"
     import type { Location } from "$lib/types/map";
-    import TimelineHypothesisPanel from "./timeline-hypothesis-panel.svelte";
 
     let { event } = $props<{ event: Event }>();
 
@@ -257,7 +256,6 @@
             {#if event.entities_data}
                 <div class="mt-6">
                     <h3 class="text-lg font-medium mb-4">事件时间线</h3>
-                    <TimelineHypothesisPanel entitiesData={event.entities_data} />
                 </div>
             {/if}
 

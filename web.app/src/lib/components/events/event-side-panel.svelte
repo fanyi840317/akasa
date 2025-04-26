@@ -9,11 +9,10 @@
   import type { Category } from "$lib/types/category";
   import type { Location } from "$lib/types/map";
   import type { Hypothesis, TimelineEvent } from "$lib/types/timeline";
-  import EventPropertyStackedCard from "./event-property-stacked-card.svelte";
+  import EventPropertyCard from "./event-property-card.svelte";
   import EventTimelineCard from "./event-timeline-card.svelte";
   import EventCommentsCard from "./event-comments-card.svelte";
 
-  import EventHypothesisStackedCard from "./event-hypothesis-stacked-card.svelte";
 
   // Define event types
   type EventTypes = {
@@ -198,7 +197,7 @@
   items-center justify-between
    relative h-[calc(100vh-20px)] mx-auto"
 >
-  <EventPropertyStackedCard
+  <EventPropertyCard
     bind:eventDate
     bind:locationData
     bind:selectedCategories
@@ -207,14 +206,9 @@
   />
   <!-- 假说卡片 -->
   <div class="flex-1 w-full items-center justify-start">
-    <EventHypothesisStackedCard
-      bind:hypotheses
-      on:hypothesisChange={(
-        event: CustomEvent<{ hypotheses: Hypothesis[] }>,
-      ) => {
-        dispatch("hypothesisChange", { hypotheses: event.detail.hypotheses });
-      }}
-      on:toggleCard={() => (isHypothesisCardVisible = !isHypothesisCardVisible)}
+    <EventTimelineCard
+      bind:timelineEvents
+      on:timelineChange={handleTimelineChange}
     />
   </div>
 

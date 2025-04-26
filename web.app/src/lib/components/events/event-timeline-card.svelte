@@ -80,7 +80,7 @@
   }
 </script>
 
-<Card class="shadow-sm bg-neutral-900">
+<Card class="shadow-sm bg-neutral-900 h-[320px]">
   <CardHeader class="p-3 pb-1">
     <CardTitle class="text-xs font-bold flex items-center justify-between">
       <div class="flex items-center gap-2 font-bold">
@@ -89,8 +89,9 @@
       </div>
       <Popover>
         <PopoverTrigger>
-          <Button variant="outline" size="icon" class="h-6 w-6">
+          <Button variant="outline" size="sm" class="h-7 px-2 py-0 gap-0">
             <Plus class="h-3 w-3" />
+            <span class="text-xs">添加时间点</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent class="w-80">
@@ -122,7 +123,7 @@
     </CardTitle>
   </CardHeader>
   <CardContent class="p-3 pt-1">
-    <ScrollArea class="h-[300px]">
+    <ScrollArea class="h-[260px]">
       <div class="space-y-4 my-2">
         {#each [...timelineEvents].sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) as entry (entry.id)}
           <div class="flex gap-3 group" in:fade={{ duration: 200 }}>
