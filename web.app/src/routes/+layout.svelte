@@ -40,7 +40,7 @@
     <Loading size="lg" />
   </div>
 {:then}
-  <div class="flex flex-col h-[100vh]" out:fade={{ duration: 300 }}>
+  <div class="flex flex-col h-[100vh] bg-card" in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
     {@render children()}
   </div>
   <AlertDialog />
