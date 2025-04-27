@@ -13,16 +13,23 @@
 </script>
 
 <header
-	class="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur"
+	class="border-border/40 bg-card/95 supports-[backdrop-filter]:bg-card/60 sticky top-0 z-50 w-full border-b backdrop-blur"
 >
 	<div class="container flex h-14 max-w-screen-2xl items-center">
 		<div class="mr-4 hidden md:flex">
 			<a href="{base}/" class="mr-6 flex items-center space-x-2">
-				<img
-					src="{base}/images/logo_02.png"
-					alt={$_("site.name")}
-					class="h-6 w-6"
-				/>
+				<svg
+				  xmlns="http://www.w3.org/2000/svg"
+				  viewBox="0 0 64 32"
+				  class="h-6 w-6 fill-current"
+				  aria-label={$_("site.name")}
+				>
+				  <!-- X -->
+				  <polygon points="0,0 8,0 20,16 8,32 0,32 12,16" />
+				  <polygon points="12,0 20,0 32,16 20,32 12,32 24,16" />
+				  <!-- 2 -->
+				  <path d="M38,0 h18 a6,6 0 0 1 6,6 v6 a6,6 0 0 1 -6,6 h-10 l12,14 h-18 l-12,-14 v-6 a6,6 0 0 1 6,-6 z" />
+				</svg>
 				<span class="hidden font-bold xl:inline-block">
 					{$_("site.name")}
 				</span>

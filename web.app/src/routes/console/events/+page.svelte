@@ -22,6 +22,7 @@
     import { Sparkles } from "lucide-svelte";
     import BorderBeam from "$lib/components/ui/background/border-beam.svelte";
     import Marquee from "$lib/components/ui/marquee/Marquee.svelte";
+    import DarkTiles from "$lib/components/ui/background/dark-tiles.svelte";
 
     let events = $state<Event[]>([]);
     let categories = $state<Category[]>([]);
@@ -208,7 +209,9 @@
 
 <!-- <ModeWatcher /> -->
 <div class="w-full h-full flex flex-col relative bg-card">
+    
     <div class="flex flex-row h-full items-center justify-center">
+       
         <!-- 左侧：新增内容区域 -->
         <div class="w-2/5 h-full flex items-center justify-end pr-8">
             <GlobeLeftContent />
@@ -226,9 +229,7 @@
 
         <!-- 右侧：事件跑马灯 -->
     </div>
-    <div
-        class="flex flex-row mb-20 mx-40 relative"
-    >
+    <div class="flex flex-row mb-20 mx-40 relative">
         <Marquee>
             {#each events.slice(0, 5) as event}
                 <article

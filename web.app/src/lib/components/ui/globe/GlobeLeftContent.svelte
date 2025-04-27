@@ -4,28 +4,45 @@
   import { Button } from "$lib/components/ui/button";
   import { Motion } from "svelte-motion";
   import { Input } from "$lib/components/ui/input";
-  import { Search } from "lucide-svelte";
+  import { CheckIcon, ChevronRightIcon, Search } from "lucide-svelte";
   import { eventStore } from "$lib/stores/event";
   import { onMount } from "svelte";
-    import Avatar from "../avatar/avatar.svelte";
-    import { AvatarFallback, AvatarImage } from "../avatar";
+  import Avatar from "../avatar/avatar.svelte";
+  import { AvatarFallback, AvatarImage } from "../avatar";
+  import { cubicOut } from "svelte/easing";
+  import { tweened } from "svelte/motion";
+    import AnimatedSubscribeButton from "./AnimatedSubscribeButton.svelte";
 
-  let className = '';
+  let className = "";
   export { className as class };
 
-  let searchQuery = '';
-  let totalEvents = 0;
-  let totalContributors = 0; // 新增：存储贡献者数量
+  let searchQuery = "";
+  const tweenedOptions = { duration: 1000, easing: cubicOut };
+  const animatedTotalEvents = tweened(0, tweenedOptions);
+  const animatedTotalContributors = tweened(0, tweenedOptions);
+  let contributors: { id: string; avatarUrl: string }[] = $state([]); // 新增：存储贡献者列表
 
-  // Fetch events count on mount
+  // Fetch events count and contributors on mount
   onMount(async () => {
     try {
-      const events = await eventStore.fetchEvents();
-      totalEvents = events.length;
-      // 假设有一个方法获取贡献者数量
-      // totalContributors = await eventStore.fetchContributorCount();
+      // const events = await eventStore.fetchEvents();
+      // totalEvents = events.length;
+
+      // TODO: 替换为实际获取贡献者数据的逻辑
+      // 示例：假设 eventStore 或其他服务提供 fetchContributors 方法
+      // const fetchedContributors = await eventStore.fetchContributors({ limit: 3 });
+      // totalContributors = fetchedContributors.totalCount;
+      // contributors = fetchedContributors.data;
+
       // 暂时使用模拟数据
-      totalContributors = 123; // 替换为实际获取逻辑
+      animatedTotalEvents.set(902);
+
+      animatedTotalContributors.set(123);
+      contributors = [
+        { id: "1", avatarUrl: "https://avatars.githubusercontent.com/u/1?v=4" },
+        { id: "2", avatarUrl: "https://avatars.githubusercontent.com/u/2?v=4" },
+        { id: "3", avatarUrl: "https://avatars.githubusercontent.com/u/3?v=4" },
+      ];
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
@@ -39,9 +56,14 @@
   }
 </script>
 
-<div class={cn("relative w-full h-full flex flex-col justify-center items-start", className)}>
+<div
+  class={cn(
+    "relative w-full h-full flex flex-col justify-center items-start",
+    className,
+  )}
+>
   <!-- Background elements -->
-  <GridBeam class="absolute inset-0 opacity-70" >
+  <GridBeam class="absolute inset-0 opacity-70">
     <div></div>
   </GridBeam>
 
@@ -56,10 +78,11 @@
     >
       <h1 use:motion class="text-5xl font-bold mb-4 text-white">
         探索神秘 <br />
-        未知的 <span class="bg-neutral-800 px-2 py-1 rounded">世界</span>
-      </h1>
+        未知的<span class="bg-blue-800 px-2 py-1 border rounded font-semibold bg-gradient-to-b from-white to-neutral-700 text-transparent bg-clip-text">世界</span>
+     
+    </h1>
     </Motion>
-
+    <!-- <span class="bg-blue-800 px-2 py-1 border rounded font-semibold bg-gradient-to-b from-white to-neutral-700 text-transparent bg-clip-text"><div>世界</div></span> -->
     <!-- Description text with animation -->
     <Motion
       initial={{ opacity: 0, y: 20 }}
@@ -100,9 +123,7 @@
     >
       <div use:motion class="flex gap-4">
         <!-- <Button class="bg-purple-500 hover:bg-purple-600 text-white" onclick={handleSearch}>探索</Button> -->
-        <Button variant="outline" class="text-white hover:bg-gray-800/30" onclick={() => window.location.href = '/console/events/create'}>
-          <span class="mr-2 text-xs">+</span> 创建事件
-        </Button>
+        <AnimatedSubscribeButton text="探索"></AnimatedSubscribeButton>
       </div>
     </Motion>
 
@@ -114,18 +135,37 @@
       let:motion
     >
       <div use:motion class="flex items-center mt-6">
-        <div class="flex -space-x-2">
-          <Avatar class="h-6 w-6 border-2 border-background">
-            <AvatarImage src="https://api.dicebear.com/7.x/personas/svg?seed=explore" alt="User Avatar" />
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-          <Avatar class="h-6 w-6 border-2 border-background">
-            <AvatarImage src="https://api.dicebear.com/7.x/personas/svg?seed=share" alt="User Avatar" />
-            <AvatarFallback>S</AvatarFallback>
-          </Avatar>
-       </div>
-        <span class="ml-2 text-sm text-gray-400">
-          由 {totalContributors || '...'} 位探索者分享了 {totalEvents || '...'} 个神秘事件 <span class="ml-1">→</span>
+        {#if contributors.length > 0}
+          <div class="flex justify-center relative">
+            {#each contributors.slice(0, 3) as contributor, i (contributor.id)}
+              <Avatar
+                class="h-8 w-8 border border-white bg-gradient-to-br from-blue-400 to-purple-500"
+                style="transform: translateX({i * -4}px); z-index: {3 -
+                  i}; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);"
+              >
+                <AvatarImage
+                  src={contributor.avatarUrl}
+                  alt="Contributor Avatar"
+                />
+                <AvatarFallback class="text-[10px]"
+                  >{contributor.id
+                    .substring(0, 1)
+                    .toUpperCase()}</AvatarFallback
+                >
+              </Avatar>
+            {/each}
+          </div>
+        {/if}
+        <span class="text-sm text-gray-400">
+          由 <span class="text-lg font-bold text-white tracking-tight"
+            >{Math.round($animatedTotalContributors) || "..."}</span
+          >
+          位探索者分享了
+          <span class="text-lg font-bold text-white tracking-tight"
+            >{Math.round($animatedTotalEvents) || "..."}</span
+          >
+          个神秘事件
+          <span class="ml-1">→</span>
         </span>
       </div>
     </Motion>

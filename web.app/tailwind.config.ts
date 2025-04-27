@@ -122,6 +122,11 @@ const config: Config = {
 						"background-position": "0% 0%",
 					},
 				},
+				gradient: {
+					to: {
+						"background-position": "200% center",
+					},
+				},
 			},
 			animation: {
 				"accordion-down": "accordion-down 0.2s ease-out",
@@ -129,6 +134,7 @@ const config: Config = {
 				"caret-blink": "caret-blink 1.25s ease-out infinite",
 				"border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
 				meteor: "meteor 5s linear infinite",
+				gradient: "gradient 8s linear infinite",
 			},
 		},
 	},

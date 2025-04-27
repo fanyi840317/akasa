@@ -2,6 +2,12 @@
   import { onMount, onDestroy } from 'svelte';
   import { cn } from '$lib/utils';
   import createGlobe from 'cobe';
+  import { Motion } from 'svelte-motion';
+  import { tweened } from 'svelte/motion';
+  import { cubicOut } from 'svelte/easing';
+  import Avatar from '../avatar/avatar.svelte';
+  import { AvatarFallback, AvatarImage } from '../avatar';
+  import { eventStore } from '$lib/stores/event'; // Assuming eventStore is needed and accessible
 
   let className = '';
   export { className as class };
@@ -13,7 +19,16 @@
   let height = 0;
   let animationFrame: number;
 
-  onMount(() => {
+  // Added from GlobeLeftContent
+  let contributors: { id: string; avatarUrl: string }[] = [];
+  const tweenedOptions = { duration: 1000, easing: cubicOut };
+  const animatedTotalEvents = tweened(0, tweenedOptions);
+  const animatedTotalContributors = tweened(0, tweenedOptions);
+
+  onMount(async () => { // Added async
+   
+
+    // Original Globe onMount logic continues here
     if (!canvasRef) return;
 
     const pixelRatio = window.devicePixelRatio || 1;
@@ -68,3 +83,4 @@
   bind:this={canvasRef} 
   class={cn("w-full h-full", className)}
 />
+
