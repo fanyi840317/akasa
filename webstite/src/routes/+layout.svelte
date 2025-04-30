@@ -4,7 +4,7 @@
 	import { onMount } from "svelte";
 	import { auth } from "$lib/stores/auth";
 	import { goto } from "$app/navigation";
-	import { ModeWatcher, mode } from "mode-watcher";
+	import { ModeWatcher, mode,setMode } from "mode-watcher";
 	import { waitLocale } from "svelte-i18n";
 
 	let { children } = $props();
@@ -13,6 +13,7 @@
 
 	// Initialize auth store
 	onMount(() => {
+		setMode("dark");
 		isMounted = true;
 		auth.init();
 
@@ -40,6 +41,12 @@
 	}
 </script>
 
+<mode-watcher />
+{#await waitLocale()}
+	<div class="min-h-screen flex items-center justify-center">
+		<div class="loading loading-infinity loading-xl"></div>
+	</div>
+{:then}
 <Header
 	class="z-50 header-main"
 	{user}
@@ -47,11 +54,6 @@
 	onLogout={handleLogout}
 	onProfile={handleProfile}
 />
-{#await waitLocale()}
-	<div class="min-h-screen flex items-center justify-center">
-		<div class="loading loading-infinity loading-xl"></div>
-	</div>
-{:then}
 	{#if isMounted}
 		{@render children()}
 	{/if}

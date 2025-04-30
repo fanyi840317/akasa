@@ -73,9 +73,9 @@
     {/each}
   </div>
   <div
-    class="pointer-events-none absolute inset-y-0 left-0 w-1/3 h-full bg-gradient-to-r from-white dark:from-base-100"
+    class="pointer-events-none absolute inset-y-0 left-0 w-1/3 h-full bg-gradient-to-r from-base-100"
   ></div>
   <div
-    class="pointer-events-none absolute inset-y-0 right-0 w-1/3 h-full bg-gradient-to-l from-white dark:from-base-100"
+    class="pointer-events-none absolute inset-y-0 right-0 w-1/3 h-full bg-gradient-to-l from-base-100"
   ></div>
 </div>

@@ -5,12 +5,13 @@ import initI18n from '$lib/i18n';
 import { auth } from '$lib/stores/auth';
 import { get } from 'svelte/store';
 import type { LayoutLoad } from './$types';
+import { ModeWatcher, mode,setMode } from "mode-watcher";
 import { DEFAULT_LOCATION } from '$lib/types/map';
 
 injectAnalytics({ mode: dev ? 'development' : 'production' });
 
 // 初始化位置和语言设置
-export const ssr = false;
+// export const ssr = false;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const load: LayoutLoad = async ({ url, route }) => {
     try {

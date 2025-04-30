@@ -370,7 +370,7 @@
     </div>
 </div>
 
-<div transition:fly={{ y: 100, duration: 600 }}>
+<div class="flex size-full items-center justify-center" transition:fly={{ y: 100, duration: 600 }}>
     <EventCardList
         {events}
         maxEvents={4}
@@ -397,18 +397,7 @@
 {/if} -->
 
 <!-- 事件详情面板 -->
-<NotionPanel
-    open={showEventPanel}
-    width={45}
-    maxWidth={60}
-    showHeader={false}
-    showFooter={false}
-    component={EventView}
-    componentProps={{
-        event: selectedEvent,
-    }}
-    on:close={handlePanelClose}
-/>
+
 
 <style>
     :global(.map-with-mask) {
