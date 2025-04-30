@@ -11,6 +11,7 @@
   import { Button } from "$lib/components/ui/button";
   import { Locate } from "lucide-svelte";
   import { LoadingCircle } from "$lib/components/icons";
+  import { cn } from "$lib/utils";
 
   const dispatch = createEventDispatcher();
 
@@ -18,6 +19,7 @@
     locationData = $bindable(DEFAULT_LOCATION),
     zoom = 13,
     showUserLocation = true,
+    class:className = "",
     onClick = undefined,
     clickable = $bindable(true),
     showLocateButton = $bindable(true),
@@ -25,6 +27,7 @@
     locationData?: Location;
     zoom?: number;
     showUserLocation?: boolean;
+    class?: string;
     onClick?: (e: { lngLat: { lng: number; lat: number } }) => void;
     clickable?: boolean;
     showLocateButton?: boolean;
@@ -275,7 +278,7 @@
   }
 </script>
 
-<div bind:this={container} class="map-container">
+<div bind:this={container} class={cn("map-container", className)}>
   {#if showLocateButton}
     <Button
       variant="outline"

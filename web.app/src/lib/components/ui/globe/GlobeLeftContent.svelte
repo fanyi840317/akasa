@@ -13,8 +13,10 @@
   import { tweened } from "svelte/motion";
     import AnimatedSubscribeButton from "./AnimatedSubscribeButton.svelte";
 
-  let className = "";
-  export { className as class };
+  let {
+    class: className = "",
+    onExplore = () => {}
+  } = $props();
 
   let searchQuery = "";
   const tweenedOptions = { duration: 1000, easing: cubicOut };
@@ -79,7 +81,7 @@
       <h1 use:motion class="text-5xl font-bold mb-4 text-white">
         探索神秘 <br />
         未知的<span class="bg-blue-800 px-2 py-1 border rounded font-semibold bg-gradient-to-b from-white to-neutral-700 text-transparent bg-clip-text">世界</span>
-     
+
     </h1>
     </Motion>
     <!-- <span class="bg-blue-800 px-2 py-1 border rounded font-semibold bg-gradient-to-b from-white to-neutral-700 text-transparent bg-clip-text"><div>世界</div></span> -->
@@ -123,7 +125,7 @@
     >
       <div use:motion class="flex gap-4">
         <!-- <Button class="bg-purple-500 hover:bg-purple-600 text-white" onclick={handleSearch}>探索</Button> -->
-        <AnimatedSubscribeButton text="探索"></AnimatedSubscribeButton>
+        <AnimatedSubscribeButton text="探索" onclick={onExplore}></AnimatedSubscribeButton>
       </div>
     </Motion>
 

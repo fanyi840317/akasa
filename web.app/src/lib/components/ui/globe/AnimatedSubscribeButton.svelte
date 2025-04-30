@@ -8,7 +8,7 @@
 
 <button
   class={cn(
-    "group relative w-32 cursor-pointer overflow-hidden rounded-full border bg-background p-2 text-center font-semibold",
+    "group relative w-32 cursor-pointer overflow-hidden rounded-full border  bg-neutral-900 p-2 text-center font-semibold",
     _class
   )}
   {...$$restProps}
