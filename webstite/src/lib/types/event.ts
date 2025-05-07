@@ -52,6 +52,7 @@ export type Event = {
   $updatedAt?: string;
   title: string;
   content: string;
+  summary?: string;
   categories?: string[];
   tags?:string[];
   date: string;

@@ -226,7 +226,7 @@
 
 <div
   class={cn(
-    "w-[300px] h-[300px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] lg:w-[500px] lg:h-[500px] xl:w-[500px] xl:h-[500px] relative",
+    "w-[300px] h-[300px]  relative",
     className,
   )}
 >
