@@ -73,7 +73,7 @@
 		{:else}
 			<!-- User is not logged in -->
 			<button
-				class="btn gap-2"
+				class="btn gap-2 btn-ghost"
 				onclick={onLogin}
 				onkeydown={(e) => e.key === "Enter" && onLogin()}
 			>

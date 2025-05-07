@@ -2,6 +2,7 @@
   import { fly } from "svelte/transition";
   import { UserAvatar } from "$lib/components/ui/avatar";
   import type { Event } from "$lib/types/event";
+  import { goto } from "$app/navigation";
 
   let {
     events = [],
@@ -82,7 +83,7 @@
         transition-all hover:bg-base-300/90 hover:scale-105 rounded-lg 
         cursor-pointer group h-full bg-base-200/50 aspect-[16/10] w-[120px] min-w-[120px]"
         transition:fly={{ y: 20, duration: 300 }}
-        onclick={() => console.log('Add more clicked')}
+        onclick={() => goto('/events/new')}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-base-content/30 group-hover:text-primary-content">
           <line x1="12" y1="5" x2="12" y2="19"></line>

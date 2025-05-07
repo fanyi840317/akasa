@@ -61,11 +61,11 @@
           enableHighAccuracy: true,
           timeout: 5000,
           maximumAge: 0,
-        }
+        },
       );
     } else {
       console.error(
-        "Geolocation is not supported by this browser or map instance not ready."
+        "Geolocation is not supported by this browser or map instance not ready.",
       );
       // Optionally fly to a default location
       // mapBaseInstance?.flyTo(DEFAULT_LNG, DEFAULT_LAT, { zoom: 1 });
@@ -337,19 +337,23 @@
 </script>
 
 <div class="hero">
-  <div class="hero-content flex-col lg:flex-row">
-    <div class="relative  flex items-center justify-center">
+  <div class="hero-content flex-col lg:flex-row items-start">
+    <div
+      class="relative flex p-4 px-10"
+      in:fly={{ x: -200, duration: 800, delay: 0 }}
+      out:fly={{ x: -200, duration: 800, delay: 0 }}
+    >
       <Globe color="" {targetCoordinates} autoRotate={!pauseMarquee} />
     </div>
     <div
       class="w-full"
-      in:fly={{ x: -200, duration: 800, delay: 0 }}
-      out:fly={{ x: -200, duration: 800, delay: 800 }}
+      in:fly={{ x: 200, duration: 800, delay: 0 }}
+      out:fly={{ x: 200, duration: 800, delay: 0 }}
     >
       <div class="flex items-center justify-between p-6">
         <div class="flex items-center justify-center gap-4">
           <span class="text-3xl font-bold">Events</span>
-          <div class="badge badge-outline ">2000条</div>
+          <div class="badge badge-outline">2000条</div>
         </div>
       </div>
       <EventCardList
@@ -360,7 +364,6 @@
         onEventClick={handleEventClick}
         {getCoverUrl}
       />
-
     </div>
   </div>
 </div>
