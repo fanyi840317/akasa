@@ -17,12 +17,16 @@ type AppState = {
     sidebarWidthIcon: number;
     
     // 模板相关
-    selectedTemplate: any | null;
+    selectedTemplate: unknown | null;
 
     // 事件创建器状态
     showEventCreator: boolean;
     eventCreatorType: 'experience' | 'documentation' | 'witness' | 'evidence' | null;
     currentEvent: Event | null;
+
+    // Header 浮动状态
+    isHeaderFloatingEnabled: boolean;
+    showFloatingHeader: boolean;
 };
 
 const createAppStore = () => {
@@ -47,6 +51,10 @@ const createAppStore = () => {
         showEventCreator: false,
         eventCreatorType: null,
         currentEvent: null,
+
+        // Header 浮动状态
+        isHeaderFloatingEnabled: false,
+        showFloatingHeader: true, // 默认显示 Header
     });
 
     return {
@@ -99,7 +107,7 @@ const createAppStore = () => {
         },
         
         // 模板相关方法
-        setTemplate: (template: any | null) => {
+        setTemplate: (template: unknown | null) => {
             store.update(state => ({
                 ...state,
                 selectedTemplate: template,
@@ -121,6 +129,23 @@ const createAppStore = () => {
                 ...state,
                 showEventCreator: false,
                 eventCreatorType: null
+            }));
+        },
+
+        // Header 浮动相关方法
+        setHeaderFloatingEnabled: (enabled: boolean) => {
+            store.update(state => ({
+                ...state,
+                isHeaderFloatingEnabled: enabled,
+                // 如果禁用浮动，确保 header 是可见的
+                showFloatingHeader: !enabled ? true : state.showFloatingHeader 
+            }));
+        },
+
+        setShowFloatingHeader: (show: boolean) => {
+            store.update(state => ({
+                ...state,
+                showFloatingHeader: show
             }));
         },
         

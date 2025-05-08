@@ -2,7 +2,7 @@
 @import "@toeverything/theme/style.css";
 @plugin '@tailwindcss/typography';
 @plugin "daisyui" {
-  themes: all;
+  themes:  dark ;
 }
 @plugin "daisyui/theme" {
   name: "black";

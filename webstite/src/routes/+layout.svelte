@@ -8,23 +8,24 @@
   import { waitLocale } from "svelte-i18n";
   import { effects as blocksEffects } from "@blocksuite/blocks/effects";
   import { effects as presetsEffects } from "@blocksuite/presets/effects";
+  import { appStore } from "$lib/stores/appState";
 
   let { children } = $props();
   let isMounted = $state(false);
   let user = $state<any>(null);
+  let isFloating = $state(false);
+  let showFloating = $state(false);
   blocksEffects();
   presetsEffects();
-  // Initialize auth store
+
   onMount(() => {
-    setMode("dark");
+    // setMode("dark");
     isMounted = true;
-    auth.init();
-
-    // Subscribe to auth store
-    const unsubscribe = auth.subscribe((state) => {
-      user = state.user;
+    // Initialize auth store
+    const unsubscribe = appStore.subscribe((state) => {
+      isFloating = state.isHeaderFloatingEnabled;
+      showFloating = state.showFloatingHeader;
     });
-
     return () => {
       unsubscribe();
     };
@@ -51,24 +52,14 @@
   </div>
 {:then}
   <Header
-    class="z-50 header-main"
     {user}
     onLogin={handleLogin}
     onLogout={handleLogout}
     onProfile={handleProfile}
+    {isFloating}
+    {showFloating}
   />
   {#if isMounted}
     {@render children()}
   {/if}
 {/await}
-
-<style>
-  :global(:root) {
-    --header-height: 64px;
-  }
-
-  :global(.header-main) {
-    height: var(--header-height);
-    position: relative;
-  }
-</style>

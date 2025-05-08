@@ -3,6 +3,7 @@
 	import { goto } from "$app/navigation";
 	import { LogIn } from "lucide-svelte";
 	import { cn } from "$lib/utils";
+	import { fly } from 'svelte/transition';
 
 	// Define user type
 	type UserData = {
@@ -17,16 +18,30 @@
 		onLogout = () => {},
 		onProfile = () => goto("/profile"),
 		class: className = "",
+		isFloating = $bindable(false),
+		showFloating = $bindable(true),
 	} = $props<{
 		user?: UserData;
 		onLogin?: () => void;
 		onLogout?: () => void;
 		onProfile?: () => void;
 		class?: string;
+		isFloating?: boolean;
+		showFloating?: boolean;
 	}>();
-</script>
 
-<div class={cn("navbar backdrop-blur-sm shadow-sm", className)}>
+</script>
+{#if !isFloating || showFloating}
+<div 
+	class={cn(
+		"navbar backdrop-blur-sm shadow-sm", 
+		className,
+		{'absolute top-0 left-0 right-0 z-50': showFloating}
+	)}
+	transition:fly={{ y: isFloating && !showFloating ? -100 : 0, duration: 300 }}
+	style={isFloating && !showFloating ? 'transform: translateY(-100%);' : 'transform: translateY(0);'}
+>
+	
 	<div class="navbar-start">
 		<button
 			class="btn btn-ghost text-xl"
@@ -40,7 +55,7 @@
 		{#if user}
 			<!-- User is logged in -->
 			<div class="dropdown dropdown-end">
-				<button tabindex="0" class="btn">
+				<button tabindex="0" class="btn btn-ghost rounded-full">
 					<UserAvatar
 						src={user.avatar}
 						alt={user.name}
@@ -83,3 +98,4 @@
 		{/if}
 	</div>
 </div>
+{/if}

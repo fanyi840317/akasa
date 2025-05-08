@@ -48,6 +48,7 @@
     "@blocksuite/icons": "2.1.75",
     "@blocksuite/presets": "^0.19.5",
     "@blocksuite/store": "^0.19.5",
+    "@google/generative-ai": "^0.24.1",
     "@toeverything/theme": "^1.1.13",
     "@vercel/analytics": "^1.5.0",
     "appwrite": "^17.0.2",
