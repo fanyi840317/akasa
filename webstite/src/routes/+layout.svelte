@@ -1,71 +1,74 @@
 <script lang="ts">
-	import Header from "$lib/components/layout/header.svelte";
-	import "../app.css";
-	import { onMount } from "svelte";
-	import { auth } from "$lib/stores/auth";
-	import { goto } from "$app/navigation";
-	import { ModeWatcher, mode,setMode } from "mode-watcher";
-	import { waitLocale } from "svelte-i18n";
+  import Header from "$lib/components/layout/header.svelte";
+  import "../app.css";
+  import { onMount } from "svelte";
+  import { auth } from "$lib/stores/auth";
+  import { goto } from "$app/navigation";
+  import { ModeWatcher, mode, setMode } from "mode-watcher";
+  import { waitLocale } from "svelte-i18n";
+  import { effects as blocksEffects } from "@blocksuite/blocks/effects";
+  import { effects as presetsEffects } from "@blocksuite/presets/effects";
 
-	let { children } = $props();
-	let isMounted = $state(false);
-	let user = $state<any>(null);
+  let { children } = $props();
+  let isMounted = $state(false);
+  let user = $state<any>(null);
+  blocksEffects();
+  presetsEffects();
+  // Initialize auth store
+  onMount(() => {
+    setMode("dark");
+    isMounted = true;
+    auth.init();
 
-	// Initialize auth store
-	onMount(() => {
-		setMode("dark");
-		isMounted = true;
-		auth.init();
+    // Subscribe to auth store
+    const unsubscribe = auth.subscribe((state) => {
+      user = state.user;
+    });
 
-		// Subscribe to auth store
-		const unsubscribe = auth.subscribe((state) => {
-			user = state.user;
-		});
+    return () => {
+      unsubscribe();
+    };
+  });
 
-		return () => {
-			unsubscribe();
-		};
-	});
+  // Handle login, logout and profile navigation
+  function handleLogin() {
+    goto("/login");
+  }
 
-	// Handle login, logout and profile navigation
-	function handleLogin() {
-		goto("/login");
-	}
+  function handleLogout() {
+    auth.logout();
+  }
 
-	function handleLogout() {
-		auth.logout();
-	}
-
-	function handleProfile() {
-		goto("/profile");
-	}
+  function handleProfile() {
+    goto("/profile");
+  }
 </script>
 
-<mode-watcher />
+<mode-watcher></mode-watcher>
 {#await waitLocale()}
-	<div class="min-h-screen flex items-center justify-center">
-		<div class="loading loading-infinity loading-xl"></div>
-	</div>
+  <div class="min-h-screen flex items-center justify-center">
+    <div class="loading loading-infinity loading-xl"></div>
+  </div>
 {:then}
-<Header
-	class="z-50 header-main"
-	{user}
-	onLogin={handleLogin}
-	onLogout={handleLogout}
-	onProfile={handleProfile}
-/>
-	{#if isMounted}
-		{@render children()}
-	{/if}
+  <Header
+    class="z-50 header-main"
+    {user}
+    onLogin={handleLogin}
+    onLogout={handleLogout}
+    onProfile={handleProfile}
+  />
+  {#if isMounted}
+    {@render children()}
+  {/if}
 {/await}
 
 <style>
-	:global(:root) {
-		--header-height: 64px;
-	}
+  :global(:root) {
+    --header-height: 64px;
+  }
 
-	:global(.header-main) {
-		height: var(--header-height);
-		position: relative;
-	}
+  :global(.header-main) {
+    height: var(--header-height);
+    position: relative;
+  }
 </style>

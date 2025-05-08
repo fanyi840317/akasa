@@ -1,16 +1,27 @@
 <script lang="ts">
-    import { Editor } from '@blocksuite/affine'; 
-    import { onMount } from 'svelte';
-    let editorContainer: HTMLDivElement;
+  import { createEmptyDoc, AffineEditorContainer } from "@blocksuite/presets";
+  import {
+    ColorScheme,
+    OverrideThemeExtension,
+    ParagraphBlockService,
+    SpecProvider,
+    type ThemeExtension,
+  } from "@blocksuite/blocks";
+  import { onMount } from "svelte";
+  let editorContainer: HTMLDivElement;
 
-    onMount(() => {
-        const editor = new Editor();
-        editorContainer.appendChild(editor);
-    });
+ 
+  onMount(() => {
+    document.documentElement.dataset.theme = "dark"
+    const doc = createEmptyDoc().init();
+    console.log(doc);
+    const editor = new AffineEditorContainer();
+    editor.doc = doc;
+    editor.mode = 'edgeless';
+    editorContainer.appendChild(editor);
+  });
 </script>
 
-
-<div>
-
-<div bind:this={editorContainer} ></div>
+<div class="w-full h-full">
+  <div class="h-[calc(100vh-4rem)]" bind:this={editorContainer}></div>
 </div>
