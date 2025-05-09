@@ -6,17 +6,13 @@
   import { goto } from "$app/navigation";
   import { ModeWatcher, mode, setMode } from "mode-watcher";
   import { waitLocale } from "svelte-i18n";
-  import { effects as blocksEffects } from "@blocksuite/blocks/effects";
-  import { effects as presetsEffects } from "@blocksuite/presets/effects";
   import { appStore } from "$lib/stores/appState";
 
   let { children } = $props();
   let isMounted = $state(false);
   let user = $state<any>(null);
   let showHeader = $state(false);
-  let showFloating = $state(false);
-  blocksEffects();
-  presetsEffects();
+ 
 
   onMount(() => {
     // setMode("dark");

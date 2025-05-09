@@ -5,8 +5,13 @@ import initI18n from '$lib/i18n';
 import { auth } from '$lib/stores/auth';
 import { get } from 'svelte/store';
 import type { LayoutLoad } from './$types';
-import { ModeWatcher, mode,setMode } from "mode-watcher";
 import { DEFAULT_LOCATION } from '$lib/types/map';
+
+import { effects as blocksEffects } from "@blocksuite/blocks/effects";
+import { effects as presetsEffects } from "@blocksuite/presets/effects";
+blocksEffects();
+presetsEffects();
+
 
 injectAnalytics({ mode: dev ? 'development' : 'production' });
 

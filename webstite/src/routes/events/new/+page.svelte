@@ -10,8 +10,10 @@
   } from "@blocksuite/blocks";
   import { onMount, onDestroy } from "svelte";
   import { appStore } from "$lib/stores/appState";
-  let editorContainer: HTMLDivElement;
+  import "@toeverything/theme/style.css";
 
+  let editorContainer: HTMLDivElement;
+  appStore.setShowHeader(false);
   const currentTheme = document.documentElement.dataset.theme;
   const colorScheme =
     currentTheme === "black" ? ColorScheme.Dark : ColorScheme.Light;
@@ -30,7 +32,6 @@
   //     },
   //   };
   // }
-  appStore.setShowHeader(false);
   onMount(async () => {
     const doc = createEmptyDoc().init();
     doc;
