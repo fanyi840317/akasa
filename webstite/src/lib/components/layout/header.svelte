@@ -18,29 +18,23 @@
 		onLogout = () => {},
 		onProfile = () => goto("/profile"),
 		class: className = "",
-		isFloating = $bindable(false),
-		showFloating = $bindable(true),
+		isShow = $bindable(true),
 	} = $props<{
 		user?: UserData;
 		onLogin?: () => void;
 		onLogout?: () => void;
 		onProfile?: () => void;
 		class?: string;
-		isFloating?: boolean;
-		showFloating?: boolean;
+		isShow?: boolean;
 	}>();
 
 </script>
-{#if !isFloating || showFloating}
+{#if isShow }
 <div 
 	class={cn(
 		"navbar backdrop-blur-sm shadow-sm", 
-		className,
-		{'absolute top-0 left-0 right-0 z-50': showFloating}
-	)}
-	transition:fly={{ y: isFloating && !showFloating ? -100 : 0, duration: 300 }}
-	style={isFloating && !showFloating ? 'transform: translateY(-100%);' : 'transform: translateY(0);'}
->
+		className
+	)}>
 	
 	<div class="navbar-start">
 		<button

@@ -29,6 +29,9 @@ importers:
       '@google/generative-ai':
         specifier: ^0.24.1
         version: 0.24.1
+      '@preact/signals-core':
+        specifier: ^1.8.0
+        version: 1.8.0
       '@toeverything/theme':
         specifier: ^1.1.13
         version: 1.1.14

@@ -13,18 +13,17 @@
   let { children } = $props();
   let isMounted = $state(false);
   let user = $state<any>(null);
-  let isFloating = $state(false);
+  let showHeader = $state(false);
   let showFloating = $state(false);
   blocksEffects();
   presetsEffects();
 
   onMount(() => {
     // setMode("dark");
-    isMounted = true;
+    isMounted = true;    
     // Initialize auth store
     const unsubscribe = appStore.subscribe((state) => {
-      isFloating = state.isHeaderFloatingEnabled;
-      showFloating = state.showFloatingHeader;
+      showHeader = state.showHeader;
     });
     return () => {
       unsubscribe();
@@ -56,8 +55,7 @@
     onLogin={handleLogin}
     onLogout={handleLogout}
     onProfile={handleProfile}
-    {isFloating}
-    {showFloating}
+    isShow={showHeader}
   />
   {#if isMounted}
     {@render children()}

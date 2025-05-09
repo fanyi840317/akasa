@@ -25,8 +25,7 @@ type AppState = {
     currentEvent: Event | null;
 
     // Header 浮动状态
-    isHeaderFloatingEnabled: boolean;
-    showFloatingHeader: boolean;
+    showHeader: boolean;
 };
 
 const createAppStore = () => {
@@ -53,8 +52,7 @@ const createAppStore = () => {
         currentEvent: null,
 
         // Header 浮动状态
-        isHeaderFloatingEnabled: false,
-        showFloatingHeader: true, // 默认显示 Header
+        showHeader: true
     });
 
     return {
@@ -133,19 +131,10 @@ const createAppStore = () => {
         },
 
         // Header 浮动相关方法
-        setHeaderFloatingEnabled: (enabled: boolean) => {
+        setShowHeader: (show: boolean) => {
             store.update(state => ({
                 ...state,
-                isHeaderFloatingEnabled: enabled,
-                // 如果禁用浮动，确保 header 是可见的
-                showFloatingHeader: !enabled ? true : state.showFloatingHeader 
-            }));
-        },
-
-        setShowFloatingHeader: (show: boolean) => {
-            store.update(state => ({
-                ...state,
-                showFloatingHeader: show
+                showHeader:show
             }));
         },
         
