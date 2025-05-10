@@ -16,7 +16,7 @@ presetsEffects();
 injectAnalytics({ mode: dev ? 'development' : 'production' });
 
 // 初始化位置和语言设置
-// export const ssr = false;
+export const ssr = false;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const load: LayoutLoad = async ({ url, route }) => {
     try {

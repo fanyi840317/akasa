@@ -1,16 +1,26 @@
 <script lang="ts">
-  import { createEmptyDoc, EdgelessEditor } from "@blocksuite/presets";
+  import {
+    AffineEditorContainer,
+    createEmptyDoc,
+    EdgelessEditor,
+  } from "@blocksuite/presets";
   import { signal } from "@preact/signals-core";
   import {
     ColorScheme,
+    DocModeExtension,
+    DocModeProvider,
     OverrideThemeExtension,
     ParagraphBlockService,
     SpecProvider,
+    type DocMode,
     type ThemeExtension,
   } from "@blocksuite/blocks";
   import { onMount, onDestroy } from "svelte";
   import { appStore } from "$lib/stores/appState";
   import "@toeverything/theme/style.css";
+  import type { ExtensionType } from "@blocksuite/block-std";
+  import { Slot } from "@blocksuite/store";
+  import type { Disposable } from '@blocksuite/global/utils';
 
   let editorContainer: HTMLDivElement;
   appStore.setShowHeader(false);
@@ -25,28 +35,54 @@
       return signal(colorScheme);
     },
   };
-  //   function OverrideToolsExtension(service: ThemeExtension): ExtensionType {
-  //   return {
-  //     setup: di => {
-  //       di.override(ThemeExtensionIdentifier, () => service);
-  //     },
-  //   };
-  // }
+  const override_doc_mode_extension = (
+    editor: AffineEditorContainer
+  ): ExtensionType => {
+    const DOC_MODE = "edgeless"; // fixed to edgeless mode
+    const doc_slots = new Map<string, Slot<DocMode>>();
+    const service: DocModeProvider = {
+      setPrimaryMode: (_mode: DocMode, doc_id: string): void => {
+        doc_slots.get(doc_id)?.emit(DOC_MODE);
+      },
+      getPrimaryMode: (_doc_id: string): DocMode => {
+        return DOC_MODE;
+      },
+      togglePrimaryMode: (_doc_id: string): DocMode => {
+        return DOC_MODE;
+      },
+      onPrimaryModeChange: (
+        handler: (mode: DocMode) => void,
+        doc_id: string
+      ): Disposable => {
+        if (!doc_slots.has(doc_id)) {
+          doc_slots.set(doc_id, new Slot<DocMode>());
+        }
+        return doc_slots.get(doc_id)!.on(handler);
+      },
+      setEditorMode: (_mode: DocMode): void => {
+        editor.switchEditor(DOC_MODE);
+      },
+      getEditorMode: (): DocMode | null => editor.mode,
+    };
+    return DocModeExtension(service);
+  };
+
   onMount(async () => {
     const doc = createEmptyDoc().init();
     doc;
     console.log(doc);
-    const editor = new EdgelessEditor();
+    const editor = new AffineEditorContainer();
     editor.doc = doc;
+    
 
-    // editor.mode = "edgeless";
+    editor.mode = "edgeless";
     // 应用主题扩展到编辑器
-    if (editor.specs) {
+    if (editor.edgelessSpecs) {
       const edgelessSpecs = SpecProvider.getInstance().getSpec("edgeless");
-      edgelessSpecs.extend([OverrideThemeExtension(themeExtension)]);
-      editor.specs = edgelessSpecs.value;
+      edgelessSpecs.extend([OverrideThemeExtension(themeExtension), override_doc_mode_extension(editor)]);
+      editor.edgelessSpecs = edgelessSpecs.value;
     }
-   
+
     // const paragraphService: ParagraphBlockService | null =
     //   editor.std.getService("affine:paragraph");
     // if (paragraphService) {

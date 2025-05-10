@@ -1,59 +1,62 @@
 <script lang="ts">
+    import { SpecProvider } from "@blocksuite/affine-shared/utils";
+    import { AffineSchemas } from "@blocksuite/affine/schemas";
+    import {
+        createAutoIncrementIdGenerator,
+        type DocCollectionOptions,
+        TestWorkspace,
+    } from "@blocksuite/affine/store/test";
+    import { TestAffineEditorContainer } from "@blocksuite/integration-test";
+    import { onDestroy, onMount } from "svelte";
 
-    // import { createEmptyDoc, EdgelessEditor } from "@blocksuite/presets";
-    // import { signal } from "@preact/signals-core";
-    // import {
-    //     ColorScheme,
-    //     OverrideThemeExtension,
-    //     ParagraphBlockService,
-    //     SpecProvider,
-    //     type ThemeExtension,
-    // } from "@blocksuite/blocks";
-    import { onMount, onDestroy } from "svelte";
-    // import "@toeverything/theme/style.css";
+    let editorContainer: HTMLDivElement;
 
-    // let editorContainer: HTMLDivElement;
-    // const currentTheme = document.documentElement.dataset.theme;
-    // const colorScheme =
-    //     currentTheme === "black" ? ColorScheme.Dark : ColorScheme.Light;
-    // const themeExtension: ThemeExtension = {
-    //     getAppTheme: () => {
-    //         return signal(colorScheme);
-    //     },
-    //     getEdgelessTheme: () => {
-    //         return signal(colorScheme);
-    //     },
-    // };
-    //   function OverrideToolsExtension(service: ThemeExtension): ExtensionType {
-    //   return {
-    //     setup: di => {
-    //       di.override(ThemeExtensionIdentifier, () => service);
-    //     },
-    //   };
-    // }
-    onMount(() => {
-        console.log("onMount");
-        // const doc = createEmptyDoc().init();
-        // doc;
-        // console.log(doc);
-        // const editor = new EdgelessEditor();
-        // editor.doc = doc;
+    function createTestOptions() {
+        const idGenerator = createAutoIncrementIdGenerator();
+        return { id: "test-collection", idGenerator };
+    }
+    const collection = new TestWorkspace(createTestOptions());
+    collection.meta.initialize();
+    collection.storeExtensions = SpecProvider._.getSpec("store").value;
+    const doc = collection.createDoc("home");
 
-        // // editor.mode = "edgeless";
-        // // 应用主题扩展到编辑器
-        // if (editor.specs) {
-        //     const edgelessSpecs =
-        //         SpecProvider.getInstance().getSpec("edgeless");
-        //     edgelessSpecs.extend([OverrideThemeExtension(themeExtension)]);
-        //     editor.specs = edgelessSpecs.value;
-        // }
 
-        // editorContainer.appendChild(editor);
-        // await editor.updateComplete;
+    console.log(collection.storeExtensions);
+
+    const editor = new TestAffineEditorContainer();
+    editor.doc = doc.getStore();
+    // editor.edgelessSpecs = testSpecs;
+
+    // document.body.append(editorContainer);
+    onMount(async () => {
+        editorContainer.appendChild(editor);
+        await editor.updateComplete;
     });
     onDestroy(() => {});
 </script>
 
-<div style="width:100% height: 100%;">
-    <div style="width:100% height: 100%;" bind:this={editorContainer}></div>
-</div>
+<div class="fullscreen-editor" bind:this={editorContainer}></div>
+
+<style>
+    :global(html, body, #svelte) {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+    :global(body) {
+        background: #18181b;
+    }
+    .dg > ul {
+        overflow: scroll;
+    }
+    .fullscreen-editor {
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: #18181b;
+    }
+</style>
