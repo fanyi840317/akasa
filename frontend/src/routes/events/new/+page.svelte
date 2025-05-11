@@ -16,11 +16,11 @@
     type ThemeExtension,
   } from "@blocksuite/blocks";
   import { onMount, onDestroy } from "svelte";
-  import { appStore } from "$lib/stores/appState";
+  import { appStore } from "$lib/stores/app-state";
   import "@toeverything/theme/style.css";
   import type { ExtensionType } from "@blocksuite/block-std";
-  import { Slot } from "@blocksuite/store";
-  import type { Disposable } from '@blocksuite/global/utils';
+  import { Block, Slot } from "@blocksuite/store";
+  import type { Disposable } from "@blocksuite/global/utils";
 
   let editorContainer: HTMLDivElement;
   appStore.setShowHeader(false);
@@ -35,9 +35,9 @@
       return signal(colorScheme);
     },
   };
-  const override_doc_mode_extension = (
-    editor: AffineEditorContainer
-  ): ExtensionType => {
+  const createDocModeProvider = (
+    editor: AffineEditorContainer,
+  ): DocModeProvider => {
     const DOC_MODE = "edgeless"; // fixed to edgeless mode
     const doc_slots = new Map<string, Slot<DocMode>>();
     const service: DocModeProvider = {
@@ -52,7 +52,7 @@
       },
       onPrimaryModeChange: (
         handler: (mode: DocMode) => void,
-        doc_id: string
+        doc_id: string,
       ): Disposable => {
         if (!doc_slots.has(doc_id)) {
           doc_slots.set(doc_id, new Slot<DocMode>());
@@ -64,42 +64,40 @@
       },
       getEditorMode: (): DocMode | null => editor.mode,
     };
-    return DocModeExtension(service);
+    return service;
   };
 
   onMount(async () => {
     const doc = createEmptyDoc().init();
-    doc;
     console.log(doc);
     const editor = new AffineEditorContainer();
+
+    let surface = doc.getBlocksByFlavour("affine:surface")[0];
+    alert(surface.id);
+    if (surface) {
+      doc.addBlock(
+      'affine:embed-github',
+      {
+        url: 'https://github.com/Milkdown/milkdown/pull/1215',
+        xywh: '[500, 400, 752, 116]',
+      },
+      (surface as Block)?.id
+    );
+    }
     editor.doc = doc;
-    
 
     editor.mode = "edgeless";
     // 应用主题扩展到编辑器
     if (editor.edgelessSpecs) {
       const edgelessSpecs = SpecProvider.getInstance().getSpec("edgeless");
-      edgelessSpecs.extend([OverrideThemeExtension(themeExtension), override_doc_mode_extension(editor)]);
+      edgelessSpecs.extend([
+        OverrideThemeExtension(themeExtension),
+        DocModeExtension(createDocModeProvider(editor)),
+      ]);
       editor.edgelessSpecs = edgelessSpecs.value;
     }
 
-    // const paragraphService: ParagraphBlockService | null =
-    //   editor.std.getService("affine:paragraph");
-    // if (paragraphService) {
-    //   paragraphService.placeholderGenerator = (model) => {
-    //     const placeholders = {
-    //       text: "输入 '/' 使用命令，或按 'Enter' 创建新段落",
-    //       h1: "标题 1",
-    //       h2: "标题 2",
-    //       h3: "标题 3",
-    //       h4: "标题 4",
-    //       h5: "标题 5",
-    //       h6: "标题 6",
-    //       quote: "",
-    //     };
-    //     return placeholders[model.type];
-    //   };
-    // }
+    
     editorContainer.appendChild(editor);
     await editor.updateComplete;
   });

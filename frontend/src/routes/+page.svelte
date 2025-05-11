@@ -14,7 +14,7 @@
   import { goto } from "$app/navigation";
   import type { Event } from "$lib/types/event";
   import { eventStore } from "$lib/stores/event";
-  import { LeftContent, NotionPanel } from "$lib/components/layout";
+  import {  NotionPanel } from "$lib/components/layout";
   import { EventCardList, EventView } from "$lib/components/events";
   import { MapBase } from "$lib/components/map";
 

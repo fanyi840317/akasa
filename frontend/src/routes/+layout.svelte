@@ -6,7 +6,7 @@
   import { goto } from "$app/navigation";
   import { ModeWatcher, mode, setMode } from "mode-watcher";
   import { waitLocale } from "svelte-i18n";
-  import { appStore } from "$lib/stores/appState";
+  import { appStore } from "$lib/stores/app-state";
 
   let { children } = $props();
   let isMounted = $state(false);
@@ -36,6 +36,8 @@
   }
 
   function handleProfile() {
+
+    
     goto("/profile");
   }
 </script>
