@@ -1,21 +1,14 @@
 <script lang="ts">
-  import type { PageData } from "./$types";
-  import { Search } from "lucide-svelte";
-
-  import { fade, fly } from "svelte/transition";
+  
+  import { fly } from "svelte/transition";
   import { onMount } from "svelte";
-  import { Motion } from "svelte-motion";
   import Globe from "$lib/components/ui/globe";
-  import { Sparkles } from "lucide-svelte";
-
+  
   import { cubicOut } from "svelte/easing";
   import { tweened } from "svelte/motion";
-  import { cn } from "$lib/utils";
-  import { goto } from "$app/navigation";
   import type { Event } from "$lib/types/event";
   import { eventStore } from "$lib/stores/event";
-  import {  NotionPanel } from "$lib/components/layout";
-  import { EventCardList, EventView } from "$lib/components/events";
+  import { EventCardList } from "$lib/components/events";
   import { MapBase } from "$lib/components/map";
 
   let events = $state<Event[]>([]);

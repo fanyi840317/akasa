@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { UserAvatar } from "../ui/avatar";
 	import { goto } from "$app/navigation";
-	import { LogIn } from "lucide-svelte";
+	import { LogInIcon } from "lucide-svelte";
 	import { cn } from "$lib/utils";
 	import { fly } from 'svelte/transition';
 
@@ -14,9 +14,9 @@
 
 	let {
 		user = null,
-		onLogin = () => goto("/login"),
+		onLogin = () => {},
 		onLogout = () => {},
-		onProfile = () => goto("/profile"),
+		onProfile = () => {},
 		class: className = "",
 		isShow = $bindable(true),
 	} = $props<{
@@ -86,7 +86,7 @@
 				onclick={onLogin}
 				onkeydown={(e) => e.key === "Enter" && onLogin()}
 			>
-				<LogIn class="h-4 w-4" />
+				<LogInIcon class="h-4 w-4" />
 				<span>登录</span>
 			</button>
 		{/if}

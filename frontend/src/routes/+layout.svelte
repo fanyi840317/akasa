@@ -10,36 +10,19 @@
 
   let { children } = $props();
   let isMounted = $state(false);
-  let user = $state<any>(null);
-  let showHeader = $state(false);
- 
 
   onMount(() => {
     // setMode("dark");
-    isMounted = true;    
+    isMounted = true;
+    goto("/web");
     // Initialize auth store
-    const unsubscribe = appStore.subscribe((state) => {
-      showHeader = state.showHeader;
-    });
-    return () => {
-      unsubscribe();
-    };
+    // const unsubscribe = appStore.subscribe((state) => {
+    //     showHeader = state.showHeader;
+    //   });
+    //   return () => {
+    //     unsubscribe();
+    //   };
   });
-
-  // Handle login, logout and profile navigation
-  function handleLogin() {
-    goto("/login");
-  }
-
-  function handleLogout() {
-    auth.logout();
-  }
-
-  function handleProfile() {
-
-    
-    goto("/profile");
-  }
 </script>
 
 <mode-watcher></mode-watcher>
@@ -48,13 +31,6 @@
     <div class="loading loading-infinity loading-xl"></div>
   </div>
 {:then}
-  <Header
-    {user}
-    onLogin={handleLogin}
-    onLogout={handleLogout}
-    onProfile={handleProfile}
-    isShow={showHeader}
-  />
   {#if isMounted}
     {@render children()}
   {/if}

@@ -73,7 +73,7 @@
                 </div>
             {/if}
             
-            <form on:submit|preventDefault={handleSubmit} class="space-y-4">
+            <form onsubmit={handleSubmit} class="space-y-4">
                 {#if isRegister}
                     <div class="form-control">
                         <label class="label">
@@ -115,7 +115,7 @@
                     />
                 </div>
                 
-                <div class="form-control mt-6">
+                <!-- <div class="form-control mt-6">
                     <button 
                         type="submit" 
                         class="btn btn-primary" 
@@ -126,10 +126,10 @@
                         {/if}
                         {isRegister ? "注册" : "登录"}
                     </button>
-                </div>
+                </div> -->
             </form>
             
-            <div class="divider">或者</div>
+            <!-- <div class="divider">或者</div> -->
             
             <button 
                 class="btn btn-outline btn-block" 
