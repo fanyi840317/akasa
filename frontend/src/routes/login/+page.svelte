@@ -5,6 +5,7 @@
   import { UserPlus, User, KeyRound, AlertCircle } from "lucide-svelte";
   import { base } from "$app/paths";
   import { page } from "$app/stores";
+  import {toast} from "svelte-sonner";
 
   // 从URL获取returnUrl参数
   let returnUrl = $page.url.searchParams.get("returnUrl");
@@ -65,6 +66,9 @@
         (isRegister
           ? "Registration failed, please try again"
           : "Login failed, please try again");
+
+      // 显示错误信息
+      toast.error(err.message);
     } finally {
       loading = false;
     }
