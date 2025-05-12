@@ -7,6 +7,7 @@
   import { ModeWatcher, mode, setMode } from "mode-watcher";
   import { waitLocale } from "svelte-i18n";
   import { appStore } from "$lib/stores/app-state";
+  import { Toaster } from "$lib/components/ui/sonner";
 
   let { children } = $props();
   let isMounted = $state(false);
@@ -25,6 +26,7 @@
   });
 </script>
 
+<Toaster ></Toaster>
 <mode-watcher></mode-watcher>
 {#await waitLocale()}
   <div class="min-h-screen flex items-center justify-center">

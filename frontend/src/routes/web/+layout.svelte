@@ -19,8 +19,12 @@
     const unsubscribe = appStore.subscribe((state) => {
       showHeader = state.showHeader;
     });
+    const unsubscribeAuth = auth.subscribe((state) => {
+      user = state.user;
+    });
     return () => {
       unsubscribe();
+      unsubscribeAuth();
     };
   });
 

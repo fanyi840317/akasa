@@ -2,9 +2,9 @@ import { writable, get } from 'svelte/store';
 import { account } from '../../../../web.app/src/lib/appwrite';
 import type { Models } from 'appwrite';
 import { ID } from 'appwrite';
-import { goto } from '$app/navigation';
-import { base } from '$app/paths';
-import { toast } from 'svelte-sonner';
+// import { goto } from '$app/navigation';
+// import { base } from '$app/paths';
+// import { toast } from 'svelte-sonner';
 
 type AuthState = {
     user: Models.User<Models.Preferences> | null;
@@ -13,7 +13,7 @@ type AuthState = {
 };
 
 const createAuthStore = () => {
-    const { subscribe, set, update } = writable<AuthState>({
+    const { subscribe, update } = writable<AuthState>({
         user: null,
         loading: true,
         error: null
@@ -34,44 +34,30 @@ const createAuthStore = () => {
             initialized = true;
             try {
                 const user = await account.get();
-                update(state => ({ ...state, user, loading: false }));
+                update(state => ({ ...state, user: user as Models.User<Models.Preferences>, loading: false }));
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (error) {
                 update(state => ({ ...state, user: null, loading: false }));
             }
         },
-        login: async (email: string, password: string, returnUrl?: string) => {
+        login: async (email: string, password: string) => {
             update(state => ({ ...state, loading: true, error: null }));
             try {
                 // 检查用户是否已登录
                 const state = get(auth);
                 if (state.user) {
-                    toast.error('您已经登录');
-                    await goto(`${base}/`);
-                    return;
+                    return state.user;
                 }
-                
-                try {
-                    // 尝试删除当前会话，以防止"Creation of a session is prohibited when a session is active"错误
-                    await account.deleteSession('current');
-                } catch (sessionError) {
-                    // 忽略删除会话时的错误，可能是因为没有活跃会话
-                    console.log('No active session to delete or session deletion failed');
-                }
+                await account.deleteSession('current');
                 
                 // 创建邮箱密码会话
                 await account.createEmailPasswordSession(email, password);
                 const user = await account.get();
-                update(state => ({ ...state, user, loading: false }));
+                update(state => ({ ...state, user: user as Models.User<Models.Preferences>, loading: false }));
                 
-                // 重定向到指定页面或首页
-                if (returnUrl) {
-                    await goto(`${base}${returnUrl}`);
-                } else {
-                    await goto(`${base}/`);
-                }
-            } catch (error: any) {
-                update(state => ({ ...state, loading: false, error: error.message }));
-                toast.error(error.message || '登录失败');
+            } catch (error) {
+                update(state => ({ ...state, loading: false, error: (error as Error).message }));
+                throw new Error((error as Error).message || '登录失败');
             }
         },
         register: async (email: string, password: string, username: string, returnUrl?: string) => {

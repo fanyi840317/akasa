@@ -17,11 +17,15 @@
   } from "@blocksuite/blocks";
   import { onMount, onDestroy } from "svelte";
   import { appStore } from "$lib/stores/app-state";
-  import "@toeverything/theme/style.css";
+  // import "@toeverything/theme/style.css";
   import type { ExtensionType } from "@blocksuite/block-std";
   import { Block, Slot } from "@blocksuite/store";
   import type { Disposable } from "@blocksuite/global/utils";
 
+//   import { effects as blocksEffects } from "@blocksuite/blocks/effects";
+// import { effects as presetsEffects } from "@blocksuite/presets/effects";
+// blocksEffects();
+// presetsEffects();
   let editorContainer: HTMLDivElement;
   appStore.setShowHeader(false);
   const currentTheme = document.documentElement.dataset.theme;
