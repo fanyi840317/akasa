@@ -15,7 +15,7 @@
   onMount(() => {
     // setMode("dark");
     isMounted = true;
-    goto("/web");
+    // goto("/web");
     // Initialize auth store
     // const unsubscribe = appStore.subscribe((state) => {
     //     showHeader = state.showHeader;

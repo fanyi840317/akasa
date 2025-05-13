@@ -22,7 +22,7 @@
  
 <Avatar.Root class={cn("avatar size-full size-10 bg-neutral rounded-full", className)} {...restProps} bind:ref>
 	<Avatar.Image class="aspect-square size-full rounded-full" {src} {alt} bind:ref={imageRef} />
-	<Avatar.Fallback class="flex size-full items-center justify-center" bind:ref={fallbackRef}>
+	<Avatar.Fallback class="flex size-full items-center text-neutral-content justify-center" bind:ref={fallbackRef}>
 		<span>{fallback}</span> 
 	</Avatar.Fallback>
 </Avatar.Root>

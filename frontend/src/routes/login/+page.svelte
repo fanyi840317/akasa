@@ -5,7 +5,7 @@
   import { UserPlus, User, KeyRound, AlertCircle } from "lucide-svelte";
   import { base } from "$app/paths";
   import { page } from "$app/stores";
-  import {toast} from "svelte-sonner";
+  import { toast } from "svelte-sonner";
 
   // 从URL获取returnUrl参数
   let returnUrl = $page.url.searchParams.get("returnUrl");
@@ -58,7 +58,7 @@
       if (returnUrl) {
         await goto(`${base}${returnUrl}`);
       } else {
-        await goto(`${base}/`);
+        await goto(`${base}/console`);
       }
     } catch (err: any) {
       error =
@@ -77,9 +77,9 @@
 
 <div
   class="min-h-screen flex items-center justify-center bg-base-200 p-4"
-  in:fly={{ y: 20, duration: 500 }}
+  in:fly={{ y: 20, duration: 500 ,delay:800}}
 >
-  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+  <div class="card w-full max-w-md bg-base-100 shadow-xl"  >
     <div class="card-body">
       {#if !isRegister}
         <div class="flex items-center gap-2 mb-1">
@@ -177,6 +177,15 @@
           </div>
         {:else}
           <!-- Login Form -->
+          <!-- <label class="floating-label">
+            <span>Your Email or Username</span>
+            <input
+              type="text"
+              placeholder="Email or Username"
+              bind:value={email}
+              class="input input-md w-full"
+            />
+          </label> -->
 
           <label class="input input-bordered flex items-center gap-2 w-full">
             <User class="w-4 h-4 text-base-content/50" />
@@ -188,7 +197,15 @@
               required
             />
           </label>
-
+          <!-- <label class="floating-label">
+            <span>Password</span>
+            <input
+              type="text"
+              placeholder="Password"
+              bind:value={password}
+              class="input input-md w-full"
+            />
+          </label> -->
           <label class="input input-bordered flex items-center gap-2 w-full">
             <KeyRound class="w-4 h-4 text-base-content/50" />
             <input
