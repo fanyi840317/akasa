@@ -68,14 +68,14 @@
           卡片视图
         </label>
       </div>
-      <div class="form-control">
+      <!-- <div class="form-control">
         <input
           type="text"
           placeholder="filter by username"
           class="input input-sm w-full max-w-xs"
           bind:value={searchTerm}
         />
-      </div>
+      </div> -->
     </div>
   </div>
   <p class="text-xs text-base-content/60 mb-6">

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Users, BarChart2, Shield, MessageSquare, Info, Settings, Search, ListFilter, FileText, ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-svelte';
   import { page } from '$app/stores';
+  import { auth } from '$lib/stores/auth'; // 假设 auth store 的路径
+    import { UserAvatar } from '$lib/components/ui/avatar';
 
   const categories = [
     { name: 'Discussion', icon: MessageSquare, color: 'bg-blue-500', path: '/console/categories/discussion' },
@@ -55,8 +57,36 @@
   </div>
   <div class="drawer-side">
     <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-    <ul class="menu p-4 w-64 min-h-full bg-base-100 text-base-content">
-      <button class="btn btn-outline btn-sm"><Search class="w-4 h-4"/>Search</button>
+    <ul class="menu p-4 w-64 min-h-full bg-base-200 text-base-content">
+      {#if $auth.user}
+      <div class="pb-4 border-b border-base-300">
+        <div class="flex items-center space-x-2">
+        <UserAvatar
+          tabindex={0}
+          class="cursor-pointer size-8"
+          src={$auth.user.avatarUrl || ''}
+          alt={$auth.user.name}
+          fallback={$auth.user.name.substring(0, 1).toUpperCase() || $auth.user.email?.substring(0, 2).toUpperCase()} >
+        </UserAvatar>
+    
+          <div>
+            <div class="font-semibold text-sm">{$auth.user.name || 'N/A'}</div>
+            <div class="text-xs text-base-content/70">{$auth.user.email || 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+      {/if}
+      
+      <button class="btn btn-outline btn-sm  w-48  justify-between my-4">
+        <div class="flex gap-2">
+          <Search class="w-4 h-4"/>Search
+
+        </div>
+        <div class="">
+          <kbd class="kbd kbd-xs">Ctrl</kbd>
+          <kbd class="kbd kbd-xs">K</kbd>
+        </div>
+      </button>
       <!-- Sidebar content here -->
       <li class="menu-title text-xs">Navigation</li>
       <li><a href="/console/events" class:btn-active={activeMenu === 'Events'} class="btn btn-ghost justify-start"><BarChart2 class="w-4 h-4"/> Events</a></li>
@@ -76,10 +106,10 @@
       {/each}
       <li><a href="/console/all-categories" class:btn-active={activeMenu === 'All categories'} class="btn btn-ghost justify-start"><ListFilter class="w-4 h-4"/> All categories</a></li>
 
-      <!-- <div class="mt-auto flex items-center justify-between p-2 border-t border-base-300">
+      <div class="mt-auto flex items-center justify-between p-2 border-t border-base-300">
         <button class="btn btn-ghost btn-sm p-1"><Settings class="w-5 h-5" /></button>
         <button class="btn btn-ghost btn-sm p-1"><Search class="w-5 h-5" /></button>
-      </div> -->
+      </div>
     </ul>
   </div>
 </div>
