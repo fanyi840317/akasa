@@ -49,7 +49,7 @@
         <div class="flex items-center gap-4">
           <span class="text-sm text-base-content/70">42182 users</span>
           <div class="form-control">
-            <input type="text" placeholder="filter by username" class="input input-bordered input-sm w-full max-w-xs" bind:value={searchTerm} />
+            <input type="text" placeholder="filter by username" class="input input-sm w-full max-w-xs" bind:value={searchTerm} />
           </div>
         </div>
       </div>
