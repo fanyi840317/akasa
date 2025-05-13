@@ -12,7 +12,7 @@
 		fallbackRef = $bindable(null),
 		...restProps
 	}: WithoutChildrenOrChild<Avatar.RootProps> & {
-		src: string;
+		src: string | null;
 		alt: string;
 		fallback: string;
 		imageRef?: HTMLImageElement | null;
