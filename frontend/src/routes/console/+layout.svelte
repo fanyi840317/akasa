@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Users, BarChart2, Shield, MessageSquare, Info, Settings, Search, ListFilter, FileText, ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-svelte';
+  import { Users, BarChart2, Shield, MessageSquare, Info, Settings, Search, ListFilter, FileText, ThumbsUp, ThumbsDown, MessageCircle, FileSearch } from 'lucide-svelte';
   import { page } from '$app/stores';
   import { auth } from '$lib/stores/auth'; // 假设 auth store 的路径
     import { UserAvatar } from '$lib/components/ui/avatar';
@@ -25,8 +25,8 @@
       activeMenu = 'Users';
     } else if (currentPath.startsWith('/console/events')) {
       activeMenu = 'Events';
-    } else if (currentPath.startsWith('/console/badges')) {
-      activeMenu = 'Badges';
+    } else if (currentPath.startsWith('/console/admin/research')) {
+      activeMenu = 'Research';
     } else if (currentPath.startsWith('/console/groups')) {
       activeMenu = 'Groups';
     } else if (currentPath.startsWith('/console/about')) {
@@ -90,9 +90,9 @@
       </button>
       <!-- Sidebar content here -->
       <li class="menu-title text-xs">Navigation</li>
+      <li><a href="/console/admin/research" class:btn-active={activeMenu === 'Research'} class="btn btn-ghost justify-start"><FileSearch class="w-4 h-4"/> Research</a></li>
       <li><a href="/console/events" class:btn-active={activeMenu === 'Events'} class="btn btn-ghost justify-start"><BarChart2 class="w-4 h-4"/> Events</a></li>
       <li><a href="/console/users" class:btn-active={activeMenu === 'Users'} class="btn btn-ghost justify-start"><Users class="w-4 h-4"/> Users</a></li>
-      <li><a href="/console/badges" class:btn-active={activeMenu === 'Badges'} class="btn btn-ghost justify-start"><Shield class="w-4 h-4"/> Badges</a></li>
       <li><a href="/console/groups" class:btn-active={activeMenu === 'Groups'} class="btn btn-ghost justify-start"><Users class="w-4 h-4"/> Groups</a></li>
       <li><a href="/console/about" class:btn-active={activeMenu === 'About'} class="btn btn-ghost justify-start"><Info class="w-4 h-4"/> About</a></li>
       
