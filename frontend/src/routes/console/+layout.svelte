@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
   import { auth } from '$lib/stores/auth'; // 假设 auth store 的路径
     import { UserAvatar } from '$lib/components/ui/avatar';
+  import { BatchAddEvents } from '$lib/components/events';
 
   const categories = [
     { name: 'Discussion', icon: MessageSquare, color: 'bg-blue-500', path: '/console/categories/discussion' },
@@ -64,7 +65,7 @@
         <UserAvatar
           tabindex={0}
           class="cursor-pointer size-8"
-          src={$auth.user.avatarUrl || ''}
+          src={$auth.user.prefs["avatarUrl"] || ''}
           alt={$auth.user.name}
           fallback={$auth.user.name.substring(0, 1).toUpperCase() || $auth.user.email?.substring(0, 2).toUpperCase()} >
         </UserAvatar>
@@ -77,14 +78,14 @@
       </div>
       {/if}
       
-      <button class="btn btn-outline btn-sm  w-48  justify-between my-4">
+      <button class="btn btn-outline btn-sm  w-42  justify-between my-4">
         <div class="flex gap-2">
           <Search class="w-4 h-4"/>Search
 
         </div>
         <div class="">
           <kbd class="kbd kbd-xs">Ctrl</kbd>
-          <kbd class="kbd kbd-xs">K</kbd>
+          <kbd class="kbd kbd-xs">k</kbd>
         </div>
       </button>
       <!-- Sidebar content here -->
@@ -106,10 +107,10 @@
       {/each}
       <li><a href="/console/all-categories" class:btn-active={activeMenu === 'All categories'} class="btn btn-ghost justify-start"><ListFilter class="w-4 h-4"/> All categories</a></li>
 
-      <div class="mt-auto flex items-center justify-between p-2 border-t border-base-300">
+      <!-- <div class="mt-auto flex items-center justify-between p-2 border-t border-base-300">
         <button class="btn btn-ghost btn-sm p-1"><Settings class="w-5 h-5" /></button>
         <button class="btn btn-ghost btn-sm p-1"><Search class="w-5 h-5" /></button>
-      </div>
+      </div> -->
     </ul>
   </div>
 </div>

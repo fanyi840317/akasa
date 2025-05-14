@@ -45,6 +45,7 @@ export async function uploadToImgBB(
         try {
           const result = JSON.parse(xhr.responseText);
           resolve(result);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
           reject(new Error('Failed to parse response'));
         }
