@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
   import { eventStore } from "$lib/stores/event";
   import {
     ChevronDown,
@@ -94,20 +95,21 @@
         >
           <li>
             <button
-              class="hover:bg-base-300 active:bg-primary active:text-primary-content"
+              class="hover:bg-base-300 active:bg-primary active:text-primary-content w-full text-left"
+              onclick={() => goto('/console/events/new')}
             >
-              <PenTool class="w-4 h-4" /> 新建事件
+              <PenTool class="w-4 h-4 inline-block mr-2" /> 新建事件
             </button>
           </li>
           <li>
-            <button
+            <!-- <button
               class="hover:bg-base-300"
               onclick={() => {
                 showBatchAddModal = true;
               }}
             >
               <FileTextIcon class="w-4 h-4" /> 批量添加
-            </button>
+            </button> -->
           </li>
           <li>
             <a class="hover:bg-base-300">
@@ -166,7 +168,7 @@
         </thead>
         <tbody>
           {#each filteredEvents as event (event.$id)}
-            <tr>
+            <tr class="hover cursor-pointer" onclick={() => goto(`/console/events/${event.$id}`)}>
               <td>{event.title}</td>
               <td>{event.date || "-"}</td>
               <td>{event.location || "-"}</td>
@@ -181,10 +183,12 @@
       class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
     >
       {#each filteredEvents as event (event.$id)}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div
-          class="card bg-base-200 shadow-md rounded-xl hover:shadow-xl coursor-pointer
+          class="card bg-base-200 shadow-md rounded-xl hover:shadow-xl cursor-pointer
            hover:ring-primary hover:ring-offset-2
            hover:bg-base-300 transition-all duration-200 ease-in-out"
+           onclick={() => goto(`/console/events/${event.$id}`)}
         >
           <figure
             class="overflow-hidden h-32 bg-base-300 flex items-center justify-center"
@@ -202,8 +206,8 @@
     </div>
   {/if}
 </div>
-<Modal.Root bind:open={showBatchAddModal}>
+<!-- <Modal.Root bind:open={showBatchAddModal}>
   <Modal.Content>
     <BatchAddEvents />
   </Modal.Content>
-</Modal.Root>
+</Modal.Root> -->

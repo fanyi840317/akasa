@@ -13,7 +13,7 @@
 		...restProps
 	}: WithoutChildrenOrChild<Avatar.RootProps> & {
 		src: string | null;
-		alt: string;
+		alt?: string;
 		fallback: string;
 		imageRef?: HTMLImageElement | null;
 		fallbackRef?: HTMLElement | null;
