@@ -14,8 +14,9 @@
     Zap,
     Globe,
     UploadCloud,
+    Trash2
   } from "lucide-svelte";
-  import { BatchAddEvents } from "$lib/components/events";
+  import { BatchAddEvents, EventConsoleCard } from "$lib/components/events";
   import * as Modal from "$lib/components/ui/modal";
   import { Root } from "$lib/components/ui/scroll-area";
   // import { eventStore } from "$lib/stores/event";
@@ -23,12 +24,14 @@
   let viewMode: "table" | "card" = $state("card");
   let searchTerm = "";
   let showBatchAddModal = $state(false);
+  let showDeleteConfirmModal = $state(false);
+  let selectedEventIds: string[] = $state([]);
 
   // 订阅事件数据
-  let events: any[] = [];
-  let listLoading = false;
-  let error: string | null = null;
-  let filteredEvents: any[] = $state([]);
+  let events: any[] = $state([]);
+  let listLoading = $state(false);
+  let error: string | null = $state(null);
+  // let filteredEvents: any[] = $state([]);
   const unsubscribe = eventStore.subscribe((state) => {
     events = state.events;
     listLoading = state.listLoading;
@@ -45,11 +48,35 @@
   //   e.title?.toLowerCase().includes(searchTerm.toLowerCase())
   // );
 
-  $effect(() => {
-    filteredEvents = events.filter((e) =>
-      e.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  // $effect(() => {
+  //   filteredEvents = events.filter((e) =>
+  //     e.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  //   );
+  // });
+
+  function toggleSelectEvent(eventId: string) {
+    if (selectedEventIds.includes(eventId)) {
+      selectedEventIds = selectedEventIds.filter((id) => id !== eventId);
+    } else {
+      selectedEventIds = [...selectedEventIds, eventId];
+    }
+  }
+
+  function confirmDelete() {
+    showDeleteConfirmModal = true;
+  }
+
+  async function deleteSelectedEvents() {
+    if (selectedEventIds.length === 0) return;
+    // Assuming eventStore has a deleteEvents method
+    await eventStore.deleteEvents(selectedEventIds);
+    selectedEventIds = []; // Clear selection after deletion
+    showDeleteConfirmModal = false;
+  }
+
+  function cancelDelete() {
+    showDeleteConfirmModal = false;
+  }
 </script>
 
 <div class="p-6">
@@ -61,6 +88,12 @@
       </button>
     </div>
     <div class="flex items-center gap-4">
+      {#if selectedEventIds.length > 0}
+        <button class="btn btn-error btn-sm" onclick={confirmDelete}>
+          <Trash2 class="w-4 h-4" />
+          删除 ({selectedEventIds.length})
+        </button>
+      {/if}
       <div class="tabs tabs-box tabs-xs">
         <label class="tab">
           <input
@@ -89,56 +122,25 @@
         </button>
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         {#if !showBatchAddModal}
-        <ul
-          tabindex="0"
-          class="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-300 rounded-xl w-56"
-        >
-          <li>
-            <button
-              class="hover:bg-base-300 active:bg-primary active:text-primary-content w-full text-left"
-              onclick={() => goto('/console/events/new')}
-            >
-              <PenTool class="w-4 h-4 inline-block mr-2" /> 新建事件
-            </button>
-          </li>
-          <li>
-            <!-- <button
-              class="hover:bg-base-300"
-              onclick={() => {
-                showBatchAddModal = true;
-              }}
-            >
-              <FileTextIcon class="w-4 h-4" /> 批量添加
-            </button> -->
-          </li>
-          <li>
-            <a class="hover:bg-base-300">
-              <Presentation class="w-4 h-4 text-orange-500" /> Slides
-            </a>
-          </li>
-          <li>
-            <a class="hover:bg-base-300 flex justify-between">
-              <div>
-                <Zap class="w-4 h-4 text-pink-500 inline-block mr-2" /> Buzz
-              </div>
-              <span class="badge badge-sm badge-info">Beta</span>
-            </a>
-          </li>
-          <li>
-            <a class="hover:bg-base-300 flex justify-between">
-              <div>
-                <Globe class="w-4 h-4 text-green-500 inline-block mr-2" /> Site
-              </div>
-              <span class="badge badge-sm badge-info">Beta</span>
-            </a>
-          </li>
-          <div class="divider my-1"></div>
-          <li>
-            <a class="hover:bg-base-300">
-              <UploadCloud class="w-4 h-4" /> Import
-            </a>
-          </li>
-        </ul>
+          <ul
+            tabindex="0"
+            class="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-300 rounded-xl w-56"
+          >
+            <li>
+              <button
+                class="hover:bg-base-300 active:bg-primary active:text-primary-content w-full text-left"
+                onclick={() => goto("/console/events/new")}
+              >
+                <PenTool class="w-4 h-4 inline-block mr-2" /> 新建事件
+              </button>
+            </li>
+
+            <li>
+              <button class="hover:bg-base-300">
+                <UploadCloud class="w-4 h-4" /> Import
+              </button>
+            </li>
+          </ul>
         {/if}
       </div>
     </div>
@@ -153,10 +155,10 @@
     </div>
   {:else if error}
     <div class="alert alert-error">{error}</div>
-  {:else if filteredEvents.length === 0}
+  {:else if events.length === 0}
     <div class="text-center text-base-content/60">暂无事件</div>
   {:else if viewMode === "table"}
-    <div class="overflow-x-auto">
+    <!-- <div class="overflow-x-auto">
       <table class="table table-zebra w-full">
         <thead>
           <tr class="text-base-content/80">
@@ -167,8 +169,11 @@
           </tr>
         </thead>
         <tbody>
-          {#each filteredEvents as event (event.$id)}
-            <tr class="hover cursor-pointer" onclick={() => goto(`/console/events/${event.$id}`)}>
+          {#each events as event (event.$id)}
+            <tr
+              class="hover cursor-pointer"
+              onclick={() => goto(`/console/events/${event.$id}`)}
+            >
               <td>{event.title}</td>
               <td>{event.date || "-"}</td>
               <td>{event.location || "-"}</td>
@@ -177,31 +182,20 @@
           {/each}
         </tbody>
       </table>
-    </div>
+    </div> -->
   {:else}
     <div
       class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
     >
-      {#each filteredEvents as event (event.$id)}
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <div
-          class="card bg-base-200 shadow-md rounded-xl hover:shadow-xl cursor-pointer
-           hover:ring-primary hover:ring-offset-2
-           hover:bg-base-300 transition-all duration-200 ease-in-out"
-           onclick={() => goto(`/console/events/${event.$id}`)}
-        >
-          <figure
-            class="overflow-hidden h-32 bg-base-300 flex items-center justify-center"
-          >
-            <!-- <img src={event.image || '/static/favicon.png'} alt="event cover" class="object-cover w-full h-full" /> -->
-          </figure>
-          <div class="card-body">
-            <span class="text-sm">{event.title}</span>
-            <!-- <p class="text-sm text-base-content/70">
-              {event.date || "-"} | {event.location || "-"}
-            </p> -->
-          </div>
-        </div>
+      {#each events as event (event.$id)}
+        <EventConsoleCard
+          title={event.title}
+          description={event.description || "-"}
+          duration={event.duration || "-"}
+          onDblClick={() => goto(`/console/events/${event.$id}`)}
+          onClick={() => toggleSelectEvent(event.$id)}
+          isSelected={selectedEventIds.includes(event.$id)}
+        />
       {/each}
     </div>
   {/if}
@@ -211,3 +205,14 @@
     <BatchAddEvents />
   </Modal.Content>
 </Modal.Root> -->
+
+<Modal.Root bind:open={showDeleteConfirmModal} class="w-[400px]">
+    <div class="p-4">
+      <h3 class="font-bold text-lg">确认删除事件?</h3>
+      <p class="py-4">您确定要删除选中的 {selectedEventIds.length} 个事件吗？此操作不可撤销。</p>
+      <div class="modal-action">
+        <button class="btn btn-outline" onclick={cancelDelete}>取消</button>
+        <button class="btn btn-error" onclick={deleteSelectedEvents}>确认删除</button>
+      </div>
+    </div>
+</Modal.Root>

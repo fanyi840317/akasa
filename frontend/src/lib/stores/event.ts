@@ -1,7 +1,6 @@
 import { writable, get } from 'svelte/store';
 import { databases } from '../../../../web.app/src/lib/appwrite';
 import { ID, Query } from 'appwrite';
-import type { Models } from 'appwrite';
 import type { Event } from '../types/event';
 import { toast } from "svelte-sonner";
 import { _ } from "svelte-i18n";
@@ -40,7 +39,7 @@ const createEventStore = () => {
         fetchEvents: async (userId?: string) => {
             update(state => ({ ...state, listLoading: true, error: null }));
             try {
-                let query = [];
+                const query = [];
                 
                 // 如果提供了用户ID，则按用户ID筛选
                 if (userId) {
@@ -83,7 +82,6 @@ const createEventStore = () => {
                 
                 // 使用工具方法解析 i18n 字段
                 const event = parseI18nFields(eventDoc as unknown as Event);
-
                 update(state => ({
                     ...state,
                     currentEvent: event,
@@ -173,7 +171,7 @@ const createEventStore = () => {
                     toast.error(get(_)("validation.user_not_logged_in"));
                     return null;
                 }
-
+                console.log("eventData:  ",eventData);
                 const updatedEvent = await databases.updateDocument(
                     databaseId,
                     eventsCollectionId,
@@ -233,6 +231,50 @@ const createEventStore = () => {
             }
         },
         
+        // 删除多个事件
+        deleteEvents: async (eventIds: string[]) => {
+            update(state => ({ ...state, listLoading: true, error: null }));
+            try {
+                const deletedIds: string[] = [];
+                for (const eventId of eventIds) {
+                    try {
+                        await databases.deleteDocument(
+                            databaseId,
+                            eventsCollectionId,
+                            eventId
+                        );
+                        deletedIds.push(eventId);
+                    } catch (error) {
+                        console.error(`Failed to delete event ${eventId}:`, error);
+                        // Optionally handle individual deletion errors, but continue with others
+                    }
+                }
+
+                update(state => ({
+                    ...state,
+                    events: state.events.filter(e => !deletedIds.includes(e.$id as string)),
+                    currentEvent: state.currentEvent && deletedIds.includes(state.currentEvent.$id as string) ?
+                        null : state.currentEvent,
+                    listLoading: false
+                }));
+
+                if (deletedIds.length > 0) {
+                    toast.success(`${deletedIds.length} 个事件已成功删除！`);
+                } else {
+                    toast.info("没有事件被删除。");
+                }
+
+                return deletedIds;
+            } catch (error) {
+                // This catch block would only be reached if databases.deleteDocument throws synchronously,
+                // which is unlikely for async operations. Individual errors are handled inside the loop.
+                const errorMessage = error instanceof Error ? error.message : '批量删除事件失败';
+                update(state => ({ ...state, listLoading: false, error: errorMessage }));
+                toast.error(errorMessage);
+                throw error;
+            }
+        },
+
         // 设置当前事件
         setCurrentEvent: (eventData: Event | null) => {
             update(state => ({ ...state, currentEvent: eventData }));

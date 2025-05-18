@@ -6,20 +6,23 @@
 	let {
 		class: className = "",
 		onClose = () => {},
-		title,
+		children,
 		...restProps
 	} = $props<{
 		title?: Snippet;
+		children: Snippet;
+		class?: string;
+		onClose?: () => void;
 	}>();
 </script>
 
-<div class={cn("flex items-center justify-between", className)} {...restProps}>
-	<h2 class="text-lg font-semibold leading-none tracking-tight">
-		{@render title?.()}
+<div class={cn("flex items-center justify-between p-4 ", className)} {...restProps}>
+	<h2 class="text-lg font-semibold leading-none tracking-tight px-2">
+		{@render children?.()}
 	</h2>
 	<button
-		class="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
-		on:click={onClose}
+		class="btn btn-sm btn-circle btn-ghost"
+		onclick={onClose}
 	>
 		<X class="h-4 w-4" />
 		<span class="sr-only">Close</span>

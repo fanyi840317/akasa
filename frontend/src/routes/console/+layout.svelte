@@ -100,7 +100,8 @@
       {#each categories as category}
         <li>
           <a href={category.path} class:btn-active={activeMenu === category.name} class="btn btn-ghost justify-start">
-            <svelte:component this={category.icon} class={`w-3 h-3 mr-1 p-0.5 rounded-sm ${category.color} text-white`} /> 
+            <!-- svelte-ignore svelte_component_deprecated -->
+            <svelte:component this={category.icon} class={`w-3 h-3 mr-1 p-0.5 rounded-sm ${category.color} text-base-content`} /> 
             {category.name}
           </a>
         </li>
