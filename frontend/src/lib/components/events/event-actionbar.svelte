@@ -1,6 +1,12 @@
 <script lang="ts">
-  import { X as XIcon, Save as SaveIcon, Pencil } from "lucide-svelte";
+  import {
+    X as XIcon,
+    Save as SaveIcon,
+    Pencil,
+    Settings2,
+  } from "lucide-svelte";
   import * as Modal from "$lib/components/ui/modal";
+  import {UserAvatar } from "$lib/components/ui/avatar";
 
   let {
     title = $bindable("Untitled Event"),
@@ -23,6 +29,7 @@
   let currentModalTitle = $state(title);
 
   let inputElement: HTMLInputElement; // Variable to hold the input element reference
+  let isPropertiesPanelOpen = $state(false);
 
   function startEditing() {
     if (!editableTitle) return;
@@ -41,10 +48,6 @@
     isEditingModalVisible = false;
   }
 
-  function handleClose() {
-    onClose();
-  }
-
   function handleSaveDocument() {
     onSaveDocument();
   }
@@ -59,7 +62,7 @@
 <div
   class="p-4 flex justify-between items-center absolute top-0 left-0 right-0 z-10"
 >
-  <button class="btn btn-sm btn-circle" onclick={handleClose}>
+  <button class="btn btn-sm btn-circle btn-ghost" onclick={onClose}>
     <XIcon class="w-4 h-4" />
   </button>
 
@@ -74,19 +77,77 @@
       </button>
     {/if}
   </div>
+  <div>
+    <button
+      class="btn btn-sm btn-ghost"
+      onclick={() => {
+        // isPropertiesPanelOpen =!isPropertiesPanelOpen;
+      }}
+    >
+      
+    <UserAvatar class="size-6"></UserAvatar>
+    +添加评论
+      </button>
 
-  {#if showSaveButton}
-    <button class="btn btn-sm btn-primary" onclick={handleSaveDocument}>
-      <SaveIcon class="w-4 h-4 mr-1" />
-      保存
+    <button
+      class="btn btn-sm btn-ghost"
+      onclick={() => {
+        isPropertiesPanelOpen = !isPropertiesPanelOpen;
+      }}
+    >
+      <!-- {#if isPropertiesPanelOpen}
+        <XIcon class="w-4 h-4 mr-1" />
+        关闭属性
+      {:else}
+       
+      {/if} -->
+      <Settings2 class="w-4 h-4 mr-1" />
+      属性
+      <label class="toggle toggle-xs text-base-content ml-2">
+        <input type="checkbox" bind:checked={isPropertiesPanelOpen} />
+        <svg
+          aria-label="enabled"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <g
+            stroke-linejoin="round"
+            stroke-linecap="round"
+            stroke-width="4"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path d="M20 6 9 17l-5-5"></path>
+          </g>
+        </svg>
+        <svg
+          aria-label="disabled"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </label>
     </button>
-  {:else}
-    <!-- Placeholder for alignment if save button is hidden -->
-    <div
-      class="w-[calc(theme(spacing.btn-sm)+theme(spacing.4)+theme(spacing.1))]"
-    ></div>
-    <!-- Adjusted width to match button + icon + margin -->
-  {/if}
+    {#if showSaveButton}
+      <button class="btn btn-sm btn-ghost" onclick={handleSaveDocument}>
+        <SaveIcon class="w-4 h-4 mr-1" />
+        保存
+      </button>
+    {:else}
+      <!-- Placeholder for alignment if save button is hidden -->
+      <div
+        class="w-[calc(theme(spacing.btn-sm)+theme(spacing.4)+theme(spacing.1))]"
+      ></div>
+      <!-- Adjusted width to match button + icon + margin -->
+    {/if}
+  </div>
 </div>
 
 <!-- Modal for title editing -->
@@ -101,15 +162,15 @@
     type="text"
     placeholder="输入标题"
     bind:value={currentModalTitle}
-    bind:this={inputElement} 
+    bind:this={inputElement}
     class="editor-fix-input px-4 mx-2"
   />
   <Modal.Foot
-      cancelText="取消"
-      confirmText="保存"
-      onCancel={cancelEditing}
-      onConfirm={confirmSaveChanges}
-    />
+    cancelText="取消"
+    confirmText="保存"
+    onCancel={cancelEditing}
+    onConfirm={confirmSaveChanges}
+  />
 </Modal.Root>
 
 <style>
