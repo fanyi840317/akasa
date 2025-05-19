@@ -2,6 +2,8 @@
   import { onMount, onDestroy } from "svelte";
   import mapboxgl from "mapbox-gl";
   import "mapbox-gl/dist/mapbox-gl.css";
+  import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+  import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
   import { mode, userPrefersMode } from "mode-watcher";
   // Removed unused 'get' import
   import type { Location } from "$lib/types/map";
@@ -19,6 +21,7 @@
     onClick = undefined,
     clickable = $bindable(true),
     showLocateButton = $bindable(true),
+    showGeocoder = false, // Default to false
   } = $props<{
     locationData?: Location;
     zoom?: number;
@@ -27,6 +30,7 @@
     onClick?: (e: { lngLat: { lng: number; lat: number } }) => void;
     clickable?: boolean;
     showLocateButton?: boolean;
+    showGeocoder?: boolean;
   }>();
 
   let container: HTMLDivElement;
@@ -116,6 +120,15 @@
               error
             );
           }
+        }
+
+        if (showGeocoder) {
+          map!.addControl(
+            new MapboxGeocoder({
+              accessToken: mapboxgl.accessToken!,
+              mapboxgl: mapboxgl
+            })
+          );
         }
       });
 

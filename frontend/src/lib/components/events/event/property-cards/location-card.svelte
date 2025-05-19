@@ -1,16 +1,31 @@
 <script lang="ts">
   import type { Location } from "$lib/types/map";
   import { cn } from "$lib/utils";
-  import {MapBase} from "$lib/components/map";
+  import { MapBase } from "$lib/components/map";
+  import * as Modal from "$lib/components/ui/modal";
+  import { Pencil } from "lucide-svelte";
 
-  let { locationData = $bindable(null), isLocation = $bindable(false), class: className = "" } = $props<{
+  let {
+    locationData = $bindable(null),
+    isLocation = $bindable(false),
+    class: className = "",
+    onConfirm = () => {},
+    onCancel = () => {},
+  } = $props<{
     locationData: Location | null;
     isLocation?: boolean;
     class?: string;
+    onConfirm: () => void;
+    onCancel: () => void;
   }>();
+  let isEditingModalVisible = $state(false);
 </script>
+
 <div
-  class={cn("card rounded-md bg-base-100 card-border border-base-300 card-sm overflow-hidden", className)}
+  class={cn(
+    "card rounded-md bg-base-100 card-border border-base-300 card-sm overflow-hidden",
+    className
+  )}
 >
   <div class="card-body p-0 h-[160px]">
     <MapBase class="h-full rounded-full-t"></MapBase>
@@ -18,14 +33,37 @@
   <div class="bg-base-300">
     <div class="flex items-center gap-2 p-4">
       <div class="grow">
-        <div class="text-sm font-medium">Team Sync Meeting</div>
+        <div class="text-sm font-medium">事件的发生地点</div>
         <div class="text-xs opacity-60">
-          Weekly product review with design and development teams
+          {locationData?.name || "未设置"}
         </div>
       </div>
       <div class="shrink-0">
-        <span class="badge badge-sm badge-neutral">1h</span>
+        <button
+          class="btn btn-sm"
+          onclick={() => {
+            isEditingModalVisible = true;
+          }}>修改</button
+        >
       </div>
     </div>
   </div>
 </div>
+<!-- Modal for title editing -->
+<Modal.Root bind:open={isEditingModalVisible} class="w-[800px] h-[600px]">
+  <Modal.Title
+    onClose={() => {
+      isEditingModalVisible = false;
+    }}>设置地点</Modal.Title
+  >
+  <MapBase showGeocoder={true} class="h-full"></MapBase>
+  <div class="bag">{locationData?.name || "未设置"}</div>
+  <Modal.Foot
+    cancelText="取消"
+    confirmText="保存"
+    onCancel={() => {
+      isEditingModalVisible = false;
+    }}
+    {onConfirm}
+  />
+</Modal.Root>

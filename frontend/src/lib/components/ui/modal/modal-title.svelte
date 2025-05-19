@@ -17,7 +17,7 @@
 </script>
 
 <div class={cn("flex items-center justify-between p-4 ", className)} {...restProps}>
-	<h2 class="text-lg font-semibold leading-none tracking-tight px-2">
+	<h2 class="text-lg font-semibold leading-none tracking-tight">
 		{@render children?.()}
 	</h2>
 	<button

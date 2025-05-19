@@ -60,39 +60,5 @@
         ></span
       >
     </div>
-    <div class="flex flex-col">
-      <div
-        class="border-b-base-content/5 flex items-center justify-between gap-2 border-b border-dashed py-2"
-      >
-        <label class="flex cursor-pointer items-center gap-2 select-none"
-          ><input type="checkbox" class="checkbox checkbox-sm"  />
-          <span>Hoodies</span></label
-        > <span class="badge badge-xs badge-neutral font-mono">25</span>
-      </div>
-      <div
-        class="border-b-base-content/5 flex items-center justify-between gap-2 border-b border-dashed py-2"
-      >
-        <label class="flex cursor-pointer items-center gap-2 select-none"
-          ><input type="checkbox" class="checkbox checkbox-sm" />
-          <span>Bags</span></label
-        > <span class="badge badge-xs badge-neutral font-mono">3</span>
-      </div>
-      <div
-        class="border-b-base-content/5 flex items-center justify-between gap-2 border-b border-dashed py-2"
-      >
-        <label class="flex cursor-pointer items-center gap-2 select-none"
-          ><input type="checkbox" class="checkbox checkbox-sm" />
-          <span>Shoes</span></label
-        > <span class="badge badge-xs badge-warning font-mono">0</span>
-      </div>
-      <div
-        class="border-b-base-content/5 flex items-center justify-between gap-2 border-b border-dashed py-2"
-      >
-        <label class="flex cursor-pointer items-center gap-2 select-none"
-          ><input type="checkbox" class="checkbox checkbox-sm" />
-          <span>Accessories</span></label
-        > <span class="badge badge-xs badge-neutral font-mono">4</span>
-      </div>
-    </div>
   </div>
 </div>

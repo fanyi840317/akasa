@@ -63,10 +63,10 @@
       {eventDate}
     ></DateCard>
     <CategoryCard
-      class="absolute -bottom-6 left-0 w-full z-10 transition-all duration-300 ease-out transform scale-[0.96] group-hover:scale-100 group-hover:translate-y-[21rem] transition-transform"
+      class="absolute -bottom-6 left-0 w-full z-10 transition-all duration-300 ease-out transform scale-[0.96] group-hover:scale-100 group-hover:translate-y-[11rem] transition-transform"
       {categories}
       {selectedCategories}
     ></CategoryCard>
-    <CoverCard class="absolute -bottom-9 left-0 w-full z-0 transition-all duration-300 ease-out transform scale-[0.94] group-hover:scale-100 group-hover:translate-y-[34rem] transition-transform" ></CoverCard>
+    <CoverCard class="absolute -bottom-9 left-0 w-full z-0 transition-all duration-300 ease-out transform scale-[0.94] group-hover:scale-100 group-hover:translate-y-[24rem] transition-transform" ></CoverCard>
   </div>
 </div>

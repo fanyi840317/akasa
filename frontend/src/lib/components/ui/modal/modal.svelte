@@ -56,9 +56,7 @@
 						</div>
 					</div>
 				{/if}
-				<ScrollArea class="flex-1">
-					{@render children?.()}
-				</ScrollArea>
+				{@render children?.()}
 			</div>
 		</div>
 	</div>

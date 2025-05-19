@@ -102,7 +102,7 @@
     placeholder="输入标题"
     bind:value={currentModalTitle}
     bind:this={inputElement} 
-    class="editor-fix-input px-4 w-full mx-4"
+    class="editor-fix-input px-4 mx-2"
   />
   <Modal.Foot
       cancelText="取消"
