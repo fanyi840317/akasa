@@ -7,6 +7,7 @@
 		alt,
 		class: className,
 		fallback,
+		fallbackClass,
 		ref = $bindable(null),
 		imageRef = $bindable(null),
 		fallbackRef = $bindable(null),
@@ -17,12 +18,13 @@
 		fallback?: string;
 		imageRef?: HTMLImageElement | null;
 		fallbackRef?: HTMLElement | null;
+		fallbackClass?: string;
 	} = $props();
 </script>
  
 <Avatar.Root class={cn("avatar size-full size-10 bg-neutral rounded-full", className)} {...restProps} bind:ref>
 	<Avatar.Image class="aspect-square size-full rounded-full" {src} {alt} bind:ref={imageRef} />
 	<Avatar.Fallback class="flex size-full items-center text-neutral-content justify-center" bind:ref={fallbackRef}>
-		<span>{fallback}</span> 
+		<span class={cn("text-base-content font-semibold text-sm",fallbackClass)}>{fallback}</span>
 	</Avatar.Fallback>
 </Avatar.Root>

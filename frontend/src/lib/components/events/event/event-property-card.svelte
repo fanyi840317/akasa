@@ -17,7 +17,7 @@
     style = "", // For dynamic positioning by parent
   } = $props<{
     eventDate?: string;
-    locationData: Location | null;
+    locationData?: Location | null;
     selectedCategories: string[];
     categories: Category[];
     isLocation?: boolean;
@@ -48,8 +48,6 @@
 </script>
 
 <div
-  draggable="true"
-  ondragstart={handleDragStart}
   class={cn(
     "w-80 flex-shrink-0 p-4 cursor-grab", // Removed absolute positioning, added cursor
     className,

@@ -15,6 +15,8 @@
     onClose = () => {},
     onSaveDocument = () => {},
     onTitleChange = (newTitle: string) => {},
+    isPropertiesPanelOpen = $bindable(false),
+    isCommentsPanelOpen = $bindable(false)
   } = $props<{
     title?: string;
     showSaveButton?: boolean;
@@ -22,6 +24,8 @@
     onClose?: () => void;
     onSaveDocument?: () => void;
     onTitleChange?: (newTitle: string) => void;
+    isPropertiesPanelOpen?: boolean;
+    isCommentsPanelOpen?: boolean;
   }>();
 
   let isEditingModalVisible = $state(false);
@@ -29,7 +33,7 @@
   let currentModalTitle = $state(title);
 
   let inputElement: HTMLInputElement; // Variable to hold the input element reference
-  let isPropertiesPanelOpen = $state(false);
+  // let isPropertiesPanelOpen = $state(false);
 
   function startEditing() {
     if (!editableTitle) return;
@@ -66,7 +70,7 @@
     <XIcon class="w-4 h-4" />
   </button>
 
-  <div class="flex items-center">
+  <div class="absolute left-1/2 -translate-x-1/2 flex items-center">
     <h1 class="text-lg font-semibold mr-2">{title}</h1>
     {#if editableTitle}
       <button
@@ -77,20 +81,20 @@
       </button>
     {/if}
   </div>
-  <div>
+  <div class="flex items-center">
     <button
       class="btn btn-sm btn-ghost"
       onclick={() => {
-        // isPropertiesPanelOpen =!isPropertiesPanelOpen;
+        isCommentsPanelOpen = !isCommentsPanelOpen;
       }}
     >
-      
-    <UserAvatar class="size-6"></UserAvatar>
-    +添加评论
-      </button>
+      <UserAvatar class="size-6"></UserAvatar>
+      +添加评论
+    </button>
 
     <button
       class="btn btn-sm btn-ghost"
+      class:btn-active={isPropertiesPanelOpen}
       onclick={() => {
         isPropertiesPanelOpen = !isPropertiesPanelOpen;
       }}

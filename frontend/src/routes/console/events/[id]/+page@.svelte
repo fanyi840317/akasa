@@ -9,6 +9,7 @@
   import type { Event as EventType } from "$lib/types/event"; // Added import for Event type
   import { get } from "svelte/store"; // Added import for get
   import EventCommentsPanel from "$lib/components/events/event/event-comments-panel.svelte"; // Import the comments panel
+  import { fade, fly } from "svelte/transition";
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -22,6 +23,8 @@
   // Subscribe to store's currentEvent and eventLoading
   let currentEvent: EventType | null = $state(null);
   let eventLoading = $state(true);
+  let isPropertiesPanelOpen = $state(true); // State for the properties panel
+  let isCommentsPanelOpen = $state(false);
 
   const unsubscribeEvent = eventStore.subscribe((store) => {
     currentEvent = store.currentEvent;
@@ -126,7 +129,7 @@
       "ID:",
       eventId,
       "Content to save:",
-      editorContent,
+      editorContent
     );
 
     if (eventId === "new") {
@@ -146,7 +149,7 @@
 
   // Drag and drop state and handlers for EventPropertyCard
   // Initial position (approximating original top-20, and some right offset relative to right edge)
-  let cardPosition = $state({ x: 20, y: 80 });
+  let cardPosition = $state({ x: 10, y: 40 });
   // It's better to calculate initial position based on viewport or a saved state.
 
   function handleDragOver(event: DragEvent) {
@@ -192,7 +195,7 @@
       rect.top
     );
     cardPosition = {
-      x: rect.right -event.clientX- dragOffsetX,
+      x: rect.right - event.clientX - dragOffsetX,
       y: event.clientY - rect.top - dragOffsetY,
     };
   }
@@ -208,49 +211,55 @@
 </script>
 
 <!-- This outer div will be the drop target and relative positioning context -->
-<div
-  class="relative w-full h-screen"
-  ondragover={handleDragOver}
-  ondrop={handleDrop}
->
-  <div class="w-full h-full flex flex-col">
-    <EventActionbar
-      bind:title={currentEventTitle}
-      editableTitle={!eventLoading}
-      showSaveButton={!eventLoading}
-      onClose={handleClose}
-      onSaveDocument={handleSaveDocument}
-      onTitleChange={handleTitleChange}
-    />
+<div class="w-full h-screen flex flex-row overflow-hidden">
+  <div class="relative w-full h-screen">
+    <div class="w-full h-full flex flex-col">
+      <EventActionbar
+        bind:title={currentEventTitle}
+        editableTitle={!eventLoading}
+        showSaveButton={!eventLoading}
+        onClose={handleClose}
+        onSaveDocument={handleSaveDocument}
+        onTitleChange={handleTitleChange}
+        bind:isPropertiesPanelOpen
+        bind:isCommentsPanelOpen
+      />
 
-    {#if eventLoading}
-      <!-- Use eventLoading from store -->
-      <div class="flex justify-center items-center h-full">
-        <span class="loading loading-spinner loading-lg"></span>
-      </div>
-    {:else}
-      <div class="flex flex-1 overflow-hidden">
-        <!-- Editor on the left -->
-        <div class="flex-1 overflow-auto">
-          <BlockSuiteEditor
-            bind:this={editorComponent}
-            initialJsonContent={currentEvent?.content}
-          />
+      {#if eventLoading}
+        <!-- Use eventLoading from store -->
+        <div class="flex justify-center items-center h-full">
+          <span class="loading loading-spinner loading-lg"></span>
         </div>
+      {:else}
+        <BlockSuiteEditor
+          bind:this={editorComponent}
+          initialJsonContent={currentEvent?.content}
+        />
+      {/if}
+    </div>
+    {#if isPropertiesPanelOpen}
+      <div
+        class="absolute top-4 right-4 z-10 transition-transform duration-300 ease-in-out"
+        in:fade={{ duration: 300 }}
+        out:fade={{ duration: 300 }}
+      >
+        <EventPropertyCard
+          style={`position: absolute; right: ${cardPosition.x}px; top: ${cardPosition.y}px; z-index: 10;`}
+          eventDate={currentEvent?.date}
+          locationData={currentEvent?.location_data}
+          selectedCategories={currentEvent?.categories || []}
+          categories={[]}
+        />
       </div>
     {/if}
   </div>
-  <EventPropertyCard
-    style={`position: absolute; right: ${cardPosition.x}px; top: ${cardPosition.y}px; z-index: 10;`}
-    eventDate={currentEvent?.date}
-    locationData={currentEvent?.location_data}
-    selectedCategories={currentEvent?.categories || []}
-    categories={currentEvent?.categories}
-  />
-
-  <!-- Comments Panel in the bottom right corner -->
-  <EventCommentsPanel
-    comments={[]}
-    class="absolute bottom-4 right-4"
-  />
+  {#if isCommentsPanelOpen}
+    <div
+      class=""
+      in:fly={{ x: 100, duration: 300 }}
+      out:fly={{ x: 100, duration: 300 }}
+    >
+      <EventCommentsPanel comments={[]} />
+    </div>
+  {/if}
 </div>
