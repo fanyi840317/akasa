@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import mapboxgl from "mapbox-gl";
   import "mapbox-gl/dist/mapbox-gl.css";
+  // @ts-ignore 暂时忽略类型检查，后续需要安装 @types/mapbox__mapbox-gl-geocoder
   import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
   import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
   import { mode, userPrefersMode } from "mode-watcher";
@@ -23,7 +24,7 @@
     showLocateButton = $bindable(true),
     showGeocoder = false, // Default to false
   } = $props<{
-    locationData?: Location;
+    locationData?: Location|null;
     zoom?: number;
     showUserLocation?: boolean;
     class?: string;
@@ -94,6 +95,8 @@
     try {
       map = new mapboxgl.Map({
         container,
+        attributionControl: false,
+        
         style:
           mode.current === "light"
             ? "mapbox://styles/mapbox/light-v10"

@@ -94,7 +94,7 @@
     isReply = false,
     parentCommentId?: string
   ) {
-    const updateLikes = (items: Comment[]) => {
+    const updateLikes = (items: Comment[]): Comment[] => {
       return items.map((item) => {
         if (item.id === commentId) {
           return { ...item, likes: (item.likes || 0) + 1 };
@@ -159,41 +159,7 @@
   }
 
   onMount(() => {
-    if (comments.length === 0) {
-      comments = [
-        {
-          id: "1",
-          author: { name: "wafsn2218", avatar: "/images/avatars/user_w.png" }, // Example avatar
-          content:
-            "我始终相信兼听则明，二爷的故事始终是我了解历史真相的一块拼图，不偏不倚。希望二爷可以坚持，不要像某些youtuber为了黑而黑，而是有事实有依据的真实讲述历史故事。",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 4), // 4 months ago
-          likes: 850,
-          isEdited: true,
-          paidAmount: "US$200.00",
-          replies: [
-            {
-              id: "1-1",
-              author: { name: "范翼", avatar: "/images/avatars/user_fan.png" },
-              content: "说得好！",
-              timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 3), // 3 months ago
-              likes: 10,
-            },
-          ],
-        },
-        {
-          id: "2",
-          author: {
-            name: "riverhe2853",
-            avatar: "/images/avatars/user_dog.png",
-          },
-          content: "谢谢精彩视频，祝二爷一家新年快乐🎉🎊",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 4), // 4 months ago
-          likes: 23,
-          paidAmount: "CA$5.00",
-          replies: [],
-        },
-      ];
-    }
+
   });
 
   let showReplies: Record<string, boolean> = $state({});
@@ -205,7 +171,7 @@
 
 <div
   class={cn(
-    "w-full bg-base-200 text-white p-4 font-san border-l border-base-300 w-[400px] h-[100vh] ",
+    "w-full bg-base-200 text-base-content  p-4  font-san border-l border-base-300 w-[400px] h-[100vh] ",
     className
   )}
   {...restProps}

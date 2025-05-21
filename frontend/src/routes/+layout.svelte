@@ -13,7 +13,7 @@
   let isMounted = $state(false);
 
   onMount(() => {
-    // setMode("dark");
+    setMode("dark");
     isMounted = true;
     // goto("/web");
     // Initialize auth store

@@ -1,30 +1,42 @@
 <script lang="ts">
-    let {
-        cancelText = "取消",
-        confirmText = "保存",
-        onCancel = () => {},
-        onConfirm = () => {},
-    } = $props<{
-        cancelText?: string;
-        confirmText?: string;
-        onCancel?: () => void;
-        onConfirm?: () => void;
-    }>();
+  import { cn } from "$lib/utils";
+  import type { Snapshot } from "@sveltejs/kit";
 
-    function handleCancel() {
-        onCancel();
-    }
+  let {
+    cancelText = "取消",
+    confirmText = "保存",
+    onCancel = () => {},
+    onConfirm = () => {},
+    class: className = "",
+    leftContent,
+  } = $props<{
+    cancelText?: string;
+    confirmText?: string;
+    onCancel?: () => void;
+    onConfirm?: () => void;
+    class?: string;
+    leftContent?: ()=>any;
+  }>();
 
-    function handleConfirm() {
-        onConfirm();
-    }
+  function handleCancel() {
+    onCancel();
+  }
+
+  function handleConfirm() {
+    onConfirm();
+  }
 </script>
 
-<div class="modal-action my-4 px-4">
+<div class={cn("flex gap-2 items-center justify-between my-4 px-6", className)}>
+  <div class="">
+    {@render leftContent?.()}
+  </div>
+  <div>
     <button class="btn btn-sm btn-ghost" onclick={handleCancel}
-        >{cancelText}</button
+      >{cancelText}</button
     >
     <button class="btn btn-sm btn-primary" onclick={handleConfirm}>
-        {confirmText}
+      {confirmText}
     </button>
+  </div>
 </div>

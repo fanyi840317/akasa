@@ -6,7 +6,6 @@
   import CategoryCard from "./property-cards/category-card.svelte";
   import DateCard from "./property-cards/date-card.svelte";
   import LocationCard from "./property-cards/location-card.svelte";
-  import CoverCard from "./property-cards/cover-card.svelte";
   let {
     eventDate = $bindable(undefined),
     locationData = $bindable(null),
@@ -49,7 +48,7 @@
 
 <div
   class={cn(
-    "w-80 flex-shrink-0 p-4 cursor-grab", // Removed absolute positioning, added cursor
+    "w-70 flex-shrink-0 cursor-grab", // Removed absolute positioning, added cursor
     className,
   )}
   {style}
@@ -65,6 +64,6 @@
       {categories}
       {selectedCategories}
     ></CategoryCard>
-    <CoverCard class="absolute -bottom-9 left-0 w-full z-0 transition-all duration-300 ease-out transform scale-[0.94] group-hover:scale-100 group-hover:translate-y-[24rem] transition-transform" ></CoverCard>
+    <!-- <CoverCard class="absolute -bottom-9 left-0 w-full z-0 transition-all duration-300 ease-out transform scale-[0.94] group-hover:scale-100 group-hover:translate-y-[24rem] transition-transform" ></CoverCard> -->
   </div>
 </div>

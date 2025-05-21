@@ -75,44 +75,6 @@
   }
 </script>
 
-<style>
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus,
-  input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px hsl(var(--b1)) inset !important;
-    -webkit-text-fill-color: hsl(var(--bc)) !important;
-    caret-color: hsl(var(--bc)) !important;
-  }
-
-  /* Firefox specific override if needed, though box-shadow trick is often enough */
-  /* input:-moz-autofill {
-    box-shadow: 0 0 0 30px hsl(var(--b1)) inset !important;
-    -webkit-text-fill-color: hsl(var(--bc)) !important; Firefox might not respect -webkit-text-fill-color
-    color: hsl(var(--bc)) !important; 
-    caret-color: hsl(var(--bc)) !important;
-  } */
-
-  /* A more standard approach, though -webkit-prefixed is widely supported */
-  /* input:autofill {
-    box-shadow: 0 0 0 30px hsl(var(--b1)) inset !important;
-    -webkit-text-fill-color: hsl(var(--bc)) !important;
-    color: hsl(var(--bc)) !important;
-    caret-color: hsl(var(--bc)) !important;
-  } */
-
-  /* DaisyUI input fields might need specific targeting if the above is too general */
-  .input:-webkit-autofill,
-  .input:-webkit-autofill:hover,
-  .input:-webkit-autofill:focus,
-  .input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px hsl(var(--b1)) inset !important;
-    -webkit-text-fill-color: hsl(var(--bc)) !important;
-    caret-color: hsl(var(--bc)) !important;
-  }
-</style>
-
-
 <div
   class="min-h-screen flex items-center justify-center bg-base-200 p-4"
   in:fly={{ y: 20, duration: 500 ,delay:800}}

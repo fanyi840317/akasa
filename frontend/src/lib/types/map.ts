@@ -3,7 +3,7 @@ export interface Location {
   city?: string;
   region?: string;
   timezone?: string;
-  coordinates?: {lat: number; lng : number};
+  coordinates?: {lat: number; lng : number}|null;
   name?: string;
   description?: string;
 }
@@ -24,6 +24,6 @@ export interface MapMarker {
     title?: string;
     location?: string;
     amount?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 } 

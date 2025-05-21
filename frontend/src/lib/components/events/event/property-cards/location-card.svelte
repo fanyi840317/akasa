@@ -12,18 +12,18 @@
     onConfirm = () => {},
     onCancel = () => {},
   } = $props<{
-    locationData: Location | null;
+    locationData?: Location | null;
     isLocation?: boolean;
     class?: string;
-    onConfirm: () => void;
-    onCancel: () => void;
+    onConfirm?: () => void;
+    onCancel?: () => void;
   }>();
   let isEditingModalVisible = $state(false);
 </script>
 
 <div
   class={cn(
-    "card rounded-md bg-base-100 card-border border-base-300 card-sm overflow-hidden",
+    "card rounded-xl bg-base-100 card-border border-base-200 card-sm overflow-hidden",
     className
   )}
 >
@@ -56,11 +56,12 @@
       isEditingModalVisible = false;
     }}>设置地点</Modal.Title
   >
-  <MapBase showGeocoder={true} class="h-full"></MapBase>
-  <div class="bag">{locationData?.name || "未设置"}</div>
+  <div class="p-4 w-full h-full">
+
+    <MapBase showGeocoder={true} class="h-full"></MapBase>
+  </div>
+  <div class="badge m-4">{locationData?.name || "未设置"}</div>
   <Modal.Foot
-    cancelText="取消"
-    confirmText="保存"
     onCancel={() => {
       isEditingModalVisible = false;
     }}

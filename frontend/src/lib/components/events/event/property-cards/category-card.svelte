@@ -13,7 +13,7 @@
   }>();
 </script>
 
-<div class={cn("card rounded-md shadow-2xl bg-base-100 card-border border-base-300 card-sm",className)}>
+<div class={cn("card rounded-xl shadow-2xl bg-base-100 card-border border-base-200 card-sm",className)}>
   <div class="card-body gap-4">
     <h2 class="flex items-center justify-between">
       <span class="flex items-center gap-2 font-semibold"

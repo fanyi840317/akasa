@@ -10,6 +10,7 @@
   import { get } from "svelte/store"; // Added import for get
   import EventCommentsPanel from "$lib/components/events/event/event-comments-panel.svelte"; // Import the comments panel
   import { fade, fly } from "svelte/transition";
+  import { UserAvatar } from "$lib/components/ui/avatar";
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -25,6 +26,39 @@
   let eventLoading = $state(true);
   let isPropertiesPanelOpen = $state(true); // State for the properties panel
   let isCommentsPanelOpen = $state(false);
+  let comments = [
+    {
+      id: "1",
+      author: { name: "wafsn2218", avatar: "/images/avatars/user_w.png" }, // Example avatar
+      content:
+        "我始终相信兼听则明，二爷的故事始终是我了解历史真相的一块拼图，不偏不倚。希望二爷可以坚持，不要像某些youtuber为了黑而黑，而是有事实有依据的真实讲述历史故事。",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 4), // 4 months ago
+      likes: 850,
+      isEdited: true,
+      paidAmount: "US$200.00",
+      replies: [
+        {
+          id: "1-1",
+          author: { name: "范翼", avatar: "/images/avatars/user_fan.png" },
+          content: "说得好！",
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 3), // 3 months ago
+          likes: 10,
+        },
+      ],
+    },
+    {
+      id: "2",
+      author: {
+        name: "riverhe2853",
+        avatar: "/images/avatars/user_dog.png",
+      },
+      content: "谢谢精彩视频，祝二爷一家新年快乐🎉🎊",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 4), // 4 months ago
+      likes: 23,
+      paidAmount: "CA$5.00",
+      replies: [],
+    },
+  ];
 
   const unsubscribeEvent = eventStore.subscribe((store) => {
     currentEvent = store.currentEvent;
@@ -239,19 +273,34 @@
     </div>
     {#if isPropertiesPanelOpen}
       <div
-        class="absolute top-4 right-4 z-10 transition-transform duration-300 ease-in-out"
+        class="absolute top-18 left-22 z-10 transition-transform duration-300 ease-in-out"
         in:fade={{ duration: 300 }}
         out:fade={{ duration: 300 }}
       >
-        <EventPropertyCard
-          style={`position: absolute; right: ${cardPosition.x}px; top: ${cardPosition.y}px; z-index: 10;`}
+        <!-- <EventPropertyCard
           eventDate={currentEvent?.date}
           locationData={currentEvent?.location_data}
           selectedCategories={currentEvent?.categories || []}
           categories={[]}
-        />
+        /> -->
       </div>
     {/if}
+
+    <!-- <button
+      class="group absolute bottom-6 right-2 badge badge-ghost badge-sm text-base-content/50 group-hover:text-base-content group-hover:bg-base-200/50 p-2 rounded-lg transition-all duration-200 ease-in-out flex items-center cursor-pointer"
+      onclick={() => {
+        isCommentsPanelOpen = !isCommentsPanelOpen;
+      }}
+    >
+      <UserAvatar
+        class="size-6 group-hover:opacity-100 opacity-80 transition-opacity"
+      ></UserAvatar>
+      <div
+        class="px-1 border-b py-1 border-base-content/50 group-hover:border-base-content group-hover:text-base-content transition-colors text-xs"
+      >
+        +添加评论
+      </div>
+    </button> -->
   </div>
   {#if isCommentsPanelOpen}
     <div
@@ -259,7 +308,7 @@
       in:fly={{ x: 100, duration: 300 }}
       out:fly={{ x: 100, duration: 300 }}
     >
-      <EventCommentsPanel comments={[]} />
+      <EventCommentsPanel comments={comments} />
     </div>
   {/if}
 </div>

@@ -20,7 +20,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
     class="card bg-base-100 card-border border-base-300 card-sm overflow-hidden coursor-pointer
-    hover:shadow-xl hover:shadow-primary/50 hover:scale-105 transition-all duration-300
+    hover:shadow-xl hover:shadow-primary/50 transition-all duration-300
     min-w-[300px] max-w-[400px] min-h-[200px]"
     class:ring-1={isSelected}
     onclick={onClick}

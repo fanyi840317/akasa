@@ -26,7 +26,7 @@
 </script>
 
 <div
-  class={cn("card rounded-md bg-base-100 card-border border-base-300 w-full overflow-hidden", className)}
+  class={cn("card rounded-xl bg-base-100 card-border border-base-200 w-full overflow-hidden", className)}
 >
   <div class="stats">
     <div class="stat">
