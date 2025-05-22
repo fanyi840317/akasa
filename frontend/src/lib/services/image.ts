@@ -2,6 +2,10 @@ interface UploadResponse {
   success: boolean;
   data?: {
     url: string;
+    delete_url?: string; // 添加 delete_url
+    thumb:{
+      url: string;
+    }
   };
   error?: {
     message: string;

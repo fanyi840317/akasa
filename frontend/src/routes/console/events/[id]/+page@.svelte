@@ -11,6 +11,7 @@
   import EventCommentsPanel from "$lib/components/events/event/event-comments-panel.svelte"; // Import the comments panel
   import { fade, fly } from "svelte/transition";
   import { UserAvatar } from "$lib/components/ui/avatar";
+  import { auth } from '$lib/stores/auth';
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -250,13 +251,14 @@
     <div class="w-full h-full flex flex-col">
       <EventActionbar
         bind:title={currentEventTitle}
-        editableTitle={!eventLoading}
+        editable={!eventLoading}
         showSaveButton={!eventLoading}
         onClose={handleClose}
         onSaveDocument={handleSaveDocument}
         onTitleChange={handleTitleChange}
         bind:isPropertiesPanelOpen
         bind:isCommentsPanelOpen
+        userId={ $auth.user?.$id} 
       />
 
       {#if eventLoading}
