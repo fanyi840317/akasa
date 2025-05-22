@@ -16,29 +16,36 @@
 
   // 使用 store 中的数据
   // 修改为包含缩略图 URL 的数据结构
-    // 使用 store 中的数据并按提供者分组
-  let groupedCoverImages = $derived(() => {
-    if (!$userImagesStore.listLoading) {
-      
-    }
-    const images = $userImagesStore.images;
-    console.log(images);
-    const grouped: Record<string, { imageUrl: string; thumbnailUrl?: string; provider?: string }[]> = {};
-      images.forEach(image => {
-      const provider = image.provider || '未知提供者'; // 假设图片数据中有 provider 字段
-      if (!grouped[provider]) {
-        grouped[provider] = [];
-      }
-      console.log(image);
-      grouped[provider].push(image);
-    });
-    return grouped;
-  });
+  // 使用 store 中的数据并按提供者分组
+
+  let groupedCoverImages = $derived(
+    $userImagesStore.images && $userImagesStore.images.length > 0
+      ? $userImagesStore.images.reduce(
+          (
+            acc: Record<
+              string,
+              { imageUrl: string; thumbnailUrl?: string; provider?: string }[]
+            >,
+            image
+          ) => {
+            const provider = image.provider || "未知提供者";
+            if (!acc[provider]) {
+              acc[provider] = [];
+            }
+            acc[provider].push(image);
+            return acc;
+          },
+          {} as Record<
+            string,
+            { imageUrl: string; thumbnailUrl?: string; provider?: string }[]
+          >
+        )
+      : {}
+  );
   let isLoading = $derived($userImagesStore.listLoading);
 
   // 在组件挂载或 userId 变化时加载用户图片
   onMount(() => {
-    userImagesStore.reset();
     if (userId) {
       userImagesStore.loadUserImages(userId);
     }
@@ -79,14 +86,14 @@
       <span>我的图片</span>
     </button>
     <div class="p-4 tab-content bg-base-200 border-base-300">
-      <div class="grid grid-cols-3 gap-2 h-[200px] overflow-y-auto">
+      <div class="h-[200px]">
         {#if isLoading}
           <div class="col-span-3 flex items-center justify-center h-full">
             <div
               class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
             ></div>
           </div>
-        {:else if groupedCoverImages.length === 0}
+        {:else if Object.keys(groupedCoverImages).length === 0}
           <div
             class="col-span-3 flex items-center justify-center h-full text-muted-foreground"
           >
@@ -98,17 +105,17 @@
               <h3 class="text-sm font-semibold mb-2">{provider}</h3>
               <div class="grid grid-cols-3 gap-2">
                 {#each images as image}
-                  <div
+                  <button
                     class="aspect-video overflow-hidden rounded-lg cursor-pointer hover:border-1
-                     hover:border-primary "
+                       hover:border-primary"
                     onclick={() => handleSelectExistingImage(image.imageUrl)}
                   >
                     <img
-                      src={image.thumbnailUrl || image.imageUrl} 
+                      src={image.thumbnailUrl || image.imageUrl}
                       alt="封面图片"
                       class="w-full h-full object-cover"
                     />
-                  </div>
+                  </button>
                 {/each}
               </div>
             </div>
@@ -119,13 +126,16 @@
       <input
         type="file"
         accept="image/*"
-        class="hidden" 
+        class="hidden"
         onchange={handleFileSelect}
         id="file-upload-input"
       />
       <!-- 添加一个按钮作为文件选择的触发器 -->
       <div class="flex justify-center mt-4">
-        <label for="file-upload-input" class="btn btn-outline btn-sm cursor-pointer">
+        <label
+          for="file-upload-input"
+          class="btn btn-outline btn-sm cursor-pointer"
+        >
           上传图片
         </label>
       </div>

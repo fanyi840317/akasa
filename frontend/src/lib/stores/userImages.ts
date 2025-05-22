@@ -35,7 +35,6 @@ const createUserImagesStore = () => {
         subscribe,
         // Function to load user images from Appwrite
         loadUserImages: async (userId: string) => {
-            console.log(`userImages.ts: loadUserImages: Starting image load for userId: ${userId}`); // Existing log
             update(state => ({ ...state, listLoading: true, error: null }));
             try {
                 const response = await databases.listDocuments(
@@ -43,24 +42,11 @@ const createUserImagesStore = () => {
                     userImagesCollectionId,
                     [Query.equal('userId', userId)]
                 );
-                console.log('userImages.ts: loadUserImages: Documents fetched:', response.documents); // Existing log
-                const loadedImages = response.documents as UserImage[];
-                console.log('userImages.ts: loadUserImages: MAPPED loadedImages before update:', JSON.stringify(loadedImages));
-
-                update(state => {
-                    console.log('userImages.ts: loadUserImages: INSIDE update callback, current store state before merge:', JSON.stringify(state));
-                    console.log('userImages.ts: loadUserImages: INSIDE update callback, new loadedImages to set:', JSON.stringify(loadedImages));
-                    const newState = {
-                        ...state,
-                        images: loadedImages, // Ensure this is a new array reference if loadedImages is different
-                        listLoading: false
-                    };
-                    console.log('userImages.ts: loadUserImages: INSIDE update callback, newState to be set:', JSON.stringify(newState));
-                    return newState;
-                });
-                // Log after update to see the store's state if possible, though direct access isn't typical here
-                // We rely on subscription or $derived in components to see the change.
-                console.log(`userImages.ts: loadUserImages: Update call completed for userId: ${userId}. Check component logs for $derived updates.`);
+                update(state => ({
+                    ...state,
+                    images: response.documents as UserImage[],
+                    listLoading: false
+                }));
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to load user images';
                 update(state => ({ ...state, listLoading: false, error: errorMessage }));
@@ -124,13 +110,11 @@ const createUserImagesStore = () => {
 
         // Reset state
         reset: () => {
-            console.log('userImages.ts: reset: Resetting store');
             set({
                 images: [],
                 listLoading: false,
                 error: null
             });
-            console.log('userImages.ts: reset: Store has been reset');
         },
     };
 };
