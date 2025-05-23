@@ -9,6 +9,7 @@
     description,
     info,
     size = 'sm', // Default to 'sm'
+    contentClass = '', // Added contentClass prop
     ...restProps
   } = $props<{
     class?: string;
@@ -17,6 +18,7 @@
     description?: string;
     info?: string;
     size?: 'xs' | 'sm'; // Added size prop
+    contentClass?: string; // Added contentClass prop
   }>();
 </script>
 
@@ -33,7 +35,8 @@
     class={cn(
       "card-body",
       size === 'sm' && "gap-4", // Default gap for sm
-      size === 'xs' && "p-2 gap-1"  // Smaller padding and gap for xs
+      size === 'xs' && "p-2 gap-1",  // Smaller padding and gap for xs
+      contentClass // Apply contentClass here
     )}
   >
     {@render children?.()}

@@ -120,7 +120,8 @@
     >
 
       <InfoCard
-        class="shadow-xl w-[200px] min-w-64 min-h-48"
+        class="shadow-xl w-[200px] min-w-64 min-h-48 p-0"
+        size="xs"
         title={coverUrl ? "点击更改封面" : "点击设置封面"}
         description={coverUrl ? undefined : "当前暂无封面"}
       >
