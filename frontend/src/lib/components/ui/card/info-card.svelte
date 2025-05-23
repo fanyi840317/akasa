@@ -12,7 +12,7 @@
   } = $props<{
     class?: string;
     children?: Snippet;
-    title: string;
+    title?: string;
     description?: string;
     info?: string;
   }>();
@@ -21,7 +21,7 @@
 <div
   class={cn(
     "card bg-base-100 card-border border-base-300 card-sm overflow-hidden",
-    className
+    className,
   )}
   {...restProps}
 >
@@ -29,11 +29,13 @@
   <div class="bg-base-300">
     <div class="flex items-center gap-2 p-4">
       <div class="grow">
-        <div class="text-sm font-medium">
-          {title}
-        </div>
+        {#if title}
+          <div class="text-xs font-medium">
+            {title}
+          </div>
+        {/if}
         {#if description}
-          <div class="text-xs opacity-60">
+          <div class="text-[10px] opacity-60">
             {description}
           </div>
         {/if}

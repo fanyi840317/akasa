@@ -23,7 +23,6 @@
   let isUploading = $state(false);
   let uploadProgress = $state(0);
   let imageLoading = $state(false);
-  let showCoverSelector = $state(false);
   let showInfoTooltip = $state(false);
   let isDropdownOpen = $state(false); // To control dropdown visibility on click
 
@@ -56,7 +55,6 @@
     } finally {
       isUploading = false;
       uploadProgress = 0;
-      showCoverSelector = false;
       // isDropdownOpen = false; // Optionally close dropdown after upload
     }
   }
@@ -102,8 +100,8 @@
             alt="Event Cover"
             class:opacity-0={imageLoading}
             class="max-w-full max-h-full object-contain"
-            onload={() => (imageLoading = false)}
-            onloadstart={() => (imageLoading = true)}
+            onload={() => {alert(2); imageLoading = false;}}
+            onloadstart={() => {alert(1); imageLoading = true;}}
             onerror={() => (imageLoading = false)}
           />
         </ProgressContainer>
@@ -138,12 +136,10 @@
       <CoverSelector
         onSelect={(url) => {
           coverUrl = url;
-          showCoverSelector = false;
           isDropdownOpen = false; // Close dropdown after selection
         }}
         onLinkSubmit={(url) => {
           coverUrl = url;
-          showCoverSelector = false;
           isDropdownOpen = false; // Close dropdown after submission
         }}
         onFileUpload={handleFileUpload}

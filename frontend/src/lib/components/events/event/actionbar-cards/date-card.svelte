@@ -4,7 +4,7 @@
   import { formatDistanceToNow } from "date-fns";
   import { zhCN } from "date-fns/locale";
   import { cn } from "$lib/utils";
-  import "cally";
+  // import "cally";
   import {Card} from "$lib/components/ui/card"
 
   import { onMount } from "svelte";
@@ -146,7 +146,7 @@
       {#if showCalendar}
         <Card class="absolute top-24 left-4 p-0">
           {#if customElements.get("calendar-date")}
-            <calendar-date
+            <!-- <calendar-date
               class="cally rounded-box border border-base-300 mt-1"
               onchange={handleDateChange}
               value={eventDate}
@@ -158,7 +158,7 @@
                 ><ChevronRight class="size-4" /></button
               >
               <calendar-month></calendar-month>
-            </calendar-date>
+            </calendar-date> -->
           {:else}
             <p class="text-xs text-warning">
               日期选择器加载失败。请检查网络连接或尝试刷新。
