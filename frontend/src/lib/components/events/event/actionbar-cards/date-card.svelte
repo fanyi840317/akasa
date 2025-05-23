@@ -111,7 +111,7 @@
       class={cn("w-auto", className)}
       {...restProps}
     >
-      <div class="flex items-center text-xs px-2 text-gray-500">
+      <div class="flex items-center text-xs px-2">
         <Clock class="w-3 h-3 mr-1" />
         <span class="font-semibold">{relativeTime}</span>
       </div>

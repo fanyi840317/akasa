@@ -33,7 +33,7 @@
 >
   <div 
     class={cn(
-      "card-body",
+      "card-body relative",
       size === 'sm' && "gap-4", // Default gap for sm
       size === 'xs' && "p-2 gap-1",  // Smaller padding and gap for xs
       contentClass // Apply contentClass here
@@ -41,21 +41,20 @@
   >
     {@render children?.()}
   </div>
-  <div class={cn("bg-base-300", size === 'xs' && "py-1.5 px-2")}> 
-    <div 
+  <div 
       class={cn(
-        "flex items-center gap-2",
-        size === 'sm' && "p-4", // Default padding for sm footer content
-        size === 'xs' && "p-1.5"   // Smaller padding for xs footer content
+        "bg-base-300 flex items-center gap-2",
+        size === 'sm' && "py-4", // Default padding for sm footer content
+        size === 'xs' && "py-2"   // Smaller padding for xs footer content
       )}
     >
-      <div class="grow">
+      <div class="grow min-w-0 gap-1">
         {#if title}
           <div 
             class={cn(
-              "font-medium",
-              size === 'sm' && "text-xs",
-              size === 'xs' && "text-[10px] leading-tight" // Smaller font for xs title
+              "font-medium ",
+              size === 'sm' && "text-xs px-4 ",
+              size === 'xs' && "text-[11px] leading-tight px-2"
             )}
           >
             {title}
@@ -64,9 +63,9 @@
         {#if description}
           <div 
             class={cn(
-              "opacity-60",
-              size === 'sm' && "text-[10px]",
-              size === 'xs' && "text-[9px] leading-tight" // Smaller font for xs description
+              "opacity-60  overflow-hidden text-ellipsis",
+              size === 'sm' && "text-[10px] px-4",
+              size === 'xs' && "text-[10px] leading-tight px-2"
             )}
           >
             {description}
@@ -87,5 +86,4 @@
         </div>
       {/if}
     </div>
-  </div>
 </div>

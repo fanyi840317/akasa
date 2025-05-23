@@ -15,7 +15,10 @@
 </script>
 
 <div class={cn("relative flex felx-row items-center gap-1",
-   "hover:bg-base-200 hover:shadow-xl hover:scale-105 active:scale-95"
+   "hover:shadow-xl  hover:scale-105 active:scale-95",
+   "text-base-content/50 hover:text-base-content",
+   className
+  
 )} {...restProps}>
   <div
     class={cn(
