@@ -6,6 +6,7 @@
   import { cn } from "$lib/utils";
   // import "cally";
   import {Card} from "$lib/components/ui/card"
+  import InfoCard from '$lib/components/ui/card/info-card.svelte'; // Import InfoCard
 
   import { onMount } from "svelte";
 
@@ -20,6 +21,7 @@
 
   let showCalendar = $state(false);
   let dateInput = $state(eventDate || "");
+  let showDateTooltip = $state(false); // State for controlling date tooltip visibility
 
   onMount(async () => {
     // Attempt to load cally from CDN
@@ -58,6 +60,15 @@
     showCalendar = !showCalendar;
   }
 
+  function handleMouseEnterTrigger() { // Add mouse enter handler
+    if (showCalendar) return; // Don't show tooltip if calendar is open
+    showDateTooltip = true;
+  }
+
+  function handleMouseLeaveTrigger() { // Add mouse leave handler
+    showDateTooltip = false;
+  }
+
   let relativeTime = $derived("");
   let dateInputRef: HTMLInputElement;
 
@@ -90,33 +101,39 @@
   });
 </script>
 
-<div class="dropdown dropdown-start">
+<div class="dropdown dropdown-center">
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-  <div class="tooltip tooltip-bottom tooltip-base-100" tabindex="0">
-    <div class="tooltip-content p-2 px-4">
-      <!-- Tooltip content for date, maybe show full date or something -->
-      {#if eventDate}
-        <span class="text-neutral-content/50 text-xs font-semibold"
-          >{new Date(eventDate).toLocaleDateString()}</span
-        >
-      {:else}
-        <span class="text-neutral-content/50 text-xs font-semibold"
-          >暂无日期</span
-        >
-      {/if}
+  <ActionBarCard
+    role="button"
+    tabindex="0"
+    class={cn("w-auto min-w-12", className)}
+    {...restProps}
+    onclick={toggleCalendar} 
+    onmouseenter={handleMouseEnterTrigger} 
+    onmouseleave={handleMouseLeaveTrigger} 
+  >
+    <div class="flex items-center text-xs px-2">
+      <Clock class="w-3 h-3 mr-1" />
+      <span class="font-semibold">{relativeTime}</span>
     </div>
-    <ActionBarCard
-      role="button"
-      tabindex="0"
-      class={cn("w-auto", className)}
-      {...restProps}
+  </ActionBarCard>
+
+  {#if showDateTooltip && !showCalendar} 
+    <div
+      class="absolute z-50 top-full left-1/2 -translate-x-1/2 mt-2 pointer-events-none"
     >
-      <div class="flex items-center text-xs px-2">
-        <Clock class="w-3 h-3 mr-1" />
-        <span class="font-semibold">{relativeTime}</span>
-      </div>
-    </ActionBarCard>
-  </div>
+      <InfoCard
+        class="shadow-xl min-w-20 rounded-lg" 
+        size="xs"
+        contentClass="p-0"
+        title={eventDate ? new Date(eventDate).toLocaleDateString() : "暂无日期"}
+        description={eventDate ? undefined : "点击设置日期"}
+      >
+        <!-- Optional: Add more content to the tooltip body if needed -->
+      </InfoCard>
+    </div>
+  {/if}
+
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
     tabindex="0"

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { cn } from "$lib/utils";
   import type { Snippet } from "svelte";
+    import { fade } from "svelte/transition";
 
   let {
     class: className = "",
@@ -24,11 +25,13 @@
 
 <div
   class={cn(
-    "card bg-base-100 card-border border-base-300 overflow-hidden",
+    "card bg-base-100 card-border border-base-200 overflow-hidden",
     size === 'sm' && "card-sm", // Apply card-sm only if size is 'sm'
     size === 'xs' && "p-0", // Custom padding for xs, or adjust as needed
     className,
   )}
+  in:fade={{ duration: 200 }}
+  out:fade={{ duration: 200 }}
   {...restProps}
 >
   <div 
@@ -43,12 +46,12 @@
   </div>
   <div 
       class={cn(
-        "bg-base-300 flex items-center gap-2",
+        "bg-base-200 flex items-center gap-2",
         size === 'sm' && "py-4", // Default padding for sm footer content
         size === 'xs' && "py-2"   // Smaller padding for xs footer content
       )}
     >
-      <div class="grow min-w-0 gap-1">
+      <div class="grow min-w-0 gap-1 ">
         {#if title}
           <div 
             class={cn(

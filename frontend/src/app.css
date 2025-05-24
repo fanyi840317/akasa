@@ -17,8 +17,8 @@
   --color-primary-content: oklch(0.21 0.006 285.885);
   --color-secondary: oklch(0.274 0.006 286.033);
   --color-secondary-content: oklch(0.985 0 0);
-  --color-accent: oklch(37% 0.01 67.558);
-  --color-accent-content: oklch(0.985 0 0);
+  --color-accent: oklch(4% 0.005 285.823);
+  --color-accent-content: oklch(87% 0.006 286.286);
   --color-neutral: oklch(26% 0 0);
   --color-neutral-content: oklch(92% 0.004 286.32);
   --color-info: oklch(45.201% 0.313 264.052);
@@ -30,7 +30,7 @@
   --color-error: oklch(62.795% 0.257 29.233);
   --color-error-content: oklch(12.559% 0.051 29.233);
   --radius-selector: 2rem;
-  --radius-field: 2rem;
+  --radius-field: 1rem;
   --radius-box: 1rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
@@ -41,15 +41,15 @@
 
 .editor-fix-input {
   color: var(--color-base-content);
-  font-size: medium;
+  /* font-size: medium;
   border-radius: 0.5rem;
   border: 1px solid var(--color-neutral);
   padding: 0.5rem;
-  background: var(--color-base-100);
+  background: var(--color-base-100); */
 }
-.editor-fix-input:focus {
+/* .editor-fix-input:focus {
   outline: 1px solid var(--color-primary);
 }
 .editor-fix-input::placeholder {
   color: var(--color-neutral);
-}
+} */

@@ -2,6 +2,7 @@
   import { Image, Link } from "lucide-svelte";
   import { onMount } from "svelte";
   import { userImagesStore } from "$lib/stores/userImages"; // 导入用户图片 store
+  import { fade } from "svelte/transition";
 
   // 使用 $props() 定义组件属性，接收回调函数
   let { onSelect, onLinkSubmit, onFileUpload, userId } = $props<{
@@ -13,6 +14,7 @@
 
   let coverSelectorTab = $state("my-images");
   let coverLink = $state("");
+  let showValidationError = $state(false); // 控制是否显示验证错误信息
 
   // 使用 store 中的数据
   // 修改为包含缩略图 URL 的数据结构
@@ -26,7 +28,7 @@
               string,
               { imageUrl: string; thumbnailUrl?: string; provider?: string }[]
             >,
-            image
+            image,
           ) => {
             const provider = image.provider || "未知提供者";
             if (!acc[provider]) {
@@ -38,9 +40,9 @@
           {} as Record<
             string,
             { imageUrl: string; thumbnailUrl?: string; provider?: string }[]
-          >
+          >,
         )
-      : {}
+      : {},
   );
   let isLoading = $derived($userImagesStore.listLoading);
 
@@ -65,27 +67,67 @@
     }
   }
 
-  // 处理链接提交
-  function handleLinkSubmit() {
-    if (coverLink.trim()) {
-      onLinkSubmit(coverLink.trim());
-      coverLink = "";
+  // 验证链接格式
+  function isValidUrl(url: string): boolean {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
+
+  // 处理链接提交
+  function handleLinkSubmit() {
+    const trimmedLink = coverLink.trim();
+    if (!trimmedLink) {
+      showValidationError = true;
+      return;
+    }
+    // 使用更严格的URL验证，并检查是否是图片链接（简单判断后缀）
+    const imageRegex = /\.(jpg|jpeg|png|gif|webp|bmp)$/i;
+    if (!isValidUrl(trimmedLink) || !imageRegex.test(trimmedLink)) {
+      showValidationError = true;
+      return;
+    }
+
+    showValidationError = false;
+    onLinkSubmit(trimmedLink);
+    coverLink = ""; // 提交后清空输入框
+  }
+
+  // 检查链接是否有效以控制按钮状态
+  let isSubmitButtonEnabled = $derived(() => {
+    const trimmedLink = coverLink.trim();
+    if (!trimmedLink) return false;
+    const imageRegex = /\.(jpg|jpeg|png|gif|webp|bmp)$/i;
+    return isValidUrl(trimmedLink) && imageRegex.test(trimmedLink);
+  });
 </script>
 
 <div class="w-[400px]">
-  <div role="tablist" class="tabs tabs-lift">
+  <div role="tablist" class="tabs tabs-border">
     <button
       role="tab"
       class="tab gap-1 [--tab-bg:var(--color-base-200)]"
       class:tab-active={coverSelectorTab === "my-images"}
       onclick={() => (coverSelectorTab = "my-images")}
     >
-      <Image class="h-4 w-4" />
       <span>我的图片</span>
     </button>
-    <div class="p-4 tab-content bg-base-200 border-base-300">
+
+    <button
+      role="tab"
+      class="tab gap-1 [--tab-bg:var(--color-base-200)]"
+      class:tab-active={coverSelectorTab === "link"}
+      onclick={() => (coverSelectorTab = "link")}
+    >
+      <span>填写链接</span>
+    </button>
+  </div>
+
+  {#if coverSelectorTab === "my-images"}
+    <div class="p-4 border-t border-secondary">
       <div class="h-[200px]">
         {#if isLoading}
           <div class="col-span-3 flex items-center justify-center h-full">
@@ -134,41 +176,45 @@
       <div class="flex justify-center mt-4">
         <label
           for="file-upload-input"
-          class="btn btn-outline btn-sm cursor-pointer"
+          class="btn  btn-sm cursor-pointer"
         >
           上传图片
         </label>
       </div>
     </div>
-    <button
-      role="tab"
-      class="tab gap-1 [--tab-bg:var(--color-base-200)]"
-      class:tab-active={coverSelectorTab === "link"}
-      onclick={() => (coverSelectorTab = "link")}
-    >
-      <Link class="h-4 w-4" />
-      <span>填写链接</span>
-    </button>
-    <div class="p-4 tab-content bg-base-200 border-base-300">
-      <div class="space-y-4">
-        <div class="space-y-2">
-          <label for="cover-link" class="label"
-            ><span class="label-text">图片链接</span></label
-          >
+  {/if}
+
+  {#if coverSelectorTab === "link"}
+    <div class="py-6 px-4 border-t border-secondary pb-1">
+      <div class="space-y-1 w-full">
+        <label class="input input-border input-neutral w-full">
+          <Link class="h-4 w-4" />
           <input
-            id="cover-link"
-            type="text"
-            placeholder="https://example.com/image.jpg"
-            class="editor-fix-input w-full"
+            type="url"
+            class="editor-fix-input input-neutral"
             bind:value={coverLink}
+            oninput={() => (showValidationError = false)}
+            placeholder="在此粘贴图片的链接..."
           />
-        </div>
-        <div class="flex justify-end">
-          <button class="btn btn-primary btn-sm" onclick={handleLinkSubmit}
-            >确认</button
+        </label>
+        {#if showValidationError}
+          <p
+            in:fade={{ duration: 200 }}
+            out:fade={{ duration: 200 }}
+            class="ml-1 validator-hint text-error m-0"
           >
+            请输入有效的图片链接 (需包含图片文件后缀)
+          </p>
+        {/if}
+        <div class="flex flex-col items-center justify-center gap-2 mt-4">
+          <button
+            class="btn  btn-neutral btn-sm btn-wide"
+            onclick={handleLinkSubmit}
+            disabled={!isSubmitButtonEnabled}>确认</button
+          >
+          <p class="label text-xs">适合任何的网络图片</p>
         </div>
       </div>
     </div>
-  </div>
+  {/if}
 </div>

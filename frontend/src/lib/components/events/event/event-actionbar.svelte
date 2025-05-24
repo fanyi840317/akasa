@@ -83,7 +83,7 @@ import DateCard from "./actionbar-cards/date-card.svelte";
         <X class="w-4 h-4" />
       </button>
       <h1 class="text-xl font-semibold mr-2">{title}</h1>
-      <CoverCard coverUrl={currentCoverUrl} class="w-[60px]" {userId}></CoverCard>
+      <CoverCard coverUrl={currentCoverUrl}  {userId}></CoverCard>
       <DateCard eventDate={eventTime ? eventTime.toISOString() : undefined} />
       <MapCard locationData={location} />
       
@@ -109,11 +109,13 @@ import DateCard from "./actionbar-cards/date-card.svelte";
       <div class="dropdown dropdown-start">
         <button
           aria-label="Change cover"
+          tabindex="0"
           class="btn btn-sm btn-circle btn-ghost"
         >
           <More class="w-4 h-4" />
         </button>
         <ul
+          tabindex="0"
           class="menu menu-mddropdown-content bg-base-300
           dropdown-content bg-base-200 text-base-content rounded-box
           rounded-xl z-1 w-48 border border-white/5 shadow-2xl outline-1 outline-black/5"
@@ -136,13 +138,13 @@ import DateCard from "./actionbar-cards/date-card.svelte";
 
     <div class="flex items-center gap-2">
       {#if showSaveButton}
-      <button class="btn btn-sm" onclick={onSaveDocument}>
+      <button class="btn btn-ghost btn-sm" onclick={onSaveDocument}>
         <SaveIcon class="w-4 h-4 mr-1" />
         保存
       </button>
       {/if}
       <button
-        class="btn btn-sm px-1 pr-2"
+        class="btn btn-ghost btn-sm px-1 pr-2"
         onclick={() => {
           isCommentsPanelOpen = !isCommentsPanelOpen;
         }}

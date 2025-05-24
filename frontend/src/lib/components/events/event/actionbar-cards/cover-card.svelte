@@ -2,12 +2,13 @@
   import { cn } from "$lib/utils";
   import type { Snippet } from "svelte";
   import ActionbarCard from "./actionbar-card.svelte";
+  import { Image, Camera } from "lucide-svelte"; // Import Lucide icons
   import CoverSelector from "../cover-selector.svelte";
   import { uploadToImgBB } from "$lib/services/image"; // 导入上传函数
   import { userImagesStore } from "$lib/stores/userImages"; // 导入用户图片 store
-  import InfoCard from '$lib/components/ui/card/info-card.svelte';
-  import { Card } from '$lib/components/ui/card'; // Keep Card for dropdown content
-  import ProgressContainer from '$lib/components/ui/progress-container.svelte';
+  import InfoCard from "$lib/components/ui/card/info-card.svelte";
+  import { Card } from "$lib/components/ui/card"; // Keep Card for dropdown content
+  import ProgressContainer from "$lib/components/ui/progress-container.svelte";
 
   let {
     class: className = "",
@@ -42,7 +43,7 @@
             result.data.url,
             "imgbb",
             result.data.thumb?.url,
-            { delete_url: result.data.delete_url }
+            { delete_url: result.data.delete_url },
           );
         }
       } else {
@@ -79,57 +80,62 @@
 
 <div class="dropdown dropdown-center">
   <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div
+  <ActionbarCard
     role="button"
     tabindex="0"
     onclick={toggleDropdown}
     onmouseenter={handleMouseEnterTrigger}
     onmouseleave={handleMouseLeaveTrigger}
+    disabled={isUploading}
+    class={cn("w-auto min-w-18", className)}
+    {...restProps}
   >
-    <ActionbarCard
-      disabled={isUploading}
-      class={cn("", className)}
-      {...restProps}
-    >
-      {#if isUploading}
-        <ProgressContainer progress={uploadProgress} size="xxs"/>
-      {:else if coverUrl}
-        <ProgressContainer class="bg-transparent" size="xs">
-          <img
-            src={coverUrl}
-            alt="Event Cover"
-            class:opacity-0={imageLoading}
-            class="max-w-full max-h-full object-contain"
-            onload={() => {alert(2); imageLoading = false;}}
-            onloadstart={() => {alert(1); imageLoading = true;}}
-            onerror={() => (imageLoading = false)}
-          />
-        </ProgressContainer>
-      {:else}
-        <span
-          class="animate-bounce text-gray-400 -rotate-10 text-xs font-black"
-        >
-          no cover
-        </span>
-      {/if}
-    </ActionbarCard>
-  </div>
+    {#if isUploading}
+      <ProgressContainer progress={uploadProgress} size="xxs" />
+    {:else if coverUrl}
+      <ProgressContainer class="bg-transparent" size="xs">
+        <img
+          src={coverUrl}
+          alt="Event Cover"
+          class:opacity-0={imageLoading}
+          class="max-w-full max-h-full object-contain"
+          onload={() => {
+            alert(2);
+            imageLoading = false;
+          }}
+          onloadstart={() => {
+            alert(1);
+            imageLoading = true;
+          }}
+          onerror={() => (imageLoading = false)}
+        />
+      </ProgressContainer>
+    {:else}
+      <div class="flex items-center text-xs px-2">
+        <Image class="w-3 h-3 mr-1" />
+        <span class="font-semibold">未设置封面</span>
+      </div>
+    {/if}
+  </ActionbarCard>
   {#if showInfoTooltip && !isUploading && !isDropdownOpen}
     <div
       class="absolute z-50 top-full left-1/2 -translate-x-1/2 mt-2 pointer-events-none"
     >
-
       <InfoCard
         class="shadow-xl w-[200px] min-w-64 min-h-48 rounded-lg"
         size="xs"
         contentClass="p-0"
-        title={coverUrl ? undefined : "当前暂无封面"}
-        description={coverUrl ?  coverUrl: "点击设置封面"}
+        title={coverUrl ? coverUrl: "当前暂无封面"}
+        description={coverUrl ? undefined  : "点击设置封面"}
       >
-      {#if coverUrl}
-        <img alt="" src={coverUrl} class="absolute inset-0 w-full h-full object-cover" />
-      {/if}
-    </InfoCard>
+        {#if coverUrl}
+          <img
+            alt=""
+            src={coverUrl}
+            class="absolute inset-0 w-full h-full object-cover"
+          />
+        {/if}
+      </InfoCard>
     </div>
   {/if}
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
