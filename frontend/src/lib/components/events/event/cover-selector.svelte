@@ -3,6 +3,7 @@
   import { onMount } from "svelte";
   import { userImagesStore } from "$lib/stores/userImages"; // 导入用户图片 store
   import { fade } from "svelte/transition";
+  import {ScrollArea} from "$lib/components/ui/scroll-area";
 
   // 使用 $props() 定义组件属性，接收回调函数
   let { onSelect, onLinkSubmit, onFileUpload, userId } = $props<{
@@ -128,7 +129,7 @@
 
   {#if coverSelectorTab === "my-images"}
     <div class="p-4 border-t border-secondary">
-      <div class="h-[200px]">
+      <ScrollArea class="h-[200px]">
         {#if isLoading}
           <div class="col-span-3 flex items-center justify-center h-full">
             <div
@@ -163,12 +164,12 @@
             </div>
           {/each}
         {/if}
-      </div>
+      </ScrollArea>
       <!-- 添加文件选择输入框 -->
       <input
         type="file"
         accept="image/*"
-        class="hidden"
+        class="hidden size-0"
         onchange={handleFileSelect}
         id="file-upload-input"
       />
@@ -176,7 +177,7 @@
       <div class="flex justify-center mt-4">
         <label
           for="file-upload-input"
-          class="btn  btn-sm cursor-pointer"
+          class="btn btn-neutral btn-sm cursor-pointer"
         >
           上传图片
         </label>

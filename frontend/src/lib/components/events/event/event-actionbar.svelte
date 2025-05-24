@@ -79,7 +79,7 @@ import DateCard from "./actionbar-cards/date-card.svelte";
     absolute top-0 left-0 right-0 z-10 "
   >
     <div class="flex flex-row items-center gap-4">
-      <button class="btn btn-sm btn-circle btn-ghost" onclick={onClose}>
+      <button class="btn btn-sm btn-circle btn-ghost btn-neutral" onclick={onClose}>
         <X class="w-4 h-4" />
       </button>
       <h1 class="text-xl font-semibold mr-2">{title}</h1>
@@ -110,7 +110,7 @@ import DateCard from "./actionbar-cards/date-card.svelte";
         <button
           aria-label="Change cover"
           tabindex="0"
-          class="btn btn-sm btn-circle btn-ghost"
+          class="btn btn-sm btn-circle btn-ghost btn-neutral"
         >
           <More class="w-4 h-4" />
         </button>
@@ -138,13 +138,13 @@ import DateCard from "./actionbar-cards/date-card.svelte";
 
     <div class="flex items-center gap-2">
       {#if showSaveButton}
-      <button class="btn btn-ghost btn-sm" onclick={onSaveDocument}>
+      <button class="btn btn-ghost btn-neutral btn-sm" onclick={onSaveDocument}>
         <SaveIcon class="w-4 h-4 mr-1" />
         保存
       </button>
       {/if}
       <button
-        class="btn btn-ghost btn-sm px-1 pr-2"
+        class="btn btn-ghost btn-neutral btn-sm px-1 pr-2"
         onclick={() => {
           isCommentsPanelOpen = !isCommentsPanelOpen;
         }}
