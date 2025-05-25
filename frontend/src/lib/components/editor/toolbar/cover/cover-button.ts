@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
-import { getTooltipWithShortcut } from "./unit";
-import { property, state } from "lit/decorators.js";
+import { getTooltipWithShortcut } from "./../../unit";
+import { property } from "lit/decorators.js";
 
 export class EdgelessCoverButton extends LitElement {
   static styles = css`
@@ -149,12 +149,18 @@ export class EdgelessCoverButton extends LitElement {
     );
     this.url = "";
   }
+  private _panel?: HTMLElement;
+
   constructor() {
     super();
     this.url = "";
     this.uploadProgress = 0;
     this.showUploadProgress = false;
     this.showImageLoading = false;
+  }
+
+  private _showTemplatePanel() {
+    if (this.showUploadProgress || this.showImageLoading) return;
   }
 
   render() {
@@ -167,7 +173,11 @@ export class EdgelessCoverButton extends LitElement {
         .tooltipOffset=${4}
         .disabled=${disabled}
       >
-        <div class="cover-button" data-theme="black">
+        <div 
+          class="cover-button" 
+          data-theme="black"
+          @click=${this._showTemplatePanel}
+        >
           ${this.showUploadProgress
             ? html`
                 <div class="progress-container">

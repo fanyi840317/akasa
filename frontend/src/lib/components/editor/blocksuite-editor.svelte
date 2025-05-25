@@ -21,7 +21,10 @@
   import { effects as blocksEffects } from "@blocksuite/blocks/effects";
   import { effects as presetsEffects } from "@blocksuite/presets/effects";
 
-  import {EdgelessCoverButton} from './cover-button';
+  import { EdgelessCoverButton } from "./toolbar/cover/cover-button";
+  import { auth } from "$lib/stores/auth";
+  import CoverSelector from "./toolbar/cover/cover-selector.svelte";
+  import { Card } from "../ui";
   // Ensure effects are initialized only once globally
   if (!(window as any).__blocksuite_effects_initialized) {
     blocksEffects();
@@ -48,7 +51,7 @@
   };
 
   const createDocModeProvider = (
-    editorInstance: AffineEditorContainer
+    editorInstance: AffineEditorContainer,
   ): DocModeProvider => {
     const DOC_MODE = "edgeless"; // fixed to edgeless mode
     const doc_slots = new Map<string, Slot<DocMode>>();
@@ -64,7 +67,7 @@
       },
       onPrimaryModeChange: (
         handler: (mode: DocMode) => void,
-        doc_id: string
+        doc_id: string,
       ): Disposable => {
         if (!doc_slots.has(doc_id)) {
           doc_slots.set(doc_id, new Slot<DocMode>());
@@ -94,7 +97,7 @@
 
         if (!(doc instanceof Doc)) {
           console.error(
-            "createDocByJson did not return a Doc instance, falling back."
+            "createDocByJson did not return a Doc instance, falling back.",
           );
           throw new Error("createDocByJson did not return a Doc instance");
         }
@@ -103,7 +106,7 @@
       } catch (e) {
         console.error(
           "Failed to create document using createDocByJson or provided JSON is invalid:",
-          e
+          e,
         );
         // Fallback to an empty doc with the given ID
         doc = createEmptyDoc().init();
@@ -146,26 +149,23 @@
         return;
       }
       const templateButton = toolbarWidget.shadowRoot?.querySelector(
-        "edgeless-template-button"
+        "edgeless-template-button",
       );
       // const cover = document.createElement("edgeless-cover-tool-button");
       templateButton?.parentElement?.append(coverRef);
-      
+
       // templateButton?.parentElement?.parentElement?.after(divider); // Append the divider after the template button
-  // Append the divider after the template button
+      // Append the divider after the template button
       templateButton?.remove();
-    },100);
+    }, 100);
     // setTimeout(() => {
     //   url="";
     // },1000)
-
-
   });
   const handCoverClick = () => {
-    alert('clickdwq');
+    alert("clickdwq");
     coverRef.getBoundingClientRect();
-
-  }
+  };
 
   onDestroy(() => {
     // editor?.dispose(); // Consider disposing the editor if necessary
@@ -175,12 +175,67 @@
   }
   let dividerRef: HTMLDivElement;
   let coverRef: HTMLDivElement;
-  let url=$state("https://images.unsplash.com/photo-1448375240586-882707db888b");
+  let coverUrl = $state(
+    "https://images.unsplash.com/photo-1448375240586-882707db888b",
+  );
+  let showCoverSelector = $state(false);
+  let coverSelectorRef: HTMLDivElement;
+
+  function handleCoverSelect(url: string) {
+    url = url;
+    showCoverSelector = false;
+  }
+
+  function handleFileUpload(file: File) {
+    // Handle file upload logic
+    showCoverSelector = false;
+  }
+
+  function handleLinkSubmit(url: string) {
+    url = url;
+    showCoverSelector = false;
+  }
 </script>
 
 <div class="w-full h-full" bind:this={editorContainer}>
-  <edgeless-cover-button bind:this={coverRef} url={url} onclick={handCoverClick}>
+  <edgeless-cover-button
+    bind:this={coverRef}
+    url={coverUrl}
+    onclick={() => (showCoverSelector = true)}
+  />
 
-  </edgeless-cover-button>
+  {#if showCoverSelector}
+    <div
+      class="absolute z-50"
+      bind:this={coverSelectorRef}
+      style="top: {coverRef?.getBoundingClientRect().top -
+        360}px; left: {coverRef?.getBoundingClientRect().left - 150}px"
+    >
+      <Card class="p-0 ">
+        <CoverSelector
+          onSelect={(url) => {
+            coverUrl = url;
+            // isDropdownOpen = false; // Close dropdown after selection
+          }}
+          onLinkSubmit={(url) => {
+            // coverUrl = url;
+            // isDropdownOpen = false; // Close dropdown after submission
+          }}
+          onFileUpload={handleFileUpload}
+          userId={$auth.user?.$id || ""}
+        />
+      </Card>
+    </div>
+  {/if}
 </div>
 
+{#if showCoverSelector}
+  <div
+    class="fixed inset-0 z-40"
+    onclick={() => (showCoverSelector = false)}
+    oncontextmenu={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }}
+  />
+{/if}

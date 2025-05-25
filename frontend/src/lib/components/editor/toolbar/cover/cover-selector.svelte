@@ -106,7 +106,7 @@
   });
 </script>
 
-<div class="w-[400px]">
+<div class="w-[400px] h-[360px]">
   <div role="tablist" class="tabs tabs-border">
     <button
       role="tab"
@@ -128,8 +128,8 @@
   </div>
 
   {#if coverSelectorTab === "my-images"}
-    <div class="p-4 border-t border-secondary ">
-      <ScrollArea class="h-full">
+    <div class="p-4 border-t border-secondary">
+      <ScrollArea class="h-[240px]">
         {#if isLoading}
           <div class="col-span-3 flex items-center justify-center h-full">
             <div
@@ -169,7 +169,7 @@
       <input
         type="file"
         accept="image/*"
-        class="hidden size-0"
+        class="hidden size-0 opacity-0 text-transparent"
         onchange={handleFileSelect}
         id="file-upload-input"
       />
@@ -186,36 +186,34 @@
   {/if}
 
   {#if coverSelectorTab === "link"}
-    <div class="py-6 px-4 border-t border-secondary pb-1 ">
-      <div class="space-y-1 w-full">
-        <label class="input input-border input-neutral w-full">
-          <Link class="h-4 w-4" />
-          <input
-            type="url"
-            class="editor-fix-input input-neutral"
-            bind:value={coverLink}
-            oninput={() => (showValidationError = false)}
-            placeholder="在此粘贴图片的链接..."
-          />
-        </label>
-        {#if showValidationError}
-          <p
-            in:fade={{ duration: 200 }}
-            out:fade={{ duration: 200 }}
-            class="ml-1 validator-hint text-error m-0"
-          >
-            请输入有效的图片链接 (需包含图片文件后缀)
-          </p>
-        {/if}
-        <div class="flex flex-col items-center justify-center gap-2 mt-4">
-          <button
-            class="btn  btn-neutral btn-sm btn-wide"
-            onclick={handleLinkSubmit}
-            disabled={!isSubmitButtonEnabled}>确认</button
-          >
-          <p class="label text-xs">适合任何的网络图片</p>
-        </div>
-      </div>
+  <div class="py-6 px-4 border-t border-secondary pb-1 space-y-1 w-full ">
+    <label class="input input-border input-neutral w-full">
+      <Link class="h-4 w-4" />
+      <input
+        type="url"
+        class="editor-fix-input input-neutral"
+        bind:value={coverLink}
+        oninput={() => (showValidationError = false)}
+        placeholder="在此粘贴图片的链接..."
+      />
+    </label>
+    {#if showValidationError}
+      <p
+        in:fade={{ duration: 200 }}
+        out:fade={{ duration: 200 }}
+        class="ml-1 validator-hint text-error m-0"
+      >
+        请输入有效的图片链接 (需包含图片文件后缀)
+      </p>
+    {/if}
+    <div class="flex flex-col items-center justify-center gap-2 mt-6">
+      <button
+        class="btn  btn-neutral btn-sm btn-wide"
+        onclick={handleLinkSubmit}
+        disabled={!isSubmitButtonEnabled}>确认</button
+      >
+      <p class="label text-xs">适合任何的网络图片</p>
     </div>
+  </div>
   {/if}
 </div>
