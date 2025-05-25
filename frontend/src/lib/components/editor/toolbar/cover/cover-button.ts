@@ -8,6 +8,7 @@ export class EdgelessCoverButton extends LitElement {
       height: 100%;
       overflow-y: hidden;
       transition: transform 0.2s ease;
+      z-index: 10000;
     }
     :host(:hover) {
       transform: scale(1.1) translateY(-10px);

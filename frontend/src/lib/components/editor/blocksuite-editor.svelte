@@ -180,6 +180,8 @@
   );
   let showCoverSelector = $state(false);
   let coverSelectorRef: HTMLDivElement;
+  let uploadProgress = $state(0);
+  let showUploadProgress = $state(false);
 
   function handleCoverSelect(url: string) {
     url = url;
@@ -187,8 +189,20 @@
   }
 
   function handleFileUpload(file: File) {
-    // Handle file upload logic
+    showUploadProgress = true;
+    uploadProgress = 0;
     showCoverSelector = false;
+    
+    // 模拟上传进度
+    const interval = setInterval(() => {
+      uploadProgress += 10;
+      if (uploadProgress >= 100) {
+        clearInterval(interval);
+        showUploadProgress = false;
+        // 实际上传完成后设置url
+        coverUrl = URL.createObjectURL(file);
+      }
+    }, 300);
   }
 
   function handleLinkSubmit(url: string) {
@@ -201,6 +215,8 @@
   <edgeless-cover-button
     bind:this={coverRef}
     url={coverUrl}
+    uploadProgress={uploadProgress}
+    showUploadProgress={showUploadProgress}
     onclick={() => (showCoverSelector = true)}
   />
 
