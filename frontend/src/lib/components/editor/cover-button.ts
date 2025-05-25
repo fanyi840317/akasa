@@ -122,6 +122,10 @@ export class EdgelessCoverButton extends LitElement {
     :host(:hover) .delete-btn {
       opacity: 1;
     }
+    .eraser-button:hover ,
+    .eraser-button.active {
+      transform: translateY(0);
+    }
   `;
 
   @property({ type: String })
