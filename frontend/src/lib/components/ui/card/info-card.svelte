@@ -55,7 +55,7 @@
         {#if title}
           <div 
             class={cn(
-              "font-medium ",
+              "font-medium overflow-hidden text-ellipsis",
               size === 'sm' && "text-xs px-4 ",
               size === 'xs' && "text-[11px] leading-tight px-2"
             )}

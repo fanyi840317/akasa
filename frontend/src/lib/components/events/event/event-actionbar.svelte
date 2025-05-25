@@ -75,7 +75,7 @@ import DateCard from "./actionbar-cards/date-card.svelte";
 {#if editable}
   <div
     class="p-2 flex justify-between items-center  
-    border-b border-white/5 bg-base-300/10 backdrop-blur-sm 
+
     absolute top-0 left-0 right-0 z-10 "
   >
     <div class="flex flex-row items-center gap-4">
@@ -83,9 +83,8 @@ import DateCard from "./actionbar-cards/date-card.svelte";
         <X class="w-4 h-4" />
       </button>
       <h1 class="text-xl font-semibold mr-2">{title}</h1>
-      <CoverCard coverUrl={currentCoverUrl}  {userId}></CoverCard>
-      <DateCard eventDate={eventTime ? eventTime.toISOString() : undefined} />
-      <MapCard locationData={location} />
+      <!-- <DateCard eventDate={eventTime ? eventTime.toISOString() : undefined} />-->
+      <!-- <MapCard locationData={location} />  -->
       
       <!-- <div class="dropdown dropdown-center">
         <button

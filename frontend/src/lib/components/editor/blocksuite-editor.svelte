@@ -15,23 +15,20 @@
   import "@toeverything/theme/style.css";
   import { Doc, Slot, type Block } from "@blocksuite/store"; // Added Doc
   import type { Disposable } from "@blocksuite/global/utils";
-  import { createDocByJson, exportDocToJson } from "./blocksuite-editor";
+  import { createDocByJson, exportDocToJson } from "./editor-doc";
 
   // Import effects if they are not globally initialized elsewhere
   import { effects as blocksEffects } from "@blocksuite/blocks/effects";
   import { effects as presetsEffects } from "@blocksuite/presets/effects";
 
+  import {EdgelessCoverButton} from './cover-button';
   // Ensure effects are initialized only once globally
   if (!(window as any).__blocksuite_effects_initialized) {
     blocksEffects();
     presetsEffects();
+    customElements.define("edgeless-cover-button", EdgelessCoverButton);
     (window as any).__blocksuite_effects_initialized = true;
   }
-
-  // IMPORTANT: User needs to provide/import `createDocByJson` for the intended functionality.
-  // e.g., import { createDocByJson } from './path/to/your/custom-blocksuite-utils';
-  // This is a placeholder for the actual function the user intends to use.
-  // declare function createDocByJson(docId: string, jsonData: any): Doc; // Removed placeholder
 
   // export let docId: string | undefined = undefined; // Optional prop to load an existing doc
   // export let initialJsonContent: string | undefined = undefined; // New prop for initial JSON content
@@ -51,7 +48,7 @@
   };
 
   const createDocModeProvider = (
-    editorInstance: AffineEditorContainer,
+    editorInstance: AffineEditorContainer
   ): DocModeProvider => {
     const DOC_MODE = "edgeless"; // fixed to edgeless mode
     const doc_slots = new Map<string, Slot<DocMode>>();
@@ -67,7 +64,7 @@
       },
       onPrimaryModeChange: (
         handler: (mode: DocMode) => void,
-        doc_id: string,
+        doc_id: string
       ): Disposable => {
         if (!doc_slots.has(doc_id)) {
           doc_slots.set(doc_id, new Slot<DocMode>());
@@ -97,7 +94,7 @@
 
         if (!(doc instanceof Doc)) {
           console.error(
-            "createDocByJson did not return a Doc instance, falling back.",
+            "createDocByJson did not return a Doc instance, falling back."
           );
           throw new Error("createDocByJson did not return a Doc instance");
         }
@@ -106,7 +103,7 @@
       } catch (e) {
         console.error(
           "Failed to create document using createDocByJson or provided JSON is invalid:",
-          e,
+          e
         );
         // Fallback to an empty doc with the given ID
         doc = createEmptyDoc().init();
@@ -142,17 +139,48 @@
 
     editorContainer.appendChild(editor);
     await editor.updateComplete;
+    // <div class="full-divider"></div>
+    setTimeout(() => {
+      const toolbarWidget = document.querySelector("edgeless-toolbar-widget");
+      if (!toolbarWidget) {
+        return;
+      }
+      const templateButton = toolbarWidget.shadowRoot?.querySelector(
+        "edgeless-template-button"
+      );
+      // const cover = document.createElement("edgeless-cover-tool-button");
+      templateButton?.parentElement?.append(coverRef);
+      
+      // templateButton?.parentElement?.parentElement?.after(divider); // Append the divider after the template button
+  // Append the divider after the template button
+      templateButton?.remove();
+    },100);
+    // setTimeout(() => {
+    //   url="";
+    // },1000)
 
-    appStore.setShowHeader(false);
+
   });
+  const handCoverClick = () => {
+    alert('clickdwq');
+    coverRef.getBoundingClientRect();
+
+  }
 
   onDestroy(() => {
-    appStore.setShowHeader(true);
     // editor?.dispose(); // Consider disposing the editor if necessary
   });
   export async function getContent() {
     return await exportDocToJson(editor.doc);
   }
+  let dividerRef: HTMLDivElement;
+  let coverRef: HTMLDivElement;
+  let url=$state("https://images.unsplash.com/photo-1448375240586-882707db888b");
 </script>
 
-<div class="w-full h-full" bind:this={editorContainer}></div>
+<div class="w-full h-full" bind:this={editorContainer}>
+  <edgeless-cover-button bind:this={coverRef} url={url} onclick={handCoverClick}>
+
+  </edgeless-cover-button>
+</div>
+

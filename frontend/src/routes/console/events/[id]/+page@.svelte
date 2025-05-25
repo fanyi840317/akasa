@@ -11,7 +11,8 @@
   import EventCommentsPanel from "$lib/components/events/event/event-comments-panel.svelte"; // Import the comments panel
   import { fade, fly } from "svelte/transition";
   import { UserAvatar } from "$lib/components/ui/avatar";
-  import { auth } from '$lib/stores/auth';
+  import { auth } from "$lib/stores/auth";
+  import CoverCard from "$lib/components/events/event/actionbar-cards/cover-card.svelte";
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -90,10 +91,22 @@
     await eventStore.fetchEvent(id);
     // eventData and loading will be updated by the store subscription
   }
-
+  let coverRfe:HTMLDivElement;
   onMount(() => {
     appStore.setShowHeader(false);
-  });
+    console.log("Event page mounted");
+  //   setTimeout(() => {
+  //     console.log(document.body.innerHTML);
+  //   // Remove the edgeless-template-button element
+  //   const templateButton = document.querySelector('edgeless-toolbar-widget')?.shadowRoot.querySelector("edgeless-template-button");
+  //   console.log("Template button:", templateButton);
+  //   if (templateButton) {
+  //     templateButton.parentElement?.appendChild(coverRfe);
+  //     templateButton.remove();
+  //   }
+  // },100);
+      
+    });
 
   onDestroy(() => {
     appStore.setShowHeader(true);
@@ -258,7 +271,6 @@
         onTitleChange={handleTitleChange}
         bind:isPropertiesPanelOpen
         bind:isCommentsPanelOpen
-        userId={ $auth.user?.$id} 
       />
 
       {#if eventLoading}
@@ -287,22 +299,15 @@
         /> -->
       </div>
     {/if}
-
-    <!-- <button
-      class="group absolute bottom-6 right-2 badge badge-ghost badge-sm text-base-content/50 group-hover:text-base-content group-hover:bg-base-200/50 p-2 rounded-lg transition-all duration-200 ease-in-out flex items-center cursor-pointer"
-      onclick={() => {
-        isCommentsPanelOpen = !isCommentsPanelOpen;
-      }}
-    >
-      <UserAvatar
-        class="size-6 group-hover:opacity-100 opacity-80 transition-opacity"
-      ></UserAvatar>
-      <div
-        class="px-1 border-b py-1 border-base-content/50 group-hover:border-base-content group-hover:text-base-content transition-colors text-xs"
-      >
-        +添加评论
-      </div>
-    </button> -->
+      <!-- <div bind:this={coverRfe}>cs</div> -->
+    <!-- dropdownClass="absolute top-12 left-12 z-5" -->
+     <!-- <div bind:this={coverRfe}>
+      <CoverCard 
+      coverUrl={currentEvent?.cover}
+      userId={$auth.user?.$id}
+    ></CoverCard>
+     </div> -->
+   
   </div>
   {#if isCommentsPanelOpen}
     <div
@@ -310,7 +315,7 @@
       in:fly={{ x: 100, duration: 300 }}
       out:fly={{ x: 100, duration: 300 }}
     >
-      <EventCommentsPanel comments={comments} />
+      <EventCommentsPanel {comments} />
     </div>
   {/if}
 </div>

@@ -6,11 +6,13 @@
     class: className = "",
     progress,
     children,
+    isLoading,
     size,
   }: {
     class?: string;
     progress?: number | null;
     children?: Snippet;
+    isLoading?: boolean;
     size?: "xxs" | "xs" | "sm" | "md" | "lg"; // Add specific types for size
   } = $props();
 
@@ -67,19 +69,27 @@
     className
   )}
 >
+  {#if children}
+    {@render children?.()}
+  {/if}
   {#if progress !== undefined && progress !== null && progress >= 0 && progress <= 100}
     <div
-      class={cn("radial-progress bg-primary text-primary-content border-primary border-4", fontSizeClass)}
+      class={cn(
+        " absolute top-0 left-0 w-full h-full radial-progress text-primary-content border-primary border-4",
+        fontSizeClass
+      )}
       style="--value:{progress}; {radialProgressStyles}"
       aria-valuenow={progress}
       role="progressbar"
     >
       {progress}%
     </div>
-  {:else if children}
-    {@render children()}
-  {:else}
-    <span class={cn("loading loading-ring text-primary", loadingSizeClass)}
-    ></span>
+  {:else if isLoading}
+    <div
+      class="absolute top-0 left-0 w-full h-full flex items-center justify-center"
+    >
+      <span class={cn("loading loading-ring text-primary", loadingSizeClass)}
+      ></span>
+    </div>
   {/if}
 </div>
