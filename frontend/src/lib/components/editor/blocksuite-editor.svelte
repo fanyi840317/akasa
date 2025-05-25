@@ -21,15 +21,19 @@
   import { effects as blocksEffects } from "@blocksuite/blocks/effects";
   import { effects as presetsEffects } from "@blocksuite/presets/effects";
 
-  import { EdgelessCoverButton } from "./toolbar/cover/cover-button";
+  import { EdgelessCoverToolButton } from "./toolbar/cover/cover-button";
   import { auth } from "$lib/stores/auth";
   import CoverSelector from "./toolbar/cover/cover-selector.svelte";
   import { Card } from "../ui";
+    import MapBase from "../map/map-base.svelte";
+    import { EdgelessMapToolButton } from "./toolbar/map/map-button";
   // Ensure effects are initialized only once globally
   if (!(window as any).__blocksuite_effects_initialized) {
     blocksEffects();
     presetsEffects();
-    customElements.define("edgeless-cover-button", EdgelessCoverButton);
+    customElements.define("edgeless-cover-tool-button", EdgelessCoverToolButton);
+
+customElements.define("edgeless-map-tool-button", EdgelessMapToolButton);
     (window as any).__blocksuite_effects_initialized = true;
   }
 
@@ -153,19 +157,21 @@
       );
       // const cover = document.createElement("edgeless-cover-tool-button");
       templateButton?.parentElement?.append(coverRef);
-
-      // templateButton?.parentElement?.parentElement?.after(divider); // Append the divider after the template button
-      // Append the divider after the template button
       templateButton?.remove();
+
+      const shapeButton = toolbarWidget.shadowRoot?.querySelector(
+        "edgeless-shape-tool-button",
+      );
+      shapeButton?.parentElement?.append(mapButtonRef);
+      shapeButton?.remove();
+
     }, 100);
-    // setTimeout(() => {
-    //   url="";
-    // },1000)
   });
   const handCoverClick = () => {
     alert("clickdwq");
     coverRef.getBoundingClientRect();
   };
+  
 
   onDestroy(() => {
     // editor?.dispose(); // Consider disposing the editor if necessary
@@ -175,6 +181,8 @@
   }
   let dividerRef: HTMLDivElement;
   let coverRef: HTMLDivElement;
+  let mapButtonRef: HTMLDivElement;
+  let mapRef: MapBase;
   let coverUrl = $state(
     "https://images.unsplash.com/photo-1448375240586-882707db888b",
   );
@@ -212,13 +220,18 @@
 </script>
 
 <div class="w-full h-full" bind:this={editorContainer}>
-  <edgeless-cover-button
+  <edgeless-cover-tool-button
     bind:this={coverRef}
     url={coverUrl}
     uploadProgress={uploadProgress}
     showUploadProgress={showUploadProgress}
     onclick={() => (showCoverSelector = true)}
-  />
+  ></edgeless-cover-tool-button>
+  
+  <edgeless-map-tool-button
+    bind:this={mapButtonRef}
+    onclick={() => console.log('Map button clicked')}
+  ></edgeless-map-tool-button>
 
   {#if showCoverSelector}
     <div
@@ -239,7 +252,7 @@
           }}
           onFileUpload={handleFileUpload}
           userId={$auth.user?.$id || ""}
-        />
+        ></CoverSelector>
       </Card>
     </div>
   {/if}

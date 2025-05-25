@@ -2,7 +2,7 @@ import { LitElement, html, css } from "lit";
 import { getTooltipWithShortcut } from "./../../unit";
 import { property } from "lit/decorators.js";
 
-export class EdgelessCoverButton extends LitElement {
+export class EdgelessCoverToolButton extends LitElement {
   static styles = css`
     :host {
       height: 100%;
@@ -50,6 +50,7 @@ export class EdgelessCoverButton extends LitElement {
       height: 100%;
       display: flex;
       flex-direction: column;
+      font-size: 12px;
       justify-content: center;
       align-items: center;
       background: rgba(0, 0, 0, 0.5);
@@ -129,7 +130,7 @@ export class EdgelessCoverButton extends LitElement {
     }
   `;
 
-  @property({ type: String })
+  @property({ type: String, reflect: true })
   declare url: string;
   @property({ type: Number })
   declare uploadProgress: number;
@@ -160,9 +161,13 @@ export class EdgelessCoverButton extends LitElement {
     this.showImageLoading = false;
   }
 
-  private _showTemplatePanel() {
-    if (this.showUploadProgress || this.showImageLoading) return;
+  attributeChangedCallback(name: string, _old: string | null, value: string | null) {
+    super.attributeChangedCallback(name, _old, value);
+    if (name === 'url' && value && value !== '') {
+      this.showImageLoading = true;
+    }
   }
+
 
   render() {
     const disabled = this.showUploadProgress || this.showImageLoading;
@@ -177,7 +182,6 @@ export class EdgelessCoverButton extends LitElement {
         <div 
           class="cover-button" 
           data-theme="black"
-          @click=${this._showTemplatePanel}
         >
           ${this.showUploadProgress
             ? html`
