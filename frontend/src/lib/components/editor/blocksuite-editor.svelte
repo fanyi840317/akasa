@@ -25,15 +25,18 @@
   import { auth } from "$lib/stores/auth";
   import CoverSelector from "./toolbar/cover/cover-selector.svelte";
   import { Card } from "../ui";
-    import MapBase from "../map/map-base.svelte";
-    import { EdgelessMapToolButton } from "./toolbar/map/map-button";
+  import MapBase from "../map/map-base.svelte";
+  import { EdgelessMapToolButton } from "./toolbar/map/map-button";
   // Ensure effects are initialized only once globally
   if (!(window as any).__blocksuite_effects_initialized) {
     blocksEffects();
     presetsEffects();
-    customElements.define("edgeless-cover-tool-button", EdgelessCoverToolButton);
+    customElements.define(
+      "edgeless-cover-tool-button",
+      EdgelessCoverToolButton,
+    );
 
-customElements.define("edgeless-map-tool-button", EdgelessMapToolButton);
+    customElements.define("edgeless-map-tool-button", EdgelessMapToolButton);
     (window as any).__blocksuite_effects_initialized = true;
   }
 
@@ -162,16 +165,35 @@ customElements.define("edgeless-map-tool-button", EdgelessMapToolButton);
       const shapeButton = toolbarWidget.shadowRoot?.querySelector(
         "edgeless-shape-tool-button",
       );
+      const mindmapButton = toolbarWidget.shadowRoot?.querySelector(
+        "edgeless-mindmap-tool-button",
+      );
+
+      // if (mindmapButton) {
+      //   // 获取父节点
+      //   const parent = mindmapButton.parentNode;
+
+      //   // 获取父节点的父节点（祖父节点）
+      //   const grandParent = parent?.parentNode;
+
+      //   // 在祖父节点中向上移动父节点（交换位置）
+      //   if (grandParent && (parent as Element).previousElementSibling) {
+      //     grandParent.insertBefore(parent, (parent as Element).previousElementSibling);
+      //   }
+      //   const aiNode = document.createElement("div");
+      //   aiNode.className="senior-tool-item";
+      //   grandParent?.appendChild(aiNode);
+      // }
       shapeButton?.parentElement?.append(mapButtonRef);
       shapeButton?.remove();
 
+      
     }, 100);
   });
   const handCoverClick = () => {
     alert("clickdwq");
     coverRef.getBoundingClientRect();
   };
-  
 
   onDestroy(() => {
     // editor?.dispose(); // Consider disposing the editor if necessary
@@ -200,7 +222,7 @@ customElements.define("edgeless-map-tool-button", EdgelessMapToolButton);
     showUploadProgress = true;
     uploadProgress = 0;
     showCoverSelector = false;
-    
+
     // 模拟上传进度
     const interval = setInterval(() => {
       uploadProgress += 10;
@@ -223,14 +245,14 @@ customElements.define("edgeless-map-tool-button", EdgelessMapToolButton);
   <edgeless-cover-tool-button
     bind:this={coverRef}
     url={coverUrl}
-    uploadProgress={uploadProgress}
-    showUploadProgress={showUploadProgress}
+    {uploadProgress}
+    {showUploadProgress}
     onclick={() => (showCoverSelector = true)}
   ></edgeless-cover-tool-button>
-  
+
   <edgeless-map-tool-button
     bind:this={mapButtonRef}
-    onclick={() => console.log('Map button clicked')}
+    onclick={() => console.log("Map button clicked")}
   ></edgeless-map-tool-button>
 
   {#if showCoverSelector}

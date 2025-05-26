@@ -124,11 +124,7 @@ import DateCard from "./actionbar-cards/date-card.svelte";
               ><FileEdit class="w-4 h-4 mr-1" />重命名</button
             >
           </li>
-          <li>
-            <button 
-              ><ImageIcon class="w-4 h-4 mr-1" />设置封面</button
-            >
-          </li>
+        
           <li><a><Trash2 class="w-4 h-4 mr-1" />删除</a></li>
           <li><a><Info class="w-4 h-4 mr-1" />查看属性</a></li>
         </ul>

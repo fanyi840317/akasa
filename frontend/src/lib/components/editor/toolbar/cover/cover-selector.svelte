@@ -177,7 +177,7 @@
       <div class="flex justify-center mt-4">
         <label
           for="file-upload-input"
-          class="btn btn-neutral btn-sm cursor-pointer"
+          class="btn btn-outline btn-primary btn-sm"
         >
           上传图片
         </label>

@@ -171,21 +171,40 @@
 
 <div
   class={cn(
-    "w-full bg-base-200 text-base-content  p-4  font-san border-l border-base-300 w-[400px] h-[100vh] ",
+    "w-full bg-base-100 text-base-content  p-4 py-2 font-san border-l border-base-300 w-[400px] h-[100vh] ",
     className
   )}
   {...restProps}
 >
-  <div class="flex items-center mb-4">
-    <h2 class="text-lg font-semibold mr-4">
-      {comments.length.toLocaleString()} 条评论
-    </h2>
-    <button class="btn btn-ghost text-neutral-400 btn-sm">
-      <ListFilter class="w-4 h-4 mr-1" />
-      排序方式
-    </button>
-  </div>
 
+
+  <div class="flex items-center mb-4 justify-between">
+
+    <h2 class="text-lg font-semibold mr-4">
+
+      {comments.length.toLocaleString()} 条评论
+
+    </h2>
+
+    <div class="flex items-center gap-2">
+
+      <button class="btn btn-ghost text-neutral-400 btn-sm">
+
+        <ListFilter class="w-4 h-4 mr-1" />
+
+        排序方式
+
+      </button>
+
+      <button class="btn btn-ghost text-neutral-400 btn-sm" onclick={() => dispatch("closeCommentsPanel")}>
+
+        关闭
+
+      </button>
+
+    </div>
+
+  </div>
   <!-- Add Comment Input -->
   <div class="flex items-start mb-6">
     <UserAvatar class="size-8 mt-1 mr-3 " fallback="范"></UserAvatar>

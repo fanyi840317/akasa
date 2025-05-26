@@ -39,7 +39,7 @@ export class EdgelessCoverToolButton extends LitElement {
       align-items: center;
       background: var(--affine-background-secondary-color);
       color: var(--affine-text-secondary-color);
-      font-size: 24px;
+      font-size: 28px;
     }
 
     .progress-container {

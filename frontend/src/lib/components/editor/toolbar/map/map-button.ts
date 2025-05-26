@@ -1,12 +1,16 @@
 import { LitElement, html, css } from "lit";
 import { property } from "lit/decorators.js";
 import { getTooltipWithShortcut } from "../../unit";
+import "mapbox-gl/dist/mapbox-gl.css";
+import mapboxgl from "mapbox-gl";
+import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
 
 export class EdgelessMapToolButton extends LitElement {
   static styles = css`
     :host {
       height: 100%;
-      overflow-y: hidden;
+      overflow: hidden;
+
       transition: transform 0.2s ease;
     }
     :host(:hover) {
@@ -16,25 +20,69 @@ export class EdgelessMapToolButton extends LitElement {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 32px;
-      height: 32px;
+      width: 94px;
+      height: 64px;
       border-radius: 4px;
       background: var(--affine-background-primary-color);
       cursor: pointer;
     }
-    .map-icon {
-      width: 20px;
-      height: 20px;
-      color: var(--affine-text-primary-color);
+    #edgeless-map-tool-button-view {
+      width: 100%;
+      height: 60px;
     }
+    /* Remove map-icon style */
   `;
 
   @property({ type: Boolean })
   declare active: boolean;
 
+  @property({ type: String })
+  declare accessToken: string; // Add accessToken property
+
+  @property({ type: Number })
+  declare lat: number; // Add lat property
+
+  @property({ type: Number })
+  declare lng: number; // Add lng property
+
+  @property({ type: Number })
+  declare zoom: number; // Add zoom property
+
+  private map?: mapboxgl.Map;
+
   constructor() {
     super();
     this.active = false;
+    this.accessToken = PUBLIC_MAPBOX_TOKEN || ""; // Initialize accessToken
+    this.lat = 39.9; // Initialize lat
+    this.lng = 116.4; // Initialize lng
+    this.zoom = 10; // Initialize zoom
+  }
+  firstUpdated() {
+    mapboxgl.accessToken = this.accessToken;
+
+    this.map = new mapboxgl.Map({
+      attributionControl: false,
+      container: this.renderRoot.querySelector('#edgeless-map-tool-button-view') as HTMLElement,
+      // style: 'mapbox://styles/mapbox/streets-v11',
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [this.lng, this.lat],
+      zoom: this.zoom,
+      pitch: 0,
+      antialias: true,
+      interactive: false,
+    });
+
+    this.map.on('load', () => {
+      console.log('Map loaded');
+    });
+  }
+
+  updated(changedProps: Map<string | number | symbol, unknown>) {
+    if (this.map && (changedProps.has('lat') || changedProps.has('lng') || changedProps.has('zoom'))) {
+      this.map.setCenter([this.lng, this.lat]);
+      this.map.setZoom(this.zoom);
+    }
   }
 
   render() {
@@ -45,9 +93,8 @@ export class EdgelessMapToolButton extends LitElement {
         .tooltipOffset=${4}
       >
         <div class="map-button" data-theme="black">
-          <svg class="map-icon" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5z"/>
-          </svg>
+          <!-- Use MapboxView component -->
+          <div id="edgeless-map-tool-button-view"></div>
         </div>
       </edgeless-toolbar-button>
     `;
