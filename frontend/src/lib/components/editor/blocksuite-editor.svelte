@@ -11,9 +11,9 @@
     type ThemeExtension,
   } from "@blocksuite/blocks";
   import { onMount, onDestroy } from "svelte";
-  import { appStore } from "$lib/stores/app-state";
+
   import "@toeverything/theme/style.css";
-  import { Doc, Slot, type Block } from "@blocksuite/store"; // Added Doc
+  import { Doc, Slot } from "@blocksuite/store"; // Added Doc
   import type { Disposable } from "@blocksuite/global/utils";
   import { createDocByJson, exportDocToJson } from "./editor-doc";
 
@@ -22,10 +22,13 @@
   import { effects as presetsEffects } from "@blocksuite/presets/effects";
 
   import { EdgelessCoverToolButton } from "./toolbar/cover/cover-button";
+  import { EdgelessAIToolButton } from "./toolbar/ai/ai-button";
   import { auth } from "$lib/stores/auth";
   import CoverSelector from "./toolbar/cover/cover-selector.svelte";
+  import AIModal from "./toolbar/ai/ai-modal.svelte";
+  import AIFeatureHandler from "./toolbar/ai/ai-feature-handler.svelte";
   import { Card } from "../ui";
-  import MapBase from "../map/map-base.svelte";
+
   import { EdgelessMapToolButton } from "./toolbar/map/map-button";
   // Ensure effects are initialized only once globally
   if (!(window as any).__blocksuite_effects_initialized) {
@@ -37,6 +40,7 @@
     );
 
     customElements.define("edgeless-map-tool-button", EdgelessMapToolButton);
+    customElements.define("edgeless-ai-tool-button", EdgelessAIToolButton);
     (window as any).__blocksuite_effects_initialized = true;
   }
 
@@ -155,19 +159,20 @@
       if (!toolbarWidget) {
         return;
       }
+
       const templateButton = toolbarWidget.shadowRoot?.querySelector(
         "edgeless-template-button",
       );
       // const cover = document.createElement("edgeless-cover-tool-button");
-      templateButton?.parentElement?.append(coverRef);
+      if (coverRef) {
+        templateButton?.parentElement?.append(coverRef);
+      }
       templateButton?.remove();
 
       const shapeButton = toolbarWidget.shadowRoot?.querySelector(
         "edgeless-shape-tool-button",
       );
-      const mindmapButton = toolbarWidget.shadowRoot?.querySelector(
-        "edgeless-mindmap-tool-button",
-      );
+
 
       // if (mindmapButton) {
       //   // 获取父节点
@@ -184,16 +189,18 @@
       //   aiNode.className="senior-tool-item";
       //   grandParent?.appendChild(aiNode);
       // }
-      shapeButton?.parentElement?.append(mapButtonRef);
-      shapeButton?.remove();
 
-      
+      if (mapButtonRef) {
+        shapeButton?.parentElement?.append(mapButtonRef);
+      }
+      shapeButton?.remove();
+      const toolsNode = toolbarWidget.shadowRoot?.querySelector(".senior-tools");
+      if (toolsNode) {
+        toolsNode?.appendChild(aiButtonRef);
+      }
     }, 100);
   });
-  const handCoverClick = () => {
-    alert("clickdwq");
-    coverRef.getBoundingClientRect();
-  };
+
 
   onDestroy(() => {
     // editor?.dispose(); // Consider disposing the editor if necessary
@@ -201,22 +208,23 @@
   export async function getContent() {
     return await exportDocToJson(editor.doc);
   }
-  let dividerRef: HTMLDivElement;
-  let coverRef: HTMLDivElement;
-  let mapButtonRef: HTMLDivElement;
-  let mapRef: MapBase;
+  let coverRef = $state<HTMLDivElement>();
+  let mapButtonRef = $state<HTMLDivElement>();
   let coverUrl = $state(
     "https://images.unsplash.com/photo-1448375240586-882707db888b",
   );
   let showCoverSelector = $state(false);
-  let coverSelectorRef: HTMLDivElement;
+  let coverSelectorRef = $state<HTMLDivElement>();
   let uploadProgress = $state(0);
   let showUploadProgress = $state(false);
 
-  function handleCoverSelect(url: string) {
-    url = url;
-    showCoverSelector = false;
-  }
+  // AI相关状态
+  let aiButtonRef: HTMLDivElement;
+  let showAIModal = $state(false);
+  let aiModalPosition = $state({ x: 0, y: 0 });
+  let activeAIFeature = $state("");
+
+
 
   function handleFileUpload(file: File) {
     showUploadProgress = true;
@@ -235,9 +243,31 @@
     }, 300);
   }
 
-  function handleLinkSubmit(url: string) {
-    url = url;
-    showCoverSelector = false;
+
+
+  // AI按钮处理函数
+  function handleAIClick() {
+    const rect = aiButtonRef?.getBoundingClientRect();
+    if (rect) {
+      aiModalPosition = {
+        x: rect.left + rect.width / 2,
+        y: rect.top
+      };
+    }
+    showAIModal = true;
+  }
+
+  function handleAIFeatureSelect(event: { featureId: string }) {
+    activeAIFeature = event.featureId;
+    showAIModal = false;
+  }
+
+  function handleAIModalClose() {
+    showAIModal = false;
+  }
+
+  function handleAIFeatureClose() {
+    activeAIFeature = "";
   }
 </script>
 
@@ -248,19 +278,36 @@
     {uploadProgress}
     {showUploadProgress}
     onclick={() => (showCoverSelector = true)}
+    onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && (showCoverSelector = true)}
+    role="button"
+    tabindex="0"
+    aria-label="选择封面"
   ></edgeless-cover-tool-button>
 
   <edgeless-map-tool-button
     bind:this={mapButtonRef}
     onclick={() => console.log("Map button clicked")}
+    onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && console.log("Map button clicked")}
+    role="button"
+    tabindex="0"
+    aria-label="地图工具"
   ></edgeless-map-tool-button>
+
+  <edgeless-ai-tool-button
+    bind:this={aiButtonRef}
+    onclick={handleAIClick}
+    onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && handleAIClick()}
+    role="button"
+    tabindex="0"
+    aria-label="AI助手"
+  ></edgeless-ai-tool-button>
 
   {#if showCoverSelector}
     <div
       class="absolute z-50"
       bind:this={coverSelectorRef}
-      style="top: {coverRef?.getBoundingClientRect().top -
-        360}px; left: {coverRef?.getBoundingClientRect().left - 150}px"
+      style="top: {(coverRef?.getBoundingClientRect()?.top ?? 0) -
+        360}px; left: {(coverRef?.getBoundingClientRect()?.left ?? 0) - 150}px"
     >
       <Card class="p-0 ">
         <CoverSelector
@@ -268,8 +315,8 @@
             coverUrl = url;
             // isDropdownOpen = false; // Close dropdown after selection
           }}
-          onLinkSubmit={(url) => {
-            // coverUrl = url;
+          onLinkSubmit={(_url) => {
+            // coverUrl = _url;
             // isDropdownOpen = false; // Close dropdown after submission
           }}
           onFileUpload={handleFileUpload}
@@ -288,5 +335,22 @@
       e.preventDefault();
       e.stopPropagation();
     }}
-  />
+    role="button"
+    tabindex="0"
+    onkeydown={(e) => e.key === 'Enter' && (showCoverSelector = false)}
+  ></div>
 {/if}
+
+<!-- AI模态框 -->
+<AIModal
+  bind:open={showAIModal}
+  position={aiModalPosition}
+  onfeatureselect={handleAIFeatureSelect}
+  onclose={handleAIModalClose}
+/>
+
+<!-- AI功能处理器 -->
+<AIFeatureHandler
+  bind:activeFeature={activeAIFeature}
+  onclose={handleAIFeatureClose}
+/>
