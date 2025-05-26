@@ -27,7 +27,7 @@ export class EdgelessMapToolButton extends LitElement {
       cursor: pointer;
     }
     #edgeless-map-tool-button-view {
-      width: 100%;
+      width: 94px;
       height: 60px;
     }
     /* Remove map-icon style */
