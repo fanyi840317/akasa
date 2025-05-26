@@ -93,7 +93,7 @@
   // If actual navigation is needed, use <a> tags or programmatic navigation.
 </script>
 
-<div class="drawer lg:drawer-open bg-base-100 min-h-screen">
+<div class="drawer lg:drawer-open bg-base-200 min-h-screen">
   <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content flex flex-col">
     <!-- Page content will be rendered here by SvelteKit -->
@@ -107,7 +107,7 @@
   <div class="drawer-side">
     <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"
     ></label>
-    <ul class="menu p-4 w-64 min-h-full bg-base-200 text-base-content">
+    <ul class="menu p-4 py-6 w-64 min-h-full bg-base-200 text-base-content">
       {#if $auth.user}
         <div class="pb-4 border-b border-base-300">
           <div class="flex items-center space-x-2">
@@ -132,7 +132,7 @@
         </div>
       {/if}
 
-      <button class="btn btn-outline btn-sm w-42 justify-between my-4">
+      <button class="btn btn-outline  w-42 justify-between my-4">
         <div class="flex gap-2">
           <Search class="w-4 h-4" />Search
         </div>
@@ -147,7 +147,7 @@
         <a
           href="/console/admin/research"
           class:btn-active={activeMenu === "Research"}
-          class="btn btn-ghost justify-start"
+          class="btn btn-secondary  btn-ghost justify-start"
           ><FileSearch class="w-4 h-4" /> Research</a
         >
       </li>
@@ -155,7 +155,7 @@
         <a
           href="/console/events"
           class:btn-active={activeMenu === "Events"}
-          class="btn btn-ghost justify-start"
+          class="btn btn-secondary  btn-ghost justify-start"
           ><BarChart2 class="w-4 h-4" /> Events</a
         >
       </li>
@@ -163,14 +163,14 @@
         <a
           href="/console/users"
           class:btn-active={activeMenu === "Users"}
-          class="btn btn-ghost justify-start"><Users class="w-4 h-4" /> Users</a
+          class="btn btn-secondary  btn-ghost justify-start"><Users class="w-4 h-4" /> Users</a
         >
       </li>
       <li>
         <a
           href="/console/groups"
           class:btn-active={activeMenu === "Groups"}
-          class="btn btn-ghost justify-start"
+          class="btn btn-secondary  btn-ghost justify-start"
           ><Users class="w-4 h-4" /> Groups</a
         >
       </li>
@@ -178,7 +178,7 @@
         <a
           href="/console/about"
           class:btn-active={activeMenu === "About"}
-          class="btn btn-ghost justify-start"><Info class="w-4 h-4" /> About</a
+          class="btn btn-secondary  btn-ghost justify-start"><Info class="w-4 h-4" /> About</a
         >
       </li>
 
@@ -188,7 +188,7 @@
           <a
             href={category.path}
             class:btn-active={activeMenu === category.name}
-            class="btn btn-ghost justify-start"
+            class="btn btn-secondary  btn-ghost justify-start"
           >
             <!-- svelte-ignore svelte_component_deprecated -->
             <svelte:component
@@ -203,14 +203,14 @@
         <a
           href="/console/all-categories"
           class:btn-active={activeMenu === "All categories"}
-          class="btn btn-ghost justify-start"
+          class="btn btn-ghost btn-secondary  justify-start"
           ><ListFilter class="w-4 h-4" /> All categories</a
         >
       </li>
 
       <!-- <div class="mt-auto flex items-center justify-between p-2 border-t border-base-300">
-        <button class="btn btn-ghost btn-sm p-1"><Settings class="w-5 h-5" /></button>
-        <button class="btn btn-ghost btn-sm p-1"><Search class="w-5 h-5" /></button>
+        <button class="btn btn-ghost btn-secondary   p-1"><Settings class="w-5 h-5" /></button>
+        <button class="btn btn-ghost btn-secondary   p-1"><Search class="w-5 h-5" /></button>
       </div> -->
     </ul>
   </div>

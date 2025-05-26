@@ -26,17 +26,17 @@ export class EdgelessAIToolButton extends LitElement {
       height: 64px;
       z-index: 50;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(59, 130, 246, 0.2);
+      /* background: rgba(255, 255, 255, 0.8); */
+      /* border: 1px solid rgba(59, 130, 246, 0.2); */
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .ai-button:hover {
+    /* .ai-button:hover {
       background: rgba(255, 255, 255, 0.95);
       border-color: rgba(59, 130, 246, 0.4);
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-    }
+    } */
 
     .ai-icon {
       width: 32px;

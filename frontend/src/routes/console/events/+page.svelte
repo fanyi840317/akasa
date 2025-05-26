@@ -19,7 +19,7 @@
   import { BatchAddEvents, EventConsoleCard } from "$lib/components/events";
   import * as Modal from "$lib/components/ui/modal";
   import { Root } from "$lib/components/ui/scroll-area";
-  // import { eventStore } from "$lib/stores/event";
+  import * as Dropdown from "$lib/components/ui/dropdown-menu";
 
   let viewMode: "table" | "card" = $state("card");
   let searchTerm = "";
@@ -79,7 +79,7 @@
   }
 </script>
 
-<div class="p-6">
+<div class="p-6 py-4">
   <div class="flex justify-between items-center mb-2">
     <div class="flex items-center gap-2">
       <h1 class="text-2xl font-semibold">Week MAY 7 - MAY 13</h1>
@@ -114,35 +114,27 @@
           <Grid class="w-4 " />
         </label>
       </div>
-      <div class="dropdown dropdown-end">
-        <button tabindex="0" class="btn btn-neutral btn-sm">
-          <Plus class="w-4 h-4" />
-          Create
-          <ChevronDown class="w-4 h-4" />
-        </button>
-        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-        {#if !showBatchAddModal}
-          <ul
-            tabindex="0"
-            class="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-300 rounded-xl w-56"
-          >
-            <li>
-              <button
-                class="hover:bg-base-300 active:bg-primary active:text-primary-content w-full text-left"
-                onclick={() => goto("/console/events/new")}
-              >
-                <PenTool class="w-4 h-4 inline-block mr-2" /> 新建事件
-              </button>
-            </li>
-
-            <li>
-              <button class="hover:bg-base-300">
-                <UploadCloud class="w-4 h-4" /> Import
-              </button>
-            </li>
-          </ul>
-        {/if}
-      </div>
+      <Dropdown.Root>
+        <Dropdown.Trigger>
+          <button class="btn btn-neutral btn-sm">
+            <Plus class="w-4 h-4" />
+            Create
+            <ChevronDown class="w-4 h-4" />
+          </button>
+        </Dropdown.Trigger>
+        <Dropdown.Content class="w-56">
+          <Dropdown.Group>
+            <Dropdown.Item onclick={() => goto("/console/events/new")}>
+              <PenTool class="w-4 h-4 mr-2" />
+              <span>新建事件</span>
+            </Dropdown.Item>
+            <Dropdown.Item>
+              <UploadCloud class="w-4 h-4 mr-2" />
+              <span>Import</span>
+            </Dropdown.Item>
+          </Dropdown.Group>
+        </Dropdown.Content>
+      </Dropdown.Root>
     </div>
   </div>
   <p class="text-xs text-base-content/60 mb-6">

@@ -32,6 +32,9 @@ importers:
       '@google/generative-ai':
         specifier: ^0.24.1
         version: 0.24.1
+      '@lucide/svelte':
+        specifier: ^0.511.0
+        version: 0.511.0(svelte@5.28.2)
       '@mapbox/mapbox-gl-geocoder':
         specifier: ^5.0.3
         version: 5.0.3
@@ -698,6 +701,11 @@ packages:
 
   '@lottiefiles/dotlottie-web@0.41.0':
     resolution: {integrity: sha512-hJR3zN9DiQkNjEA0+OJbuPJPXZtbySrfYa61WD5qFc7dBPHGDUaSC6APvwM2FSrzPy0AU4nrOPfExEe6VNznkg==}
+
+  '@lucide/svelte@0.511.0':
+    resolution: {integrity: sha512-aLCSPMUJmHlCuLXzXENXa4Z1NV2mN1iAZAFKk4bEbey+/MdsNlu+/DqwVkgW3Yvj6p8y8Vn5xZ2v9CLmPlA6Vw==}
+    peerDependencies:
+      svelte: ^5
 
   '@mapbox/fusspot@0.4.0':
     resolution: {integrity: sha512-6sys1vUlhNCqMvJOqPEPSi0jc9tg7aJ//oG1A16H3PXoIt9whtNngD7UzBHUVTH15zunR/vRvMtGNVsogm1KzA==}
@@ -3914,6 +3922,10 @@ snapshots:
       lit: 3.3.0
 
   '@lottiefiles/dotlottie-web@0.41.0': {}
+
+  '@lucide/svelte@0.511.0(svelte@5.28.2)':
+    dependencies:
+      svelte: 5.28.2
 
   '@mapbox/fusspot@0.4.0':
     dependencies:

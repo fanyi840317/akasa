@@ -8,7 +8,7 @@
   import { userImagesStore } from "$lib/stores/userImages"; // 导入用户图片 store
   import InfoCard from "$lib/components/ui/card/info-card.svelte";
   import { Card } from "$lib/components/ui/card"; // Keep Card for dropdown content
-  import ProgressContainer from "$lib/components/ui/progress-container.svelte";
+  import ProgressContainer from "$lib/components/ui/progress-container/progress-container.svelte";
   import type { HTMLAttributes } from "svelte/elements";
 
   let {

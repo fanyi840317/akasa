@@ -97,7 +97,7 @@
   <!-- AI功能模态框 -->
   <div
     class="bg-white rounded-xl shadow-2xl border border-gray-200 w-[400px]"
-    style={modalStyle}
+
     role="dialog"
     aria-modal="true"
     aria-labelledby="ai-modal-title"
