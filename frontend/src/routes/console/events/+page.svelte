@@ -122,8 +122,10 @@
             <ChevronDown class="w-4 h-4" />
           </button>
         </Dropdown.Trigger>
-        <Dropdown.Content class="w-56">
+        <Dropdown.Content class="w-48">
           <Dropdown.Group>
+            <Dropdown.Label>Appearance</Dropdown.Label>
+            <Dropdown.Separator />
             <Dropdown.Item onclick={() => goto("/console/events/new")}>
               <PenTool class="w-4 h-4 mr-2" />
               <span>新建事件</span>

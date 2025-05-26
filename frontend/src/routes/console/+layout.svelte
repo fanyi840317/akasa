@@ -132,7 +132,7 @@
         </div>
       {/if}
 
-      <button class="btn btn-outline  w-42 justify-between my-4">
+      <button class="btn btn-outline  w-44 justify-between my-4">
         <div class="flex gap-2">
           <Search class="w-4 h-4" />Search
         </div>
