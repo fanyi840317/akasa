@@ -12,7 +12,7 @@
 <button
     class="flex h-[68px] group buttonActiveRing items-stretch
     justify-start pl-4 rounded-xl cursor-pointer
-     {isEven ? 'bg-transparent' : 'bg-base-100'}"
+     {isEven ? 'bg-transparent' : 'bg-base-200'}"
      onclick = {() => onclick?.(event)}
 >
     <div
@@ -30,7 +30,7 @@
         </p>
     </div>
     <div
-        class="w-1/12 min-w-28 border-l-4 border-base-200 dark:border-dark-bg flex-center px-2 shrink-0"
+        class="w-1/12 min-w-28 border-l-4 border-base-100 dark:border-dark-bg flex-center px-2 shrink-0"
     >
         <UserAvatar
             fallback={event.  creator_name|| "?"}
@@ -54,7 +54,7 @@
         </div> -->
     </div>
     <div
-        class="w-1/12 min-w-28 border-l-4 border-base-200 dark:border-dark-bg flex-center"
+        class="w-1/12 min-w-28 border-l-4 border-base-100 dark:border-dark-bg flex-center"
     >
         <div class="w-14 h-1.5 rounded-full bg-base-200/30">
             <div
@@ -64,7 +64,7 @@
         </div>
     </div>
     <div
-        class="w-1/12 min-w-28 flex-center border-l-4 border-base-200 dark:border-dark-bg flex items-center pl-2"
+        class="w-1/12 min-w-28 flex-center border-l-4 border-base-100 dark:border-dark-bg flex items-center pl-2"
     >
         <span class="text-xs"
             >{new Date(event.occurredAt).toLocaleDateString("zh-CN")}</span

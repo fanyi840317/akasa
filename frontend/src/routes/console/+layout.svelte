@@ -93,10 +93,10 @@
 </script>
 <style>
   .box-s {
-  box-shadow:  -16px -6px 30px var(--color-base-100);
+  box-shadow:  -16px -6px 30px var(--color-base-200);
 }
 </style>
-<div class="drawer lg:drawer-open bg-base-200 min-h-screen">
+<div class="drawer lg:drawer-open bg-base-100 min-h-screen">
   <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content flex flex-col px-4 py-2 box-s z-0">
     <!-- Page content will be rendered here by SvelteKit -->
@@ -112,7 +112,7 @@
     ></label>
     <ul class="menu pl-10 py-10 w-72 min-h-full  z-2 text-base-content/50 -mr-4">
         <h1 class="text-2xl font-bold mb-4 text-center">Akas</h1>
-      <div class=" w-full rounded-xl bg-secondary/80 p-4 ">
+      <div class=" w-full rounded-xl bg-base-200 p-4 ">
         <button
           class="btn btn-ghost w-48 items-center justify-between my-4 text-base-content/50"
         >

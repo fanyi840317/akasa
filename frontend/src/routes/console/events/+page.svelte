@@ -19,7 +19,7 @@
 </script>
 
 <div
-  class="mx-auto px-6 pt-10 xs:px-8 sm:px-12 lg:px-6 pt-6 flex flex-col
+  class="mx-auto px-6 pt-6 xs:px-8 sm:px-12 lg:px-6  flex flex-col
    justify-start  w-full"
   style="max-width: 1608px;"
 >
@@ -55,7 +55,7 @@
   <!-- <p class="text-xs text-base-content/60 mb-10">
     Last Updated: May 12, 2025 12:06 pm
   </p> -->
-  <ScrollArea class="h-[calc(100vh-300px)]">
+  <ScrollArea class="h-[calc(100vh-298px)]">
     <EventList {events} onclick={handEventClick} />
   </ScrollArea>
   <div class="flex-center">
