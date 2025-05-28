@@ -2,7 +2,7 @@
   import { Send, Plus, Search, Lightbulb, Brain, Image as ImageIcon, Mic, Settings2, MoreHorizontal, Camera, HelpCircle, Trash2 } from 'lucide-svelte';
   import { sineOut } from 'svelte/easing';
   import { fly } from 'svelte/transition';
-  import {UserChat,InputArea} from '$lib/components/ai';
+  import { UserChat, InputArea } from '$lib/components/ai';
 
   type Message = {
     id: string;
@@ -23,17 +23,17 @@
     return Math.random().toString(36).substring(2, 15);
   }
 
-  async function handleSubmit() {
-    if (!inputText.trim()) return;
+  async function handleSubmit({ detail }: CustomEvent<{ text: string }>) {
+    const text = detail.text;
+    if (!text) return;
 
     const newMessage: Message = {
       id: generateId(),
       role: 'user',
-      content: inputText.trim(),
+      content: text,
       timestamp: new Date(),
     };
     messages = [...messages, newMessage];
-    const currentInput = inputText.trim();
     inputText = '';
     isLoading = true;
 
@@ -43,7 +43,7 @@
     const aiResponse: Message = {
       id: generateId(),
       role: 'assistant',
-      content: `这是对 "${currentInput}" 的模拟回复。`, // More sophisticated response logic will be needed
+      content: `这是对 "${text}" 的模拟回复。`, // More sophisticated response logic will be needed
       timestamp: new Date(),
     };
     messages = [...messages, aiResponse];
@@ -65,10 +65,9 @@
     "如果恐龙从未灭绝会怎样？",
     "给我推荐一部科幻电影。"
   ];
-
   function useSuggestedPrompt(prompt: string) {
     inputText = prompt;
-    handleSubmit();
+    handleSubmit({ detail: { text: prompt } } as CustomEvent<{ text: string }>);
   }
 
   let inputWrapperRef: HTMLElement | undefined = $state();
@@ -188,44 +187,13 @@
       {#if !chatStarted}
         <!-- Placeholder for potential initial buttons when input is centered -->
       {/if}
-      <form onsubmit={handleSubmit} class="flex flex-col gap-2 bg-base-200 p-2 rounded-xl shadow-2xl">
-        <!-- 工具栏 -->
-        <InputArea></InputArea>
-        <!-- 输入区域 -->
-        <!-- <div class="flex items-end gap-2">
-          <textarea
-            bind:value={inputText}
-            placeholder="询问任何问题..."
-            class="flex-grow px-3 py-2 bg-transparent text-gray-200 placeholder-gray-500 focus:outline-none resize-none overflow-y-auto max-h-40 text-sm md:text-base"
-            rows="1"
-            onkeydown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-            oninput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = 'auto';
-              target.style.height = `${target.scrollHeight}px`;
-            }}
-          ></textarea>
-          <button type="button" class="p-2 text-gray-400 hover:text-gray-200 transition-colors rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 tooltip" data-tip="语音输入">
-            <Mic size={20} />
-          </button>
-          <button 
-            type="submit" 
-            disabled={isLoading || !inputText.trim()}
-            class="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {#if isLoading}
-              <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            {:else}
-              <Send size={20} />
-            {/if}
-          </button>
-        </div> -->
-      </form>
+      <div class="flex flex-col gap-2 bg-base-200 p-2 rounded-xl shadow-2xl">
+        <InputArea 
+          bind:value={inputText}
+          {isLoading}
+          on:submit={handleSubmit}
+        />
+      </div>
       <p class="text-xs text-gray-500 text-center mt-2">Trae AI. 回答可能不准确或不完整。</p>
     </div>
   </div>

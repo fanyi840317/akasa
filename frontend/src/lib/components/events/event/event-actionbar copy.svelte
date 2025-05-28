@@ -22,7 +22,7 @@
   import type { Location } from "$lib/types/map";
   import { Clock } from "lucide-svelte"; // Import Clock icon
   import CoverCard from "./actionbar-cards/cover-card.svelte";
-  import DateCard from "./actionbar-cards/date-card.svelte";
+import DateCard from "./actionbar-cards/date-card.svelte";
   import MapCard from "./actionbar-cards/map-card.svelte";
   // import  from "daisyui/src/colors/themes";
 
@@ -69,57 +69,90 @@
   let newLocation = $state<Location | null>(null);
   let isEditingTime = $state(false); // New state for time modal
   let newEventTime = $state<Date | null>(eventTime); // New state for selected time
+
+  
 </script>
 
-<div class="relative w-full bg-secondary/50"
->
+{#if editable}
   <div
-    class="flex gap-x-4 h-16 relative p-3 items-center w-full justify-between"
+    class="p-2 flex justify-between items-center  bg-secondary border-b border-base-200 
+
+    absolute top-0 left-0 right-0 z-10 "
   >
-    <div
-      class="border-b-[0.4px] border-neutral absolute inset-x-0 bottom-0 h-px"
-    ></div>
-    <div
-      class="flex gap-8 text-sm min-w-[500px] justify-between  max-lg:w-full!"
-      style="width: 643px;"
-    >
-      <div class="flex shrink items-center gap-2">
-        <button class="btn btn-sm btn-ghost btn-neutral" onclick={onClose}>
-          <ArrowLeftIcon class="w-4 h-4" />
-          Events
-        </button>
-        <div
-          class="relative shrink text-sm leading-snug flex grow flex-col w-full"
+    <div class="flex flex-row items-center gap-4">
+      <button class="btn btn-sm btn-ghost btn-neutral" onclick={onClose}>
+        <ArrowLeftIcon class="w-4 h-4" />
+        Events
+      </button>
+      <h1 class="text-xl font-semibold mr-2">{title}</h1>
+      <!-- <DateCard eventDate={eventTime ? eventTime.toISOString() : undefined} />-->
+      <!-- <MapCard locationData={location} />  -->
+      
+      <!-- <div class="dropdown dropdown-center">
+        <button
+          class="btn btn-sm"
+          class:btn-active={isPropertiesPanelOpen}
+          onclick={() => {
+            isPropertiesPanelOpen = !isPropertiesPanelOpen;
+          }}
         >
-          <div class="flex justify-between w-full">
-            <h3 class="font-semibold flex gap-2">
-              <span class="line-clamp-1 text-left">{title}</span>
-            </h3>
-          </div>
-          <p class="font-normal line-clamp-1 text-neutral-content/50 text-xs">
-            {summary || "没有描述"}
-          </p>
+          <Settings2 class="w-4 h-4 mr-1" />
+          属性
+         
+        </button>
+        <div class="dropdown-content">
+          <ul class="menu menu-md w-full rouded-xl">
+            <EventPropertyCard categories={[]} />
+          </ul>
         </div>
+      </div> -->
+
+      <div class="dropdown dropdown-start">
+        <button
+          aria-label="Change cover"
+          tabindex="0"
+          class="btn btn-sm btn-circle btn-ghost btn-neutral"
+        >
+          <More class="w-4 h-4" />
+        </button>
+        <ul
+          tabindex="0"
+          class="menu menu-mddropdown-content bg-base-300
+          dropdown-content bg-base-200 text-base-content rounded-box
+          rounded-xl z-1 w-48 border border-white/5 shadow-2xl outline-1 outline-black/5"
+        >
+          <li>
+            <button 
+              ><FileEdit class="w-4 h-4 mr-1" />重命名</button
+            >
+          </li>
+        
+          <li><a><Trash2 class="w-4 h-4 mr-1" />删除</a></li>
+          <li><a><Info class="w-4 h-4 mr-1" />查看属性</a></li>
+        </ul>
       </div>
     </div>
-    <div class="absolute right-0 lg:pr-3 shrink-0 lg:block hidden">
-      <div
-        class="gap-2 h-0 items-center flex text-sm font-medium"
-        style="z-index: 4;"
+
+    <div class="flex items-center gap-2">
+      {#if showSaveButton}
+      <button class="btn btn-ghost btn-neutral btn-sm" onclick={onSaveDocument}>
+        <SaveIcon class="w-4 h-4 mr-1" />
+        保存
+      </button>
+      {/if}
+      <button
+        class="btn  btn-neutral btn-sm px-1 pr-2"
+        onclick={() => {
+          isCommentsPanelOpen = !isCommentsPanelOpen;
+        }}
       >
-        <div class="flex gap-2 select-none relative justify-start items-center">
-          <UserAvatar
-            class="size-6 group-hover:opacity-100 opacity-80 transition-opacity"
-            fallback="F"
-          ></UserAvatar>
-        </div>
-        <button
-          class="btn rounded-full btn-neutral"
-          onclick={() => {
-            isCommentsPanelOpen = !isCommentsPanelOpen;
-          }}>添加评论</button
-        >
-      </div>
+        <!-- <UserAvatar
+          class="size-6 group-hover:opacity-100 opacity-80 transition-opacity"
+        ></UserAvatar> -->
+
+        +添加评论
+      </button>
     </div>
   </div>
-</div>
+{/if}
+
