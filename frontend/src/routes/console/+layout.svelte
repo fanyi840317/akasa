@@ -23,6 +23,8 @@
   import { BatchAddEvents } from "$lib/components/events";
   import { effects as blocksEffects } from "@blocksuite/blocks/effects";
   import { effects as presetsEffects } from "@blocksuite/presets/effects";
+  import NavItem from "$lib/components/ui/nav/nav-item.svelte";
+  import CategoryNavItem from "$lib/components/ui/nav/category-nav-item.svelte";
 
   const categories = [
     {
@@ -273,9 +275,10 @@
   <div class="drawer-side">
     <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"
     ></label>
-    <ul class="menu pl-10 py-10 w-68 min-h-full text-base-content/50 -mr-4">
+    <div class="flex flex-col h-full">
+      <ul class="menu pl-10 py-10 w-68 text-base-content/50 -mr-4 flex-1">
         <h1 class="text-2xl font-bold mb-4 text-center">Akas</h1>
-      <div class=" w-full rounded-xl bg-base-200 p-4 ">
+      <div class="w-full flex-1 rounded-xl bg-base-200 p-4">
         <button
           class="btn btn-ghost w-full items-center justify-between my-4 text-base-content/50"
         >
@@ -289,75 +292,63 @@
         </button>
         <!-- Sidebar content here -->
         <li class="menu-title text-xs">Navigation</li>
-        <li>
-          <a
-            href="/console/admin/research"
-            class:btn-active={activeMenu === "Research"}
-            class:text-base-content={activeMenu === "Research"}
-            class="btn btn-secondary hover:bg-base-100/80 text-base-content/50 btn-ghost justify-start"
-            ><FileSearch class="w-4 h-4" /> Research</a
-          >
-        </li>
-        <li>
-          <a
-            href="/console/events"
-            class:text-base-content={activeMenu === "Events"}
-            class="btn btn-neutral hover:btn-netural {activeMenu === "Events"? 'bg-base-100/80':'' } btn-ghost justify-start"
-            ><BarChart2 class="w-4 h-4" /> Events</a
-          >
-        </li>
-        <li>
-          <a
-            href="/console/users"
-            class:btn-active={activeMenu === "Users"}
-            class="btn btn-secondary text-base-content/50 btn-ghost justify-start"
-            ><Users class="w-4 h-4" /> Users</a
-          >
-        </li>
-        <li>
-          <a
-            href="/console/groups"
-            class:btn-active={activeMenu === "Groups"}
-            class="btn btn-secondary text-base-content/50 btn-ghost justify-start"
-            ><Users class="w-4 h-4" /> Groups</a
-          >
-        </li>
-        <li>
-          <a
-            href="/console/about"
-            class:btn-active={activeMenu === "About"}
-            class="btn btn-secondary text-base-content/50 btn-ghost justify-start"
-            ><Info class="w-4 h-4" /> About</a
-          >
-        </li>
+        
+        <NavItem 
+          href="/console/admin/research" 
+          icon={FileSearch} 
+          label="Research" 
+          isActive={activeMenu === "Research"}
+        />
+        
+        <NavItem 
+          href="/console/events" 
+          icon={BarChart2} 
+          label="Events" 
+          isActive={activeMenu === "Events"}
+        />
+        
+        <NavItem 
+          href="/console/users" 
+          icon={Users} 
+          label="Users" 
+          isActive={activeMenu === "Users"}
+        />
+        
+        <NavItem 
+          href="/console/groups" 
+          icon={Users} 
+          label="Groups" 
+          isActive={activeMenu === "Groups"}
+        />
+        
+        <NavItem 
+          href="/console/about" 
+          icon={Info} 
+          label="About" 
+          isActive={activeMenu === "About"}
+        />
 
         <li class="menu-title text-xs mt-4">Categories</li>
         {#each categories as category}
-          <li>
-            <a
-              href={category.path}
-              class:btn-active={activeMenu === category.name}
-              class="btn btn-secondary text-base-content/50 btn-ghost justify-start"
-            >
-              <!-- svelte-ignore svelte_component_deprecated -->
-              <svelte:component
-                this={category.icon}
-                class={`w-3 h-3 mr-1 p-0.5 rounded-sm ${category.color} text-base-content/50`}
-              />
-              {category.name}
-            </a>
-          </li>
+          <CategoryNavItem 
+            href={category.path}
+            icon={category.icon}
+            label={category.name}
+            color={category.color}
+            isActive={activeMenu === category.name}
+          />
         {/each}
-        <li>
-          <a
-            href="/console/all-categories"
-            class:btn-active={activeMenu === "All categories"}
-            class="btn btn-ghost btn-secondary text-base-content/50 justify-start"
-            ><ListFilter class="w-4 h-4" /> All categories</a
-          >
-        </li>
+        
+        <NavItem 
+          href="/console/all-categories" 
+          icon={ListFilter} 
+          label="All categories" 
+          isActive={activeMenu === "All categories"}
+          class="btn-ghost"
+        />
       </div>
-
+      </ul>
+      
       <div class="mt-auto flex justify-center items-center p-2">
         {#if $auth.user}
           <div class="pb-4">
@@ -386,6 +377,6 @@
         <!-- <button class="btn btn-ghost btn-secondary text-base-content/50   p-1"><Settings class="w-5 h-5" /></button>
         <button class="btn btn-ghost btn-secondary text-base-content/50   p-1"><Search class="w-5 h-5" /></button> -->
       </div>
-    </ul>
+    </div>
   </div>
 </div>

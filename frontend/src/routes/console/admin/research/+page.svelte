@@ -187,14 +187,11 @@
       {#if !chatStarted}
         <!-- Placeholder for potential initial buttons when input is centered -->
       {/if}
-      <div class="flex flex-col gap-2 bg-base-200 p-2 rounded-xl shadow-2xl">
-        <InputArea 
+      <InputArea 
           bind:value={inputText}
           {isLoading}
           on:submit={handleSubmit}
         />
-      </div>
-      <p class="text-xs text-gray-500 text-center mt-2">Trae AI. 回答可能不准确或不完整。</p>
     </div>
   </div>
 </div>
