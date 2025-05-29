@@ -13,6 +13,9 @@
     ThumbsDown,
     MessageCircle,
     FileSearch,
+    Minimize2,
+    X,
+    Maximize2
   } from "lucide-svelte";
   import { page } from "$app/stores";
   import { auth } from "$lib/stores/auth"; // 假设 auth store 的路径
@@ -56,6 +59,8 @@
 
   let { children } = $props();
   let activeMenu = $state("");
+  let dockedWindows = $state([]);
+  let minimizedWindows = $state([]);
 
   // Determine activeMenu based on the current path
   $effect(() => {
@@ -87,34 +92,192 @@
     }
   });
 
+  // 窗口管理函数
+  function addDockedWindow(window) {
+    dockedWindows = [...dockedWindows, window];
+  }
+  
+  function removeDockedWindow(windowId) {
+    dockedWindows = dockedWindows.filter(w => w.id !== windowId);
+  }
+  
+  function addMinimizedWindow(window) {
+    minimizedWindows = [...minimizedWindows, window];
+  }
+  
+  function removeMinimizedWindow(windowId) {
+    minimizedWindows = minimizedWindows.filter(w => w.id !== windowId);
+  }
+  
+  function restoreWindow(windowId) {
+    const window = minimizedWindows.find(w => w.id === windowId);
+    if (window && window.onRestore) {
+      window.onRestore();
+      removeMinimizedWindow(windowId);
+    }
+  }
+  
+  // 全局窗口管理器
+  if (typeof window !== 'undefined') {
+    window.windowManager = {
+      addDockedWindow,
+      removeDockedWindow,
+      addMinimizedWindow,
+      removeMinimizedWindow
+    };
+  }
+  
   // Helper function to create navigation links, assuming you might want to navigate
   // For buttons that just set activeMenu, on:click is fine as is.
   // If actual navigation is needed, use <a> tags or programmatic navigation.
 </script>
 <style>
   .box-s {
-  box-shadow:  -16px -6px 30px var(--color-base-200);
-}
+    box-shadow: -16px -6px 30px var(--color-base-200);
+  }
+  
+  .dock-area {
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px dashed rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .dock-area.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+  
+  .docked-window {
+    transition: all 0.3s ease;
+    animation: slideInRight 0.3s ease;
+  }
+  
+  .minimized-card {
+    transition: all 0.3s ease;
+    animation: slideInUp 0.3s ease;
+  }
+  
+  .minimized-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 </style>
-<div class="drawer lg:drawer-open bg-base-100 min-h-screen">
+<div class="drawer lg:drawer-open bg-base-100 min-h-screen relative">
   <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content flex flex-col px-4 py-2 box-s z-0">
     <!-- Page content will be rendered here by SvelteKit -->
     {@render children()}
     <label
       for="my-drawer-2"
-      class="btn btn-primary drawer-button lg:hidden fixed bottom-4 right-4 z-10"
+      class="btn btn-primary drawer-button lg:hidden fixed bottom-4 right-4"
       >Open drawer</label
     >
   </div>
+  
+  <!-- 右边栏停靠区域 -->
+   {#if false}
+  <div class="fixed right-0 top-0 h-full w-80 bg-base-200/50 backdrop-blur-sm border-l border-base-300 z-40 flex flex-col">
+    <!-- 停靠窗口区域 -->
+    <div class="flex-1 p-4">
+      <h3 class="text-sm font-medium text-base-content/70 mb-3">停靠窗口</h3>
+      <div class="dock-area rounded-lg p-2 min-h-32 mb-4" class:active={dockedWindows.length > 0}>
+        {#if dockedWindows.length === 0}
+          <div class="text-center text-base-content/50 text-xs py-8">
+            拖拽窗口到此处停靠
+          </div>
+        {:else}
+          {#each dockedWindows as window (window.id)}
+            <div class="docked-window bg-base-100 rounded-lg p-3 mb-2 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="text-sm font-medium truncate">{window.title}</h4>
+                <div class="flex gap-1">
+                  <button 
+                    class="btn btn-ghost btn-xs"
+                    onclick={() => window.onUndock?.()}
+                  >
+                    <Maximize2 class="w-3 h-3" />
+                  </button>
+                  <button 
+                    class="btn btn-ghost btn-xs"
+                    onclick={() => {
+                      window.onClose?.();
+                      removeDockedWindow(window.id);
+                    }}
+                  >
+                    <X class="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+              <div class="text-xs text-base-content/60">
+                {window.content || '窗口内容'}
+              </div>
+            </div>
+          {/each}
+        {/if}
+      </div>
+    </div>
+    
+    <!-- 最小化窗口区域 -->
+    <div class="p-4 border-t border-base-300">
+      <h3 class="text-sm font-medium text-base-content/70 mb-3">最小化窗口</h3>
+      <div class="grid grid-cols-2 gap-2">
+        {#each minimizedWindows as window (window.id)}
+          <div 
+            class="minimized-card bg-base-100 rounded-lg p-3 cursor-pointer shadow-sm hover:shadow-md"
+            onclick={() => restoreWindow(window.id)}
+          >
+            <div class="flex items-center justify-between mb-1">
+              <h4 class="text-xs font-medium truncate">{window.title}</h4>
+              <button 
+                class="btn btn-ghost btn-xs"
+                onclick={(e) => {
+                  e.stopPropagation();
+                  window.onClose?.();
+                  removeMinimizedWindow(window.id);
+                }}
+              >
+                <X class="w-2 h-2" />
+              </button>
+            </div>
+            <div class="text-xs text-base-content/50 truncate">
+              {window.content || '点击恢复'}
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  </div>
+  {/if}
   <div class="drawer-side">
     <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"
     ></label>
-    <ul class="menu pl-10 py-10 w-72 min-h-full  z-2 text-base-content/50 -mr-4">
+    <ul class="menu pl-10 py-10 w-68 min-h-full text-base-content/50 -mr-4">
         <h1 class="text-2xl font-bold mb-4 text-center">Akas</h1>
       <div class=" w-full rounded-xl bg-base-200 p-4 ">
         <button
-          class="btn btn-ghost w-48 items-center justify-between my-4 text-base-content/50"
+          class="btn btn-ghost w-full items-center justify-between my-4 text-base-content/50"
         >
           <div class="flex gap-2 items-center">
             <Search class="w-4 h-4" />Search

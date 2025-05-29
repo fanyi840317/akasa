@@ -71,14 +71,10 @@
   let newEventTime = $state<Date | null>(eventTime); // New state for selected time
 </script>
 
-<div class="relative w-full bg-secondary/50"
->
+<div class="relative w-full bg-neutral/50 border-b-[0.4px] border-neutral">
   <div
     class="flex gap-x-4 h-16 relative p-3 items-center w-full justify-between"
   >
-    <div
-      class="border-b-[0.4px] border-neutral absolute inset-x-0 bottom-0 h-px"
-    ></div>
     <div
       class="flex gap-8 text-sm min-w-[500px] justify-between  max-lg:w-full!"
       style="width: 643px;"
