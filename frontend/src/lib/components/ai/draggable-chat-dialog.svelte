@@ -12,7 +12,8 @@
   } from "lucide-svelte";
   import { GoogleGenerativeAI } from "@google/generative-ai";
   import { PUBLIC_GEMINI_API_KEY } from "$env/static/public";
-  import DraggableWindow from "../ui/draggable-window.svelte";
+  import DraggableWindow from "../ui/draggable-window/draggable-window.svelte";
+  import InputArea from "./input-area.svelte";
   import { ScrollArea } from "../ui/scroll-area";
   import { marked } from "marked";
   import type { ChatMessage } from "$lib/types/ai";
@@ -30,6 +31,9 @@
     collapsedCardX = $bindable(0),
     collapsedCardY = $bindable(0),
     onclose,
+    onDock,
+    onMaximize,
+    hideDockButton = false,
   } = $props<{
     open?: boolean;
     apiKey?: string;
@@ -41,6 +45,9 @@
     collapsedCardX?: number;
     collapsedCardY?: number;
     onclose?: () => void;
+    onDock?: () => void;
+    onMaximize?: () => void;
+    hideDockButton?: boolean;
   }>();
 
   // Window management
@@ -273,13 +280,17 @@
   }
 
   function handleDock() {
-    // Dock functionality is handled by DraggableWindow component
-    console.log("Window docked");
+    // 调用父组件传递的onDock事件处理器
+    onDock?.();
+    // 隐藏当前浮动窗口
+    open = false;
   }
 
   function handleMinimize() {
-    // Minimize functionality is handled by DraggableWindow component
-    console.log("Window minimized");
+    // 调用父组件传递的onMaximize事件处理器
+    onMaximize?.();
+    // 隐藏当前浮动窗口
+    open = false;
   }
 
   // Watch for initialMessages changes
@@ -305,6 +316,11 @@
 
 
 
+  // 处理input-area的generate事件
+  function handleGenerate(event: CustomEvent<{ text: string }>) {
+    sendMessage(event.detail.text);
+  }
+
   // 计算最后一条消息
   let lastMessage = $derived(
     messages.length > 0 ? messages[messages.length - 1] : null
@@ -322,6 +338,7 @@
       minHeight={400}
       {x}
       {y}
+      {hideDockButton}
       onClose={closeDialog}
       onDock={handleDock}
       onMinimize={handleMinimize}
@@ -444,17 +461,14 @@
           </div>
         </ScrollArea>
 
-        <!-- 状态显示区域 -->
-        {#if isLoading}
-          <div class="border-t border-base-300 p-4 -mt-10">
-            <div
-              class="flex items-center justify-center gap-2 text-sm opacity-70"
-            >
-              <Loader2 class="h-4 w-4 animate-spin" />
-              <span>AI 正在思考中...</span>
-            </div>
-          </div>
-        {/if}
+        <!-- 输入区域 -->
+        <div class="border-t border-base-300">
+          <InputArea
+            on:generate={handleGenerate}
+            disabled={isLoading}
+            placeholder="输入消息..."
+          />
+        </div>
       </div>
     </DraggableWindow>
   {/if}

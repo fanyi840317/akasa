@@ -9,7 +9,7 @@
 </script>
 
 <InfoCard
-	class="shadow-sm rounded-lg bg-base-300 w-[150px] min-w-[120px] max-w-[200px] hover:shadow-md transition-shadow cursor-pointer m-2"
+	class="shadow-sm rounded-lg bg-base-300 w-[100px] min-w-[120px] max-w-[200px] hover:shadow-md transition-shadow cursor-pointer m-2"
 	title={title}
 	description={timestamp}
 	info={messageCount.toString()}

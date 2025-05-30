@@ -17,6 +17,7 @@
     onClose,
     onDock,
     onMinimize,
+    hideDockButton = false,
     class: className = "",
     ...restProps
   }: HTMLAttributes<HTMLDivElement> & {
@@ -33,6 +34,7 @@
     onClose?: () => void;
     onDock?: () => void;
     onMinimize?: () => void;
+    hideDockButton?: boolean;
     class?: string;
   } = $props();
   // } = $props<>();
@@ -184,11 +186,16 @@
       if (onDock) {
         onDock();
       } else if (typeof window !== "undefined" && window.windowManager) {
-        // 使用全局窗口管理器
+        // 使用全局窗口管理器，传递组件内容而不仅是文本
+        const childComponent = children?.() || null;
+        
         window.windowManager.addDockedWindow({
           id: title + "_" + Date.now(),
           title: title,
           content: "停靠的窗口内容",
+          // 如果有子组件，传递它
+          component: childComponent?.type,
+          props: childComponent?.props || {},
           onUndock: () => {
             handleUndock();
             open = true;
@@ -286,13 +293,15 @@
     >
       <h3 class="font-medium text-sm">{title}</h3>
       <div class="window-controls flex items-center gap-1">
-        <button
-          class="btn btn-ghost btn-xs w-6 h-6 p-0 hover:bg-success/20"
-          onclick={handleDock}
-          title="停靠到右侧"
-        >
-          <PanelRight class="w-3 h-3" />
-        </button>
+        {#if !hideDockButton}
+          <button
+            class="btn btn-ghost btn-xs w-6 h-6 p-0 hover:bg-success/20"
+            onclick={handleDock}
+            title="停靠到右侧"
+          >
+            <PanelRight class="w-3 h-3" />
+          </button>
+        {/if}
         <button
           class="btn btn-ghost btn-xs w-6 h-6 p-0 hover:bg-warning/20"
           onclick={handleMinimize}

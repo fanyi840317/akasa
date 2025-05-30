@@ -5,3 +5,4 @@ export * from "./globe";
 export * from "./modal";
 export * from "./resizable";
 export * from "./sonner";
+export * from "./tooltip";

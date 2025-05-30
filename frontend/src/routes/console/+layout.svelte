@@ -5,26 +5,34 @@
     Shield,
     MessageSquare,
     Info,
-    Settings,
-    Search,
     ListFilter,
     FileText,
     ThumbsUp,
     ThumbsDown,
     MessageCircle,
     FileSearch,
+    Compass,
+    Plus,
+    Map,
+    Settings,
+    Search,
     Minimize2,
     X,
-    Maximize2
+    Maximize2,
+    MapIcon,
   } from "lucide-svelte";
   import { page } from "$app/stores";
-  import { auth } from "$lib/stores/auth"; // 假设 auth store 的路径
+  import { auth } from "$lib/stores/auth";
+  import { appStore } from "$lib/stores/app-state";
   import { UserAvatar } from "$lib/components/ui/avatar";
   import { BatchAddEvents } from "$lib/components/events";
   import { effects as blocksEffects } from "@blocksuite/blocks/effects";
   import { effects as presetsEffects } from "@blocksuite/presets/effects";
   import NavItem from "$lib/components/ui/nav/nav-item.svelte";
   import CategoryNavItem from "$lib/components/ui/nav/category-nav-item.svelte";
+  import DraggableChatDialog from "$lib/components/ai/draggable-chat-dialog.svelte";
+  import { LeftSidebar, TopBar } from "$lib/components/console-layout";
+  import { goto } from "$app/navigation";
 
   const categories = [
     {
@@ -38,31 +46,26 @@
       icon: FileText,
       color: "bg-orange-500/20",
       path: "/console/categories/how-to",
-    }, // Assuming FileText is for 'How To'
+    },
     {
       name: "Feature Requests",
       icon: ThumbsUp,
       color: "bg-green-500/20",
       path: "/console/categories/feature-requests",
-    }, // Assuming ThumbsUp is for 'Feature Requests'
-    {
-      name: "Bug Reports",
-      icon: ThumbsDown,
-      color: "bg-purple-500/20",
-      path: "/console/categories/bug-reports",
-    }, // Assuming ThumbsDown is for 'Bug Reports'
-    {
-      name: "Feedback",
-      icon: MessageCircle,
-      color: "bg-blue-500/20",
-      path: "/console/categories/feedback",
-    }, // Assuming MessageCircle is for 'Feedback'
+    },
   ];
 
   let { children } = $props();
   let activeMenu = $state("");
-  let dockedWindows = $state([]);
-  let minimizedWindows = $state([]);
+  let chatDialogOpen = $state(false);
+  let chatDialogX = $state(100);
+  let chatDialogY = $state(100);
+
+  // 订阅appStore状态
+  let appState = $state(appStore.get());
+  appStore.subscribe((state) => {
+    appState = state;
+  });
 
   // Determine activeMenu based on the current path
   $effect(() => {
@@ -72,7 +75,7 @@
     if (currentPath.startsWith("/console/users")) {
       activeMenu = "Users";
     } else if (currentPath.startsWith("/console/events")) {
-      activeMenu = "Events";
+      activeMenu = "Explore";
     } else if (currentPath.startsWith("/console/admin/research")) {
       activeMenu = "Research";
     } else if (currentPath.startsWith("/console/groups")) {
@@ -82,7 +85,7 @@
     } else {
       // Check categories
       const activeCategory = categories.find((cat) =>
-        currentPath.startsWith(cat.path),
+        currentPath.startsWith(cat.path)
       );
       if (activeCategory) {
         activeMenu = activeCategory.name;
@@ -94,289 +97,166 @@
     }
   });
 
-  // 窗口管理函数
-  function addDockedWindow(window) {
-    dockedWindows = [...dockedWindows, window];
+  // 处理新建按钮点击
+  function handleChatClick() {
+    chatDialogOpen = true;
   }
-  
-  function removeDockedWindow(windowId) {
-    dockedWindows = dockedWindows.filter(w => w.id !== windowId);
+
+  // 处理聊天对话框关闭
+  function handleChatClose() {
+    chatDialogOpen = false;
   }
-  
-  function addMinimizedWindow(window) {
-    minimizedWindows = [...minimizedWindows, window];
+
+  // 处理窗口停靠到侧边栏
+  function handleDockToSidebar() {
+    // 添加聊天组件到侧边栏tabs
+    appStore.addSidebarTab({
+      id: "ai-chat",
+      title: "AI 对话",
+      component: DraggableChatDialog,
+      props: {
+        open: true,
+        apiKey: undefined,
+        modelName: "gemini-1.5-flash",
+        initialMessages: [],
+        hideDockButton: true,
+      },
+      icon: MessageSquare,
+    });
+
+    // 打开侧边栏
+    appStore.setSidebarOpen(true);
+
+    // 设置为活动标签页
+    appStore.setActiveSidebarTab("ai-chat");
+
+    // 关闭浮动对话框
+    chatDialogOpen = false;
   }
-  
-  function removeMinimizedWindow(windowId) {
-    minimizedWindows = minimizedWindows.filter(w => w.id !== windowId);
+
+  // 处理窗口最大化
+  function handleMaximize() {
+    // 导航到特定区域
+    window.location.hash = "#L145-147";
+    chatDialogOpen = false;
   }
-  
-  function restoreWindow(windowId) {
-    const window = minimizedWindows.find(w => w.id === windowId);
-    if (window && window.onRestore) {
-      window.onRestore();
-      removeMinimizedWindow(windowId);
-    }
-  }
-  
-  // 全局窗口管理器
-  if (typeof window !== 'undefined') {
-    window.windowManager = {
-      addDockedWindow,
-      removeDockedWindow,
-      addMinimizedWindow,
-      removeMinimizedWindow
-    };
-  }
-  
-  // Helper function to create navigation links, assuming you might want to navigate
-  // For buttons that just set activeMenu, on:click is fine as is.
-  // If actual navigation is needed, use <a> tags or programmatic navigation.
 </script>
+
+<div class="drawer lg:drawer-open bg-base-100 min-h-screen relative">
+  <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+  <div class="drawer-content flex flex-col px-4 py-3 z-0">
+    <!-- Page content will be rendered here by SvelteKit -->
+    <div
+      class="animate-[fadeIn_0.5s_ease-in-out] p-4 overflow-hidden"
+      id="L145-147"
+    >
+      <TopBar handleCreate={()=>{goto("/console/events/new");}} 
+        title={$page.data.pageTitle} subtitle={$page.data.pageSubtitle}
+        handleUseAI={handleChatClick}
+      ></TopBar>
+      {@render children()}
+    </div>
+    <label
+      for="my-drawer-2"
+      class="btn btn-sm btn-circle btn-soft lg:hidden fixed 
+      bottom-4 right-4 shadow-depth-2 hover:shadow-depth-3 transition-smooth"
+      >Open drawer</label>
+  </div>
+
+  <!-- 右侧边栏tabs区域 -->
+  {#if appState.sidebarOpen && appState.sidebarTabs.length > 0}
+    <div
+      class="fixed right-0 top-0 h-full w-80 bg-base-200/50 backdrop-blur-sm border-l border-base-300 z-40 flex flex-col"
+    >
+      <!-- Tabs 头部 -->
+      <div class="flex border-b border-base-300 bg-base-100/80">
+        {#each appState.sidebarTabs as tab (tab.id)}
+          <button
+            class="flex-1 px-3 py-2 text-sm font-medium transition-colors
+                   {appState.activeSidebarTab === tab.id
+              ? 'bg-primary text-primary-content border-b-2 border-primary'
+              : 'text-base-content/70 hover:text-base-content hover:bg-base-200/50'}"
+            on:click={() => appStore.setActiveSidebarTab(tab.id)}
+          >
+            {#if tab.icon}
+              <svelte:component this={tab.icon} class="w-4 h-4 mr-2 inline" />
+            {/if}
+            {tab.title}
+          </button>
+        {/each}
+        <button
+          class="px-2 py-2 text-base-content/50 hover:text-base-content hover:bg-base-200/50"
+          on:click={() => appStore.setSidebarOpen(false)}
+        >
+          <X class="w-4 h-4" />
+        </button>
+      </div>
+
+      <!-- Tab 内容区域 -->
+      <div class="flex-1 overflow-hidden">
+        {#each appState.sidebarTabs as tab (tab.id)}
+          {#if appState.activeSidebarTab === tab.id}
+            <div class="h-full overflow-y-auto">
+              {#if tab.component === "DraggableChatDialog"}
+                <!-- 侧边栏中的AI对话组件 -->
+                <div class="flex flex-col h-full">
+                  <div class="p-4 border-b border-base-300">
+                    <h3 class="font-medium text-base-content">AI 对话助手</h3>
+                  </div>
+                  <div class="flex-1 p-4">
+                    <div class="text-center opacity-60 py-8">
+                      <div class="avatar placeholder mb-2">
+                        <div
+                          class="bg-primary text-primary-content rounded-full w-12"
+                        >
+                          <span class="text-lg">AI</span>
+                        </div>
+                      </div>
+                      <p>开始与 AI 对话</p>
+                      <p class="text-sm opacity-50">
+                        输入你的问题，我会尽力帮助你
+                      </p>
+                    </div>
+                  </div>
+                  <div class="p-4 border-t border-base-300">
+                    <div class="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="输入消息..."
+                        class="input input-bordered flex-1 input-sm"
+                      />
+                      <button class="btn btn-primary btn-sm"> 发送 </button>
+                    </div>
+                  </div>
+                </div>
+              {:else}
+                <div>未知组件: {tab.component}</div>
+              {/if}
+            </div>
+          {/if}
+        {/each}
+      </div>
+    </div>
+  {/if}
+
+  <div class="drawer-side">
+    <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+    <LeftSidebar class="" {categories} {activeMenu} />
+  </div>
+</div>
+
+<!-- 全局 DraggableChatDialog 组件 -->
+<DraggableChatDialog
+  bind:open={chatDialogOpen}
+  bind:x={chatDialogX}
+  bind:y={chatDialogY}
+  onclose={handleChatClose}
+  onDock={handleDockToSidebar}
+  onMaximize={handleMaximize}
+/>
+
 <style>
   .box-s {
     box-shadow: -16px -6px 30px var(--color-base-200);
   }
-  
-  .dock-area {
-    background: rgba(0, 0, 0, 0.05);
-    border: 2px dashed rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
-  
-  .dock-area.active {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.3);
-  }
-  
-  .docked-window {
-    transition: all 0.3s ease;
-    animation: slideInRight 0.3s ease;
-  }
-  
-  .minimized-card {
-    transition: all 0.3s ease;
-    animation: slideInUp 0.3s ease;
-  }
-  
-  .minimized-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  @keyframes slideInRight {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideInUp {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
 </style>
-<div class="drawer lg:drawer-open bg-base-100 min-h-screen relative">
-  <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-  <div class="drawer-content flex flex-col px-4 py-2 box-s z-0">
-    <!-- Page content will be rendered here by SvelteKit -->
-    {@render children()}
-    <label
-      for="my-drawer-2"
-      class="btn btn-primary drawer-button lg:hidden fixed bottom-4 right-4"
-      >Open drawer</label
-    >
-  </div>
-  
-  <!-- 右边栏停靠区域 -->
-   {#if false}
-  <div class="fixed right-0 top-0 h-full w-80 bg-base-200/50 backdrop-blur-sm border-l border-base-300 z-40 flex flex-col">
-    <!-- 停靠窗口区域 -->
-    <div class="flex-1 p-4">
-      <h3 class="text-sm font-medium text-base-content/70 mb-3">停靠窗口</h3>
-      <div class="dock-area rounded-lg p-2 min-h-32 mb-4" class:active={dockedWindows.length > 0}>
-        {#if dockedWindows.length === 0}
-          <div class="text-center text-base-content/50 text-xs py-8">
-            拖拽窗口到此处停靠
-          </div>
-        {:else}
-          {#each dockedWindows as window (window.id)}
-            <div class="docked-window bg-base-100 rounded-lg p-3 mb-2 shadow-sm">
-              <div class="flex items-center justify-between mb-2">
-                <h4 class="text-sm font-medium truncate">{window.title}</h4>
-                <div class="flex gap-1">
-                  <button 
-                    class="btn btn-ghost btn-xs"
-                    onclick={() => window.onUndock?.()}
-                  >
-                    <Maximize2 class="w-3 h-3" />
-                  </button>
-                  <button 
-                    class="btn btn-ghost btn-xs"
-                    onclick={() => {
-                      window.onClose?.();
-                      removeDockedWindow(window.id);
-                    }}
-                  >
-                    <X class="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-              <div class="text-xs text-base-content/60">
-                {window.content || '窗口内容'}
-              </div>
-            </div>
-          {/each}
-        {/if}
-      </div>
-    </div>
-    
-    <!-- 最小化窗口区域 -->
-    <div class="p-4 border-t border-base-300">
-      <h3 class="text-sm font-medium text-base-content/70 mb-3">最小化窗口</h3>
-      <div class="grid grid-cols-2 gap-2">
-        {#each minimizedWindows as window (window.id)}
-          <div 
-            class="minimized-card bg-base-100 rounded-lg p-3 cursor-pointer shadow-sm hover:shadow-md"
-            onclick={() => restoreWindow(window.id)}
-          >
-            <div class="flex items-center justify-between mb-1">
-              <h4 class="text-xs font-medium truncate">{window.title}</h4>
-              <button 
-                class="btn btn-ghost btn-xs"
-                onclick={(e) => {
-                  e.stopPropagation();
-                  window.onClose?.();
-                  removeMinimizedWindow(window.id);
-                }}
-              >
-                <X class="w-2 h-2" />
-              </button>
-            </div>
-            <div class="text-xs text-base-content/50 truncate">
-              {window.content || '点击恢复'}
-            </div>
-          </div>
-        {/each}
-      </div>
-    </div>
-  </div>
-  {/if}
-  <div class="drawer-side">
-    <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"
-    ></label>
-    <div class="flex flex-col h-full">
-      <ul class="menu pl-10 py-10 w-68 text-base-content/50 -mr-4 flex-1">
-        <h1 class="text-2xl font-bold mb-4 text-center">Akas</h1>
-      <div class="w-full flex-1 rounded-xl bg-base-200 p-4">
-        <button
-          class="btn btn-ghost w-full items-center justify-between my-4 text-base-content/50"
-        >
-          <div class="flex gap-2 items-center">
-            <Search class="w-4 h-4" />Search
-          </div>
-          <div class="">
-            <kbd class="kbd kbd-xs">Ctrl</kbd>
-            <kbd class="kbd kbd-xs">k</kbd>
-          </div>
-        </button>
-        <!-- Sidebar content here -->
-        <li class="menu-title text-xs">Navigation</li>
-        
-        <NavItem 
-          href="/console/admin/research" 
-          icon={FileSearch} 
-          label="Research" 
-          isActive={activeMenu === "Research"}
-        />
-        
-        <NavItem 
-          href="/console/events" 
-          icon={BarChart2} 
-          label="Events" 
-          isActive={activeMenu === "Events"}
-        />
-        
-        <NavItem 
-          href="/console/users" 
-          icon={Users} 
-          label="Users" 
-          isActive={activeMenu === "Users"}
-        />
-        
-        <NavItem 
-          href="/console/groups" 
-          icon={Users} 
-          label="Groups" 
-          isActive={activeMenu === "Groups"}
-        />
-        
-        <NavItem 
-          href="/console/about" 
-          icon={Info} 
-          label="About" 
-          isActive={activeMenu === "About"}
-        />
-
-        <li class="menu-title text-xs mt-4">Categories</li>
-        {#each categories as category}
-          <CategoryNavItem 
-            href={category.path}
-            icon={category.icon}
-            label={category.name}
-            color={category.color}
-            isActive={activeMenu === category.name}
-          />
-        {/each}
-        
-        <NavItem 
-          href="/console/all-categories" 
-          icon={ListFilter} 
-          label="All categories" 
-          isActive={activeMenu === "All categories"}
-          class="btn-ghost"
-        />
-      </div>
-      </ul>
-      
-      <div class="mt-auto flex justify-center items-center p-2">
-        {#if $auth.user}
-          <div class="pb-4">
-            <div class="flex items-center space-x-2">
-              <UserAvatar
-                tabindex={0}
-                fallbackClass="text-base-content/50"
-                class="cursor-pointer size-8 "
-                src={$auth.user.prefs["avatarUrl"] || ""}
-                alt={$auth.user.name}
-                fallback={$auth.user.name.substring(0, 1).toUpperCase() ||
-                  $auth.user.email?.substring(0, 2).toUpperCase()}
-              ></UserAvatar>
-
-              <!-- <div>
-                <div class="font-semibold text-sm">
-                  {$auth.user.name || "N/A"}
-                </div>
-                <div class="text-xs text-base-content/50">
-                  {$auth.user.email || "N/A"}
-                </div>
-              </div> -->
-            </div>
-          </div>
-        {/if}
-        <!-- <button class="btn btn-ghost btn-secondary text-base-content/50   p-1"><Settings class="w-5 h-5" /></button>
-        <button class="btn btn-ghost btn-secondary text-base-content/50   p-1"><Search class="w-5 h-5" /></button> -->
-      </div>
-    </div>
-  </div>
-</div>
