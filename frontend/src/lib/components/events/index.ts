@@ -4,5 +4,16 @@ import BatchAddEvents from "./batch-add-events.svelte";
 import EventActionbar from "./event/event-actionbar.svelte";
 import EventConsoleCard from "./console/event-card.svelte";
 import EventPropertyCard from "./event/event-property-card.svelte";
+import EventCard from "./event-card.svelte";
+import EventCardGrid from "./event-card-grid.svelte";
 
-export { EventCardList, EventView, BatchAddEvents, EventActionbar ,EventConsoleCard,EventPropertyCard};
+export { 
+  EventCardList, 
+  EventView, 
+  BatchAddEvents, 
+  EventActionbar, 
+  EventConsoleCard, 
+  EventPropertyCard, 
+  EventCard, 
+  EventCardGrid 
+};

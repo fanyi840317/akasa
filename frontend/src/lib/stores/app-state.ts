@@ -1,6 +1,27 @@
 import { writable, get } from 'svelte/store';
 import type { NavItem } from '../types/types';
 import type { Event } from '../types/event';
+import type { ComponentType } from 'svelte';
+
+type WindowState = {
+    id: string;
+    title: string;
+    component: ComponentType;
+    props?: Record<string, any>;
+    isMaximized?: boolean;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+};
+
+type SidebarTab = {
+    id: string;
+    title: string;
+    component: ComponentType;
+    props?: Record<string, any>;
+    icon?: ComponentType;
+};
 
 type AppState = {
     // 视图显示状态
@@ -26,6 +47,14 @@ type AppState = {
 
     // Header 浮动状态
     showHeader: boolean;
+    
+    // 窗口管理状态
+    windows: WindowState[];
+    
+    // 侧边栏tabs状态
+    sidebarTabs: SidebarTab[];
+    activeSidebarTab: string | null;
+    sidebarOpen: boolean;
 };
 
 const createAppStore = () => {
@@ -52,7 +81,15 @@ const createAppStore = () => {
         currentEvent: null,
 
         // Header 浮动状态
-        showHeader: true
+        showHeader: true,
+        
+        // 窗口管理状态
+        windows: [],
+        
+        // 侧边栏tabs状态
+        sidebarTabs: [],
+        activeSidebarTab: null,
+        sidebarOpen: false
     });
 
     return {
@@ -135,6 +172,98 @@ const createAppStore = () => {
             store.update(state => ({
                 ...state,
                 showHeader:show
+            }));
+        },
+        
+        // 窗口管理相关方法
+        addWindow: (window: WindowState) => {
+            store.update(state => ({
+                ...state,
+                windows: [...state.windows, window]
+            }));
+        },
+        
+        removeWindow: (windowId: string) => {
+            store.update(state => ({
+                ...state,
+                windows: state.windows.filter(w => w.id !== windowId)
+            }));
+        },
+        
+        updateWindow: (windowId: string, updates: Partial<WindowState>) => {
+            store.update(state => ({
+                ...state,
+                windows: state.windows.map(w => 
+                    w.id === windowId ? { ...w, ...updates } : w
+                )
+            }));
+        },
+        
+        maximizeWindow: (windowId: string) => {
+            store.update(state => ({
+                ...state,
+                windows: state.windows.map(w => 
+                    w.id === windowId ? { ...w, isMaximized: true } : w
+                )
+            }));
+        },
+        
+        minimizeWindow: (windowId: string) => {
+            store.update(state => ({
+                ...state,
+                windows: state.windows.map(w => 
+                    w.id === windowId ? { ...w, isMaximized: false } : w
+                )
+            }));
+        },
+        
+        // 侧边栏tabs管理方法
+        addSidebarTab: (tab: SidebarTab) => {
+            store.update(state => {
+                const existingTab = state.sidebarTabs.find(t => t.id === tab.id);
+                if (existingTab) {
+                    return {
+                        ...state,
+                        activeSidebarTab: tab.id,
+                        sidebarOpen: true
+                    };
+                }
+                return {
+                    ...state,
+                    sidebarTabs: [...state.sidebarTabs, tab],
+                    activeSidebarTab: tab.id,
+                    sidebarOpen: true
+                };
+            });
+        },
+        
+        removeSidebarTab: (tabId: string) => {
+            store.update(state => {
+                const newTabs = state.sidebarTabs.filter(t => t.id !== tabId);
+                const newActiveTab = state.activeSidebarTab === tabId 
+                    ? (newTabs.length > 0 ? newTabs[0].id : null)
+                    : state.activeSidebarTab;
+                return {
+                    ...state,
+                    sidebarTabs: newTabs,
+                    activeSidebarTab: newActiveTab,
+                    sidebarOpen: newTabs.length > 0
+                };
+            });
+        },
+        
+        setActiveSidebarTab: (tabId: string | null) => {
+            store.update(state => ({
+                ...state,
+                activeSidebarTab: tabId,
+                sidebarOpen: tabId !== null
+            }));
+        },
+        
+        setSidebarOpen: (open: boolean) => {
+            store.update(state => ({
+                ...state,
+                sidebarOpen: open
             }));
         },
         
