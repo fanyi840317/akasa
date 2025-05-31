@@ -143,7 +143,7 @@
 
 <div class="w-full h-screen overflow-hidden">
     <!-- 左侧分类列表 -->
-    <div class="absolute left-14 top-[60px] z-20">
+    <div class="absolute left-14 top-[64px] z-20">
         {#each placeCategories as category, i}
             <a
                 class="block px-4 py-1 mb-2 flex items-center justify-between gap-4 transition-all transform hover:scale-105 origin-left {selectedCategory === category.id ? 'bg-background/10' : 'hover:bg-background/20'}"

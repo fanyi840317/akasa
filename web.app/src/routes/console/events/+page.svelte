@@ -17,11 +17,7 @@
     import { Input } from "$lib/components/ui/input";
     import { Badge } from "$lib/components/ui/badge";
     import { Search, Filter, Calendar, MapPin, Users, Star } from "lucide-svelte";
-    import {
-        Avatar,
-        AvatarImage,
-        AvatarFallback,
-    } from "$lib/components/ui/avatar";
+    import EventCard from "$lib/components/notion-cards/event-card.svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -142,12 +138,6 @@
                     bind:value={searchQuery}
                 />
             </div>
-            <!-- <Button variant="outline" size="icon">
-                <Filter class="h-4 w-4" />
-            </Button>
-            <Button>
-                <span>创建活动</span>
-            </Button> -->
         </div>
     </div>
 
@@ -169,55 +159,16 @@
     <!-- 事件卡片网格 -->
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
         {#each events as event}
-            <div class="mb-4">
-                <div class="relative h-48 overflow-hidden rounded-lg mb-2">
-                    <img
-                        src={event.image}
-                        alt={event.title}
-                        class="w-full h-full object-cover"
-                    />
-                </div>
-                <!-- <Card class="overflow-hidden hover:shadow-md transition-shadow">
-                    
-                </Card> -->
-                <div class="flex items-center justify-between p-2">
-                    <div class="flex items-center space-x-3">
-                        <Avatar class="h-5 w-5">
-                            <AvatarImage src={event.image} alt={event.title} />
-                            <AvatarFallback>{event.title.slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <span class="text-sm text-foreground/90">{event.title}</span>
-                    </div>
-                    <div>
-                        {#each event.tags as tag}
-                            <Badge variant="outline" class="ml-1 text-muted-foreground/30">{tag}</Badge>
-                        {/each}
-                    </div>
-                </div>
-                <div class="flex items-center space-x-1 text-xs text-muted-foreground px-3">
-                    <Star class="h-3 w-3 " />
-                    <span>{event.rating}</span>
-                </div>
-            </div>
+            <EventCard
+                title={event.title}
+                image={event.image}
+                tags={event.tags}
+                rating={event.rating}
+            />
         {/each}
     </div>
 
     <!-- 分页控件 -->
     <div class="flex justify-center mt-8">
-        <!-- <Pagination>
-            <PaginationContent>
-                <PaginationItem>
-                    <PaginationPrevious href="#" />
-                </PaginationItem>
-                {#each Array(totalPages) as _, i}
-                    <PaginationItem>
-                        <PaginationLink href="#" isActive={currentPage === i + 1}>{i + 1}</PaginationLink>
-                    </PaginationItem>
-                {/each}
-                <PaginationItem>
-                    <PaginationNext href="#" />
-                </PaginationItem>
-            </PaginationContent>
-        </Pagination>-->
     </div>
 </div>

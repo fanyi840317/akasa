@@ -244,7 +244,7 @@
 
 {#if open}
   <div
-    class="absolute z-9999 bg-base-200 shadow-2xl rounded-xl border border-base-300 {className}"
+    class="absolute z-9999 bg-base-200 shadow-2xl rounded-box border border-base-300 {className}"
     style="left: {windowX}px; top: {windowY}px; width: {currentWidth}px; height: {isMinimized
       ? 'auto'
       : currentHeight + 'px'}; pointer-events: auto;"
@@ -252,7 +252,7 @@
   >
     <!-- 标题栏 -->
     <div
-      class="flex items-center justify-between p-3 bg-base-200 rounded-t-xl cursor-move select-none border-b border-base-300"
+      class="flex items-center justify-between p-3 bg-base-200 rounded-t-box cursor-move select-none "
       draggable="true"
       ondragstart={handleDragStart}
       ondrag={handleDrag}
