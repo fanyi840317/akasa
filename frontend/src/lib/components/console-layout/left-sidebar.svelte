@@ -1,5 +1,5 @@
 <script>
-  import { Search, BarChart2, MapIcon, ListFilter, MessageSquare, HelpCircle, Lightbulb } from "lucide-svelte";
+  import { Search, BarChart2, MapIcon, ListFilter, MessageSquare, HelpCircle, Lightbulb, Bot } from "lucide-svelte";
   import CategoryNavItem from "../ui/nav/category-nav-item.svelte";
   import NavItem from "../ui/nav/nav-item.svelte";
   import { cn } from "$lib/utils";
@@ -61,12 +61,12 @@
           </div>
         </div>
 
-        <!-- <NavItem
+        <NavItem
           href="/console/admin/research"
-          icon={FileSearch}
-          label="Research"
+          icon={Bot}
+          label="AI"
           isActive={activeMenu === "Research"}
-        /> -->
+        />
 
         <NavItem
           href="/console/events"

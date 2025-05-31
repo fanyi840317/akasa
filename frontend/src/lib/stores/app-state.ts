@@ -6,7 +6,7 @@ import type { ComponentType } from 'svelte';
 type WindowState = {
     id: string;
     title: string;
-    component: ComponentType;
+    component: string;
     props?: Record<string, any>;
     isMaximized?: boolean;
     x?: number;
@@ -18,7 +18,7 @@ type WindowState = {
 type SidebarTab = {
     id: string;
     title: string;
-    component: ComponentType;
+    component: string;
     props?: Record<string, any>;
     icon?: ComponentType;
 };

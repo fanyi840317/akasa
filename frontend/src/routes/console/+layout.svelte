@@ -34,6 +34,8 @@
   import { LeftSidebar, TopBar } from "$lib/components/console-layout";
   import { goto } from "$app/navigation";
 
+  import { onMount } from "svelte";
+
   const categories = [
     {
       name: "Discussion",
@@ -60,11 +62,22 @@
   let chatDialogOpen = $state(false);
   let chatDialogX = $state(100);
   let chatDialogY = $state(100);
+  let showTooltip = $state(false);
+  let isFirstTimeUser = $state(true);
+  let chatDialogRef;
 
   // 订阅appStore状态
   let appState = $state(appStore.get());
   appStore.subscribe((state) => {
     appState = state;
+  });
+
+  // 组件挂载时检查是否为首次使用
+  onMount(() => {
+    const hasUsedBefore = localStorage.getItem("chatDialogFirstTime");
+    if (hasUsedBefore === "false") {
+      isFirstTimeUser = false;
+    }
   });
 
   // Determine activeMenu based on the current path
@@ -85,7 +98,7 @@
     } else {
       // Check categories
       const activeCategory = categories.find((cat) =>
-        currentPath.startsWith(cat.path)
+        currentPath.startsWith(cat.path),
       );
       if (activeCategory) {
         activeMenu = activeCategory.name;
@@ -99,39 +112,31 @@
 
   // 处理新建按钮点击
   function handleChatClick() {
+    // 计算AI按钮的位置，将对话框显示在按钮下方
+
+    const windowWidth = window.innerWidth;
+    // 设置对话框位置在AI按钮下方
+    chatDialogX = windowWidth - 600; // 向左偏移一些，让对话框居中对齐按钮
+    chatDialogY = 100; // 按钮下方10px
     chatDialogOpen = true;
+
+    // 如果是首次使用，显示tooltip
+    if (isFirstTimeUser) {
+      showTooltip = true;
+      // 3秒后自动隐藏tooltip
+      setTimeout(() => {
+        showTooltip = false;
+        isFirstTimeUser = false;
+        // 可以将首次使用状态保存到localStorage
+        localStorage.setItem("chatDialogFirstTime", "false");
+      }, 3000);
+    }
   }
 
   // 处理聊天对话框关闭
   function handleChatClose() {
     chatDialogOpen = false;
-  }
-
-  // 处理窗口停靠到侧边栏
-  function handleDockToSidebar() {
-    // 添加聊天组件到侧边栏tabs
-    appStore.addSidebarTab({
-      id: "ai-chat",
-      title: "AI 对话",
-      component: DraggableChatDialog,
-      props: {
-        open: true,
-        apiKey: undefined,
-        modelName: "gemini-1.5-flash",
-        initialMessages: [],
-        hideDockButton: true,
-      },
-      icon: MessageSquare,
-    });
-
-    // 打开侧边栏
-    appStore.setSidebarOpen(true);
-
-    // 设置为活动标签页
-    appStore.setActiveSidebarTab("ai-chat");
-
-    // 关闭浮动对话框
-    chatDialogOpen = false;
+    showTooltip = false;
   }
 
   // 处理窗口最大化
@@ -150,110 +155,58 @@
       class="animate-[fadeIn_0.5s_ease-in-out] p-4 overflow-hidden"
       id="L145-147"
     >
-      <TopBar handleCreate={()=>{goto("/console/events/new");}} 
-        title={$page.data.pageTitle} subtitle={$page.data.pageSubtitle}
+      <TopBar
+        handleCreate={() => {
+          goto("/console/events/new");
+        }}
+        title={$page.data.pageTitle}
+        subtitle={$page.data.pageSubtitle}
         handleUseAI={handleChatClick}
       ></TopBar>
       {@render children()}
     </div>
     <label
       for="my-drawer-2"
-      class="btn btn-sm btn-circle btn-soft lg:hidden fixed 
+      class="btn btn-sm btn-circle btn-soft lg:hidden fixed
       bottom-4 right-4 shadow-depth-2 hover:shadow-depth-3 transition-smooth"
-      >Open drawer</label>
+      >Open drawer</label
+    >
   </div>
 
   <!-- 右侧边栏tabs区域 -->
-  {#if appState.sidebarOpen && appState.sidebarTabs.length > 0}
-    <div
-      class="fixed right-0 top-0 h-full w-80 bg-base-200/50 backdrop-blur-sm border-l border-base-300 z-40 flex flex-col"
-    >
-      <!-- Tabs 头部 -->
-      <div class="flex border-b border-base-300 bg-base-100/80">
-        {#each appState.sidebarTabs as tab (tab.id)}
-          <button
-            class="flex-1 px-3 py-2 text-sm font-medium transition-colors
-                   {appState.activeSidebarTab === tab.id
-              ? 'bg-primary text-primary-content border-b-2 border-primary'
-              : 'text-base-content/70 hover:text-base-content hover:bg-base-200/50'}"
-            on:click={() => appStore.setActiveSidebarTab(tab.id)}
-          >
-            {#if tab.icon}
-              <svelte:component this={tab.icon} class="w-4 h-4 mr-2 inline" />
-            {/if}
-            {tab.title}
-          </button>
-        {/each}
-        <button
-          class="px-2 py-2 text-base-content/50 hover:text-base-content hover:bg-base-200/50"
-          on:click={() => appStore.setSidebarOpen(false)}
-        >
-          <X class="w-4 h-4" />
-        </button>
-      </div>
-
-      <!-- Tab 内容区域 -->
-      <div class="flex-1 overflow-hidden">
-        {#each appState.sidebarTabs as tab (tab.id)}
-          {#if appState.activeSidebarTab === tab.id}
-            <div class="h-full overflow-y-auto">
-              {#if tab.component === "DraggableChatDialog"}
-                <!-- 侧边栏中的AI对话组件 -->
-                <div class="flex flex-col h-full">
-                  <div class="p-4 border-b border-base-300">
-                    <h3 class="font-medium text-base-content">AI 对话助手</h3>
-                  </div>
-                  <div class="flex-1 p-4">
-                    <div class="text-center opacity-60 py-8">
-                      <div class="avatar placeholder mb-2">
-                        <div
-                          class="bg-primary text-primary-content rounded-full w-12"
-                        >
-                          <span class="text-lg">AI</span>
-                        </div>
-                      </div>
-                      <p>开始与 AI 对话</p>
-                      <p class="text-sm opacity-50">
-                        输入你的问题，我会尽力帮助你
-                      </p>
-                    </div>
-                  </div>
-                  <div class="p-4 border-t border-base-300">
-                    <div class="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="输入消息..."
-                        class="input input-bordered flex-1 input-sm"
-                      />
-                      <button class="btn btn-primary btn-sm"> 发送 </button>
-                    </div>
-                  </div>
-                </div>
-              {:else}
-                <div>未知组件: {tab.component}</div>
-              {/if}
-            </div>
-          {/if}
-        {/each}
-      </div>
-    </div>
-  {/if}
 
   <div class="drawer-side">
-    <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+    <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"
+    ></label>
     <LeftSidebar class="" {categories} {activeMenu} />
   </div>
 </div>
 
 <!-- 全局 DraggableChatDialog 组件 -->
 <DraggableChatDialog
+  bind:this={chatDialogRef}
   bind:open={chatDialogOpen}
   bind:x={chatDialogX}
   bind:y={chatDialogY}
   onclose={handleChatClose}
-  onDock={handleDockToSidebar}
   onMaximize={handleMaximize}
 />
+
+<!-- 首次使用提示tooltip -->
+{#if showTooltip && chatDialogOpen}
+  <div
+    class="fixed z-[10000] bg-primary text-primary-content px-3 py-2 rounded-lg shadow-lg text-sm pointer-events-none"
+    style="left: {chatDialogX + 50}px; top: {chatDialogY - 40}px;"
+  >
+    <div class="flex items-center gap-2">
+      <span>提示：可以拖动窗口到任意位置</span>
+    </div>
+    <!-- 小箭头指向窗口 -->
+    <div
+      class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-primary"
+    ></div>
+  </div>
+{/if}
 
 <style>
   .box-s {

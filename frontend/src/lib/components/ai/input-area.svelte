@@ -101,7 +101,7 @@
     
   </div>
 </div>
-<p class="text-xs text-gray-500 text-center mt-2">Trae AI. 回答可能不准确或不完整。</p>
+<p class="text-xs text-gray-500 text-center mt-2">Akasa AI. 回答可能不准确或不完整。</p>
 
 <style>
   /* 渐变边框效果 */

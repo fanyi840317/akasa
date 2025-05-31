@@ -28,8 +28,6 @@
     initialMessages = [],
     x = $bindable(0),
     y = $bindable(0),
-    collapsedCardX = $bindable(0),
-    collapsedCardY = $bindable(0),
     onclose,
     onDock,
     onMaximize,
@@ -42,8 +40,6 @@
     initialMessages?: Array<ChatMessage>;
     x?: number;
     y?: number;
-    collapsedCardX?: number;
-    collapsedCardY?: number;
     onclose?: () => void;
     onDock?: () => void;
     onMaximize?: () => void;
@@ -62,6 +58,8 @@
   let portalContainer: HTMLElement | null = null;
   let componentElement: HTMLElement | null = null;
   let showCollapsedCard = $state(false);
+  let collapsedCardX = $state(0); // 绑定收缩卡片的X坐标
+  let collapsedCardY = $state(0); // 绑定收缩卡片的Y坐标
 
   // 本地存储键名
   const STORAGE_KEY = `chat-messages-${windowId}`;
@@ -75,22 +73,22 @@
     loadMessagesFromStorage();
 
     // 创建portal容器并添加到document.body
-    portalContainer = document.createElement("div");
-    portalContainer.id = `chat-portal-${windowId}`;
-    portalContainer.style.position = "fixed";
-    portalContainer.style.top = "0";
-    portalContainer.style.left = "0";
-    portalContainer.style.width = "100%";
-    portalContainer.style.height = "100%";
-    portalContainer.style.pointerEvents = "none";
-    portalContainer.style.zIndex = "10000";
-    document.body.appendChild(portalContainer);
+    // portalContainer = document.createElement("div");
+    // portalContainer.id = `chat-portal-${windowId}`;
+    // portalContainer.style.position = "fixed";
+    // portalContainer.style.top = "0";
+    // portalContainer.style.left = "0";
+    // portalContainer.style.width = "100%";
+    // portalContainer.style.height = "100%";
+    // portalContainer.style.pointerEvents = "none";
+    // portalContainer.style.zIndex = "10000";
+    // document.body.appendChild(portalContainer);
 
     return () => {
       // 清理portal容器
-      if (portalContainer && portalContainer.parentNode) {
-        portalContainer.parentNode.removeChild(portalContainer);
-      }
+      // if (portalContainer && portalContainer.parentNode) {
+      //   portalContainer.parentNode.removeChild(portalContainer);
+      // }
     };
   });
 
@@ -258,8 +256,6 @@
 
   function closeDialog() {
     // 保存关闭位置
-    // collapsedCardX = x;
-    // collapsedCardY = y;
 
     // 如果有消息，显示收缩卡片
     if (messages.length > 0) {
@@ -271,11 +267,15 @@
   }
 
   function openFromCard() {
+    alert("打开");
     showCollapsedCard = false;
     open = true;
+    x = collapsedCardX;
+    y = collapsedCardY;
   }
 
   function closeCard() {
+    // alert("关闭");
     showCollapsedCard = false;
   }
 
@@ -287,10 +287,19 @@
   }
 
   function handleMinimize() {
+    // 保存当前位置到收缩卡片位置
+    collapsedCardX = x;
+    collapsedCardY = y;
+
     // 调用父组件传递的onMaximize事件处理器
     onMaximize?.();
     // 隐藏当前浮动窗口
     open = false;
+
+    // 如果有消息，显示收缩卡片
+    if (messages.length > 0) {
+    }
+    showCollapsedCard = true;
   }
 
   // Watch for initialMessages changes
@@ -305,16 +314,15 @@
     if ((open || showCollapsedCard) && portalContainer && componentElement) {
       console.log(x, y);
       // 将组件移动到portal容器中
-      portalContainer.appendChild(componentElement);
+      document.body.appendChild(componentElement);
+      // portalContainer.appendChild(componentElement);
       // portalContainer.style.pointerEvents =
       //   open || showCollapsedCard ? "auto" : "none";
     } else if (!open && !showCollapsedCard && portalContainer) {
       // 隐藏时重置pointer-events
-      portalContainer.style.pointerEvents = "none";
+      // portalContainer.style.pointerEvents = "none";
     }
   });
-
-
 
   // 处理input-area的generate事件
   function handleGenerate(event: CustomEvent<{ text: string }>) {
@@ -323,7 +331,7 @@
 
   // 计算最后一条消息
   let lastMessage = $derived(
-    messages.length > 0 ? messages[messages.length - 1] : null
+    messages.length > 0 ? messages[messages.length - 1] : null,
   );
 </script>
 
@@ -332,12 +340,12 @@
     <DraggableWindow
       bind:open
       title="AI 对话"
-      width={450}
+      width={550}
       bind:height={windowHeight}
       minWidth={350}
       minHeight={400}
-      {x}
-      {y}
+      bind:windowX={x}
+      bind:windowY={y}
       {hideDockButton}
       onClose={closeDialog}
       onDock={handleDock}
@@ -347,7 +355,7 @@
         <!-- Chat Messages -->
         <ScrollArea
           class="p-4"
-          style="height: {windowHeight - 80}px; overflow: hidden;"
+          style="height: {windowHeight - 210}px; overflow: hidden;"
           bind:ref={scrollAreaRef}
         >
           <div class="flex flex-col gap-4">
@@ -411,7 +419,7 @@
                       {#each message.actions as action}
                         <button
                           class="btn btn-xs btn-ghost hover:btn-primary"
-                          on:click={() => action.handler(message)}
+                          onclick={() => action.handler(message)}
                           title={action.label}
                         >
                           {#if action.icon}
@@ -462,7 +470,7 @@
         </ScrollArea>
 
         <!-- 输入区域 -->
-        <div class="border-t border-base-300">
+        <div class="border-t border-base-300 p-5">
           <InputArea
             on:generate={handleGenerate}
             disabled={isLoading}
@@ -474,21 +482,15 @@
   {/if}
 
   <!-- 收缩卡片 -->
-  {#if showCollapsedCard && lastMessage}
+  {#if !open && showCollapsedCard}
     <div
-      class="absolute bg-base-100 border border-base-300 rounded-lg shadow-lg p-3 max-w-xs cursor-pointer hover:shadow-xl transition-shadow z-50"
-      style="left: {collapsedCardX ||
-        window.innerWidth - 320}px; top: {collapsedCardY ||
-        window.innerHeight - 120}px;"
-      on:click={openFromCard}
-      on:keydown={(e) => e.key === "Enter" && openFromCard()}
-      role="button"
-      tabindex="0"
+      class="absolute bottom-2 right-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-3 max-w-xs w-[260px] h-[140px]
+  cursor-pointer hover:shadow-xl transition-shadow z-50"
     >
       <!-- 关闭按钮 -->
       <button
         class="absolute top-1 right-1 w-5 h-5 rounded-full bg-base-200 hover:bg-base-300 flex items-center justify-center text-xs opacity-60 hover:opacity-100"
-        on:click|stopPropagation={closeCard}
+        onclick={closeCard}
         aria-label="关闭卡片"
       >
         ×
@@ -503,32 +505,44 @@
         </div>
         <span class="text-sm font-medium">AI 对话</span>
       </div>
-
-      <!-- 最后一条消息 -->
-      <div class="text-sm opacity-80">
-        <div class="flex items-start gap-2">
-          <div
-            class="w-4 h-4 rounded-full {lastMessage.role === 'user'
-              ? 'bg-primary'
-              : 'bg-secondary'} flex-shrink-0 mt-0.5"
-          >
-            <span
-              class="text-xs text-white flex items-center justify-center w-full h-full"
-            >
-              {lastMessage.role === "user" ? "你" : "AI"}
-            </span>
+      <div
+        class=""
+        onclick={openFromCard}
+        onkeydown={(e) => e.key === "Enter" && openFromCard()}
+      >
+        <!-- 最后一条消息 -->
+        {#if lastMessage}
+          <div class="text-sm opacity-80">
+            <div class="flex items-start gap-2">
+              <div
+                class="w-4 h-4 rounded-full {lastMessage.role === 'user'
+                  ? 'bg-primary'
+                  : 'bg-secondary'} flex-shrink-0 mt-0.5"
+              >
+                <span
+                  class="text-xs text-white flex items-center justify-center w-full h-full"
+                >
+                  {lastMessage.role === "user" ? "你" : "AI"}
+                </span>
+              </div>
+              <p class="line-clamp-2 text-xs leading-relaxed">
+                {lastMessage.content.length > 60
+                  ? lastMessage.content.substring(0, 60) + "..."
+                  : lastMessage.content}
+              </p>
+            </div>
           </div>
-          <p class="line-clamp-2 text-xs leading-relaxed">
-            {lastMessage.content.length > 60
-              ? lastMessage.content.substring(0, 60) + "..."
-              : lastMessage.content}
-          </p>
-        </div>
-      </div>
 
-      <!-- 时间戳 -->
-      <div class="text-xs opacity-50 mt-2 text-right">
-        {lastMessage.timestamp.toLocaleTimeString()}
+          <!-- 时间戳 -->
+          <div class="text-xs opacity-50 mt-2 text-right">
+            {lastMessage.timestamp.toLocaleTimeString()}
+          </div>
+        {:else}
+          <!-- 暂无对话提示 -->
+          <div class="text-sm opacity-60 text-center py-2">
+            <p class="text-xs">暂无对话</p>
+          </div>
+        {/if}
       </div>
     </div>
   {/if}

@@ -10,8 +10,8 @@
     height = $bindable(500),
     minWidth = 300,
     minHeight = 200,
-    x = $bindable(100),
-    y = $bindable(100),
+    windowX = $bindable(100),
+    windowY = $bindable(100),
     resizable = true,
     children,
     onClose,
@@ -27,8 +27,8 @@
     height?: number;
     minWidth?: number;
     minHeight?: number;
-    x?: number;
-    y?: number;
+    windowX?: number;
+    windowY?: number;
     resizable?: boolean;
     children: Snippet;
     onClose?: () => void;
@@ -43,8 +43,8 @@
   let isResizing = false;
   let dragStartX = 0;
   let dragStartY = 0;
-  let windowX = $state(x);
-  let windowY = $state(y);
+  // let windowX = $state(x);
+  // let windowY = $state(y);
   let currentWidth = $state(width);
   let currentHeight = $state(height);
   let isMinimized = $state(false);
@@ -53,11 +53,16 @@
   let beforeMaximize = { x: 0, y: 0, width: 0, height: 0 };
   let beforeDock = { x: 0, y: 0, width: 0, height: 0 };
 
+  // $effect(() => {
+  //   if (x && x > 0 && y && y > 0) {
+  //     windowX = x;
+  //     windowY = y;
+  //   }
+  // });
+
+  // 同步currentHeight变化到height属性
   $effect(() => {
-    if (x && x > 0 && y && y > 0) {
-      windowX = x;
-      windowY = y;
-    }
+    height = currentHeight;
   });
   function handleDragStart(event: DragEvent) {
     if ((event.target as HTMLElement).closest(".window-controls")) {
@@ -72,9 +77,7 @@
     dragStartX = event.clientX;
     dragStartY = event.clientY;
 
-    console.log("dragStartX", dragStartX);
-    console.log("dragStartY", dragStartY);
-    console.log("windowX", windowX);
+  
     // 创建一个透明的拖拽图像
     const dragImage = new Image();
     dragImage.src =
@@ -83,7 +86,6 @@
   }
 
   function handleDrag(event: DragEvent) {
-    console.log("drag", event.clientX, event.clientY);
     if (isMinimized || isDocked) return;
     if (event.clientX === 0 && event.clientY === 0) return; // 拖拽结束时的无效事件
 
@@ -92,7 +94,7 @@
 
     windowX = Math.max(
       0,
-      Math.min(window.innerWidth - currentWidth, windowX + deltaX)
+      Math.min(window.innerWidth - currentWidth, windowX + deltaX),
     );
     windowY = Math.max(0, Math.min(window.innerHeight - 40, windowY + deltaY));
 
@@ -173,41 +175,9 @@
   function handleDock() {
     if (isMinimized) return;
 
-    if (!isDocked) {
-      beforeDock = {
-        x: windowX,
-        y: windowY,
-        width: currentWidth,
-        height: currentHeight,
-      };
-      isDocked = true;
-
-      // 通知父组件进行停靠
-      if (onDock) {
-        onDock();
-      } else if (typeof window !== "undefined" && window.windowManager) {
-        // 使用全局窗口管理器，传递组件内容而不仅是文本
-        const childComponent = children?.() || null;
-        
-        window.windowManager.addDockedWindow({
-          id: title + "_" + Date.now(),
-          title: title,
-          content: "停靠的窗口内容",
-          // 如果有子组件，传递它
-          component: childComponent?.type,
-          props: childComponent?.props || {},
-          onUndock: () => {
-            handleUndock();
-            open = true;
-          },
-          onClose: () => {
-            handleClose();
-          },
-        });
-      }
-
-      // 停靠时隐藏窗口
-      open = false;
+    // 简化dock处理，只负责参数传递给父组件
+    if (onDock) {
+      onDock();
     }
   }
 
@@ -268,7 +238,7 @@
   }
   onMount(() => {
     console.log("window mounted");
-    console.log(x, y);
+    // console.log(x, y);
   });
 </script>
 
@@ -293,7 +263,7 @@
     >
       <h3 class="font-medium text-sm">{title}</h3>
       <div class="window-controls flex items-center gap-1">
-        {#if !hideDockButton}
+        <!-- {#if !hideDockButton}
           <button
             class="btn btn-ghost btn-xs w-6 h-6 p-0 hover:bg-success/20"
             onclick={handleDock}
@@ -301,7 +271,7 @@
           >
             <PanelRight class="w-3 h-3" />
           </button>
-        {/if}
+        {/if} -->
         <button
           class="btn btn-ghost btn-xs w-6 h-6 p-0 hover:bg-warning/20"
           onclick={handleMinimize}
@@ -309,13 +279,13 @@
         >
           <Minus class="w-3 h-3" />
         </button>
-        <button
+        <!-- <button
           class="btn btn-ghost btn-xs w-6 h-6 p-0 hover:bg-info/20"
           onclick={handleMaximize}
           title="最大化"
         >
           <Maximize2 class="w-3 h-3" />
-        </button>
+        </button> -->
         <button
           class="btn btn-ghost btn-xs w-6 h-6 p-0 hover:bg-error/20"
           onclick={handleClose}
@@ -335,6 +305,14 @@
 
     <!-- 调整大小手柄 -->
     {#if resizable && !isMaximized && !isMinimized}
+      <!-- 左边缘 -->
+      <div
+        class="absolute top-0 left-0 w-1 h-full cursor-ew-resize hover:bg-primary/20"
+        onmousedown={(e) => handleResizeStart(e, "left")}
+        role="button"
+        tabindex="0"
+      ></div>
+
       <!-- 右边缘 -->
       <div
         class="absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-primary/20"
@@ -343,10 +321,42 @@
         tabindex="0"
       ></div>
 
+      <!-- 顶边缘 -->
+      <div
+        class="absolute top-0 left-0 w-full h-1 cursor-ns-resize hover:bg-primary/20"
+        onmousedown={(e) => handleResizeStart(e, "top")}
+        role="button"
+        tabindex="0"
+      ></div>
+
       <!-- 底边缘 -->
       <div
         class="absolute bottom-0 left-0 w-full h-1 cursor-ns-resize hover:bg-primary/20"
         onmousedown={(e) => handleResizeStart(e, "bottom")}
+        role="button"
+        tabindex="0"
+      ></div>
+
+      <!-- 左上角 -->
+      <div
+        class="absolute top-0 left-0 w-3 h-3 cursor-nw-resize hover:bg-primary/30"
+        onmousedown={(e) => handleResizeStart(e, "top-left")}
+        role="button"
+        tabindex="0"
+      ></div>
+
+      <!-- 右上角 -->
+      <div
+        class="absolute top-0 right-0 w-3 h-3 cursor-ne-resize hover:bg-primary/30"
+        onmousedown={(e) => handleResizeStart(e, "top-right")}
+        role="button"
+        tabindex="0"
+      ></div>
+
+      <!-- 左下角 -->
+      <div
+        class="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize hover:bg-primary/30"
+        onmousedown={(e) => handleResizeStart(e, "bottom-left")}
         role="button"
         tabindex="0"
       ></div>
@@ -377,6 +387,14 @@
 
   .cursor-nw-resize {
     cursor: nw-resize;
+  }
+
+  .cursor-ne-resize {
+    cursor: ne-resize;
+  }
+
+  .cursor-sw-resize {
+    cursor: sw-resize;
   }
 
   .select-none {
