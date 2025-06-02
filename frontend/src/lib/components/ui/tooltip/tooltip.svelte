@@ -43,7 +43,7 @@
 <div class={cn("tooltip", className, positionClass)}>
   {#if typeof content === "string"}
     <div
-      class="tooltip-content bg-base-300 rounded-lg p-2 text-xs {tooltipClass}"
+      class="tooltip-content text-base-content bg-base-300 rounded-lg p-2 text-xs {tooltipClass}"
     >
       {@html content}
     </div>

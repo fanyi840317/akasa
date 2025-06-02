@@ -25,7 +25,6 @@
   function handleSubmit() {
     if (inputValue.trim()) {
       onSubmit?.(inputValue.trim());
-      inputValue = "";
     }
   }
 
@@ -39,18 +38,12 @@
 <div class="card bg-base-300 rounded-4xl shadow-xl">
   <div class="card-body p-2 gap-0">
     <!-- 输入框 -->
-    <form on:submit|preventDefault={handleSubmit}>
+    <form onsubmit={handleSubmit}>
       <textarea
         rows="2"
         {placeholder}
         class="p-2 w-full h-full resize-none focus:outline-none"
         bind:value={inputValue}
-        on:keydown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey && !disabled) {
-            e.preventDefault();
-            handleSubmit();
-          }
-        }}
         {disabled}
       />
     </form>
@@ -59,21 +52,21 @@
       <!-- 搜索建议按钮 -->
       <div class="dropdown dropdown-top" class:dropdown-open={showSuggestions}>
         <button
-          class="btn btn-neutral btn-circle btn-sm"
-          on:click={() => (showSuggestions = !showSuggestions)}
+          class="btn btn-ghost btn-neutral btn-circle btn-sm"
+          onclick={() => {showSuggestions = !showSuggestions ;}}
         >
           <Globe class="w-5 h-5" />
         </button>
 
         {#if showSuggestions}
           <div
-            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2"
+            class="dropdown-content z-99999 menu p-2 shadow bg-base-100 rounded-box w-52 mt-2"
           >
             {#each suggestions as suggestion}
               <li>
                 <button
                   class="text-left"
-                  on:click={() => handleSuggestionClick(suggestion)}
+                  onclick={() => handleSuggestionClick(suggestion)}
                 >
                   {suggestion}
                 </button>
@@ -90,7 +83,7 @@
         <!-- 生成按钮 -->
         <button
           class="btn btn-sm btn-base-100"
-          on:click={handleSubmit}
+          onclick={handleSubmit}
           {disabled}
         >
           <svg

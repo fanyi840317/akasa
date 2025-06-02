@@ -5,19 +5,14 @@
     Send,
     Image,
     Mic,
-    Copy,
-    RotateCcw,
-    ThumbsUp,
-    ThumbsDown,
   } from "lucide-svelte";
   import { Chat } from "@ai-sdk/svelte";
   import DraggableWindow from "../ui/draggable-window/draggable-window.svelte";
   import InputArea from "./input-area.svelte";
+  import ChatMessages from "./chat-messages.svelte";
   import { ScrollArea } from "../ui/scroll-area";
-  import { marked } from "marked";
   import type { ChatMessage } from "$lib/types/ai";
 
-  const dispatch = createEventDispatcher();
 
   // Props
   let {
@@ -57,20 +52,19 @@
   const STORAGE_KEY = `chat-messages-${windowId}`;
 
   // Convert initial messages to AI SDK format
-  const convertedInitialMessages = initialMessages.map((msg: ChatMessage) => ({
-    id: msg.id,
-    role: msg.role === 'model' ? 'assistant' : msg.role,
-    content: msg.content,
-    createdAt: msg.timestamp,
-  }));
-
+  // const convertedInitialMessages = initialMessages.map((msg: ChatMessage) => ({
+  //   id: msg.id,
+  //   role: msg.role === 'model' ? 'assistant' : msg.role,
+  //   content: msg.content,
+  //   createdAt: msg.timestamp,
+  // }));
   // AI Chat instance
   const chat = new Chat({
     api: '/api/chat',
     maxSteps: 5,
-    initialMessages: convertedInitialMessages,
-    get id() {
-      return windowId;
+    onError: (error) => {
+      console.error('AI 对话错误:', error);
+      // 可以在这里添加用户友好的错误提示
     },
   });
 
@@ -86,8 +80,11 @@
   });
 
   // 消息操作函数
-  function copyMessage(content: string) {
-    navigator.clipboard.writeText(content);
+  function copyMessage(messageId: string) {
+    const message = chat.messages.find(m => m.id === messageId);
+    if (message) {
+      navigator.clipboard.writeText(message.content);
+    }
   }
 
   function regenerateMessage(messageId: string) {
@@ -109,15 +106,7 @@
     // 这里可以添加点踩逻辑
   }
 
-  // 渲染Markdown
-  function renderMarkdown(content: string): string {
-    try {
-      return marked(content) as string;
-    } catch (err) {
-      console.error("Markdown渲染失败:", err);
-      return content;
-    }
-  }
+
 
   // 外部调用的发送消息函数
   export async function sendMessage(messageText: string) {
@@ -233,131 +222,27 @@
           style="height: {windowHeight - 210}px; overflow: hidden;"
           bind:ref={scrollAreaRef}
         >
-          <div class="flex flex-col gap-4">
-            {#if chat.messages.length === 0}
-              <div class="text-center opacity-60 py-8">
-                <div class="avatar placeholder mb-2">
-                  <div
-                    class="bg-primary text-primary-content rounded-full w-12"
-                  >
-                    <span class="text-lg">AI</span>
-                  </div>
-                </div>
-                <p>开始与 AI 对话</p>
-                <p class="text-sm opacity-50">输入你的问题，我会尽力帮助你</p>
-              </div>
-            {/if}
-
-            {#each chat.messages as message}
-              <div
-                class="chat {message.role === 'user'
-                  ? 'chat-end'
-                  : 'chat-start'}"
-              >
-                <div class="chat-image avatar">
-                  <div class="w-10 rounded-full">
-                    {#if message.role === 'user'}
-                      <div
-                        class="avatar placeholder bg-secondary text-secondary-content"
-                      >
-                        <div class="w-10 rounded-full">
-                          <span class="text-xs">You</span>
-                        </div>
-                      </div>
-                    {:else}
-                      <div
-                        class="avatar placeholder bg-primary text-primary-content"
-                      >
-                        <div class="w-10 rounded-full">
-                          <span class="text-xs">AI</span>
-                        </div>
-                      </div>
-                    {/if}
-                  </div>
-                </div>
-                <div class="chat-bubble max-w-[80%]">
-                  {#if message.role === 'assistant'}
-                    {@html renderMarkdown(message.content)}
-                  {:else}
-                    {message.content}
-                  {/if}
-                </div>
-                {#if message.role === 'assistant'}
-                  <div class="chat-footer opacity-50">
-                    <div class="flex gap-1 mt-1">
-                      <button
-                        class="btn btn-ghost btn-xs"
-                        onclick={() => copyMessage(message.id)}
-                        title="复制"
-                      >
-                        <Copy class="w-3 h-3" />
-                      </button>
-                      <button
-                        class="btn btn-ghost btn-xs"
-                        onclick={() => regenerateMessage(message.id)}
-                        title="重新生成"
-                      >
-                        <RotateCcw class="w-3 h-3" />
-                      </button>
-                      <button
-                        class="btn btn-ghost btn-xs"
-                        onclick={() => likeMessage(message.id)}
-                        title="点赞"
-                      >
-                        <ThumbsUp class="w-3 h-3" />
-                      </button>
-                      <button
-                        class="btn btn-ghost btn-xs"
-                        onclick={() => dislikeMessage(message.id)}
-                        title="点踩"
-                      >
-                        <ThumbsDown class="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                {/if}
-              </div>
-            {/each}
-
-            {#if chat.status === 'submitted' || chat.status === 'streaming'}
-              <div class="chat chat-start">
-                <div class="chat-image avatar">
-                  <div class="w-8 rounded-full">
-                    <div
-                      class="bg-secondary text-secondary-content rounded-full w-8 h-8 flex items-center justify-center"
-                    >
-                      <span class="text-xs">AI</span>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="chat-bubble chat-bubble-secondary flex items-center justify-center"
-                >
-                  <Loader2 class="h-4 w-4 animate-spin opacity-70" />
-                  <span class="ml-2 text-sm">思考中...</span>
-                </div>
-              </div>
-            {/if}
-
-            {#if chat.error}
-              <div class="flex justify-center">
-                <div class="alert alert-error text-sm max-w-xs">
-                  <p>{chat.error.message || chat.error}</p>
-                </div>
-              </div>
-            {/if}
-          </div>
+          <ChatMessages
+            messages={chat.messages}
+            status={chat.status}
+            error={chat.error}
+            onCopyMessage={copyMessage}
+            onRegenerateMessage={regenerateMessage}
+            onLikeMessage={likeMessage}
+            onDislikeMessage={dislikeMessage}
+          />
         </ScrollArea>
 
+        <!-- disabled={chat.status !== 'ready'} -->
         <!-- 输入区域 -->
         <div class=" p-5">
           <InputArea
-            disabled={chat.status !== 'ready'}
             placeholder="输入消息..."
             bind:inputValue={chat.input}
             onSubmit={(text) => {
-              chat.input = text;
+              console.log('Message submitted:', text);
               chat.handleSubmit();
+              console.log('Chat messages after submit:', chat.messages.length);
             }}
           />
         </div>

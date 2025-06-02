@@ -38,22 +38,22 @@
 
   const categories = [
     {
-      name: "Discussion",
+      name: "My Events",
       icon: MessageSquare,
       color: "bg-blue-500/20",
-      path: "/console/categories/discussion",
+      path: "/console/my/events",
     },
     {
-      name: "How To",
+      name: "Favorites",
       icon: FileText,
       color: "bg-orange-500/20",
-      path: "/console/categories/how-to",
+      path: "/console/my/favorites",
     },
     {
-      name: "Feature Requests",
+      name: "Collections",
       icon: ThumbsUp,
       color: "bg-green-500/20",
-      path: "/console/categories/feature-requests",
+      path: "/console/my/collections",
     },
   ];
 
@@ -146,23 +146,25 @@
     chatDialogOpen = false;
   }
 </script>
-
-<div class="drawer lg:drawer-open bg-base-100 min-h-screen relative">
+<div class="flex flex-col overflow-hidden min-h-screen ">
+  <TopBar class="p-2"
+  handleCreate={() => {
+    goto("/console/events/new");
+  }}
+  title={$page.data.pageTitle}
+  subtitle={$page.data.pageSubtitle}
+  handleUseAI={handleChatClick}
+></TopBar>
+<!-- h-[calc(100vh-200px)] -->
+<div class="drawer lg:drawer-open bg-base-100 flex-1  ">
   <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-  <div class="drawer-content flex flex-col px-4 py-3 z-0">
+  <div class="drawer-content flex flex-col h-full ">
     <!-- Page content will be rendered here by SvelteKit -->
+
     <div
-      class="animate-[fadeIn_0.5s_ease-in-out] p-4 overflow-hidden"
+      class="animate-[fadeIn_0.5s_ease-in-out] p-4"
       id="L145-147"
     >
-      <TopBar
-        handleCreate={() => {
-          goto("/console/events/new");
-        }}
-        title={$page.data.pageTitle}
-        subtitle={$page.data.pageSubtitle}
-        handleUseAI={handleChatClick}
-      ></TopBar>
       {@render children()}
     </div>
     <label
@@ -175,12 +177,14 @@
 
   <!-- 右侧边栏tabs区域 -->
 
-  <div class="drawer-side">
+  <div class="drawer-side h-[calc(100vh-90px)]">
     <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"
     ></label>
     <LeftSidebar class="" {categories} {activeMenu} />
   </div>
 </div>
+</div>
+
 
 <!-- 全局 DraggableChatDialog 组件 -->
 <DraggableChatDialog

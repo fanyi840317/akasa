@@ -222,7 +222,7 @@
   let hasCurrentMessages = $derived(currentConversation?.messages.length > 0);
 </script>
 
-<div class="flex h-screen bg-base-100">
+<div class="flex h-screen bg-base-100 rounded-2xl border border-base-300 ">
   <!-- 侧边栏 -->
   {#if showSidebar}
     <div class="w-80 bg-base-200 border-r border-base-300 flex flex-col" transition:fly={{ x: -320, duration: 300 }}>

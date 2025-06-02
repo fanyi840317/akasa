@@ -11,12 +11,21 @@
   import { UserAvatar, Tooltip } from "../ui";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import type { User } from "$lib/types/user";
+  import { cn } from "$lib/utils";
 
-  let { title, subtitle, handleCreate, handleUseAI, user } = $props<{
+  let {
+    title,
+    subtitle,
+    handleCreate,
+    handleUseAI,
+    user,
+    class: className,
+  } = $props<{
     title?: string;
     subtitle?: string;
     handleCreate?: () => void;
     handleUseAI?: () => void;
+    class?: string;
     src?: string;
     fallback?: string;
     user?: User;
@@ -38,25 +47,34 @@
   }
 </script>
 
-<div class="flex justify-between items-center mb-4">
-  <div class="flex items-center gap-2">
-    <h1 class="text-2xl font-semibold">{title}</h1>
-    <button class="btn btn-ghost btn-sm p-1">
-      <ChevronDown class="w-5 h-5" />
-    </button>
+<div class={cn("flex justify-between items-center", className)}>
+  <div class="">
+    <h1
+      class="text-3xl font-bold text-center bg-clip-text
+      text-transparent bg-gradient-to-br from-primary via-accent to-secondary
+      tracking-tight"
+    >
+      Akasa
+    </h1>
+    <div
+      class="w-16 h-0.5 bg-gradient-to-r from-primary to-accent mx-auto mt-2 rounded-full opacity-60"
+    ></div>
+  </div>
+  <div class="flex flex-col items-start gap-0">
+    
+    {#if title}
+      <button class="btn btn-ghost btn-sm p-1">
+        <h1 class="text-xl font-semibold">{title}</h1>
+        <ChevronDown class="w-5 h-5" />
+      </button>
+    {/if}
+    {#if subtitle}
+      <span class="px-1 text-sm text-base-content/70">{subtitle}</span>
+    {/if}
   </div>
   <div class="flex items-center gap-4">
     <!-- <span class="text-sm text-base-content/70">42182 events</span> -->
     <div class="flex items-center gap-4">
-      <Tooltip content="新建事件" >
-        <button
-          class="btn btn-circle btn-primary btn-sm"
-          onclick={handleCreate}
-        >
-          <PlusCircle class="w-5 h-5" />
-        </button>
-      </Tooltip>
-
       <Tooltip
         content="点击使用AI功能,可以<p/>根据事件描述生成事件，<p/>并自动创建事件"
         position="bottom"
@@ -70,7 +88,11 @@
       </Tooltip>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
-          <UserAvatar class="cursor-pointer" src={user?.src} fallback={user?.name?.charAt(0)} />
+          <UserAvatar
+            class="cursor-pointer size-6"
+            src={user?.src}
+            fallback={user?.name?.charAt(0)}
+          />
         </DropdownMenu.Trigger>
         <DropdownMenu.Content class="w-56" sideOffset={5} align="end">
           <div class="flex items-center justify-start gap-2 p-2">
@@ -103,6 +125,3 @@
     </div>
   </div>
 </div>
-<p class="text-xs text-base-content/60 mb-6">
-  {subtitle}
-</p>

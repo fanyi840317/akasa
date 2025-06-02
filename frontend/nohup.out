@@ -1,0 +1,94 @@
+
+> frontend@0.0.1 dev
+> vite dev
+
+
+  VITE v6.3.3  ready in 1534 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+> frontend@0.0.1 dev
+> vite dev
+
+Port 5173 is in use, trying another one...
+
+  VITE v6.3.3  ready in 1228 ms
+
+  ➜  Local:   http://localhost:5174/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+10:53:33 [vite] Internal server error: Invalid declaration: `X, Minus, Maximize2, PanelRight`
+  Plugin: @tailwindcss/vite:generate:serve
+  File: /Users/fanyi/Desktop/code/akasa/frontend/src/lib/components/ui/draggable-window/draggable-window.svelte?svelte&type=style&lang.css
+      at me (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/tailwindcss@4.1.4/node_modules/tailwindcss/dist/chunk-QMW34FGX.mjs:3:2239)
+      at Xa (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/tailwindcss@4.1.4/node_modules/tailwindcss/dist/chunk-QMW34FGX.mjs:36:1799)
+      at ta (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/@tailwindcss+node@4.1.4/node_modules/@tailwindcss/node/dist/index.mjs:12:3361)
+      at R.generate (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/@tailwindcss+vite@4.1.4_vite@6.3.3_@types+node@22.15.19_jiti@2.4.2_lightningcss@1.29.2_/node_modules/@tailwindcss/vite/dist/index.mjs:1:3517)
+      at TransformPluginContext.transform (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/@tailwindcss+vite@4.1.4_vite@6.3.3_@types+node@22.15.19_jiti@2.4.2_lightningcss@1.29.2_/node_modules/@tailwindcss/vite/dist/index.mjs:1:1926)
+      at EnvironmentPluginContainer.transform (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/vite@6.3.3_@types+node@22.15.19_jiti@2.4.2_lightningcss@1.29.2/node_modules/vite/dist/node/chunks/dep-BMIURPaQ.js:42247:19)
+      at loadAndTransform (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/vite@6.3.3_@types+node@22.15.19_jiti@2.4.2_lightningcss@1.29.2/node_modules/vite/dist/node/chunks/dep-BMIURPaQ.js:35698:49)
+10:53:33 [vite] Internal server error: Invalid declaration: `Globe`
+  Plugin: @tailwindcss/vite:generate:serve
+  File: /Users/fanyi/Desktop/code/akasa/frontend/src/lib/components/ai/input-area.svelte?svelte&type=style&lang.css
+      at me (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/tailwindcss@4.1.4/node_modules/tailwindcss/dist/chunk-QMW34FGX.mjs:3:2239)
+      at Xa (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/tailwindcss@4.1.4/node_modules/tailwindcss/dist/chunk-QMW34FGX.mjs:36:1799)
+      at ta (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/@tailwindcss+node@4.1.4/node_modules/@tailwindcss/node/dist/index.mjs:12:3361)
+      at R.generate (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/@tailwindcss+vite@4.1.4_vite@6.3.3_@types+node@22.15.19_jiti@2.4.2_lightningcss@1.29.2_/node_modules/@tailwindcss/vite/dist/index.mjs:1:3517)
+      at TransformPluginContext.transform (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/@tailwindcss+vite@4.1.4_vite@6.3.3_@types+node@22.15.19_jiti@2.4.2_lightningcss@1.29.2_/node_modules/@tailwindcss/vite/dist/index.mjs:1:1926)
+      at EnvironmentPluginContainer.transform (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/vite@6.3.3_@types+node@22.15.19_jiti@2.4.2_lightningcss@1.29.2/node_modules/vite/dist/node/chunks/dep-BMIURPaQ.js:42247:19)
+      at loadAndTransform (file:///Users/fanyi/Desktop/code/akasa/frontend/node_modules/.pnpm/vite@6.3.3_@types+node@22.15.19_jiti@2.4.2_lightningcss@1.29.2/node_modules/vite/dist/node/chunks/dep-BMIURPaQ.js:35698:49)
+10:53:34 [vite-plugin-svelte] src/routes/console/+layout.svelte:212:2 Unused CSS selector ".box-s"
+https://svelte.dev/e/css_unused_selector
+10:53:34 [vite-plugin-svelte] src/lib/components/ui/nav/category-nav-item.svelte:36:4 Using `on:mouseenter` to listen to the mouseenter event is deprecated. Use the event attribute `onmouseenter` instead
+https://svelte.dev/e/event_directive_deprecated
+10:53:34 [vite-plugin-svelte] src/lib/components/ui/nav/category-nav-item.svelte:37:4 Using `on:mouseleave` to listen to the mouseleave event is deprecated. Use the event attribute `onmouseleave` instead
+https://svelte.dev/e/event_directive_deprecated
+10:53:34 [vite-plugin-svelte] src/lib/components/ui/nav/category-nav-item.svelte:53:8 `<svelte:component>` is deprecated in runes mode — components are dynamic by default
+https://svelte.dev/e/svelte_component_deprecated
+10:53:34 [vite-plugin-svelte] src/lib/components/ui/nav/nav-item.svelte:34:4 Using `on:mouseenter` to listen to the mouseenter event is deprecated. Use the event attribute `onmouseenter` instead
+https://svelte.dev/e/event_directive_deprecated
+10:53:34 [vite-plugin-svelte] src/lib/components/ui/nav/nav-item.svelte:35:4 Using `on:mouseleave` to listen to the mouseleave event is deprecated. Use the event attribute `onmouseleave` instead
+https://svelte.dev/e/event_directive_deprecated
+10:53:34 [vite-plugin-svelte] src/lib/components/ui/nav/nav-item.svelte:46:6 `<svelte:component>` is deprecated in runes mode — components are dynamic by default
+https://svelte.dev/e/svelte_component_deprecated
+10:53:34 [vite-plugin-svelte] src/lib/components/ai/draggable-chat-dialog.svelte:391:6 `<div>` with a click or keydown handler must have an ARIA role
+https://svelte.dev/e/a11y_no_static_element_interactions
+10:53:35 [vite-plugin-svelte] src/lib/components/ui/draggable-window/draggable-window.svelte:42:6 `windowElement` is updated, but is not declared with `$state(...)`. Changing its value will not correctly trigger updates
+https://svelte.dev/e/non_reactive_update
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:43:6 Self-closing HTML tags for non-void elements are ambiguous — use `<textarea ...></textarea>` rather than `<textarea ... />`
+https://svelte.dev/e/element_invalid_self_closing_tag
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:4:6 `showSuggestions` is updated, but is not declared with `$state(...)`. Changing its value will not correctly trigger updates
+https://svelte.dev/e/non_reactive_update
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:114:2 Unused CSS selector ".gradient-border"
+https://svelte.dev/e/css_unused_selector
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:119:2 Unused CSS selector ".gradient-border::before"
+https://svelte.dev/e/css_unused_selector
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:140:2 Unused CSS selector ".voice-btn:hover .bar"
+https://svelte.dev/e/css_unused_selector
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:144:2 Unused CSS selector ".bar-1"
+https://svelte.dev/e/css_unused_selector
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:147:2 Unused CSS selector ".bar-2"
+https://svelte.dev/e/css_unused_selector
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:150:2 Unused CSS selector ".bar-3"
+https://svelte.dev/e/css_unused_selector
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/input-area.svelte:153:2 Unused CSS selector ".bar-4"
+https://svelte.dev/e/css_unused_selector
+10:53:35 [vite-plugin-svelte] src/lib/components/events/batch-add-events.svelte:63:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+10:53:35 [vite-plugin-svelte] src/lib/components/events/batch-add-events.svelte:65:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+10:53:35 [vite-plugin-svelte] src/lib/components/events/batch-add-events.svelte:78:12 Visible, non-interactive elements with a click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as `<button type="button">` or `<a>` might be more appropriate
+https://svelte.dev/e/a11y_click_events_have_key_events
+10:53:35 [vite-plugin-svelte] src/lib/components/events/batch-add-events.svelte:78:12 `<a>` with a click handler must have an ARIA role
+https://svelte.dev/e/a11y_no_static_element_interactions
+10:53:35 [vite-plugin-svelte] src/lib/components/events/batch-add-events.svelte:78:12 `<a>` element should have an href attribute
+https://svelte.dev/e/a11y_missing_attribute
+10:53:35 [vite-plugin-svelte] src/lib/components/events/event-card.svelte:45:2 Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated
+10:53:35 [vite-plugin-svelte] src/lib/components/events/event-card.svelte:46:2 Using `on:keydown` to listen to the keydown event is deprecated. Use the event attribute `onkeydown` instead
+https://svelte.dev/e/event_directive_deprecated
+10:53:35 [vite-plugin-svelte] src/lib/components/ai/chat-history-list.svelte:14:12 Component has unused export property 'title'. If it is for external reference only, please consider using `export const title`
+https://svelte.dev/e/export_let_unused
+/*! 🌼 daisyUI 5.0.28 */

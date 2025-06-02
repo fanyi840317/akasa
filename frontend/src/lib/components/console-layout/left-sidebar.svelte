@@ -1,8 +1,9 @@
 <script>
-  import { Search, BarChart2, MapIcon, ListFilter, MessageSquare, HelpCircle, Lightbulb, Bot } from "lucide-svelte";
+  import { Search, BarChart2, MapIcon, ListFilter, PlusCircle, MessageSquare, HelpCircle, Lightbulb, Bot } from "lucide-svelte";
   import CategoryNavItem from "../ui/nav/category-nav-item.svelte";
   import NavItem from "../ui/nav/nav-item.svelte";
   import { cn } from "$lib/utils";
+    import { AddCursorIcon } from "@blocksuite/icons/lit";
 
   // 接收从父组件传递的 props
   let {
@@ -13,23 +14,12 @@
 </script>
 <div class={cn("flex flex-col h-full overflow-hidden",className)}>
     <ul
-      class="menu py-10 w-64 text-base-content/50 gap-2 flex-1
+      class="menu py-4 w-64 text-base-content/50 gap-2 flex-1
       items-start justify-start
        overflow-y-auto overflow-x-hidden"
     >
-      <div class="mb-6 px-6">
-        <h1
-          class="text-3xl font-bold text-center bg-clip-text
-          text-transparent bg-gradient-to-br from-primary via-accent to-secondary
-          tracking-tight"
-        >
-          Akasa
-        </h1>
-        <div
-          class="w-16 h-0.5 bg-gradient-to-r from-primary to-accent mx-auto mt-2 rounded-full opacity-60"
-        ></div>
-      </div>
-      <div class="w-full flex-1 px-5">
+    
+      <div class="w-full flex-1 ">
         <!-- Sidebar content here -->
         <!-- 新建按钮 -->
 
@@ -37,14 +27,14 @@
         <button
           class="w-full mb-6 px-4 py-3 bg-base-200/50 hover:bg-base-200
                  text-base-content/70 hover:text-base-content rounded-xl
-                 font-medium text-sm transition-all duration-200
-                 hover:scale-[1.02] hover:shadow-md
+                 font-medium text-xs transition-all duration-200
+                 hover:scale-[1.02] hover:shadow-md border border-base-300
                  flex items-center justify-center gap-2 group"
         >
           <Search
-            class="w-4 h-4 group-hover:scale-110 transition-transform duration-200"
+            class="w-4 h-4 group-hover:scale-110 transition-transform duration-200 "
           />
-          搜索
+          Search
           <span class="ml-auto text-xs opacity-50 kbd kbd-xs">Ctrl</span>
           <span class="text-xs opacity-50 kbd kbd-xs">K</span>
         </button>
@@ -63,8 +53,8 @@
 
         <NavItem
           href="/console/admin/research"
-          icon={Bot}
-          label="AI"
+          icon={PlusCircle}
+          label="Create"
           isActive={activeMenu === "Research"}
         />
 
