@@ -15,6 +15,7 @@
   import CoverCard from "$lib/components/events/event/actionbar-cards/cover-card.svelte";
   import { InputArea } from "$lib/components/ai";
   import { Minimize, Maximize, Eye, EyeOff } from "lucide-svelte"; // 导入收缩和预览图标
+  import ChatContent from "$lib/components/ai/chat-content.svelte";
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -278,11 +279,10 @@
     
     {#if !isInputAreaCollapsed}
     <div class="w-128 flex flex-col p-4 justify-between relative">
-      <div class="flex-1"></div>
+      <ChatContent windowHeight={400} />
       <div class="absolute top-2 right-2">
       
       </div>
-        <InputArea></InputArea>
     </div>
     {/if}
     <div class="relative w-full h-full pt-1">

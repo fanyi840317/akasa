@@ -12,7 +12,7 @@
   import ChatMessages from "./chat-messages.svelte";
   import { ScrollArea } from "../ui/scroll-area";
   import type { ChatMessage } from "$lib/types/ai";
-  import ChatDialogContent from "./chat-dialog-content.svelte";
+  import ChatDialogContent from "./chat-content.svelte";
 
   // Props
   let {
