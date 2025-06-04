@@ -23,7 +23,7 @@
 <div class="flex gap-1.5 flex-col ">
     <!-- Header -->
     <div
-        class="flex items-stretch justify-start .bg-light-50/50 overflow-hidden pl-4 rounded-2xl"
+        class="flex items-stretch justify-start  overflow-hidden pl-4 rounded-2xl"
     >
         <div
             class="event-cell flex-center text-base-content/20 font-semibold text-xs w-4/12"
@@ -36,17 +36,17 @@
             所有者
         </div>
         <div
-            class="event-cell min-w-28 flex-center border-base-content/20 text-base-content/20 font-semibold text-xs"
+            class="event-cell w-1/12 min-w-28 flex-center border-base-content/20 text-base-content/20 font-semibold text-xs"
         >
             可信度
         </div>
         <div
-            class="event-cell min-w-28 flex-center border-base-content/20 text-base-content/20 font-semibold text-xs"
+            class="event-cell w-1/12 min-w-28 flex-center border-base-content/20 text-base-content/20 font-semibold text-xs"
         >
             发生时间
         </div>
         <div
-            class="w-4/12 ml-2 border-l-4 border-base-content/20 flex-center text-base-content/20 uppercase font-semibold text-xs"
+            class="w-fill ml-2 flex-1 min-w-28 border-l-4 border-base-content/20 flex-center text-base-content/20 uppercase font-semibold text-xs"
         >
             证据
         </div>

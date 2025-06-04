@@ -12,7 +12,7 @@
 <button
     class="flex h-[68px] group buttonActiveRing items-stretch
     justify-start pl-4 rounded-xl cursor-pointer
-     {isEven ? 'bg-transparent' : 'bg-base-200'}"
+     {isEven ? 'bg-transparent' : 'bg-base-300'}"
      onclick = {() => onclick?.(event)}
 >
     <div

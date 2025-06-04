@@ -81,35 +81,7 @@
   });
 
   // Determine activeMenu based on the current path
-  $effect(() => {
-    const currentPath = $page.url.pathname;
-
-    // alert(currentPath);
-    if (currentPath.startsWith("/console/users")) {
-      activeMenu = "Users";
-    } else if (currentPath.startsWith("/console/events")) {
-      activeMenu = "Explore";
-    } else if (currentPath.startsWith("/console/admin/research")) {
-      activeMenu = "Research";
-    } else if (currentPath.startsWith("/console/groups")) {
-      activeMenu = "Groups";
-    } else if (currentPath.startsWith("/console/about")) {
-      activeMenu = "About";
-    } else {
-      // Check categories
-      const activeCategory = categories.find((cat) =>
-        currentPath.startsWith(cat.path),
-      );
-      if (activeCategory) {
-        activeMenu = activeCategory.name;
-      } else if (currentPath.startsWith("/console/all-categories")) {
-        activeMenu = "All categories";
-      } else {
-        activeMenu = ""; // Default or based on other logic
-      }
-    }
-  });
-
+ 
   // 处理新建按钮点击
   function handleChatClick() {
     // 计算AI按钮的位置，将对话框显示在按钮下方
@@ -146,44 +118,22 @@
     chatDialogOpen = false;
   }
 </script>
-<div class="flex flex-col overflow-hidden min-h-screen ">
-  <TopBar class="p-2"
-  handleCreate={() => {
-    goto("/console/events/new");
-  }}
-  title={$page.data.pageTitle}
-  subtitle={$page.data.pageSubtitle}
-  handleUseAI={handleChatClick}
-></TopBar>
-<!-- h-[calc(100vh-200px)] -->
-<div class="drawer lg:drawer-open bg-base-100 flex-1  ">
-  <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-  <div class="drawer-content flex flex-col h-full ">
-    <!-- Page content will be rendered here by SvelteKit -->
 
-    <div
-      class="animate-[fadeIn_0.5s_ease-in-out] p-4"
-      id="L145-147"
-    >
-      {@render children()}
-    </div>
-    <label
-      for="my-drawer-2"
-      class="btn btn-sm btn-circle btn-soft lg:hidden fixed
-      bottom-4 right-4 shadow-depth-2 hover:shadow-depth-3 transition-smooth"
-      >Open drawer</label
-    >
-  </div>
-
-  <!-- 右侧边栏tabs区域 -->
-
-  <div class="drawer-side h-[calc(100vh-90px)]">
-    <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"
-    ></label>
-    <LeftSidebar class="" {categories} {activeMenu} />
+<div class="flex flex-col overflow-hidden h-screen">
+  <TopBar
+    class="py-1 px-6"
+    handleCreate={() => {
+      goto("/console/events/new");
+    }}
+    title={$page.data.pageTitle}
+    subtitle={$page.data.pageSubtitle}
+    handleUseAI={handleChatClick}
+  ></TopBar>
+  <div class="flex-1 overflow-hidden animate-[fadeIn_0.5s_ease-in-out]  ">
+    {@render children?.()}
   </div>
 </div>
-</div>
+
 
 
 <!-- 全局 DraggableChatDialog 组件 -->

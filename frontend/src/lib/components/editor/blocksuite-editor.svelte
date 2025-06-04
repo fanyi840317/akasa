@@ -30,13 +30,14 @@
   import { Card } from "../ui";
 
   import { EdgelessMapToolButton } from "./toolbar/map/map-button";
+  import { cn } from "$lib/utils";
   // Ensure effects are initialized only once globally
   if (!(window as any).__blocksuite_effects_initialized) {
     blocksEffects();
     presetsEffects();
     customElements.define(
       "edgeless-cover-tool-button",
-      EdgelessCoverToolButton,
+      EdgelessCoverToolButton
     );
 
     customElements.define("edgeless-map-tool-button", EdgelessMapToolButton);
@@ -46,8 +47,10 @@
 
   // export let docId: string | undefined = undefined; // Optional prop to load an existing doc
   // export let initialJsonContent: string | undefined = undefined; // New prop for initial JSON content
-  let { initialJsonContent = undefined } = $props<{
+  let { initialJsonContent = undefined, class: className, readonly = false } = $props<{
     initialJsonContent: string | undefined;
+    class: string;
+    readonly?: boolean;
   }>();
   let editorContainer: HTMLDivElement;
   let editor: AffineEditorContainer;
@@ -62,7 +65,7 @@
   };
 
   const createDocModeProvider = (
-    editorInstance: AffineEditorContainer,
+    editorInstance: AffineEditorContainer
   ): DocModeProvider => {
     const DOC_MODE = "edgeless"; // fixed to edgeless mode
     const doc_slots = new Map<string, Slot<DocMode>>();
@@ -78,7 +81,7 @@
       },
       onPrimaryModeChange: (
         handler: (mode: DocMode) => void,
-        doc_id: string,
+        doc_id: string
       ): Disposable => {
         if (!doc_slots.has(doc_id)) {
           doc_slots.set(doc_id, new Slot<DocMode>());
@@ -108,7 +111,7 @@
 
         if (!(doc instanceof Doc)) {
           console.error(
-            "createDocByJson did not return a Doc instance, falling back.",
+            "createDocByJson did not return a Doc instance, falling back."
           );
           throw new Error("createDocByJson did not return a Doc instance");
         }
@@ -117,7 +120,7 @@
       } catch (e) {
         console.error(
           "Failed to create document using createDocByJson or provided JSON is invalid:",
-          e,
+          e
         );
         // Fallback to an empty doc with the given ID
         doc = createEmptyDoc().init();
@@ -130,6 +133,11 @@
     editor = new AffineEditorContainer();
     editor.doc = doc;
     editor.mode = "edgeless";
+    
+    // 设置编辑器的只读模式
+    if (readonly) {
+      editor.doc.awarenessStore.setReadonly(doc.blockCollection,true);
+    }
 
     const edgelessSpecs = SpecProvider.getInstance().getSpec("edgeless");
     edgelessSpecs.extend([
@@ -161,7 +169,7 @@
       }
 
       const templateButton = toolbarWidget.shadowRoot?.querySelector(
-        "edgeless-template-button",
+        "edgeless-template-button"
       );
       // const cover = document.createElement("edgeless-cover-tool-button");
       if (coverRef) {
@@ -170,9 +178,8 @@
       templateButton?.remove();
 
       const shapeButton = toolbarWidget.shadowRoot?.querySelector(
-        "edgeless-shape-tool-button",
+        "edgeless-shape-tool-button"
       );
-
 
       // if (mindmapButton) {
       //   // 获取父节点
@@ -194,13 +201,20 @@
         shapeButton?.parentElement?.append(mapButtonRef);
       }
       shapeButton?.remove();
-      const toolsNode = toolbarWidget.shadowRoot?.querySelector(".senior-tools");
-      if (toolsNode) {
-        toolsNode?.appendChild(aiButtonRef);
-      }
+      // const toolsNode =
+      //   toolbarWidget.shadowRoot?.querySelector(".senior-tools");
+      // if (toolsNode) {
+      //   toolsNode?.appendChild(aiButtonRef);
+      // }
     }, 100);
   });
 
+  // 监听readonly属性变化，动态切换编辑器的只读模式
+  $effect(() => {
+    if (editor && editor.doc) {
+      editor.doc.awarenessStore.setReadonly(editor.doc.blockCollection,readonly);
+    }
+  });
 
   onDestroy(() => {
     // editor?.dispose(); // Consider disposing the editor if necessary
@@ -211,7 +225,7 @@
   let coverRef = $state<HTMLDivElement>();
   let mapButtonRef = $state<HTMLDivElement>();
   let coverUrl = $state(
-    "https://images.unsplash.com/photo-1448375240586-882707db888b",
+    "https://images.unsplash.com/photo-1448375240586-882707db888b"
   );
   let showCoverSelector = $state(false);
   let coverSelectorRef = $state<HTMLDivElement>();
@@ -223,8 +237,6 @@
   let showAIModal = $state(false);
   let aiModalPosition = $state({ x: 0, y: 0 });
   let activeAIFeature = $state("");
-
-
 
   function handleFileUpload(file: File) {
     showUploadProgress = true;
@@ -243,19 +255,17 @@
     }, 300);
   }
 
-
-
   // AI按钮处理函数
-  function handleAIClick() {
-    const rect = aiButtonRef?.getBoundingClientRect();
-    if (rect) {
-      aiModalPosition = {
-        x: rect.left + rect.width / 2,
-        y: rect.top
-      };
-    }
-    showAIModal = true;
-  }
+  // function handleAIClick() {
+  //   const rect = aiButtonRef?.getBoundingClientRect();
+  //   if (rect) {
+  //     aiModalPosition = {
+  //       x: rect.left + rect.width / 2,
+  //       y: rect.top,
+  //     };
+  //   }
+  //   showAIModal = true;
+  // }
 
   function handleAIFeatureSelect(event: { featureId: string }) {
     activeAIFeature = event.featureId;
@@ -271,14 +281,15 @@
   }
 </script>
 
-<div class="w-full h-full" bind:this={editorContainer}>
+<div class={cn("w-full h-full ",className)} bind:this={editorContainer}>
   <edgeless-cover-tool-button
     bind:this={coverRef}
     url={coverUrl}
     {uploadProgress}
     {showUploadProgress}
     onclick={() => (showCoverSelector = true)}
-    onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && (showCoverSelector = true)}
+    onkeydown={(e: KeyboardEvent) =>
+      e.key === "Enter" && (showCoverSelector = true)}
     role="button"
     tabindex="0"
     aria-label="选择封面"
@@ -287,20 +298,21 @@
   <edgeless-map-tool-button
     bind:this={mapButtonRef}
     onclick={() => console.log("Map button clicked")}
-    onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && console.log("Map button clicked")}
+    onkeydown={(e: KeyboardEvent) =>
+      e.key === "Enter" && console.log("Map button clicked")}
     role="button"
     tabindex="0"
     aria-label="地图工具"
   ></edgeless-map-tool-button>
 
-  <edgeless-ai-tool-button
+  <!-- <edgeless-ai-tool-button
     bind:this={aiButtonRef}
     onclick={handleAIClick}
-    onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && handleAIClick()}
+    onkeydown={(e: KeyboardEvent) => e.key === "Enter" && handleAIClick()}
     role="button"
     tabindex="0"
     aria-label="AI助手"
-  ></edgeless-ai-tool-button>
+  ></edgeless-ai-tool-button> -->
 
   {#if showCoverSelector}
     <div
@@ -337,7 +349,7 @@
     }}
     role="button"
     tabindex="0"
-    onkeydown={(e) => e.key === 'Enter' && (showCoverSelector = false)}
+    onkeydown={(e) => e.key === "Enter" && (showCoverSelector = false)}
   ></div>
 {/if}
 

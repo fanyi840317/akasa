@@ -68,7 +68,7 @@ const createAppStore = () => {
         dialogItem: null,
         
         // 侧边栏配置
-        sidebarCollapsed: true,
+        sidebarCollapsed: false,
         sidebarWidth: 256,
         sidebarWidthIcon: 56,
         

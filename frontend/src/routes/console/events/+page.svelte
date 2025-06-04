@@ -77,9 +77,9 @@
 </script>
 
 <div
-  class="mx-auto flex flex-col justify-start w-full overflow-hidden"
+  class="mx-auto flex flex-col justify-start w-full overflow-hidden p-14 h-content"
 >
-<ScrollArea class="h-content">
+<ScrollArea class="h-full">
   <EventCardGrid {events} onEventClick={handEventClick} />
    <!-- <EventList events={events} onEventClick={handEventClick} /> -->
 </ScrollArea>

@@ -6,12 +6,15 @@
     SparklesIcon,
     LogOut,
     Settings,
+    MapIcon,
     User as UserIcon,
   } from "lucide-svelte";
   import { UserAvatar, Tooltip } from "../ui";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import type { User } from "$lib/types/user";
   import { cn } from "$lib/utils";
+  import { goto } from "$app/navigation";
+  import { page } from "$app/state";
 
   let {
     title,
@@ -45,47 +48,66 @@
     // 处理个人资料逻辑
     console.log("查看个人资料");
   }
+  let currentPath = $derived(page.url.pathname);
 </script>
 
 <div class={cn("flex justify-between items-center", className)}>
-  <div class="">
+  <div class="items-start">
     <h1
-      class="text-3xl font-bold text-center bg-clip-text
-      text-transparent bg-gradient-to-br from-primary via-accent to-secondary
+      class="text-xl font-bold text-center bg-clip-text
+      text-base-content
       tracking-tight"
     >
       Akasa
     </h1>
-    <div
-      class="w-16 h-0.5 bg-gradient-to-r from-primary to-accent mx-auto mt-2 rounded-full opacity-60"
-    ></div>
+    <!-- <p class="text-[10px] text-base-content/40">
+      प्रत्यभिज्ञानं आरम्भः  
+    </p> -->
   </div>
-  <div class="flex flex-col items-start gap-0">
-    
-    {#if title}
-      <button class="btn btn-ghost btn-sm p-1">
-        <h1 class="text-xl font-semibold">{title}</h1>
+  <div class="flex flex-col items-center gap-0 -mb-1">
+    <div role="tablist" class="tabs tabs-border">
+      <a role="tab" class="tab"
+      onclick={() => {
+        goto("/console/events");
+      }}
+      class:tab-active={currentPath.startsWith("/console/events")}
+      >Events</a>
+      <a
+        role="tab"
+        class="tab gap-1"
+        class:tab-active={currentPath.startsWith("/console/map")}
+      >
+        <MapIcon class="w-3 h-3" />
+        Map
+      </a>
+      <!-- svelte-ignore a11y_interactive_supports_focus -->
+      <a
+        class="tab gap-1 "
+        onclick={() => {
+          goto("/console/my/events");
+        }}
+        class:tab-active={currentPath.startsWith("/console/my/events")}
+      >
+        My
+
+        <ChevronDown class="w-3 h-3" />
+      </a>
+      <!-- <a role="tab" class="tab"></a> -->
+    </div>
+    <!-- {#if title}
+      <button class="btn btn-ghost btn-sm">
+        <h1 class="text-lg font-semibold">{title}</h1>
         <ChevronDown class="w-5 h-5" />
       </button>
     {/if}
     {#if subtitle}
-      <span class="px-1 text-sm text-base-content/70">{subtitle}</span>
-    {/if}
+      <span class="px-1 text-xs text-base-content/70">{subtitle}</span>
+    {/if} -->
   </div>
   <div class="flex items-center gap-4">
     <!-- <span class="text-sm text-base-content/70">42182 events</span> -->
     <div class="flex items-center gap-4">
-      <Tooltip
-        content="点击使用AI功能,可以<p/>根据事件描述生成事件，<p/>并自动创建事件"
-        position="bottom"
-      >
-        <button
-          class="btn btn-ghost btn-circle btn-secondary"
-          onclick={handleUseAI}
-        >
-          <SparklesIcon class="w-5 h-5" />
-        </button>
-      </Tooltip>
+   
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
           <UserAvatar

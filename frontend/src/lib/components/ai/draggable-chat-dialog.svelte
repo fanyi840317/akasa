@@ -12,7 +12,7 @@
   import ChatMessages from "./chat-messages.svelte";
   import { ScrollArea } from "../ui/scroll-area";
   import type { ChatMessage } from "$lib/types/ai";
-
+  import ChatDialogContent from "./chat-dialog-content.svelte";
 
   // Props
   let {
@@ -215,38 +215,22 @@
       onDock={handleDock}
       onMinimize={handleMinimize}
     >
-      <div class="flex flex-col h-full">
-        <!-- Chat Messages -->
-        <ScrollArea
-          class="p-4"
-          style="height: {windowHeight - 210}px; overflow: hidden;"
-          bind:ref={scrollAreaRef}
-        >
-          <ChatMessages
-            messages={chat.messages}
-            status={chat.status}
-            error={chat.error}
-            onCopyMessage={copyMessage}
-            onRegenerateMessage={regenerateMessage}
-            onLikeMessage={likeMessage}
-            onDislikeMessage={dislikeMessage}
-          />
-        </ScrollArea>
-
-        <!-- disabled={chat.status !== 'ready'} -->
-        <!-- 输入区域 -->
-        <div class=" p-5">
-          <InputArea
-            placeholder="输入消息..."
-            bind:inputValue={chat.input}
-            onSubmit={(text) => {
-              console.log('Message submitted:', text);
-              chat.handleSubmit();
-              console.log('Chat messages after submit:', chat.messages.length);
-            }}
-          />
-        </div>
-      </div>
+      <ChatDialogContent
+        messages={chat.messages}
+        status={chat.status}
+        error={chat.error}
+        bind:input={chat.input}
+        {windowHeight}
+        onCopyMessage={copyMessage}
+        onRegenerateMessage={regenerateMessage}
+        onLikeMessage={likeMessage}
+        onDislikeMessage={dislikeMessage}
+        onMessageSent={(text) => {
+          console.log('Message submitted:', text);
+          chat.handleSubmit();
+          console.log('Chat messages after submit:', chat.messages.length);
+        }}
+      />
     </DraggableWindow>
   {/if}
 

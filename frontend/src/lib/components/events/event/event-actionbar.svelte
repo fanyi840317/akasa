@@ -71,9 +71,9 @@
   let newEventTime = $state<Date | null>(eventTime); // New state for selected time
 </script>
 
-<div class="relative w-full bg-base-200/10 border-b-[0.4px] border-base-content/10">
+<div class="relative w-full bg-base-200/10  border-base-content/10">
   <div
-    class="flex gap-x-4 h-16 relative p-3 items-center w-full justify-between"
+    class="flex gap-x-4 relative p-3 items-center w-full justify-between"
   >
     <div
       class="flex gap-8 text-sm min-w-[500px] justify-between  max-lg:w-full!"
@@ -92,9 +92,9 @@
               <span class="line-clamp-1 text-left">{title}</span>
             </h3>
           </div>
-          <p class="font-normal line-clamp-1 text-neutral-content/50 text-xs">
+          <!-- <p class="font-normal line-clamp-1 text-neutral-content/50 text-xs">
             {summary || "没有描述"}
-          </p>
+          </p> -->
         </div>
       </div>
     </div>
@@ -110,7 +110,7 @@
           ></UserAvatar>
         </div>
         <button
-          class="btn rounded-full btn-neutral"
+          class="btn rounded-full btn-neutral btn-sm"
           onclick={() => {
             isCommentsPanelOpen = !isCommentsPanelOpen;
           }}>添加评论</button

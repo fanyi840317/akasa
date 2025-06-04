@@ -35,7 +35,7 @@
 
 <div
   class={cn(
-    "card bg-base-100 card-border border-base-200 overflow-hidden hover:shadow-md transition-all card-hover",
+    "card bg-base-100 card-border border-base-300/50 overflow-hidden hover:shadow-md transition-all card-hover",
     size === "sm" && "card-sm",
     size === "xs" && "p-0",
     className
@@ -86,7 +86,7 @@
       {/if}
     </div>
     
-    <div class="text-xs text-base-content/70 line-clamp-2">
+    <div class=" text-base-content/70 line-clamp-2">
       {event.summary || "无摘要"}
     </div>
   </div>

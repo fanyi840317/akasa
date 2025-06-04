@@ -13,6 +13,8 @@
   import { UserAvatar } from "$lib/components/ui/avatar";
   import { auth } from "$lib/stores/auth";
   import CoverCard from "$lib/components/events/event/actionbar-cards/cover-card.svelte";
+  import { InputArea } from "$lib/components/ai";
+  import { Minimize, Maximize, Eye, EyeOff } from "lucide-svelte"; // 导入收缩和预览图标
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -27,7 +29,10 @@
   let currentEvent: EventType | null = $state(null);
   let eventLoading = $state(true);
   let isPropertiesPanelOpen = $state(true); // State for the properties panel
-  let isCommentsPanelOpen = $state(false);
+  let isCommentsPanelOpen = $state(false); // State for the comments panel
+  let isInputAreaCollapsed = $state(false); // 控制输入区域是否收缩
+  let isEditorReadonly = $state(false); // 控制编辑器是否为只读模式
+
   let comments = [
     {
       id: "1",
@@ -91,22 +96,21 @@
     await eventStore.fetchEvent(id);
     // eventData and loading will be updated by the store subscription
   }
-  let coverRfe:HTMLDivElement;
+  let coverRfe: HTMLDivElement;
   onMount(() => {
     appStore.setShowHeader(false);
     console.log("Event page mounted");
-  //   setTimeout(() => {
-  //     console.log(document.body.innerHTML);
-  //   // Remove the edgeless-template-button element
-  //   const templateButton = document.querySelector('edgeless-toolbar-widget')?.shadowRoot.querySelector("edgeless-template-button");
-  //   console.log("Template button:", templateButton);
-  //   if (templateButton) {
-  //     templateButton.parentElement?.appendChild(coverRfe);
-  //     templateButton.remove();
-  //   }
-  // },100);
-      
-    });
+    //   setTimeout(() => {
+    //     console.log(document.body.innerHTML);
+    //   // Remove the edgeless-template-button element
+    //   const templateButton = document.querySelector('edgeless-toolbar-widget')?.shadowRoot.querySelector("edgeless-template-button");
+    //   console.log("Template button:", templateButton);
+    //   if (templateButton) {
+    //     templateButton.parentElement?.appendChild(coverRfe);
+    //     templateButton.remove();
+    //   }
+    // },100);
+  });
 
   onDestroy(() => {
     appStore.setShowHeader(true);
@@ -259,63 +263,97 @@
 </script>
 
 <!-- This outer div will be the drop target and relative positioning context -->
-<div class="w-full h-screen flex flex-row overflow-hidden">
-  <div class="relative w-full h-screen">
-    <div class="w-full h-full flex flex-col">
-      <EventActionbar
-        bind:title={currentEventTitle}
-        editable={!eventLoading}
-        showSaveButton={!eventLoading}
-        onClose={handleClose}
-        onSaveDocument={handleSaveDocument}
-        onTitleChange={handleTitleChange}
-        bind:isPropertiesPanelOpen
-        bind:isCommentsPanelOpen
-      />
-
-      {#if eventLoading}
-        <!-- Use eventLoading from store -->
-        <div class="flex justify-center items-center h-full">
-          <span class="loading loading-spinner loading-lg"></span>
+<div class="h-screen flex flex-col bg-muted">
+  <EventActionbar
+    bind:title={currentEventTitle}
+    editable={!eventLoading}
+    showSaveButton={!eventLoading}
+    onClose={handleClose}
+    onSaveDocument={handleSaveDocument}
+    onTitleChange={handleTitleChange}
+    bind:isPropertiesPanelOpen
+    bind:isCommentsPanelOpen
+  />
+  <div class="w-full flex-1 flex flex-row overflow-hidden">
+    
+    {#if !isInputAreaCollapsed}
+    <div class="w-128 flex flex-col p-4 justify-between relative">
+      <div class="flex-1"></div>
+      <div class="absolute top-2 right-2">
+      
+      </div>
+        <InputArea></InputArea>
+    </div>
+    {/if}
+    <div class="relative w-full h-full pt-1">
+      <div
+        class="w-full h-full flex flex-col rounded-tl-2xl
+      outline-1 outline-base-300 shadow-xl"
+      >
+        {#if eventLoading}
+          <!-- Use eventLoading from store -->
+          <div class="flex justify-center items-center h-full">
+            <span class="loading loading-spinner loading-lg"></span>
+          </div>
+        {:else}
+          <div
+            class="flex flex-row gap-2 p-2 w-full h-14 border-b border-border outline-b outline-sidebar-border relative"
+          >
+          <button
+              class="btn btn-sm btn-ghost btn-square"
+              on:click={() => (isInputAreaCollapsed = !isInputAreaCollapsed)}
+              title={isInputAreaCollapsed ? "展开输入区域" : "收缩输入区域"}
+            >
+              {#if isInputAreaCollapsed}
+                <Maximize class="w-4 h-4" />
+                
+              {:else}
+                <Minimize class="w-4 h-4" />
+              {/if}
+            </button>
+              <button
+                class="btn btn-sm btn-ghost btn-square"
+                on:click={() => (isEditorReadonly = !isEditorReadonly)}
+                title={isEditorReadonly ? "退出预览模式" : "进入预览模式"}
+              >
+                {#if isEditorReadonly}
+                  <EyeOff class="w-4 h-4" />
+                {:else}
+                  <Eye class="w-4 h-4" />
+                {/if}
+              </button>
+          </div>
+          <BlockSuiteEditor
+            class="rounded-xl"
+            bind:this={editorComponent}
+            initialJsonContent={currentEvent?.content}
+            readonly={isEditorReadonly}
+          />
+        {/if}
+      </div>
+      {#if isPropertiesPanelOpen}
+        <div
+          class="absolute top-18 left-22 z-10 transition-transform duration-300 ease-in-out"
+          in:fade={{ duration: 300 }}
+          out:fade={{ duration: 300 }}
+        >
+          <!-- <EventPropertyCard
+            eventDate={currentEvent?.date}
+            locationData={currentEvent?.location_data}
+            selectedCategories={currentEvent?.categories || []}
+            categories={[]}
+          /> -->
         </div>
-      {:else}
-        <BlockSuiteEditor
-          bind:this={editorComponent}
-          initialJsonContent={currentEvent?.content}
-        />
       {/if}
     </div>
-    {#if isPropertiesPanelOpen}
+    {#if isCommentsPanelOpen}
       <div
-        class="absolute top-18 left-22 z-10 transition-transform duration-300 ease-in-out"
-        in:fade={{ duration: 300 }}
-        out:fade={{ duration: 300 }}
+        class=""
+        in:fly={{ x: 100, duration: 300 }}
+        out:fly={{ x: 100, duration: 300 }}
       >
-        <!-- <EventPropertyCard
-          eventDate={currentEvent?.date}
-          locationData={currentEvent?.location_data}
-          selectedCategories={currentEvent?.categories || []}
-          categories={[]}
-        /> -->
+        <EventCommentsPanel {comments} />
       </div>
     {/if}
-      <!-- <div bind:this={coverRfe}>cs</div> -->
-    <!-- dropdownClass="absolute top-12 left-12 z-5" -->
-     <!-- <div bind:this={coverRfe}>
-      <CoverCard 
-      coverUrl={currentEvent?.cover}
-      userId={$auth.user?.$id}
-    ></CoverCard>
-     </div> -->
-   
   </div>
-  {#if isCommentsPanelOpen}
-    <div
-      class=""
-      in:fly={{ x: 100, duration: 300 }}
-      out:fly={{ x: 100, duration: 300 }}
-    >
-      <EventCommentsPanel {comments} />
-    </div>
-  {/if}
 </div>
