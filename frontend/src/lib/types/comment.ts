@@ -1,27 +1,25 @@
+export type CommentStatus = 'active' | 'deleted' | 'hidden';
+
 export interface Comment {
-  id: string;
-  eventId: string;
-  userId: string;
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  event_id: string;
+  user_id: string;
+  author_name: string;
+  author_avatar?: string;
   content: string;
-  createdAt: Date;
+  parent_id?: string;
   likes: number;
-  isLiked: boolean;
-  replies: Reply[];
-  user?: {
-    name: string;
-    avatar: string;
-  };
-  timestamp?: Date;
+  is_edited: boolean;
+  paid_amount?: string;
+  status: CommentStatus;
+  isLiked?: boolean;
+  replies?: Comment[];
+  timestamp?: Date; // 用于前端显示
 }
 
-export interface Reply {
-  id: string;
-  userId: string;
-  content: string;
-  createdAt: Date;
-  likes: number;
-  user: {
-    name: string;
-    avatar: string;
-  };
+// 用于API响应的评论类型，包含嵌套回复
+export interface CommentWithReplies extends Comment {
+  replies: Comment[];
 }

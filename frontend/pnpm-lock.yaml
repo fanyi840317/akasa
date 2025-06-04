@@ -20,15 +20,9 @@ importers:
       '@ai-sdk/google':
         specifier: ^1.2.18
         version: 1.2.18(zod@3.25.42)
-      '@ai-sdk/provider-utils':
-        specifier: ^2.2.8
-        version: 2.2.8(zod@3.25.42)
       '@ai-sdk/svelte':
         specifier: ^2.1.12
         version: 2.1.12(svelte@5.28.2)(zod@3.25.42)
-      '@ai-sdk/ui-utils':
-        specifier: ^1.2.11
-        version: 1.2.11(zod@3.25.42)
       '@blocksuite/affine-components':
         specifier: ^0.19.5
         version: 0.19.5(@types/react@18.3.20)(react@18.3.1)(yjs@13.6.26)

@@ -16,6 +16,8 @@
   import { InputArea } from "$lib/components/ai";
   import { Minimize, Maximize, Eye, EyeOff } from "lucide-svelte"; // 导入收缩和预览图标
   import ChatContent from "$lib/components/ai/chat-content.svelte";
+  import { Chat } from "@ai-sdk/svelte";
+  import type { Message } from "@ai-sdk/svelte";
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -98,25 +100,92 @@
     // eventData and loading will be updated by the store subscription
   }
   let coverRfe: HTMLDivElement;
+  let pageHeight = $state(window.innerHeight);
+  let chatContentHeight = $state(pageHeight - 100); // 初始值，将在onMount中更新
+  let resizeObserver: ResizeObserver | null = null;
+
+  // 真实聊天功能
+  const chat = new Chat({
+    api: '/api/chat',
+    maxSteps: 5,
+    onError: (error) => {
+      console.error('AI 对话错误:', error);
+    },
+  });
+
+  // 聊天消息操作函数
+  function copyMessage(messageId: string) {
+    const message = chat.messages.find(m => m.id === messageId);
+    if (message) {
+      navigator.clipboard.writeText(message.content);
+      console.log('消息已复制:', messageId);
+    }
+  }
+
+  function regenerateMessage(messageId: string) {
+    const messageIndex = chat.messages.findIndex((m) => m.id === messageId);
+    if (messageIndex > 0) {
+      chat.reload();
+      console.log('重新生成消息:', messageId);
+    }
+  }
+
+  function likeMessage(messageId: string) {
+    console.log("点赞消息:", messageId);
+    // 这里可以添加点赞逻辑
+  }
+
+  function dislikeMessage(messageId: string) {
+    console.log("点踩消息:", messageId);
+    // 这里可以添加点踩逻辑
+  }
+
+  // 处理消息发送
+  async function handleMessageSent(text: string) {
+    if (!text.trim() || chat.status !== 'ready') return;
+    
+    // 使用 Chat 类发送消息
+    await chat.append({
+      role: 'user',
+      content: text.trim(),
+    });
+    
+    console.log('消息已发送:', text);
+  }
+
   onMount(() => {
     appStore.setShowHeader(false);
     console.log("Event page mounted");
-    //   setTimeout(() => {
-    //     console.log(document.body.innerHTML);
-    //   // Remove the edgeless-template-button element
-    //   const templateButton = document.querySelector('edgeless-toolbar-widget')?.shadowRoot.querySelector("edgeless-template-button");
-    //   console.log("Template button:", templateButton);
-    //   if (templateButton) {
-    //     templateButton.parentElement?.appendChild(coverRfe);
-    //     templateButton.remove();
-    //   }
-    // },100);
+    
+    // 计算ChatContent的高度
+    updateChatContentHeight();
+    
+    // 使用ResizeObserver监听窗口大小变化
+    resizeObserver = new ResizeObserver(() => {
+      pageHeight = window.innerHeight;
+      updateChatContentHeight();
+    });
+    
+    // 观察document.body的大小变化
+    resizeObserver.observe(document.body);
   });
+  
+  // 更新ChatContent高度的函数
+  function updateChatContentHeight() {
+    // 计算高度：页面高度减去ActionBar高度(约60px)和其他边距
+    chatContentHeight = pageHeight - 100; // 100是ActionBar和padding的估计高度
+  }
 
   onDestroy(() => {
     appStore.setShowHeader(true);
     unsubscribeEvent(); // Unsubscribe from the store
     eventStore.setCurrentEvent(null); // Clear current event when leaving the page
+    
+    // 清理ResizeObserver
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
+    }
   });
 
   async function handleSaveDocument() {
@@ -279,10 +348,22 @@
     
     {#if !isInputAreaCollapsed}
     <div class="w-128 flex flex-col p-4 justify-between relative">
-      <ChatContent windowHeight={400} />
-      <div class="absolute top-2 right-2">
-      
-      </div>
+      <ChatContent 
+        bind:messages={chat.messages}
+        bind:status={chat.status}
+        bind:error={chat.error}
+        bind:input={chat.input}
+        windowHeight={chatContentHeight}
+        onCopyMessage={copyMessage}
+        onRegenerateMessage={regenerateMessage}
+        onLikeMessage={likeMessage}
+        onDislikeMessage={dislikeMessage}
+        onMessageSent={(text) => {
+          console.log('Message submitted:', text);
+          chat.handleSubmit();
+          console.log('Chat messages after submit:', chat.messages.length);
+        }}
+      />
     </div>
     {/if}
     <div class="relative w-full h-full pt-1">
@@ -346,13 +427,13 @@
         </div>
       {/if}
     </div>
-    {#if isCommentsPanelOpen}
+    {#if isCommentsPanelOpen && eventId && eventId !== 'new'}
       <div
         class=""
         in:fly={{ x: 100, duration: 300 }}
         out:fly={{ x: 100, duration: 300 }}
       >
-        <EventCommentsPanel {comments} />
+        <EventCommentsPanel eventId={eventId} />
       </div>
     {/if}
   </div>

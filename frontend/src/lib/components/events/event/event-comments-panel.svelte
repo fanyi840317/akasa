@@ -1,55 +1,41 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
   import { createEventDispatcher, onMount } from "svelte";
-  import {
-    MessageSquare,
-    Send,
-    ThumbsUp,
-    ThumbsDown,
-    Reply,
-    Smile,
-    MoreVertical,
-    ChevronDown,
-    ListFilter,
-  } from "lucide-svelte"; // Added ThumbsDown, Smile, MoreVertical, ChevronDown, ListFilter
+  import { Smile, ThumbsUp, ThumbsDown, ChevronDown, MoreVertical, Loader2, ListFilter } from "lucide-svelte";
+  import { formatDistanceToNow } from "date-fns";
+  import { zhCN } from "date-fns/locale";
   import { cn } from "$lib/utils";
   import { UserAvatar } from "$lib/components/ui/avatar";
+  import { commentStore } from "$lib/stores/comment";
+  import { auth } from "$lib/stores/auth";
+  import { toast } from "svelte-sonner";
+  import type { Comment, CommentWithReplies } from "$lib/types/comment";
 
   const dispatch = createEventDispatcher();
 
-  // 评论类型定义
-  interface Comment {
-    id: string;
-    author: {
-      name: string;
-      avatar?: string;
-    };
-    content: string;
-    timestamp: Date;
-    likes: number;
-    dislikes?: number; // Added dislikes
-    replies?: Comment[];
-    isEdited?: boolean; // Added isEdited
-    paidAmount?: string; // Added paidAmount
-  }
-
   let {
-    comments = $bindable([]),
     eventId = $bindable(""),
     class: className,
     ...restProps
   } = $props<{
-    comments: Comment[];
     eventId: string;
     class?: string;
   }>();
 
+  // 评论状态
+  let comments: CommentWithReplies[] = $state([]);
+  let loading = $state(false);
+  let error = $state<string | null>(null);
+  
   // 新评论内容
   let newComment = $state("");
   let showCommentInputButtons = $state(false);
+  let submittingComment = $state(false);
 
   // 格式化时间
-  function formatTimestamp(date: Date): string {
+  function formatTimestamp(dateStr?: string): string {
+    if(!dateStr) return '未知';
+    const date = new Date(dateStr);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
 
@@ -67,20 +53,33 @@
   }
 
   // 添加评论
-  function handleAddComment() {
+  async function handleAddComment() {
     if (!newComment.trim()) return;
-    const comment: Comment = {
-      id: crypto.randomUUID(),
-      author: { name: "当前用户", avatar: "/images/avatars/user.png" }, // Replace with actual user data
-      content: newComment,
-      timestamp: new Date(),
-      likes: 0,
-      replies: [],
-    };
-    comments = [comment, ...comments];
-    dispatch("commentAdded", { comment });
-    newComment = "";
-    showCommentInputButtons = false;
+    if (!$auth.user) {
+      toast.error("请先登录");
+      return;
+    }
+    
+    submittingComment = true;
+    try {
+      await commentStore.addComment({
+        event_id: eventId,
+        user_id: $auth.user.$id,
+        author_name: $auth.user.name || '匿名用户',
+        author_avatar: $auth.user.prefs?.avatar || '',
+        content: newComment,
+        likes: 0,
+        is_edited: false,
+        status: 'active'
+      });
+      
+      newComment = "";
+      showCommentInputButtons = false;
+    } catch (err) {
+      console.error('添加评论失败:', err);
+    } finally {
+      submittingComment = false;
+    }
   }
 
   function handleCancelComment() {
@@ -89,80 +88,109 @@
   }
 
   // 点赞评论
-  function handleLikeComment(
-    commentId: string,
-    isReply = false,
-    parentCommentId?: string
-  ) {
-    const updateLikes = (items: Comment[]): Comment[] => {
-      return items.map((item) => {
-        if (item.id === commentId) {
-          return { ...item, likes: (item.likes || 0) + 1 };
-        }
-        if (item.replies && item.replies.length > 0) {
-          return { ...item, replies: updateLikes(item.replies) };
-        }
-        return item;
-      });
-    };
-    comments = updateLikes(comments);
-    dispatch("commentLiked", { commentId, isReply, parentCommentId });
-  }
-
-  // 回复评论
-  function handleReplyComment(commentId: string) {
-    dispatch("commentReply", { commentId });
-  }
-
-  let activeReplyInput: string | null = $state(null);
-  let replyContent = $state("");
-
-  function toggleReplyInput(commentId: string) {
-    if (activeReplyInput === commentId) {
-      activeReplyInput = null;
-    } else {
-      activeReplyInput = commentId;
-      replyContent = ""; // Reset reply content when opening a new input
+  async function handleLikeComment(commentId: string) {
+    if (!$auth.user) {
+      toast.error("请先登录");
+      return;
+    }
+    
+    try {
+      await commentStore.likeComment(commentId);
+    } catch (err) {
+      console.error('点赞失败:', err);
     }
   }
-
-  function submitReply(parentCommentId: string) {
-    if (!replyContent.trim()) return;
-
-    const newReply: Comment = {
-      id: crypto.randomUUID(),
-      author: { name: "当前用户", avatar: "/images/avatars/user.png" }, // Replace with actual user data
-      content: replyContent,
-      timestamp: new Date(),
-      likes: 0,
-    };
-
-    const addReplyRecursively = (items: Comment[]): Comment[] => {
-      return items.map((comment) => {
-        if (comment.id === parentCommentId) {
-          return {
-            ...comment,
-            replies: [...(comment.replies || []), newReply],
-          };
-        }
-        if (comment.replies && comment.replies.length > 0) {
-          return { ...comment, replies: addReplyRecursively(comment.replies) };
-        }
-        return comment;
-      });
-    };
-
-    comments = addReplyRecursively(comments);
-    dispatch("replyAdded", { parentCommentId, reply: newReply });
+  
+  // 回复评论相关状态
+  let activeReplyInput = $state<string | null>(null);
+  let replyContent = $state("");
+  let submittingReply = $state(false);
+  
+  // 显示回复输入框
+  function showReplyInput(commentId: string) {
+    activeReplyInput = commentId;
     replyContent = "";
-    activeReplyInput = null; // Close input after submitting
   }
+  
+  // 隐藏回复输入框
+  function hideReplyInput() {
+    activeReplyInput = null;
+    replyContent = "";
+  }
+   
+  // 提交回复
+  async function handleAddReply(parentCommentId: string) {
+     if (!replyContent.trim()) return;
+     if (!$auth.user) {
+       toast.error("请先登录");
+       return;
+     }
+     
+     submittingReply = true;
+     try {
+       await commentStore.addComment({
+         event_id: eventId,
+         user_id: $auth.user.$id,
+         author_name: $auth.user.name || '匿名用户',
+         author_avatar: $auth.user.prefs?.avatar || '',
+         content: replyContent,
+         parent_id: parentCommentId,
+         likes: 0,
+         is_edited: false,
+         status: 'active'
+       });
+       
+       replyContent = "";
+       activeReplyInput = null; // 关闭回复输入框
+     } catch (err) {
+       console.error('添加回复失败:', err);
+     } finally {
+       submittingReply = false;
+     }
+   }
+   
+   // 删除评论
+   async function handleDeleteComment(commentId: string) {
+     if (!$auth.user) {
+       toast.error("请先登录");
+       return;
+     }
+     
+     if (confirm("确定要删除这条评论吗？")) {
+       try {
+         await commentStore.deleteComment(commentId);
+       } catch (err) {
+         console.error('删除评论失败:', err);
+       }
+     }
+   }
+   
+   // 加载评论
+   async function loadComments() {
+     if (!eventId) return;
+     
+     loading = true;
+     try {
+       const result = await commentStore.fetchComments(eventId);
+       comments = result;
+     } catch (err) {
+       console.error('加载评论失败:', err);
+       error = '加载评论失败';
+     } finally {
+       loading = false;
+     }
+   }
+   
+   // 监听eventId变化，重新加载评论
+   $effect(() => {
+     if (eventId) {
+       loadComments();
+     }
+   });
 
-  onMount(() => {
-
-  });
-
+  // 显示/隐藏回复状态
   let showReplies: Record<string, boolean> = $state({});
+
 
   function toggleReplies(commentId: string) {
     showReplies[commentId] = !showReplies[commentId];
@@ -236,13 +264,16 @@
             </button>
             <button
               class="btn btn-sm transition-colors duration-200"
-              class:bg-neutral-700={!newComment.trim()}
-              class:text-neutral-500={!newComment.trim()}
-              class:bg-blue-500={newComment.trim()}
-              class:text-white={newComment.trim()}
-              disabled={!newComment.trim()}
+              class:bg-neutral-700={!newComment.trim() || submittingComment}
+              class:text-neutral-500={!newComment.trim() || submittingComment}
+              class:bg-blue-500={newComment.trim() && !submittingComment}
+              class:text-white={newComment.trim() && !submittingComment}
+              disabled={!newComment.trim() || submittingComment}
               onclick={handleAddComment}
             >
+              {#if submittingComment}
+                <Loader2 class="w-4 h-4 animate-spin mr-1" />
+              {/if}
               评论
             </button>
           </div>
@@ -253,29 +284,32 @@
 
   <!-- Comments List -->
   <div class="space-y-6">
-    {#each comments as comment (comment.id)}
+    {#each comments as comment (comment.$id)}
       <div class="flex items-start group">
         <UserAvatar
           class="size-8 mr-3 "
-          src={comment.author.avatar}
-          fallback={comment.author.name[0]?.toUpperCase()}
+          src={comment.author_avatar}
+          fallback={comment.author_name[0]?.toUpperCase()}
         ></UserAvatar>
 
         <div class="flex-1">
           <div class="flex flex-row items-center text-xs mb-0.5">
-            <span class="font-semibold mr-1.5">@{comment.author.name}</span>
+            <span class="font-semibold mr-1.5">@{comment.author_name }</span>
             <span class="text-neutral-400"
-              >{formatTimestamp(comment.timestamp)}</span
+              >{formatTimestamp(comment.$createdAt || undefined)}</span
             >
+            {#if comment.is_edited}
+              <span class="text-neutral-400 ml-1.5">(已修改)</span>
+            {/if}
           </div>
 
-          <!-- {#if comment.paidAmount}
+          {#if comment.paid_amount}
             <div
               class="text-xs my-1 px-2 py-0.5 bg-red-600 text-white inline-block rounded-sm"
             >
-              {comment.paidAmount}
+              {comment.paid_amount}
             </div>
-          {/if} -->
+          {/if}
 
           <p class="text-xs leading-relaxed whitespace-pre-wrap">
             {comment.content}
@@ -284,7 +318,7 @@
           <div class="flex items-center gap-2 mt-1.5 text-neutral-400">
             <button
               class="flex items-center hover:text-white p-1 rounded-full hover:bg-neutral-800"
-              onclick={() => handleLikeComment(comment.id)}
+              onclick={() => handleLikeComment(comment.$id)}
             >
               <ThumbsUp class="w-4 h-4" />
               {#if comment.likes > 0}<span class="text-xs ml-1"
@@ -298,19 +332,31 @@
             </button>
             <button
               class="text-xs font-semibold hover:text-white p-1 rounded-full hover:bg-neutral-800"
-              onclick={() => toggleReplyInput(comment.id)}
+              onclick={() => showReplyInput(comment.$id)}
             >
               回复
             </button>
+            {#if $auth.user && ($auth.user.$id === comment.user_id )}
+              <button
+                class="text-xs font-semibold hover:text-white p-1 rounded-full hover:bg-neutral-800 text-red-400 hover:text-red-300"
+                onclick={() => handleDeleteComment(comment.$id)}
+              >
+                删除
+              </button>
+            {/if}
           </div>
 
           <!-- Reply Input -->
-          {#if activeReplyInput === comment.id}
+          {#if activeReplyInput === comment.$id}
             <div class="flex items-start mt-3 ml-3">
-              <UserAvatar class="size-8 mt-1 mr-2 " fallback="范"></UserAvatar>
+              <UserAvatar 
+                class="size-8 mt-1 mr-2" 
+                src={$auth.user?.prefs["avatar"] || ""}
+                fallback={$auth.user?.name?.[0]?.toUpperCase() || "U"}
+              ></UserAvatar>
               <div class="flex-1">
                 <textarea
-                  placeholder={`回复 @${comment.author.name}...`}
+                  placeholder={`回复 @${comment.author_name}...`}
                   bind:value={replyContent}
                   class="w-full bg-transparent border-b border-neutral-700 focus:border-white outline-none resize-none py-1 text-xs placeholder-neutral-500"
                   rows={1}
@@ -318,19 +364,22 @@
                 <div class="flex justify-end items-center mt-1.5">
                   <button
                     class="px-3 py-1 text-xs text-neutral-400 hover:bg-neutral-700 rounded-full mr-1.5"
-                    onclick={() => (activeReplyInput = null)}
+                    onclick={() => hideReplyInput()}
                   >
                     取消
                   </button>
                   <button
                     class="px-3 py-1 text-xs rounded-full transition-colors duration-200"
-                    class:bg-neutral-700={!replyContent.trim()}
-                    class:text-neutral-500={!replyContent.trim()}
-                    class:bg-blue-500={replyContent.trim()}
-                    class:text-white={replyContent.trim()}
-                    disabled={!replyContent.trim()}
-                    onclick={() => submitReply(comment.id)}
+                    class:bg-neutral-700={!replyContent.trim() || submittingReply}
+                    class:text-neutral-500={!replyContent.trim() || submittingReply}
+                    class:bg-blue-500={replyContent.trim() && !submittingReply}
+                    class:text-white={replyContent.trim() && !submittingReply}
+                    disabled={!replyContent.trim() || submittingReply}
+                    onclick={() => handleAddReply(comment.$id)}
                   >
+                    {#if submittingReply}
+                      <Loader2 class="w-3 h-3 animate-spin mr-1" />
+                    {/if}
                     回复
                   </button>
                 </div>
@@ -342,37 +391,37 @@
           {#if comment.replies && comment.replies.length > 0}
             <button
               class="flex items-center text-blue-400 text-xs font-semibold mt-2 hover:bg-blue-400 hover:bg-opacity-20 p-1.5 rounded-full"
-              onclick={() => toggleReplies(comment.id)}
+              onclick={() => toggleReplies(comment.$id)}
             >
               <ChevronDown
-                class="w-4 h-4 mr-1 transition-transform duration-200"
+                class="w-4 h-4 mr-1 transition-transform duration-200 {!!showReplies[comment.$id] ? 'rotate-180' : ''}"
               />
               {comment.replies.length} 条回复
             </button>
-            {#if showReplies[comment.id]}
+            {#if showReplies[comment.$id ]}
               <div
                 class="ml-3 mt-3 space-y-4 border-l-2 border-neutral-800 pl-4"
               >
-                {#each comment.replies as reply (reply.id)}
+                {#each comment.replies as reply (reply.$id )}
                   <div class="flex items-start group">
                     <UserAvatar
                       class="size-6 mt-1 mr-2 "
                       fallbackClass="text-xs"
-                      src={reply.author.avatar}
-                      fallback={reply.author.name[0]?.toUpperCase()}
+                      src={reply.author_avatar }
+                      fallback={(reply.author_name  || "U")[0]?.toUpperCase()}
                     ></UserAvatar>
 
                     <div class="flex-1">
                       <div class="flex items-center text-[10px] mb-0.5">
                         <span class="font-semibold mr-1.5"
-                          >@{reply.author.name}</span
+                          >@{reply.author_name }</span
                         >
                         <span class="text-neutral-400"
-                          >{formatTimestamp(reply.timestamp)}</span
+                          >{formatTimestamp(reply.$createdAt )}</span
                         >
-                        <!-- {#if reply.isEdited}
+                        {#if reply.is_edited}
                           <span class="text-neutral-400 ml-1.5">(已修改)</span>
-                        {/if} -->
+                        {/if}
                       </div>
                 
                       <p class="text-xs leading-relaxed whitespace-pre-wrap">
@@ -384,7 +433,7 @@
                         <button
                           class="flex items-center hover:text-white p-1 rounded-full hover:bg-neutral-800"
                           onclick={() =>
-                            handleLikeComment(reply.id, true, comment.id)}
+                            handleLikeComment(reply.$id )}
                         >
                           <ThumbsUp class="w-4 h-4" />
                           {#if reply.likes > 0}<span class="text-xs ml-1"
@@ -398,44 +447,54 @@
                         </button>
                         <button
                           class="text-xs font-semibold hover:text-white p-1 rounded-full hover:bg-neutral-800"
-                          onclick={() => toggleReplyInput(reply.id)}
+                          onclick={() => showReplyInput(reply.$id )}
                         >
                           回复
                         </button>
+                        {#if $auth.user && ($auth.user.$id === reply.user_id )}
+                          <button
+                            class="text-xs font-semibold hover:text-white p-1 rounded-full hover:bg-neutral-800 text-red-400 hover:text-red-300"
+                            onclick={() => handleDeleteComment(reply.$id )}
+                          >
+                            删除
+                          </button>
+                        {/if}
                       </div>
                       <!-- Reply Input for replies -->
-                      {#if activeReplyInput === reply.id}
+                      {#if activeReplyInput === (reply.$id )}
                         <div class="flex items-start mt-3 ml-3">
-                          <div class="avatar mr-2">
-                            <div
-                              class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-semibold"
-                            >
-                              范
-                            </div>
-                          </div>
+                          <UserAvatar 
+                            class="size-6 mt-1 mr-2" 
+                            fallbackClass="text-xs"
+                            src={$auth.user?.prefs["avatar"] || ""}
+                            fallback={$auth.user?.name?.[0]?.toUpperCase() || "U"}
+                          ></UserAvatar>
                           <div class="flex-1">
                             <textarea
-                              placeholder={`回复 @${reply.author.name}...`}
+                              placeholder={`回复 @${reply.author_name }...`}
                               bind:value={replyContent}
-                              class="w-full bg-transparent border-b border-neutral-700 focus:border-white outline-none resize-none py-1 text-sm placeholder-neutral-500"
+                              class="w-full bg-transparent border-b border-neutral-700 focus:border-white outline-none resize-none py-1 text-xs placeholder-neutral-500"
                               rows={1}
                             ></textarea>
                             <div class="flex justify-end items-center mt-1.5">
                               <button
                                 class="px-3 py-1 text-xs text-neutral-400 hover:bg-neutral-700 rounded-full mr-1.5"
-                                onclick={() => (activeReplyInput = null)}
+                                onclick={() => hideReplyInput()}
                               >
                                 取消
                               </button>
                               <button
                                 class="px-3 py-1 text-xs rounded-full transition-colors duration-200"
-                                class:bg-neutral-700={!replyContent.trim()}
-                                class:text-neutral-500={!replyContent.trim()}
-                                class:bg-blue-500={replyContent.trim()}
-                                class:text-white={replyContent.trim()}
-                                disabled={!replyContent.trim()}
-                                onclick={() => submitReply(reply.id)}
+                                class:bg-neutral-700={!replyContent.trim() || submittingReply}
+                                class:text-neutral-500={!replyContent.trim() || submittingReply}
+                                class:bg-blue-500={replyContent.trim() && !submittingReply}
+                                class:text-white={replyContent.trim() && !submittingReply}
+                                disabled={!replyContent.trim() || submittingReply}
+                                onclick={() => handleAddReply(reply.$id )}
                               >
+                                {#if submittingReply}
+                                  <Loader2 class="w-3 h-3 animate-spin mr-1" />
+                                {/if}
                                 回复
                               </button>
                             </div>
