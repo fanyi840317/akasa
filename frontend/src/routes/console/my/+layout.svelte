@@ -106,7 +106,7 @@
     <!-- 左侧导航栏内容 -->
     <!-- <LeftSidebar /> -->
 
-    <div class="flex-1 flex flex-col w-58 p-4 py-6">
+    <div class="flex-1 flex flex-col w-58 p-4">
       <!-- Sidebar content here -->
       <!-- 搜索按钮 -->
       <SearchButton
@@ -142,7 +142,7 @@
   </div>
 
   <!-- 右侧内容区域 -->
-   <div class="p-2 flex w-full">
+   <div class="p-2 pt-0 flex w-full">
 
     {@render children()}
    </div>

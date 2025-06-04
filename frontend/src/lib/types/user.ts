@@ -1,6 +1,6 @@
 
 import type { Models } from 'appwrite';
-export type User =  Models.User<Models.Preferences>  | null;
+export type User = Models.User<Models.Preferences> & { avatar?: string } | null;
 
 export type Team = {
   $id: string;

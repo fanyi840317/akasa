@@ -7,7 +7,7 @@
 
 @theme{
   
-  --color-background: oklch(0.06 0.006 240);
+  --color-background: hsl(240 3% 6%);
   --color-muted: oklch(0.04 0 0);
   --color-background-subtle: oklch(0.08 0.006 240);
   --color-foreground: oklch(0.98 0 0);
