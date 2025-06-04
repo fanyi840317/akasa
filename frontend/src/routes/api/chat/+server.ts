@@ -2,17 +2,14 @@ import { streamText, tool } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 // import { createAISDKTools } from '@agentic/ai-sdk';
 import { DuckDuckGoClient } from '@agentic/duck-duck-go';
-import { PUBLIC_GEMINI_API_KEY,PUBLIC_HTTPS_PROXY ,PUBLIC_HTTP_PROXY} from '$env/static/public';
+import { PUBLIC_GEMINI_API_KEY} from '$env/static/public';
 import { z } from 'zod';
 import { ProxyAgent } from 'undici';
 import type { RequestHandler } from './$types';
 // import { fetch as undiciFetch } from 'undici';
 
-// 配置代理（如果需要）
-console.log('HTTPS_PROXY:', PUBLIC_HTTPS_PROXY);
-console.log('HTTP_PROXY:', PUBLIC_HTTP_PROXY);
 // 强制使用本地代理，确保URL格式正确
-const proxyUrl = PUBLIC_HTTPS_PROXY || PUBLIC_HTTP_PROXY || 'http://127.0.0.1:7890';
+const proxyUrl = 'http://127.0.0.1:7890';
 console.log('Using proxy URL:', proxyUrl);
 const proxyAgent = new ProxyAgent(proxyUrl);
 

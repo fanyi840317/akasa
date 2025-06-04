@@ -36,39 +36,6 @@
   let isInputAreaCollapsed = $state(false); // 控制输入区域是否收缩
   let isEditorReadonly = $state(false); // 控制编辑器是否为只读模式
 
-  let comments = [
-    {
-      id: "1",
-      author: { name: "wafsn2218", avatar: "/images/avatars/user_w.png" }, // Example avatar
-      content:
-        "我始终相信兼听则明，二爷的故事始终是我了解历史真相的一块拼图，不偏不倚。希望二爷可以坚持，不要像某些youtuber为了黑而黑，而是有事实有依据的真实讲述历史故事。",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 4), // 4 months ago
-      likes: 850,
-      isEdited: true,
-      paidAmount: "US$200.00",
-      replies: [
-        {
-          id: "1-1",
-          author: { name: "范翼", avatar: "/images/avatars/user_fan.png" },
-          content: "说得好！",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 3), // 3 months ago
-          likes: 10,
-        },
-      ],
-    },
-    {
-      id: "2",
-      author: {
-        name: "riverhe2853",
-        avatar: "/images/avatars/user_dog.png",
-      },
-      content: "谢谢精彩视频，祝二爷一家新年快乐🎉🎊",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 4), // 4 months ago
-      likes: 23,
-      paidAmount: "CA$5.00",
-      replies: [],
-    },
-  ];
 
   const unsubscribeEvent = eventStore.subscribe((store) => {
     currentEvent = store.currentEvent;
@@ -101,7 +68,7 @@
   }
   let coverRfe: HTMLDivElement;
   let pageHeight = $state(window.innerHeight);
-  let chatContentHeight = $state(pageHeight - 100); // 初始值，将在onMount中更新
+  let chatContentHeight = $derived(pageHeight); // 初始值，将在onMount中更新
   let resizeObserver: ResizeObserver | null = null;
 
   // 真实聊天功能
@@ -158,23 +125,15 @@
     console.log("Event page mounted");
     
     // 计算ChatContent的高度
-    updateChatContentHeight();
     
     // 使用ResizeObserver监听窗口大小变化
     resizeObserver = new ResizeObserver(() => {
       pageHeight = window.innerHeight;
-      updateChatContentHeight();
     });
     
     // 观察document.body的大小变化
     resizeObserver.observe(document.body);
   });
-  
-  // 更新ChatContent高度的函数
-  function updateChatContentHeight() {
-    // 计算高度：页面高度减去ActionBar高度(约60px)和其他边距
-    chatContentHeight = pageHeight - 100; // 100是ActionBar和padding的估计高度
-  }
 
   onDestroy(() => {
     appStore.setShowHeader(true);
@@ -333,7 +292,7 @@
 </script>
 
 <!-- This outer div will be the drop target and relative positioning context -->
-<div class="h-screen flex flex-col bg-muted">
+<div class="h-screen flex flex-col bg-background">
   <EventActionbar
     bind:title={currentEventTitle}
     editable={!eventLoading}
@@ -347,7 +306,7 @@
   <div class="w-full flex-1 flex flex-row overflow-hidden">
     
     {#if !isInputAreaCollapsed}
-    <div class="w-128 flex flex-col p-4 justify-between relative">
+    <div class="w-128 flex flex-col justify-between relative">
       <ChatContent 
         bind:messages={chat.messages}
         bind:status={chat.status}
@@ -366,10 +325,9 @@
       />
     </div>
     {/if}
-    <div class="relative w-full h-full pt-1">
+    <div class="relative w-full h-full p-2 pl-0 pt-0">
       <div
-        class="w-full h-full flex flex-col rounded-tl-2xl
-      outline-1 outline-base-300 shadow-xl"
+        class="w-full h-full flex flex-col rounded-2xl border border-border shadow-xl"
       >
         {#if eventLoading}
           <!-- Use eventLoading from store -->
@@ -378,7 +336,7 @@
           </div>
         {:else}
           <div
-            class="flex flex-row gap-2 p-2 w-full h-14 border-b border-border outline-b outline-sidebar-border relative"
+            class="flex flex-row gap-2 p-2 w-full h-14 relative"
           >
           <button
               class="btn btn-sm btn-ghost btn-square"
@@ -405,7 +363,7 @@
               </button>
           </div>
           <BlockSuiteEditor
-            class="rounded-xl"
+            class="border-t-1 border-border"
             bind:this={editorComponent}
             initialJsonContent={currentEvent?.content}
             readonly={isEditorReadonly}

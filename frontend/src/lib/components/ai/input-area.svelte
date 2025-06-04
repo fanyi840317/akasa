@@ -131,7 +131,7 @@
     </div>
   </div>
   
-  <p class="text-xs text-gray-500 text-center mt-1">
+  <p class="text-xs text-base-content/40 text-center mt-1">
     Akasa AI. 回答可能不准确或不完整。
   </p>
 </div>

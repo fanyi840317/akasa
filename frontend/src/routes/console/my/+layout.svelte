@@ -16,7 +16,7 @@
   import { LeftSidebar } from "$lib/components/console-layout";
   import EventList from "$lib/components/events/event-list.svelte";
   import CategoryNavItem from "$lib/components/ui/nav/category-nav-item.svelte";
-  import {SearchButton,CollapseButton} from "$lib/components/ui/buttons";
+  import { SearchButton, CollapseButton } from "$lib/components/ui/buttons";
   import NavItem from "$lib/components/ui/nav/nav-item.svelte";
   import { page } from "$app/state";
 
@@ -98,11 +98,15 @@
 
 <div class="flex h-full">
   <!-- 左侧导航栏 -->
-  <div class="{$appStore.sidebarCollapsed ? 'w-0 overflow-hidden' : 'w-fit'} bg-base-100 transition-all duration-300">
+  <div
+    class="{$appStore.sidebarCollapsed
+      ? 'w-0 overflow-hidden'
+      : 'w-fit'} bg-base-100 transition-all duration-300"
+  >
     <!-- 左侧导航栏内容 -->
     <!-- <LeftSidebar /> -->
 
-    <div class="flex-1 flex flex-col w-54 p-4 py-6">
+    <div class="flex-1 flex flex-col w-58 p-4 py-6">
       <!-- Sidebar content here -->
       <!-- 搜索按钮 -->
       <SearchButton
@@ -138,5 +142,8 @@
   </div>
 
   <!-- 右侧内容区域 -->
-  {@render children()}
+   <div class="p-2 flex w-full">
+
+    {@render children()}
+   </div>
 </div>

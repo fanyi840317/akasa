@@ -29,9 +29,9 @@
   };
 
   const variantClasses = {
-    default: 'bg-base-200/50 hover:bg-base-200 border border-base-300',
+    default: 'bg-base-200/50 hover:bg-base-200 ',
     ghost: 'hover:bg-base-200/50',
-    outline: 'border border-base-content/50 hover:bg-base-200/30'
+    outline: 'border border-border hover:bg-base-200/30'
   };
 
   const iconSizes = {

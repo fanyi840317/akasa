@@ -77,7 +77,8 @@
 </script>
 
 <!-- 右侧内容区域 -->
-<div class="flex flex-col w-full flex-1 bg-base-200 rounded-tl-xl h-full">
+<div class="flex flex-col w-full flex-1 bg-sidebar-background
+border border-border rounded-xl h-full">
   <!-- 页面标题 -->
   <div
     class="flex items-center justify-between border-b border-border p-4 py-3"

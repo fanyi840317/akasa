@@ -54,46 +54,22 @@
     // 添加用户消息到消息列表
     messages = [...messages, userMessage];
     
-    // 更新状态为提交中
-    status = "submitted";
+    // 不直接修改 status，而是通过回调通知父组件
+    // status = "submitted";
     
-    // 如果需要，可以调用父组件提供的回调
+    // 调用父组件提供的回调
     onMessageSent?.(text);
     
     // 发送后清空输入框
-    input = "";
+    // input = "";
     
     // 滚动到底部
     setTimeout(() => {
       scrollToBottom();
     }, 100);
     
-    // 模拟AI响应（实际项目中应该通过API获取）
-    simulateAiResponse();
   }
-  
-  // 模拟AI响应（实际项目中应该替换为真实的API调用）
-  function simulateAiResponse() {
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        role: 'assistant',
-        content: '这是一个模拟的AI响应。在实际项目中，你应该通过API获取真实的响应。',
-        createdAt: new Date()
-      };
-      
-      // 添加AI消息到消息列表
-      messages = [...messages, aiMessage];
-      
-      // 更新状态为就绪
-      status = "ready";
-      
-      // 滚动到底部
-      setTimeout(() => {
-        scrollToBottom();
-      }, 100);
-    }, 1000); // 模拟1秒延迟
-  }
+
   
   // 处理复制消息
   function handleCopyMessage(messageId: string) {
@@ -144,8 +120,8 @@
 <div class="flex flex-col h-full">
   <!-- Chat Messages -->
   <ScrollArea
-    class="p-4"
-    style="height: {windowHeight - 210}px; overflow: hidden;"
+    class="px-4"
+    style="height: {windowHeight - 190}px; overflow: hidden;"
     bind:ref={scrollAreaRef}
   >
     <ChatMessages
@@ -160,11 +136,10 @@
   </ScrollArea>
 
   <!-- 输入区域 -->
-  <div class="p-5">
-    <InputArea
+  <InputArea
+      class="px-4"
       placeholder="输入消息..."
       bind:inputValue={input}
       onSubmit={handleSubmit}
     />
-  </div>
 </div>
