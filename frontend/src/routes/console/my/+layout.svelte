@@ -101,7 +101,7 @@
   <div
     class="{$appStore.sidebarCollapsed
       ? 'w-0 overflow-hidden'
-      : 'w-fit'} bg-base-100 transition-all duration-300"
+      : 'w-fit'}  transition-all duration-300"
   >
     <!-- 左侧导航栏内容 -->
     <!-- <LeftSidebar /> -->

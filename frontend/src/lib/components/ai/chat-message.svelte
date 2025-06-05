@@ -5,13 +5,14 @@
   import type { Message } from "@ai-sdk/svelte";
   import type { User } from "$lib/types/user";
 
-  let { message, onCopy, onRegenerate, onLike, onDislike, user } = $props<{
+  let { message, onCopy, onRegenerate, onLike, onDislike, status,user } = $props<{
     message: Message;
     onCopy?: (messageId: string) => void;
     onRegenerate?: (messageId: string) => void;
     onLike?: (messageId: string) => void;
     onDislike?: (messageId: string) => void;
     user?: User;
+    status?: "success" | "error" | "loading";
   }>();
 
   // 渲染Markdown
@@ -26,19 +27,24 @@
 </script>
 
 <div
-  class="flex flex-col gap-2 {message.role === 'user'
-    ? 'items-end'
+  class="flex flex-row gap-3 {message.role === 'user'
+    ? 'items-start'
     : 'items-start'} mb-4"
 >
   {#if message.role === "user"}
-    <UserAvatar class="size-6" src={user?.avatar} fallback={user?.name || "You"}
-    ></UserAvatar>
-    <div class="bg-base-300 text-base-content py-2 px-4 rounded-2xl">
+    <div class="flex-shrink-0">
+      <UserAvatar class="size-8 bg-base-300" fallbackClass="text-xs" src={user?.avatar} fallback={user?.name || "You"}
+      ></UserAvatar>
+    </div>
+    <div class="bg-base-300 text-base-content text-sm px-4 py-2 rounded-2xl rounded-tl-none  max-w-[80%]">
       {message.content}
     </div>
   {:else}
-    <UserAvatar class="size-6" fallback="AI"></UserAvatar>
-    <div class="py-3 rounded-lg">
+    <div class="flex-shrink-0">
+      <UserAvatar class="size-8 bg-gradient-to-r from-blue-500 to-purple-600"
+       fallbackClass="text-xs" fallback="AI"></UserAvatar>
+    </div>
+    <div class="px-1 rounded-lg flex-1 max-w-[90%] text-sm">
       {#if message.parts && message.parts.length > 0}
         <!-- 新的流式格式 -->
         {#each message.parts as part, i (i)}

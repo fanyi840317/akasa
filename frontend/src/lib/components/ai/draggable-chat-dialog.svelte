@@ -9,7 +9,6 @@
   import { Chat } from "@ai-sdk/svelte";
   import DraggableWindow from "../ui/draggable-window/draggable-window.svelte";
   import InputArea from "./input-area.svelte";
-  import ChatMessages from "./chat-messages.svelte";
   import { ScrollArea } from "../ui/scroll-area";
   import type { ChatMessage } from "$lib/types/ai";
   import ChatDialogContent from "./chat-content.svelte";

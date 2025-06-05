@@ -10,7 +10,9 @@
     type DocMode,
     type ThemeExtension,
   } from "@blocksuite/blocks";
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, createEventDispatcher } from "svelte";
+  
+  const dispatch = createEventDispatcher();
 
   import "@toeverything/theme/style.css";
   import { Doc, Slot } from "@blocksuite/store"; // Added Doc
@@ -47,7 +49,7 @@
 
   // export let docId: string | undefined = undefined; // Optional prop to load an existing doc
   // export let initialJsonContent: string | undefined = undefined; // New prop for initial JSON content
-  let { initialJsonContent = undefined, class: className, readonly = false } = $props<{
+  let { initialJsonContent = undefined, class: className, readonly = $bindable(false) } = $props<{
     initialJsonContent: string | undefined;
     class: string;
     readonly?: boolean;
@@ -222,6 +224,19 @@
   export async function getContent() {
     return await exportDocToJson(editor.doc);
   }
+  
+  // 导出设置封面URL的方法
+  export function setCoverUrl(url: string) {
+    coverUrl = url;
+  }
+  
+  // 导出设置地图的方法
+  export function setMapLocation(location: any) {
+    console.log("Setting map location:", location);
+    // 这里可以添加设置地图位置的逻辑
+    // 例如更新编辑器中的地图组件
+  }
+  
   let coverRef = $state<HTMLDivElement>();
   let mapButtonRef = $state<HTMLDivElement>();
   let coverUrl = $state(
@@ -287,7 +302,10 @@
     url={coverUrl}
     {uploadProgress}
     {showUploadProgress}
-    onclick={() => (showCoverSelector = true)}
+    onclick={() => {
+      showCoverSelector = true;
+      dispatch('coverButtonClick');
+    }}
     onkeydown={(e: KeyboardEvent) =>
       e.key === "Enter" && (showCoverSelector = true)}
     role="button"
@@ -297,9 +315,11 @@
 
   <edgeless-map-tool-button
     bind:this={mapButtonRef}
-    onclick={() => console.log("Map button clicked")}
+    onclick={() => {
+      dispatch('mapButtonClick');
+    }}
     onkeydown={(e: KeyboardEvent) =>
-      e.key === "Enter" && console.log("Map button clicked")}
+      e.key === "Enter" && dispatch('mapButtonClick')}
     role="button"
     tabindex="0"
     aria-label="地图工具"
@@ -318,8 +338,7 @@
     <div
       class="absolute z-50"
       bind:this={coverSelectorRef}
-      style="top: {(coverRef?.getBoundingClientRect()?.top ?? 0) -
-        360}px; left: {(coverRef?.getBoundingClientRect()?.left ?? 0) - 150}px"
+      style="top: {(coverRef?.offsetTop ?? 0) - 360}px; left: {(coverRef?.offsetLeft ?? 0) - 150}px"
     >
       <Card class="p-0 ">
         <CoverSelector

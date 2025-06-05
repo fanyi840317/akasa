@@ -14,10 +14,11 @@
   import { auth } from "$lib/stores/auth";
   import CoverCard from "$lib/components/events/event/actionbar-cards/cover-card.svelte";
   import { InputArea } from "$lib/components/ai";
-  import { Minimize, Maximize, Eye, EyeOff } from "lucide-svelte"; // 导入收缩和预览图标
+  import { ChevronLeft, ChevronRight, Eye, EyeOff, Save } from "lucide-svelte"; // 导入收缩和预览图标
   import ChatContent from "$lib/components/ai/chat-content.svelte";
   import { Chat } from "@ai-sdk/svelte";
   import type { Message } from "@ai-sdk/svelte";
+  import LocationCard from "$lib/components/events/event/property-cards/location-card.svelte";
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -35,7 +36,6 @@
   let isCommentsPanelOpen = $state(false); // State for the comments panel
   let isInputAreaCollapsed = $state(false); // 控制输入区域是否收缩
   let isEditorReadonly = $state(false); // 控制编辑器是否为只读模式
-
 
   const unsubscribeEvent = eventStore.subscribe((store) => {
     currentEvent = store.currentEvent;
@@ -73,19 +73,19 @@
 
   // 真实聊天功能
   const chat = new Chat({
-    api: '/api/chat',
+    api: "/api/chat",
     maxSteps: 5,
     onError: (error) => {
-      console.error('AI 对话错误:', error);
+      console.error("AI 对话错误:", error);
     },
   });
 
   // 聊天消息操作函数
   function copyMessage(messageId: string) {
-    const message = chat.messages.find(m => m.id === messageId);
+    const message = chat.messages.find((m) => m.id === messageId);
     if (message) {
       navigator.clipboard.writeText(message.content);
-      console.log('消息已复制:', messageId);
+      console.log("消息已复制:", messageId);
     }
   }
 
@@ -93,7 +93,7 @@
     const messageIndex = chat.messages.findIndex((m) => m.id === messageId);
     if (messageIndex > 0) {
       chat.reload();
-      console.log('重新生成消息:', messageId);
+      console.log("重新生成消息:", messageId);
     }
   }
 
@@ -109,28 +109,28 @@
 
   // 处理消息发送
   async function handleMessageSent(text: string) {
-    if (!text.trim() || chat.status !== 'ready') return;
-    
+    if (!text.trim() || chat.status !== "ready") return;
+
     // 使用 Chat 类发送消息
     await chat.append({
-      role: 'user',
+      role: "user",
       content: text.trim(),
     });
-    
-    console.log('消息已发送:', text);
+
+    console.log("消息已发送:", text);
   }
 
   onMount(() => {
     appStore.setShowHeader(false);
     console.log("Event page mounted");
-    
+
     // 计算ChatContent的高度
-    
+
     // 使用ResizeObserver监听窗口大小变化
     resizeObserver = new ResizeObserver(() => {
       pageHeight = window.innerHeight;
     });
-    
+
     // 观察document.body的大小变化
     resizeObserver.observe(document.body);
   });
@@ -139,7 +139,7 @@
     appStore.setShowHeader(true);
     unsubscribeEvent(); // Unsubscribe from the store
     eventStore.setCurrentEvent(null); // Clear current event when leaving the page
-    
+
     // 清理ResizeObserver
     if (resizeObserver) {
       resizeObserver.disconnect();
@@ -289,6 +289,49 @@
   //     console.log("Content changed (JSON):", editorContent);
   //     // Optionally, mark as dirty or auto-save
   // }
+  
+  // 处理地图按钮点击事件
+  function handleMapButtonClick() {
+    console.log("Map button clicked in parent component");
+    // 这里可以添加打开地图设置的逻辑
+    // 例如打开一个地图设置对话框
+    
+    // 模拟打开地图设置对话框
+    setTimeout(() => {
+      // 模拟用户设置了地图位置
+      const mapLocation = {
+        lat: 39.9042,
+        lng: 116.4074,
+        zoom: 12,
+        name: "北京市"
+      };
+      
+      // 更新编辑器中的地图
+      if (editorComponent) {
+        editorComponent.setMapLocation(mapLocation);
+      }
+    }, 1000); // 模拟1秒后用户完成设置
+  }
+  
+  // 处理封面按钮点击事件
+  function handleCoverButtonClick() {
+    console.log("Cover button clicked in parent component");
+    // 这里可以添加自定义封面设置的逻辑
+    
+    // 在这里，我们可以选择让编辑器内部的封面选择器显示
+    // 或者实现自己的封面选择逻辑
+    
+    // 示例：设置一个新的封面URL
+    setTimeout(() => {
+      // 模拟用户选择了新封面
+      const newCoverUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb";
+      
+      // 更新编辑器中的封面
+      if (editorComponent) {
+        editorComponent.setCoverUrl(newCoverUrl);
+      }
+    }, 1000); // 模拟1秒后用户完成选择
+  }
 </script>
 
 <!-- This outer div will be the drop target and relative positioning context -->
@@ -303,29 +346,36 @@
     bind:isPropertiesPanelOpen
     bind:isCommentsPanelOpen
   />
-  <div class="w-full flex-1 flex flex-row overflow-hidden">
-    
+  <div class="w-full flex-1 flex flex-row overflow-hidden p-2 pt-0 gap-2">
     {#if !isInputAreaCollapsed}
-    <div class="w-128 flex flex-col justify-between relative">
-      <ChatContent 
-        bind:messages={chat.messages}
-        bind:status={chat.status}
-        bind:error={chat.error}
-        bind:input={chat.input}
-        windowHeight={chatContentHeight}
-        onCopyMessage={copyMessage}
-        onRegenerateMessage={regenerateMessage}
-        onLikeMessage={likeMessage}
-        onDislikeMessage={dislikeMessage}
-        onMessageSent={(text) => {
-          console.log('Message submitted:', text);
-          chat.handleSubmit();
-          console.log('Chat messages after submit:', chat.messages.length);
-        }}
-      />
-    </div>
+      <div
+        class="w-[420px] flex flex-col rounded-2xl border border-border shadow-xl justify-between relative pt-2"
+      >
+        <ChatContent
+          bind:messages={chat.messages}
+          bind:status={chat.status}
+          bind:error={chat.error}
+          suggestions={[
+            "查询最近一周的神秘事件",
+            "从这篇文章中提取人物和地点",
+            "为这篇文章生成摘要",
+            "为这篇文章生成标题",
+          ]}
+          windowHeight={chatContentHeight}
+          onCopyMessage={copyMessage}
+          onRegenerateMessage={regenerateMessage}
+          onLikeMessage={likeMessage}
+          onDislikeMessage={dislikeMessage}
+          onMessageSent={(text) => {
+            console.log("Message submitted:", text);
+            chat.input = text;
+            chat.handleSubmit();
+            console.log("Chat messages after submit:", chat.messages.length);
+          }}
+        />
+      </div>
     {/if}
-    <div class="relative w-full h-full p-2 pl-0 pt-0">
+    <div class="relative flex-1 h-full">
       <div
         class="w-full h-full flex flex-col rounded-2xl border border-border shadow-xl"
       >
@@ -336,20 +386,22 @@
           </div>
         {:else}
           <div
-            class="flex flex-row gap-2 p-2 w-full h-14 relative"
+            class="flex flex-row gap-2 p-2 w-full h-14 relative justify-between"
           >
-          <button
-              class="btn btn-sm btn-ghost btn-square"
-              on:click={() => (isInputAreaCollapsed = !isInputAreaCollapsed)}
-              title={isInputAreaCollapsed ? "展开输入区域" : "收缩输入区域"}
-            >
-              {#if isInputAreaCollapsed}
-                <Maximize class="w-4 h-4" />
-                
-              {:else}
-                <Minimize class="w-4 h-4" />
-              {/if}
-            </button>
+            <div class="flex flex-row gap-2">
+              <button
+                class="btn btn-sm btn-ghost"
+                on:click={() => (isInputAreaCollapsed = !isInputAreaCollapsed)}
+                title={isInputAreaCollapsed ? "展开输入区域" : "收缩输入区域"}
+              >
+                {#if isInputAreaCollapsed}
+                  <ChevronRight class="w-4 h-4" />
+                  展开
+                {:else}
+                  <ChevronLeft class="w-4 h-4" />
+                  收缩
+                {/if}
+              </button>
               <button
                 class="btn btn-sm btn-ghost btn-square"
                 on:click={() => (isEditorReadonly = !isEditorReadonly)}
@@ -361,37 +413,37 @@
                   <Eye class="w-4 h-4" />
                 {/if}
               </button>
+            </div>
+            <div class="flex flex-row gap-2">
+              <button
+                class="btn btn-sm btn-ghost btn-square"
+                on:click={handleSaveDocument}
+                title="保存"
+              >
+                <Save class="w-4 h-4" />
+              </button>
+            </div>
           </div>
+
           <BlockSuiteEditor
             class="border-t-1 border-border"
             bind:this={editorComponent}
             initialJsonContent={currentEvent?.content}
             readonly={isEditorReadonly}
+            on:mapButtonClick={handleMapButtonClick}
+            on:coverButtonClick={handleCoverButtonClick}
           />
         {/if}
       </div>
-      {#if isPropertiesPanelOpen}
-        <div
-          class="absolute top-18 left-22 z-10 transition-transform duration-300 ease-in-out"
-          in:fade={{ duration: 300 }}
-          out:fade={{ duration: 300 }}
-        >
-          <!-- <EventPropertyCard
-            eventDate={currentEvent?.date}
-            locationData={currentEvent?.location_data}
-            selectedCategories={currentEvent?.categories || []}
-            categories={[]}
-          /> -->
-        </div>
-      {/if}
+     
     </div>
-    {#if isCommentsPanelOpen && eventId && eventId !== 'new'}
+    {#if isCommentsPanelOpen && eventId && eventId !== "new"}
       <div
         class=""
         in:fly={{ x: 100, duration: 300 }}
         out:fly={{ x: 100, duration: 300 }}
       >
-        <EventCommentsPanel eventId={eventId} />
+        <EventCommentsPanel class=" w-[400px] " {eventId} />
       </div>
     {/if}
   </div>

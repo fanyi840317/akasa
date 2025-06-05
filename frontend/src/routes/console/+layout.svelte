@@ -119,7 +119,7 @@
   }
 </script>
 
-<div class="flex flex-col overflow-hidden h-screen">
+<div class="flex flex-col overflow-hidden h-screen bg-background">
   <TopBar
     class="py-1 px-6"
     handleCreate={() => {

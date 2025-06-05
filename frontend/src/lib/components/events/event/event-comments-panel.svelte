@@ -199,7 +199,7 @@
 
 <div
   class={cn(
-    "w-full bg-base-100 text-base-content  p-4 py-2 font-san border-l border-base-300 w-[400px] h-[100vh] ",
+    "w-full text-base-content  p-4 py-2 font-san h-[100vh] ",
     className
   )}
   {...restProps}
