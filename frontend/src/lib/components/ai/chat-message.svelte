@@ -64,7 +64,7 @@
                 正在调用工具: {toolName}...
               </div>
             {:else if state === "result"}
-              <div class="text-gray-500 text-sm bg-gray-100 p-2 rounded">
+              <div class="text-gray-500 text-sm bg-base-300 p-2 mb-2 rounded">
                 <strong>工具结果:</strong>
                 {part.toolInvocation.result}
               </div>

@@ -47,9 +47,9 @@ export type Hypothesis = {
 };
 
 export type Event = {
-  $id?: string;
-  $createdAt?: string;
-  $updatedAt?: string;
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
   title: string;
   content: string;
   summary?: string;

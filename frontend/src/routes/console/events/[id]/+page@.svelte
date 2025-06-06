@@ -332,6 +332,21 @@
       }
     }, 1000); // 模拟1秒后用户完成选择
   }
+  
+  // 处理分享按钮点击事件
+  function handleShare() {
+    console.log("Share button clicked in parent component");
+    // 这里可以添加分享功能的逻辑
+    
+    // 例如：生成分享链接，打开分享对话框等
+    const shareUrl = window.location.href;
+    
+    // 模拟分享功能
+    alert(`分享链接已生成：${shareUrl}\n\n您可以将此链接发送给他人以分享此事件。`);
+    
+    // 在实际应用中，这里可以实现更复杂的分享功能
+    // 例如：复制链接到剪贴板，打开社交媒体分享对话框等
+  }
 </script>
 
 <!-- This outer div will be the drop target and relative positioning context -->
@@ -345,6 +360,7 @@
     onTitleChange={handleTitleChange}
     bind:isPropertiesPanelOpen
     bind:isCommentsPanelOpen
+    onShare={handleShare}
   />
   <div class="w-full flex-1 flex flex-row overflow-hidden p-2 pt-0 gap-2">
     {#if !isInputAreaCollapsed}

@@ -27,6 +27,7 @@
   import { InputArea } from "$lib/components/ai";
   import IconButton from "$lib/components/ui/buttons/icon-button.svelte";
   import TextCarousel from "$lib/components/ui/carousel/text-carousel.svelte";
+  import { MyEventCardGrid } from "$lib/components/my";
 
   let events: Event[] = $state([]);
   let loading = $state(false);
@@ -70,6 +71,56 @@
     goto(`/console/events/${event.$id}`);
   }
 
+  // 处理事件分享
+  function handleEventShare(event: Event) {
+    // 实现分享逻辑，例如复制链接到剪贴板
+    const shareUrl = `${window.location.origin}/console/events/${event.$id}`;
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        alert(`分享链接已复制: ${shareUrl}`);
+      })
+      .catch(err => {
+        console.error('无法复制链接:', err);
+        alert(`分享链接: ${shareUrl}`);
+      });
+  }
+
+  // 处理事件重命名
+  function handleEventRename(event: Event) {
+    // 这里可以弹出一个对话框让用户输入新名称
+    const newTitle = prompt('请输入新的事件名称:', event.title);
+    if (newTitle && newTitle !== event.title) {
+      // 调用API更新事件名称
+      eventStore.updateEvent(event.$id,{
+        ...event,
+        title: newTitle
+      }).then(() => {
+        // 更新成功后重新加载事件列表
+        loadUserEvents();
+      }).catch(err => {
+        console.error('重命名失败:', err);
+        alert('重命名失败，请重试');
+      });
+    }
+  }
+
+  // 处理事件删除
+  function handleEventDelete(event: Event) {
+    // 确认删除
+    if (confirm(`确定要删除事件 "${event.title}" 吗？`)) {
+      // 调用API删除事件
+      eventStore.deleteEvent(event.$id)
+        .then(() => {
+          // 删除成功后从列表中移除该事件
+          events = events.filter(e => e.$id !== event.$id);
+        })
+        .catch(err => {
+          console.error('删除失败:', err);
+          alert('删除失败，请重试');
+        });
+    }
+  }
+
   // 组件挂载时加载数据
   onMount(() => {
     loadUserEvents();
@@ -81,7 +132,7 @@
 border border-border rounded-xl h-full ">
   <!-- 页面标题 -->
   <div
-    class="flex items-center justify-between border-b border-border p-4 py-3 mb-20"
+    class="flex items-center justify-between border-b border-border p-4 py-3 mb-0"
   >
     <div class="flex items-center gap-3">
       <CollapseButton
@@ -170,7 +221,14 @@ border border-border rounded-xl h-full ">
   {:else}
     <!-- 事件列表 -->
     <div class="p-4">
-      <EventCardGrid cardSize="xs" {events} onEventClick={handleEventClick} />
+      <MyEventCardGrid 
+        cardSize="xs" 
+        {events} 
+        onEventClick={handleEventClick}
+        onEventShare={handleEventShare}
+        onEventRename={handleEventRename}
+        onEventDelete={handleEventDelete}
+      />
     </div>
     <!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {#each events as event (event.$id)}

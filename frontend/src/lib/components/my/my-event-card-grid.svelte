@@ -1,8 +1,8 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
   import type { Event } from "$lib/types/event";
-  import EventCard from "./event-card.svelte";
   import { cn } from "$lib/utils";
+  import { MyEventCard } from ".";
 
   let {
     events = [],
@@ -35,7 +35,7 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     {#if events && events.length > 0}
       {#each events as event (event.$id)}
-        <EventCard
+        <MyEventCard
           {event}
           onClick={onEventClick}
           onShare={onEventShare}

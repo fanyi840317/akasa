@@ -45,7 +45,7 @@
 
 <div
   class={cn(
-    "card bg-base-100 card-border border-base-300/50 overflow-hidden hover:shadow-md transition-all card-hover group",
+    "card  card-border border-border overflow-hidden hover:shadow-md transition-all card-hover group",
     size === "sm" && "card-sm",
     size === "xs" && "p-0",
     className
@@ -66,32 +66,25 @@
         class="w-full h-full object-cover transition-transform hover:scale-105"
       />
     {:else}
-      <div class="w-full h-full bg-gradient-to-br from-base-200 to-base-300 flex items-center justify-center">
-        <Image class="size-10 opacity-30" />
+      <div class="w-full h-full flex items-center justify-center ">
+        <!-- <Image class="size-10 opacity-30" /> -->
       </div>
     {/if}
   </figure>
 
   <div
     class={cn(
-      "card-body relative bg-base-200",
+      "card-body relative ",
       size === "sm" && "gap-3 p-4",
       size === "xs" && "p-2 gap-1"
     )}
   >
-    <div class="flex justify-between items-start">
-      <h3 class="font-semibold text-base text-base-content/80 line-clamp-1 flex-1 mr-2">{event.title}</h3>
+    <div class="flex justify-between items-start gap-0 border-t border-border pt-2">
+      <h3 class="font-semibold text-sm text-base-content/80 line-clamp-1 flex-1 mr-2">{event.title}</h3>
       <div class="flex items-center gap-1 shrink-0">
         {#if showActions}
-          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <IconButton 
-              size="sm" 
-              onclick={() => {
-                onShare?.(event);
-              }}
-            >
-              <Share2 class="w-3 h-3" />
-            </IconButton>
+          <div class="flex items-center gap-1 ">
+           
             <EventActionsDropdown
               class="btn-sm"
               showSettings={false}
@@ -115,7 +108,7 @@
       </div>
     </div>
     
-    <div class=" text-base-content/70 line-clamp-2">
+    <div class="text-sm text-base-content/70 line-clamp-2">
       {event.summary || "无摘要"}
     </div>
   </div>

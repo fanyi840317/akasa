@@ -20,10 +20,12 @@
   import EventPropertyCard from "./event-property-card.svelte";
   import MapBase from "$lib/components/map/map-base.svelte";
   import type { Location } from "$lib/types/map";
-  import { Clock } from "lucide-svelte"; // Import Clock icon
+  import { Clock, Share2 } from "lucide-svelte"; // Import Clock and Share2 icons
   import CoverCard from "./actionbar-cards/cover-card.svelte";
   import DateCard from "./actionbar-cards/date-card.svelte";
   import MapCard from "./actionbar-cards/map-card.svelte";
+  import { IconButton } from "$lib/components/ui/buttons";
+  import EventActionsDropdown from "$lib/components/ui/event-actions-dropdown.svelte";
   // import  from "daisyui/src/colors/themes";
 
   let {
@@ -42,6 +44,7 @@
     onEventTimeChange = (newTime: Date | undefined) => {}, // New callback prop for time changes
     // onCoverChange?: (url: string) => void, // Example prop for handling cover changes
     userId, // 声明 userId 属性类型
+    onShare = () => {}, // 添加分享事件处理函数
   } = $props<{
     // Added a placeholder for onCoverChange if needed later
     title?: string;
@@ -58,6 +61,7 @@
     eventTime?: Date | null; // New prop type
     onEventTimeChange?: (newTime: Date | null) => void; // New callback prop type
     userId?: string; // 声明 userId 属性类型
+    onShare?: () => void; // 添加分享事件处理函数类型
   }>();
 
   let isCoverSelectorOpen = $state(false);
@@ -69,6 +73,12 @@
   let newLocation = $state<Location | null>(null);
   let isEditingTime = $state(false); // New state for time modal
   let newEventTime = $state<Date | null>(eventTime); // New state for selected time
+  
+  function handleShare() {
+    // 调用父组件传入的分享处理函数
+    console.log('分享按钮被点击');
+    onShare();
+  }
 </script>
 
 <div class="relative w-full bg-base-200/10  border-base-content/10">
@@ -88,8 +98,65 @@
           class="relative shrink text-sm leading-snug flex grow flex-col w-full"
         >
           <div class="flex justify-between w-full">
-            <h3 class="font-semibold flex gap-2">
-              <span class="line-clamp-1 text-left">{title}</span>
+            <h3 class="font-semibold flex gap-2 items-center">
+              {#if isRenaming}
+                <div class="flex items-center gap-2">
+                  <input
+                    type="text"
+                    class="input input-sm input-bordered w-full max-w-xs"
+                    bind:value={newTitle}
+                    autofocus
+                    onkeydown={(e) => {
+                      if (e.key === 'Enter') {
+                        if (newTitle.trim()) {
+                          onTitleChange(newTitle);
+                          isRenaming = false;
+                        }
+                      } else if (e.key === 'Escape') {
+                        newTitle = title;
+                        isRenaming = false;
+                      }
+                    }}
+                  />
+                  <button
+                    class="btn btn-sm btn-ghost btn-circle"
+                    onclick={() => {
+                      if (newTitle.trim()) {
+                        onTitleChange(newTitle);
+                        isRenaming = false;
+                      }
+                    }}
+                  >
+                    <Check class="w-4 h-4" />
+                  </button>
+                  <button
+                    class="btn btn-sm btn-ghost btn-circle"
+                    onclick={() => {
+                      newTitle = title;
+                      isRenaming = false;
+                    }}
+                  >
+                    <X class="w-4 h-4" />
+                  </button>
+                </div>
+              {:else}
+                <span class="line-clamp-1 text-left">{title}</span>
+                <IconButton onclick={handleShare}>
+                  <Share2 class="w-4 h-4" />
+                </IconButton>
+                <EventActionsDropdown
+                  onSettings={() => isPropertiesPanelOpen = !isPropertiesPanelOpen}
+                  onRename={() => {
+                    isRenaming = true;
+                    newTitle = title;
+                  }}
+                  onShare={handleShare}
+                  onDelete={() => {
+                    // TODO: 实现删除逻辑
+                    console.log('删除事件');
+                  }}
+                />
+              {/if}
             </h3>
           </div>
           <!-- <p class="font-normal line-clamp-1 text-neutral-content/50 text-xs">
