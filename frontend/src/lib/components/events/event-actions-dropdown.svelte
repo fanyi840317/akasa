@@ -21,6 +21,7 @@
     onSettings = () => {},
     showSettings = true,
     showRename = true,
+    align = "end",
     showShare = true,
     showDelete = true,
     class: className = "",
@@ -34,60 +35,61 @@
     showShare?: boolean;
     showDelete?: boolean;
     class?: string;
+    align?: "start" | "end";
   }>();
 </script>
 
-<DropdownMenu.Root>
+<DropdownMenu.Root >
   <DropdownMenu.Trigger>
     <IconButton class={className}>
       <MoreHorizontal class="w-4 h-4" />
     </IconButton>
   </DropdownMenu.Trigger>
-  <DropdownMenu.Content align="start" class="w-48">
+  <DropdownMenu.Content {align} class="w-48">
     {#if showSettings}
       <DropdownMenu.Group>
         <DropdownMenu.GroupHeading>属性设置</DropdownMenu.GroupHeading>
         <DropdownMenu.Item onclick={onSettings}>
-          <Clock class="w-4 h-4 mr-2" />
-          时间设置
+          <Clock class="w-4 h-4 mr-1" />
+          设置开始时间
         </DropdownMenu.Item>
         <DropdownMenu.Item onclick={onSettings}>
-          <MapPin class="w-4 h-4 mr-2" />
+          <MapPin class="w-4 h-4 mr-1" />
           地点设置
         </DropdownMenu.Item>
         <DropdownMenu.Item onclick={onSettings}>
-          <Tag class="w-4 h-4 mr-2" />
+          <Tag class="w-4 h-4 mr-1" />
           类型设置
         </DropdownMenu.Item>
         <DropdownMenu.Item onclick={onSettings}>
-          <Zap class="w-4 h-4 mr-2" />
+          <Zap class="w-4 h-4 mr-1" />
           影响设置
         </DropdownMenu.Item>
         <DropdownMenu.Item onclick={onSettings}>
-          <FileText class="w-4 h-4 mr-2" />
+          <FileText class="w-4 h-4 mr-1" />
           事件描述
         </DropdownMenu.Item>
       </DropdownMenu.Group>
+      <DropdownMenu.Separator />
     {/if}
 
     {#if showRename}
-      <DropdownMenu.Separator />
       <DropdownMenu.Item onclick={onRename}>
-        <FileEdit class="w-4 h-4 mr-2" />
+        <FileEdit class="w-4 h-4 mr-1" />
         重命名
       </DropdownMenu.Item>
     {/if}
 
     {#if showShare}
       <DropdownMenu.Item onclick={onShare}>
-        <Share2 class="w-4 h-4 mr-2" />
+        <Share2 class="w-4 h-4 mr-1" />
         分享
       </DropdownMenu.Item>
     {/if}
 
     {#if showDelete}
       <DropdownMenu.Item class="text-error" onclick={onDelete}>
-        <Trash2 class="w-4 h-4 mr-2" />
+        <Trash2 class="w-4 h-4 mr-1" />
         删除
       </DropdownMenu.Item>
     {/if}

@@ -5,7 +5,7 @@
   import type { Event } from "$lib/types/event";
   import { Calendar, Clock, Image, Share2 } from "lucide-svelte";
   import { IconButton } from "$lib/components/ui/buttons";
-  import EventActionsDropdown from "$lib/components/ui/event-actions-dropdown.svelte";
+  import EventActionsDropdown from "$lib/components/events/event-actions-dropdown.svelte";
 
   let {
     event,
@@ -87,6 +87,7 @@
            
             <EventActionsDropdown
               class="btn-sm"
+              align="end"
               showSettings={false}
               onRename={() => onRename?.(event)}
               onShare={() => onShare?.(event)}

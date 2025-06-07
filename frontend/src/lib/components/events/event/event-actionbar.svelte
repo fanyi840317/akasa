@@ -26,7 +26,8 @@
   import DateCard from "./actionbar-cards/date-card.svelte";
   import MapCard from "./actionbar-cards/map-card.svelte";
   import { IconButton, OutlineButton } from "$lib/components/ui/buttons";
-  import EventActionsDropdown from "$lib/components/ui/event-actions-dropdown.svelte";
+  import EventActionsDropdown from "$lib/components/events/event-actions-dropdown.svelte";
+  import * as Popover from "$lib/components/ui/popover";
   // import  from "daisyui/src/colors/themes";
 
   let {
@@ -74,11 +75,25 @@
   let newLocation = $state<Location | null>(null);
   let isEditingTime = $state(false); // New state for time modal
   let newEventTime = $state<Date | null>(eventTime); // New state for selected time
+  let isTimePopoverOpen = $state(false);
+  let isLocationPopoverOpen = $state(false);
 
   function handleShare() {
     // 调用父组件传入的分享处理函数
     console.log("分享按钮被点击");
     onShare();
+  }
+
+  function handleTimeChange(newTime: Date | null) {
+    eventTime = newTime;
+    onEventTimeChange(newTime);
+    isTimePopoverOpen = false;
+  }
+
+  function handleLocationChange(newLoc: Location | null) {
+    location = newLoc;
+    onLocationChange(newLoc);
+    isLocationPopoverOpen = false;
   }
 </script>
 
@@ -137,6 +152,82 @@
       <LockIcon class="size-3 " />
       private
     </button>
+    <span aria-hidden="true" class="text-base-content/40 w-4 min-w-4 select-none text-center text-lg">/</span>
+    
+    <!-- Time Popover -->
+    <Popover.Root bind:open={isTimePopoverOpen}>
+      <Popover.Trigger>
+        <button class="text-sm font-medium hover:bg-base-200 px-2 py-1 rounded transition-colors">
+          <Clock class="w-3 h-3 inline mr-1" />
+          {eventTime ? new Date(eventTime).toLocaleDateString() : '设置时间'}
+        </button>
+      </Popover.Trigger>
+      <Popover.Content class="w-80">
+        <div class="space-y-4">
+          <h4 class="font-medium">设置活动时间</h4>
+          <input
+            type="datetime-local"
+            class="input input-bordered w-full"
+            value={eventTime ? new Date(eventTime).toISOString().slice(0, 16) : ''}
+            onchange={(e) => {
+              // const newTime = e.target.value ? new Date(e.target.value) : null;
+              // handleTimeChange(newTime);
+            }}
+          />
+          <div class="flex gap-2 justify-end">
+            <button class="btn btn-sm btn-ghost" onclick={() => isTimePopoverOpen = false}>
+              取消
+            </button>
+            <button class="btn btn-sm btn-primary" onclick={() => handleTimeChange(null)}>
+              清除
+            </button>
+          </div>
+        </div>
+      </Popover.Content>
+    </Popover.Root>
+    
+    <span aria-hidden="true" class="text-base-content/40 w-4 min-w-4 select-none text-center text-lg">/</span>
+    
+    <!-- Location Popover -->
+    <Popover.Root bind:open={isLocationPopoverOpen}>
+      <Popover.Trigger>
+        <button class="text-sm font-medium hover:bg-base-200 px-2 py-1 rounded transition-colors">
+          {location?.name || '设置地点'}
+        </button>
+      </Popover.Trigger>
+      <Popover.Content class="w-80">
+        <div class="space-y-4">
+          <h4 class="font-medium">设置活动地点</h4>
+          <input
+            type="text"
+            class="input input-bordered w-full"
+            placeholder="输入地点名称"
+            value={location?.name || ''}
+            onchange={(e) => {
+              // const newLocationName = e.target.value;
+              // if (newLocationName.trim()) {
+              //   const newLoc: Location = {
+              //     name: newLocationName,
+              //     latitude: location?.latitude || 0,
+              //     longitude: location?.longitude || 0
+              //   };
+              //   handleLocationChange(newLoc);
+              // } else {
+              //   handleLocationChange(null);
+              // }
+            }}
+          />
+          <div class="flex gap-2 justify-end">
+            <button class="btn btn-sm btn-ghost" onclick={() => isLocationPopoverOpen = false}>
+              取消
+            </button>
+            <button class="btn btn-sm btn-primary" onclick={() => handleLocationChange(null)}>
+              清除
+            </button>
+          </div>
+        </div>
+      </Popover.Content>
+    </Popover.Root>
   </div>
   <div
       class="gap-2 h-0 items-center flex text-sm font-medium"

@@ -14,11 +14,12 @@
   import { auth } from "$lib/stores/auth";
   import CoverCard from "$lib/components/events/event/actionbar-cards/cover-card.svelte";
   import { InputArea } from "$lib/components/ai";
-  import { ChevronLeft, ChevronRight, Eye, EyeOff, Save } from "lucide-svelte"; // 导入收缩和预览图标
+  import { ChevronLeft, ChevronRight, ChevronLeftSquare, ChevronRightSquare, Eye, EyeOff, Save } from "lucide-svelte"; // 导入收缩和预览图标
   import ChatContent from "$lib/components/ai/chat-content.svelte";
   import { Chat } from "@ai-sdk/svelte";
   import type { Message } from "@ai-sdk/svelte";
   import LocationCard from "$lib/components/events/event/property-cards/location-card.svelte";
+  import EventTimeLocationEditor from "$lib/components/events/event/event-time-location-editor.svelte";
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -36,6 +37,21 @@
   let isCommentsPanelOpen = $state(false); // State for the comments panel
   let isInputAreaCollapsed = $state(false); // 控制输入区域是否收缩
   let isEditorReadonly = $state(false); // 控制编辑器是否为只读模式
+  
+  // 为绑定创建响应式变量
+  let eventTime = $state<Date | null>(null);
+  let eventLocation = $state<any>(null);
+  
+  // 同步currentEvent的变化到绑定变量
+  $effect(() => {
+    if (currentEvent) {
+      eventTime = currentEvent.date || null;
+      eventLocation = currentEvent.location || null;
+    } else {
+      eventTime = null;
+      eventLocation = null;
+    }
+  });
 
   const unsubscribeEvent = eventStore.subscribe((store) => {
     currentEvent = store.currentEvent;
@@ -308,7 +324,7 @@
       
       // 更新编辑器中的地图
       if (editorComponent) {
-        editorComponent.setMapLocation(mapLocation);
+        // editorComponent.setMapLocation(mapLocation);
       }
     }, 1000); // 模拟1秒后用户完成设置
   }
@@ -328,7 +344,7 @@
       
       // 更新编辑器中的封面
       if (editorComponent) {
-        editorComponent.setCoverUrl(newCoverUrl);
+        // editorComponent.setCoverUrl(newCoverUrl);
       }
     }, 1000); // 模拟1秒后用户完成选择
   }
@@ -413,10 +429,10 @@
               >
                 {#if isInputAreaCollapsed}
                   <ChevronRight class="w-4 h-4" />
-                  展开
+                  
                 {:else}
                   <ChevronLeft class="w-4 h-4" />
-                  收缩
+                  
                 {/if}
               </button>
               <button
@@ -430,6 +446,24 @@
                   <Eye class="w-4 h-4" />
                 {/if}
               </button>
+              
+              <!-- 时间和地点编辑器 -->
+              <EventTimeLocationEditor
+                bind:eventTime
+                bind:location={eventLocation}
+                onTimeChange={(newTime) => {
+                  eventTime = newTime;
+                  if (currentEvent) {
+                    eventStore.updateEvent(currentEvent.id, { eventTime: newTime });
+                  }
+                }}
+                onLocationChange={(newLocation) => {
+                  eventLocation = newLocation;
+                  if (currentEvent) {
+                    eventStore.updateEvent(currentEvent.id, { location: newLocation });
+                  }
+                }}
+              />
             </div>
             <div class="flex flex-row gap-2">
               <button
@@ -447,8 +481,6 @@
             bind:this={editorComponent}
             initialJsonContent={currentEvent?.content}
             readonly={isEditorReadonly}
-            on:mapButtonClick={handleMapButtonClick}
-            on:coverButtonClick={handleCoverButtonClick}
           />
         {/if}
       </div>

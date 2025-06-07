@@ -56,6 +56,7 @@
   }>();
   let editorContainer: HTMLDivElement;
   let editor: AffineEditorContainer;
+  let resizeObserver: ResizeObserver | null = null;
 
   const currentTheme = document.documentElement.dataset.theme;
   const colorScheme =
@@ -97,7 +98,19 @@
     };
     return service;
   };
+  function removeTemporaryElements() {
+    const toolbarWidget = document.querySelector("edgeless-toolbar-widget");
+      if (!toolbarWidget) {
+        return;
+      }
 
+      const templateButton = toolbarWidget.shadowRoot?.querySelector(
+        "edgeless-template-button"
+      );
+      // const cover = document.createElement("edgeless-cover-tool-button");
+
+      templateButton?.parentElement?.remove();
+  }
   onMount(async () => {
     let doc: Doc | undefined = undefined;
 
@@ -165,50 +178,21 @@
     await editor.updateComplete;
     // <div class="full-divider"></div>
     setTimeout(() => {
-      const toolbarWidget = document.querySelector("edgeless-toolbar-widget");
-      if (!toolbarWidget) {
-        return;
-      }
-
-      const templateButton = toolbarWidget.shadowRoot?.querySelector(
-        "edgeless-template-button"
-      );
-      // const cover = document.createElement("edgeless-cover-tool-button");
-      if (coverRef) {
-        templateButton?.parentElement?.append(coverRef);
-      }
-      templateButton?.remove();
-
-      const shapeButton = toolbarWidget.shadowRoot?.querySelector(
-        "edgeless-shape-tool-button"
-      );
-
-      // if (mindmapButton) {
-      //   // 获取父节点
-      //   const parent = mindmapButton.parentNode;
-
-      //   // 获取父节点的父节点（祖父节点）
-      //   const grandParent = parent?.parentNode;
-
-      //   // 在祖父节点中向上移动父节点（交换位置）
-      //   if (grandParent && (parent as Element).previousElementSibling) {
-      //     grandParent.insertBefore(parent, (parent as Element).previousElementSibling);
-      //   }
-      //   const aiNode = document.createElement("div");
-      //   aiNode.className="senior-tool-item";
-      //   grandParent?.appendChild(aiNode);
-      // }
-
-      if (mapButtonRef) {
-        shapeButton?.parentElement?.append(mapButtonRef);
-      }
-      shapeButton?.remove();
-      // const toolsNode =
-      //   toolbarWidget.shadowRoot?.querySelector(".senior-tools");
-      // if (toolsNode) {
-      //   toolsNode?.appendChild(aiButtonRef);
-      // }
+      removeTemporaryElements();
     }, 100);
+
+    // 创建 ResizeObserver 监听容器大小变化
+    resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        // 当容器大小变化时，延迟调用 removeTemporaryElements
+        setTimeout(() => {
+          removeTemporaryElements();
+        }, 100);
+      }
+    });
+
+    // 开始观察编辑器容器
+    resizeObserver.observe(editorContainer);
   });
 
   // 监听readonly属性变化，动态切换编辑器的只读模式
@@ -219,169 +203,21 @@
   });
 
   onDestroy(() => {
+    // 清理 ResizeObserver
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
+    }
     // editor?.dispose(); // Consider disposing the editor if necessary
   });
   export async function getContent() {
     return await exportDocToJson(editor.doc);
   }
   
-  // 导出设置封面URL的方法
-  export function setCoverUrl(url: string) {
-    coverUrl = url;
-  }
-  
-  // 导出设置地图的方法
-  export function setMapLocation(location: any) {
-    console.log("Setting map location:", location);
-    // 这里可以添加设置地图位置的逻辑
-    // 例如更新编辑器中的地图组件
-  }
-  
-  let coverRef = $state<HTMLDivElement>();
-  let mapButtonRef = $state<HTMLDivElement>();
-  let coverUrl = $state(
-    "https://images.unsplash.com/photo-1448375240586-882707db888b"
-  );
-  let showCoverSelector = $state(false);
-  let coverSelectorRef = $state<HTMLDivElement>();
-  let uploadProgress = $state(0);
-  let showUploadProgress = $state(false);
-
-  // AI相关状态
-  let aiButtonRef: HTMLDivElement;
-  let showAIModal = $state(false);
-  let aiModalPosition = $state({ x: 0, y: 0 });
-  let activeAIFeature = $state("");
-
-  function handleFileUpload(file: File) {
-    showUploadProgress = true;
-    uploadProgress = 0;
-    showCoverSelector = false;
-
-    // 模拟上传进度
-    const interval = setInterval(() => {
-      uploadProgress += 10;
-      if (uploadProgress >= 100) {
-        clearInterval(interval);
-        showUploadProgress = false;
-        // 实际上传完成后设置url
-        coverUrl = URL.createObjectURL(file);
-      }
-    }, 300);
-  }
-
-  // AI按钮处理函数
-  // function handleAIClick() {
-  //   const rect = aiButtonRef?.getBoundingClientRect();
-  //   if (rect) {
-  //     aiModalPosition = {
-  //       x: rect.left + rect.width / 2,
-  //       y: rect.top,
-  //     };
-  //   }
-  //   showAIModal = true;
-  // }
-
-  function handleAIFeatureSelect(event: { featureId: string }) {
-    activeAIFeature = event.featureId;
-    showAIModal = false;
-  }
-
-  function handleAIModalClose() {
-    showAIModal = false;
-  }
-
-  function handleAIFeatureClose() {
-    activeAIFeature = "";
-  }
 </script>
 
 <div class={cn("w-full h-full ",className)} bind:this={editorContainer}>
-  <edgeless-cover-tool-button
-    bind:this={coverRef}
-    url={coverUrl}
-    {uploadProgress}
-    {showUploadProgress}
-    onclick={() => {
-      showCoverSelector = true;
-      dispatch('coverButtonClick');
-    }}
-    onkeydown={(e: KeyboardEvent) =>
-      e.key === "Enter" && (showCoverSelector = true)}
-    role="button"
-    tabindex="0"
-    aria-label="选择封面"
-  ></edgeless-cover-tool-button>
 
-  <edgeless-map-tool-button
-    bind:this={mapButtonRef}
-    onclick={() => {
-      dispatch('mapButtonClick');
-    }}
-    onkeydown={(e: KeyboardEvent) =>
-      e.key === "Enter" && dispatch('mapButtonClick')}
-    role="button"
-    tabindex="0"
-    aria-label="地图工具"
-  ></edgeless-map-tool-button>
-
-  <!-- <edgeless-ai-tool-button
-    bind:this={aiButtonRef}
-    onclick={handleAIClick}
-    onkeydown={(e: KeyboardEvent) => e.key === "Enter" && handleAIClick()}
-    role="button"
-    tabindex="0"
-    aria-label="AI助手"
-  ></edgeless-ai-tool-button> -->
-
-  {#if showCoverSelector}
-    <div
-      class="absolute z-50"
-      bind:this={coverSelectorRef}
-      style="top: {(coverRef?.offsetTop ?? 0) - 360}px; left: {(coverRef?.offsetLeft ?? 0) - 150}px"
-    >
-      <Card class="p-0 ">
-        <CoverSelector
-          onSelect={(url) => {
-            coverUrl = url;
-            // isDropdownOpen = false; // Close dropdown after selection
-          }}
-          onLinkSubmit={(_url) => {
-            // coverUrl = _url;
-            // isDropdownOpen = false; // Close dropdown after submission
-          }}
-          onFileUpload={handleFileUpload}
-          userId={$auth.user?.$id || ""}
-        ></CoverSelector>
-      </Card>
-    </div>
-  {/if}
 </div>
 
-{#if showCoverSelector}
-  <div
-    class="fixed inset-0 z-40"
-    onclick={() => (showCoverSelector = false)}
-    oncontextmenu={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }}
-    role="button"
-    tabindex="0"
-    onkeydown={(e) => e.key === "Enter" && (showCoverSelector = false)}
-  ></div>
-{/if}
 
-<!-- AI模态框 -->
-<AIModal
-  bind:open={showAIModal}
-  position={aiModalPosition}
-  onfeatureselect={handleAIFeatureSelect}
-  onclose={handleAIModalClose}
-/>
-
-<!-- AI功能处理器 -->
-<AIFeatureHandler
-  bind:activeFeature={activeAIFeature}
-  onclose={handleAIFeatureClose}
-/>
