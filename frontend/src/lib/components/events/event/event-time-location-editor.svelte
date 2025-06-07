@@ -19,8 +19,7 @@
 </script>
 
 <div class="flex items-center gap-2 {className}">
-  <span aria-hidden="true" class="text-base-content/40 w-4 min-w-4 select-none text-center text-lg">/</span>
-  
+ 
   <!-- 时间编辑器组件 -->
   <EventTimeEditor 
     bind:eventTime

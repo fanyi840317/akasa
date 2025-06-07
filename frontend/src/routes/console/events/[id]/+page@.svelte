@@ -20,6 +20,7 @@
   import type { Message } from "@ai-sdk/svelte";
   import LocationCard from "$lib/components/events/event/property-cards/location-card.svelte";
   import EventTimeLocationEditor from "$lib/components/events/event/event-time-location-editor.svelte";
+  import { IconButton } from "$lib/components/ui";
 
   // let eventData: any = null; // Replaced by store
   // let loading = true; // Replaced by store
@@ -435,17 +436,7 @@
                   
                 {/if}
               </button>
-              <button
-                class="btn btn-sm btn-ghost btn-square"
-                on:click={() => (isEditorReadonly = !isEditorReadonly)}
-                title={isEditorReadonly ? "退出预览模式" : "进入预览模式"}
-              >
-                {#if isEditorReadonly}
-                  <EyeOff class="w-4 h-4" />
-                {:else}
-                  <Eye class="w-4 h-4" />
-                {/if}
-              </button>
+              
               
               <!-- 时间和地点编辑器 -->
               <EventTimeLocationEditor
@@ -454,18 +445,28 @@
                 onTimeChange={(newTime) => {
                   eventTime = newTime;
                   if (currentEvent) {
-                    eventStore.updateEvent(currentEvent.id, { eventTime: newTime });
+                    eventStore.updateEvent(currentEvent.$id, { date: newTime });
                   }
                 }}
                 onLocationChange={(newLocation) => {
                   eventLocation = newLocation;
                   if (currentEvent) {
-                    eventStore.updateEvent(currentEvent.id, { location: newLocation });
+                    eventStore.updateEvent(currentEvent.$id, { location: newLocation });
                   }
                 }}
               />
             </div>
             <div class="flex flex-row gap-2">
+              <IconButton
+                on:click={() => (isEditorReadonly = !isEditorReadonly)}
+                title={isEditorReadonly ? "退出预览模式" : "进入预览模式"}
+              >
+                {#if isEditorReadonly}
+                  <EyeOff class="w-4 h-4" />
+                {:else}
+                  <Eye class="w-4 h-4" />
+                {/if}
+              </IconButton>
               <button
                 class="btn btn-sm btn-ghost btn-square"
                 on:click={handleSaveDocument}
