@@ -28,6 +28,7 @@
   import IconButton from "$lib/components/ui/buttons/icon-button.svelte";
   import TextCarousel from "$lib/components/ui/carousel/text-carousel.svelte";
   import { MyEventCardGrid } from "$lib/components/my";
+    import OutlineButton from "$lib/components/ui/buttons/outline-button.svelte";
 
   let events: Event[] = $state([]);
   let loading = $state(false);
@@ -146,6 +147,10 @@ border border-border rounded-xl h-full ">
       <h1 class="text-sm text-base-content">All</h1>
     </div>
     <div class="flex gap-2 flex-row">
+      <!-- <OutlineButton>
+        <PlusCircle class="size-4" />
+        <div class="text-xs">创建</div>
+      </OutlineButton> -->
       <IconButton>
         <Settings class="size-4" />
       </IconButton>
