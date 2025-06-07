@@ -1,14 +1,26 @@
 import { fontFamily } from "tailwindcss/defaultTheme";
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+import svgToDataUri from "mini-svg-data-uri";
+import { flattenColorPalette } from "tailwindcss/lib/util/flattenColorPalette";
 
+function addVariablesForColors({ addBase, theme }: any) {
+	let allColors = flattenColorPalette(theme("colors"));
+	let newVars = Object.fromEntries(
+		Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+	);
+
+	addBase({
+		":root": newVars,
+	});
+}
 const config: Config = {
 	darkMode: ["class"],
 	content: ["./src/**/*.{html,js,svelte,ts}"],
 	safelist: ["dark"],
 	fontFamily: {
-        sans: ['Geist', '-apple-system', 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC', 'sans-serif'],
-      },
+		sans: ['Geist', '-apple-system', 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC', 'sans-serif'],
+	},
 	theme: {
 		container: {
 			center: true,
@@ -61,7 +73,7 @@ const config: Config = {
 					"accent-foreground": "hsl(var(--sidebar-accent-foreground))",
 					border: "hsl(var(--sidebar-border))",
 					ring: "hsl(var(--sidebar-ring))",
-        		},
+				},
 			},
 			borderRadius: {
 				xl: "calc(var(--radius) + 4px)",
@@ -85,15 +97,47 @@ const config: Config = {
 					"0%,70%,100%": { opacity: "1" },
 					"20%,50%": { opacity: "0" },
 				},
+				"border-beam": {
+					"100%": {
+						"offset-distance": "100%",
+					},
+				},
+				meteor: {
+					"0%": { transform: "rotate(215deg) translateX(0)", opacity: "1" },
+					"70%": { opacity: "1" },
+					"100%": {
+						transform: "rotate(215deg) translateX(-500px)",
+						opacity: "0",
+					},
+				},
+
+				"shine-pulse": {
+					"0%": {
+						"background-position": "0% 0%",
+					},
+					"50%": {
+						"background-position": "100% 100%",
+					},
+					to: {
+						"background-position": "0% 0%",
+					},
+				},
+				gradient: {
+					to: {
+						"background-position": "200% center",
+					},
+				},
 			},
 			animation: {
-        		"accordion-down": "accordion-down 0.2s ease-out",
-        		"accordion-up": "accordion-up 0.2s ease-out",
-       			"caret-blink": "caret-blink 1.25s ease-out infinite",
-      		},
+				"accordion-down": "accordion-down 0.2s ease-out",
+				"accordion-up": "accordion-up 0.2s ease-out",
+				"caret-blink": "caret-blink 1.25s ease-out infinite",
+				"border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+				meteor: "meteor 5s linear infinite",
+				gradient: "gradient 8s linear infinite",
+			},
 		},
 	},
 	plugins: [tailwindcssAnimate],
 };
-
 export default config;

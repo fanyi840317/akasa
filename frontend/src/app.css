@@ -1,0 +1,366 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin '@tailwindcss/typography';
+@plugin "daisyui" {
+  themes: all;
+}
+
+@theme{
+  
+  --color-background: hsl(240 3% 6%);
+  --color-muted: oklch(0.04 0 0);
+  --color-background-subtle: hsl(240 3% 8%);
+  --color-foreground: oklch(0.98 0 0);
+  --color-muted-foreground: oklch(0.649 0.01 240);
+  --color-card: oklch(0.039 0.02 240);
+  --color-card-foreground: oklch(0.98 0 0);
+  --color-popover: hsl(240 3% 8%);
+  --color-popover-foreground: oklch(0.98 0 0);
+  --color-border: oklch(0.92 0.004 286.32 / 10.76%);
+  --color-input: oklch(0.159 0.007 240);
+  --color-primary: oklch(0.98 0 0);
+  --color-primary-foreground: oklch(0.1 0.012 240);
+  --color-secondary: oklch(0.159 0.007 240);
+  --color-secondary-foreground: oklch(0.98 0 0);
+  --color-accent: oklch(0.159 0.007 240);
+  --color-accent-foreground: oklch(0.98 0 0);
+  --color-destructive: oklch(0.306 0.157 0);
+  --color-destructive-foreground: oklch(0.973 0.086 0);
+  --color-warning: oklch(0.52 0.2 35);
+  --color-warning-foreground: oklch(0.09 0 0);
+  --color-ring: oklch(0.159 0.007 240);
+  --color-chart-1: oklch(0.5 0.14 220);
+  --color-chart-2: oklch(0.45 0.12 160);
+  --color-chart-3: oklch(0.55 0.16 30);
+  --color-chart-4: oklch(0.6 0.13 280);
+  --color-chart-5: oklch(0.55 0.15 340);
+  --color-sidebar-background: oklch(0.1 0.012 240);
+  --color-sidebar-foreground: oklch(0.959 0.01 240);
+  --color-sidebar-primary: oklch(0.48 0.152 224.3);
+  --color-sidebar-primary-foreground: oklch(1 0 0);
+  --color-sidebar-accent: oklch(0.159 0.007 240);
+  --color-sidebar-accent-foreground: oklch(0.959 0.01 240);
+  --color-sidebar-border: oklch(0.159 0.007 240);
+  --color-sidebar-ring: oklch(0.839 0.01 240);
+  --color-quaint-background: oklch(0.2 0.112 214);
+  --color-quaint-background-subtle: oklch(1 0 0 / 0.6);
+  --color-quaint-foreground-subtle: oklch(0.87 0.158 46);
+  --color-starter-deepinfra: oklch(0.21 0.07 234);
+  --color-starter-fal: oklch(0.19 0.058 190);
+  --color-starter-groq: oklch(0.16 0.04 7);
+  --color-starter-neon: oklch(0.13 0.082 182);
+  --color-starter-supabase: oklch(0.18 0.048 153);
+  --color-starter-upstash: oklch(0.19 0.052 161);
+  
+
+  
+}
+@plugin "daisyui/theme" {
+  name: "black";
+  default: false;
+  prefersdark: false;
+  color-scheme: "dark";
+  --color-base-100: oklch(0% 0 0);
+  --color-base-200: oklch(18.11% 0.006 285.885);
+  --color-base-300: oklch(27% 0.006 286.033);
+  --color-base-content: oklch(92% 0.004 286.32);
+  --color-primary: oklch(92% 0.004 286.32);
+  --color-primary-content: oklch(14% 0.005 285.823);
+  --color-secondary: oklch(40% 0.02 270);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(25.88% 0.117 284.38);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(20% 0 0);
+  --color-neutral-content: oklch(87% 0 0);
+  --color-info: oklch(45.201% 0.313 264.052);
+  --color-info-content: oklch(89.04% 0.062 264.052);
+  --color-success: oklch(51.975% 0.176 142.495);
+  --color-success-content: oklch(90.395% 0.035 142.495);
+  --color-warning: oklch(96.798% 0.211 109.769);
+  --color-warning-content: oklch(19.359% 0.042 109.769);
+  --color-error: oklch(62.795% 0.257 29.233);
+  --color-error-content: oklch(12.559% 0.051 29.233);
+  --radius-selector: 1.5rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+  
+  
+  /* 自定义阴影变量 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+}
+
+
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.centerAbs {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.h-content {
+  height: calc(100vh - 80px);
+}
+
+/* 全局过渡动画 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* 卡片悬停效果 */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 按钮悬停效果 */
+.btn-animated {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-animated::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+}
+
+.btn-animated:hover::after {
+  width: 300%;
+  height: 300%;
+}
+
+/* 渐变背景 */
+.gradient-bg {
+  background: linear-gradient(135deg, var(--color-base-200), var(--color-base-100));
+}
+
+/* 玻璃态效果 */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 输入框样式 */
+.editor-fix-input {
+  color: var(--color-base-content);
+  transition: all 0.2s ease;
+}
+
+/* 滚动条美化 - 全局细线样式 */
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-base-content);
+  opacity: 0.2;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+  opacity: 0.4;
+}
+
+/* 侧边栏区域隐藏滚动条 */
+.drawer-side ::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Firefox 滚动条样式 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--color-base-content-rgb), 0.2) transparent;
+}
+
+.drawer-side * {
+  scrollbar-width: none;
+}
+
+/* 文本选择样式 */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-content);
+}
+
+/* 现代化导航动画 */
+.nav-item-enter {
+  animation: navItemSlideIn 0.3s ease-out;
+}
+
+@keyframes navItemSlideIn {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 卡片网格动画 */
+.card-grid-item {
+  animation: cardGridFadeIn 0.4s ease-out;
+}
+
+@keyframes cardGridFadeIn {
+  from {
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 悬停发光效果 */
+.glow-on-hover {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.glow-on-hover::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  filter: blur(8px);
+}
+
+.glow-on-hover:hover::before {
+  opacity: 0.3;
+}
+
+/* 现代化输入框 */
+.modern-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.modern-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 微妙的脉冲动画 */
+.pulse-subtle {
+  animation: pulseSubtle 2s infinite;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* 现代化按钮样式 */
+.btn-modern {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-base-300), var(--color-base-200));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-modern:hover::before {
+  left: 100%;
+}
+@layer base {
+  /* * {
+    @apply border-border outline-ring/50;
+  } */
+  *{
+    /* @apply text-md; */
+  }
+}
+/* 响应式网格增强 */
+.responsive-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 深度阴影层次 */
+.shadow-depth-1 { box-shadow: var(--shadow-sm); }
+.shadow-depth-2 { box-shadow: var(--shadow-md); }
+.shadow-depth-3 { box-shadow: var(--shadow-lg); }
+.shadow-depth-4 { box-shadow: var(--shadow-xl); }
+
+/* 平滑过渡工具类 */
+.transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-bounce { transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); }

@@ -1,0 +1,49 @@
+{
+  "eventDetail": {
+    "title": {
+      "placeholder": "为你的神秘事件命名...",
+      "preview": "预览事件",
+      "share": "微信扫码分享"
+    },
+    "time": {
+      "label": "时间",
+      "exact": "具体时间",
+      "preset": "预设时间",
+      "unknown": "时间未知",
+      "start": "开始时间",
+      "end": "结束时间",
+      "unknownMessage": "这个神秘事件发生的时间暂时无法确定"
+    },
+    "location": {
+      "label": "地点",
+      "placeholder": "选择神秘事件发生的地点..."
+    },
+    "publish": {
+      "label": "发布设置",
+      "public": "公开事件",
+      "publicDescription": "任何人都可以查看和分享这个事件",
+      "privateDescription": "只有你邀请的人可以查看这个事件",
+      "button": "发布神秘事件",
+      "publishing": "正在发布...",
+      "success": "事件发布成功！"
+    },
+    "cover": {
+      "change": "更换封面",
+      "uploadSuccess": "封面图片上传成功",
+      "uploadError": "上传失败，请重试",
+      "invalidType": "请上传图片文件"
+    },
+    "share": {
+      "copy": "复制链接",
+      "twitter": "分享到 Twitter",
+      "facebook": "分享到 Facebook",
+      "wechat": "微信扫码分享",
+      "copySuccess": "链接已复制到剪贴板",
+      "scanTip": "请使用微信扫描二维码分享"
+    },
+    "validation": {
+      "titleRequired": "标题不能为空",
+      "contentRequired": "内容不能为空"
+    }
+  }
+} 

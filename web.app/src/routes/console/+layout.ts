@@ -17,16 +17,15 @@ export const load = (async ({ url, route }) => {
     }
     
     // 构建用户信息对象，用于传递给nav-user组件
-    const userInfo = {
-        name: user.name,
-        email: user.email,
-        avatar: user.prefs?.avatar || '/images/avatar-placeholder.png'
-    };
-    
     return {
         showHeader: false,
         title: '控制台',
-        user: userInfo
+        user: user ? {
+            id: user.$id,
+            name: user.name,
+            email: user.email,
+            avatar: user.prefs?.avatar || '/images/avatar-placeholder.png'
+        } : null
     };
     
 }) satisfies LayoutLoad;

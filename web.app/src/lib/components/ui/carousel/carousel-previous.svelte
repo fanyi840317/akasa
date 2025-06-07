@@ -20,9 +20,9 @@
 	{variant}
 	{size}
 	class={cn(
-		"absolute size-8 touch-manipulation rounded-full",
+		"absolute size-8 touch-manipulation rounded-full bg-background/80 hover:bg-background/90 border-none shadow-md",
 		emblaCtx.orientation === "horizontal"
-			? "-left-12 top-1/2 -translate-y-1/2"
+			? "left-2 top-1/2 -translate-y-1/2"
 			: "-top-12 left-1/2 -translate-x-1/2 rotate-90",
 		className
 	)}

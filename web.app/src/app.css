@@ -1,6 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "@toeverything/theme/style.css";
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 @font-face {
   font-family: 'Geist';
@@ -12,8 +13,6 @@
 
 @layer base {
   :root {
-    --font-sans: 'Geist', -apple-system, "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif;
-    
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -43,11 +42,12 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
-    --card:  240 5.9% 10%;
-    --card-foreground: 240 4.8% 95.9%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
@@ -60,9 +60,9 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 85%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
     --sidebar-background: 240 5.9% 9%;
     --sidebar-foreground: 240 4.8% 80%;
     --sidebar-primary: 224.3 76.3% 55%;
@@ -74,15 +74,28 @@
   }
 }
 
+input {
+  border: 1px solid hsl(var(--input)) !important;
+}
+
+/* 覆盖事件标题输入框的全局样式 */
+.event-title-input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 @layer base {
   * {
     @apply border-border;
   }
+
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
   }
 }
-
