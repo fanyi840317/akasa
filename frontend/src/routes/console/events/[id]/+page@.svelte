@@ -382,6 +382,7 @@
           onRegenerateMessage={regenerateMessage}
           onLikeMessage={likeMessage}
           onDislikeMessage={dislikeMessage}
+          bind:input={chat.input}
           onMessageSent={(text) => {
             console.log("Message submitted:", text);
             chat.input = text;

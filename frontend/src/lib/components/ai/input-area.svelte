@@ -64,29 +64,29 @@
   });
 
   // 自动保存事件数据
-  $effect(() => {
-    if (eventMode && currentEvent && inputValue !== currentEvent.content) {
-      autoSaveEvent();
-    }
-  });
+  // $effect(() => {
+  //   if (eventMode && currentEvent && inputValue !== currentEvent.content) {
+  //     autoSaveEvent();
+  //   }
+  // });
 
-  // 自动保存事件数据
-  async function autoSaveEvent() {
-    if (!eventMode || !currentEvent) return;
+  // // 自动保存事件数据
+  // async function autoSaveEvent() {
+  //   if (!eventMode || !currentEvent) return;
     
-    try {
-      const updatedEvent = {
-        ...currentEvent,
-        content: inputValue
-      };
+  //   try {
+  //     const updatedEvent = {
+  //       ...currentEvent,
+  //       content: inputValue
+  //     };
       
-      // 使用事件存储更新事件
-      await eventStore.updateEvent(updatedEvent.$id,updatedEvent);
-      console.log('事件内容已自动保存');
-    } catch (error) {
-      console.error('自动保存事件失败:', error);
-    }
-  }
+  //     // 使用事件存储更新事件
+  //     await eventStore.updateEvent(updatedEvent.$id,updatedEvent);
+  //     console.log('事件内容已自动保存');
+  //   } catch (error) {
+  //     console.error('自动保存事件失败:', error);
+  //   }
+  // }
 
   function handleSubmit() {
     if (inputValue.trim()) {

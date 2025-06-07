@@ -23,6 +23,7 @@
     )}
     {...restProps}
   >
-    {@render children?.()}
+  <div class="flex items-center justify-center ">
+    {@render children?.()}</div>
   </button>
   

@@ -5,6 +5,7 @@
     Pencil,
     Settings2,
     ArrowLeftIcon,
+    LockIcon,
     Check,
     MoreHorizontalIcon as More,
     FileEdit, // For Rename
@@ -24,7 +25,7 @@
   import CoverCard from "./actionbar-cards/cover-card.svelte";
   import DateCard from "./actionbar-cards/date-card.svelte";
   import MapCard from "./actionbar-cards/map-card.svelte";
-  import { IconButton } from "$lib/components/ui/buttons";
+  import { IconButton, OutlineButton } from "$lib/components/ui/buttons";
   import EventActionsDropdown from "$lib/components/ui/event-actions-dropdown.svelte";
   // import  from "daisyui/src/colors/themes";
 
@@ -73,116 +74,100 @@
   let newLocation = $state<Location | null>(null);
   let isEditingTime = $state(false); // New state for time modal
   let newEventTime = $state<Date | null>(eventTime); // New state for selected time
-  
+
   function handleShare() {
     // 调用父组件传入的分享处理函数
-    console.log('分享按钮被点击');
+    console.log("分享按钮被点击");
     onShare();
   }
 </script>
 
-<div class="relative w-full bg-base-200/10  border-base-content/10">
-  <div
-    class="flex gap-x-4 relative p-3 items-center w-full justify-between"
-  >
-    <div
-      class="flex gap-8 text-sm min-w-[500px] justify-between  max-lg:w-full!"
-      style="width: 643px;"
-    >
-      <div class="flex shrink items-center gap-2">
-        <button class="btn btn-sm btn-ghost btn-neutral" onclick={onClose}>
-          <ArrowLeftIcon class="w-4 h-4" />
-          Events
-        </button>
-        <div
-          class="relative shrink text-sm leading-snug flex grow flex-col w-full"
-        >
-          <div class="flex justify-between w-full">
-            <h3 class="font-semibold flex gap-2 items-center">
-              {#if isRenaming}
-                <div class="flex items-center gap-2">
-                  <input
-                    type="text"
-                    class="input input-sm input-bordered w-full max-w-xs"
-                    bind:value={newTitle}
-                    autofocus
-                    onkeydown={(e) => {
-                      if (e.key === 'Enter') {
-                        if (newTitle.trim()) {
-                          onTitleChange(newTitle);
-                          isRenaming = false;
-                        }
-                      } else if (e.key === 'Escape') {
-                        newTitle = title;
-                        isRenaming = false;
-                      }
-                    }}
-                  />
-                  <button
-                    class="btn btn-sm btn-ghost btn-circle"
-                    onclick={() => {
-                      if (newTitle.trim()) {
-                        onTitleChange(newTitle);
-                        isRenaming = false;
-                      }
-                    }}
-                  >
-                    <Check class="w-4 h-4" />
-                  </button>
-                  <button
-                    class="btn btn-sm btn-ghost btn-circle"
-                    onclick={() => {
-                      newTitle = title;
-                      isRenaming = false;
-                    }}
-                  >
-                    <X class="w-4 h-4" />
-                  </button>
-                </div>
-              {:else}
-                <span class="line-clamp-1 text-left">{title}</span>
-                <IconButton onclick={handleShare}>
-                  <Share2 class="w-4 h-4" />
-                </IconButton>
-                <EventActionsDropdown
-                  onSettings={() => isPropertiesPanelOpen = !isPropertiesPanelOpen}
-                  onRename={() => {
-                    isRenaming = true;
-                    newTitle = title;
-                  }}
-                  onShare={handleShare}
-                  onDelete={() => {
-                    // TODO: 实现删除逻辑
-                    console.log('删除事件');
-                  }}
-                />
-              {/if}
-            </h3>
-          </div>
-          <!-- <p class="font-normal line-clamp-1 text-neutral-content/50 text-xs">
-            {summary || "没有描述"}
-          </p> -->
+<div class="flex gap-x-4 relative p-3 items-center w-full justify-between">
+  <div class="flex  items-center gap-2">
+    <button class="btn btn-sm btn-ghost btn-neutral" onclick={onClose}>
+      <ArrowLeftIcon class="w-4 h-4" />
+      Events
+    </button>
+    <h3 class="font-semibold flex gap-2 items-center">
+      {#if isRenaming}
+        <div class="flex items-center gap-2">
+          <input
+            type="text"
+            class="input input-sm input-bordered w-full max-w-xs"
+            bind:value={newTitle}
+            autofocus
+            onkeydown={(e) => {
+              if (e.key === "Enter") {
+                if (newTitle.trim()) {
+                  onTitleChange(newTitle);
+                  isRenaming = false;
+                }
+              } else if (e.key === "Escape") {
+                newTitle = title;
+                isRenaming = false;
+              }
+            }}
+          />
+          <button
+            class="btn btn-sm btn-ghost btn-circle"
+            onclick={() => {
+              if (newTitle.trim()) {
+                onTitleChange(newTitle);
+                isRenaming = false;
+              }
+            }}
+          >
+            <Check class="w-4 h-4" />
+          </button>
+          <button
+            class="btn btn-sm btn-ghost btn-circle"
+            onclick={() => {
+              newTitle = title;
+              isRenaming = false;
+            }}
+          >
+            <X class="w-4 h-4" />
+          </button>
         </div>
-      </div>
-    </div>
-    <div class="absolute right-0 lg:pr-3 shrink-0 lg:block hidden">
-      <div
-        class="gap-2 h-0 items-center flex text-sm font-medium"
-        style="z-index: 4;"
-      >
-        <div class="flex gap-2 select-none relative justify-start items-center">
-          <UserAvatar
-            class="size-6 group-hover:opacity-100 opacity-80 transition-opacity"
-            fallback="F"
-          ></UserAvatar>
-        </div>
-        <button
-          class="btn rounded-full btn-neutral btn-sm"
-          onclick={() => {
-            isCommentsPanelOpen = !isCommentsPanelOpen;
-          }}>添加评论</button
-        >
-      </div>
-    </div>
+      {:else}
+        <span class="line-clamp-1 text-left">{title}</span>
+      {/if}
+    </h3>
+    <button class="btn btn-xs btn-ghost  border-border ">
+      <LockIcon class="size-3 " />
+      private
+    </button>
   </div>
+  <div
+      class="gap-2 h-0 items-center flex text-sm font-medium"
+      style="z-index: 4;"
+    >
+      <IconButton onclick={handleShare}>
+        <Share2 class="w-4 h-4" />
+      </IconButton>
+      <EventActionsDropdown
+        onSettings={() => (isPropertiesPanelOpen = !isPropertiesPanelOpen)}
+        onRename={() => {
+          isRenaming = true;
+          newTitle = title;
+        }}
+        onShare={handleShare}
+        onDelete={() => {
+          // TODO: 实现删除逻辑
+          console.log("删除事件");
+        }}
+      />
+      <div class="flex gap-2 select-none relative justify-start items-center">
+        <UserAvatar
+          class="size-6 group-hover:opacity-100 opacity-80 transition-opacity"
+          fallback="F"
+        ></UserAvatar>
+      </div>
+      <button
+        class="btn rounded-full btn-neutral btn-sm"
+        onclick={() => {
+          isCommentsPanelOpen = !isCommentsPanelOpen;
+        }}>添加评论</button
+      >
+    </div>
 </div>
