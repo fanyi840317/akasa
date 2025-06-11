@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import AiInput from '$lib/components/ai/ai-input.svelte';
-	import BlocksuiteWrapper from '$lib/components/editor/blocksuite-wrapper.svelte';
+	// import BlocksuiteWrapper from '$lib/components/editor/blocksuite-wrapper.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Resizable from '$lib/components/ui/resizable/index.js';
 	import { Separator } from '$lib/components/ui/separator';
@@ -9,8 +9,8 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { Badge } from '$lib/components/ui/badge';
 	import UserAvatar from '$lib/components/user';
-	import Pro from "./pro.svelte";
-	// import BlocksuiteEditor from '$lib/components/editor/blocksuite-editor.svelte';
+	import BaseInfo from './base-info.svelte';
+	import { BlocksuiteEditor } from '$lib/components/editor/index.js';
 	// let number = 0;
 	let actionTab = $state('info');
 </script>
@@ -63,23 +63,22 @@
 					>
 				</Tabs.List>
 			</Tabs.Root>
-			<Button variant="outline" class="px-2">
-				<div
-					class="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:grayscale"
-				>
+			<Button variant="outline" class="px-2 rounded-full">
+				<div class="*:data-[slot=avatar]:ring-background flex -space-x-2  *:data-[slot=avatar]:grayscale">
 					<UserAvatar class="size-6" user={{ name: 'Akasa' }}></UserAvatar>
 					<UserAvatar class="size-6" user={{ name: '?' }}></UserAvatar>
 					<UserAvatar class="size-6" user={{ name: '?' }}></UserAvatar>
 				</div>
+				<span class="text-foreground/50 text-[10px]">
+					
 				0 评论
+				</span>
 			</Button>
 		</header>
 		{#if actionTab === 'info'}
-			<BlocksuiteWrapper class="rounded-2xl border h-full" />
+			<BlocksuiteEditor class="rounded-2xl border h-full" />
 		{:else if actionTab === 'properties'}
-			<div class="rounded-2xl border h-full bg-muted">
-				<Pro />
-			</div>
+			<BaseInfo class="rounded-2xl border h-full" />
 		{:else if actionTab === 'password1'}
 			<div class="rounded-2xl border h-full"></div>
 		{/if}

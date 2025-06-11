@@ -1,5 +1,5 @@
-// 导出包装后的 BlocksuiteEditor 组件
-export { default as BlocksuiteEditor } from './blocksuite-wrapper.svelte';
+// 直接导出 BlocksuiteEditor 组件
+export { default as BlocksuiteEditor } from './blocksuite-editor.svelte';
 
 // 导出其他编辑器相关函数
 export {

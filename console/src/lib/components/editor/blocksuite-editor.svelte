@@ -1,3 +1,5 @@
+<!-- svelte-ignore css_unused_selector -->
+
 <script lang="ts">
 	import { AffineEditorContainer, createEmptyDoc } from '@blocksuite/presets';
 	import { signal } from '@preact/signals-core';
@@ -12,7 +14,6 @@
 	} from '@blocksuite/blocks';
 	import { onMount, onDestroy } from 'svelte';
 
-	import '@toeverything/theme/style.css';
 	import { Doc, Slot } from '@blocksuite/store'; // Added Doc
 	import type { Disposable } from '@blocksuite/global/utils';
 	import { createDocByJson, exportDocToJson } from './editor';
@@ -34,6 +35,7 @@
 	let editorContainer: HTMLDivElement;
 	let editor: AffineEditorContainer;
 	let resizeObserver: ResizeObserver | null = null;
+	let styleCleanup: (() => void) | null = null;
 
 	const createDocModeProvider = (editorInstance: AffineEditorContainer): DocModeProvider => {
 		const DOC_MODE = 'edgeless'; // fixed to edgeless mode
@@ -72,7 +74,96 @@
 
 		templateButton?.parentElement?.remove();
 	}
+
+	// CSS 隔离函数：动态管理 BlockSuite 的全局样式
+	function setupStyleIsolation() {
+		// 记录初始样式表数量
+		const initialStyleSheetCount = document.styleSheets.length;
+		
+		// 创建 MutationObserver 监控 head 中的样式变化
+		const styleObserver = new MutationObserver((mutations) => {
+			mutations.forEach((mutation) => {
+				if (mutation.type === 'childList') {
+					mutation.addedNodes.forEach((node) => {
+						if (node.nodeType === Node.ELEMENT_NODE) {
+							const element = node as Element;
+							// 只检查包含 input 样式的元素
+							if (element.tagName === 'STYLE') {
+								const content = element.textContent || '';
+								if (content.includes('input')) {
+									// 为包含 input 的样式添加作用域限制
+									try {
+										scopeInputStyles(element);
+									} catch (e) {
+										console.warn('Failed to scope input styles:', e);
+									}
+								}
+							}
+						}
+					});
+				}
+			});
+		});
+
+		// 开始监控 document.head
+		styleObserver.observe(document.head, {
+			childList: true,
+			subtree: true
+		});
+
+		// 在组件销毁时停止监控
+		return () => {
+			styleObserver.disconnect();
+		};
+	}
+
+	// 为包含 input 的样式添加作用域限制
+	function scopeInputStyles(styleElement: Element) {
+		if (styleElement.tagName === 'STYLE') {
+			const style = styleElement as HTMLStyleElement;
+			let cssText = style.textContent || '';
+			
+			// 只处理包含 input 的样式规则
+			if (cssText.includes('input')) {
+				// 将 input 相关的全局样式限制在 .blocksuite-isolation-container 内
+				cssText = cssText.replace(
+					/(^|\}\s*)([^{}]*input[^{}]*\{[^{}]*\})/g,
+					(match, prefix, rule) => {
+						const selector = rule.split('{')[0].trim();
+						const declarations = rule.split('{')[1];
+						
+						// 如果选择器包含 input，添加作用域前缀
+						if (selector.includes('input')) {
+							return `${prefix}.blocksuite-isolation-container ${selector} {${declarations}`;
+						}
+						return match;
+					}
+				);
+				style.textContent = cssText;
+			}
+		}
+	}
+
+	// 处理已存在的包含 input 的样式
+	function processExistingInputStyles() {
+		const existingStyles = document.querySelectorAll('style');
+		existingStyles.forEach(style => {
+			const content = style.textContent || '';
+			// 只检查是否包含 input 相关内容
+			if (content.includes('input')) {
+				try {
+			
+					scopeInputStyles(style);
+				} catch (e) {
+					console.warn('Failed to scope existing input styles:', e);
+				}
+			}
+		});
+	}
 	onMount(async () => {
+		// 延迟初始化effects，只在编辑器实例创建前才注册
+		// 这样可以最大程度减少对其他组件的影响
+		
 		const currentTheme = document.documentElement.dataset.theme;
 		// const colorScheme = currentTheme === 'dark' ? ColorScheme.Dark : ColorScheme.Light;
 		const colorScheme = ColorScheme.Dark;
@@ -81,21 +172,11 @@
 			getAppTheme: () => signal(colorScheme),
 			getEdgelessTheme: () => signal(colorScheme)
 		};
-		if (!(window as any).__blocksuite_effects_initialized) {
-			blocksEffects();
-			presetsEffects();
-			(window as any).__blocksuite_effects_initialized = true;
-		}
 		let doc: Doc | undefined = undefined;
 
 		if (initialJsonContent) {
 			try {
 				const jsonData = initialJsonContent;
-				// User is expected to provide `createDocByJson` function.
-				// This function should take a docId and the parsed custom JSON,
-				// and return an initialized BlockSuite Doc instance.
-				// The `declare function createDocByJson` above is a placeholder.
-				// Ensure this function is properly imported and available in scope.
 				doc = await createDocByJson(jsonData);
 
 				if (!(doc instanceof Doc)) {
@@ -117,6 +198,21 @@
 			doc = createEmptyDoc().init();
 		}
 
+		// 在 effects 初始化之前开始监控样式，因为 effects 会立即注入全局样式
+		// styleCleanup = setupStyleIsolation();
+		
+		// 只在编辑器实例创建前才注册effects，最小化对其他组件的影响
+		if (!(window as any).__blocksuite_effects_initialized) {
+			blocksEffects();
+			presetsEffects();
+			(window as any).__blocksuite_effects_initialized = true;
+			
+			// effects 初始化后，立即处理已经注入的样式
+			setTimeout(() => {
+				processExistingInputStyles();
+			}, 0);
+		}
+		
 		editor = new AffineEditorContainer();
 		editor.doc = doc;
 		editor.mode = 'edgeless';
@@ -175,16 +271,88 @@
 	});
 
 	onDestroy(() => {
+		// 清理样式监控器
+		if (styleCleanup) {
+			styleCleanup();
+			styleCleanup = null;
+		}
+		
 		// 清理 ResizeObserver
 		if (resizeObserver) {
 			resizeObserver.disconnect();
 			resizeObserver = null;
 		}
-		// editor?.dispose(); // Consider disposing the editor if necessary
+		
+		// 清理编辑器实例
+		if (editor) {
+			try {
+				editor.remove();
+			} catch (e) {
+				console.warn('Error disposing editor:', e);
+			}
+		}
+		
+		// 尝试清理可能影响其他组件的全局样式
+		// try {
+		// 	// 移除可能的全局样式污染
+		// 	const styleSheets = document.styleSheets;
+		// 	for (let i = 0; i < styleSheets.length; i++) {
+		// 		const sheet = styleSheets[i];
+		// 		if (sheet.href && (sheet.href.includes('blocksuite') || sheet.href.includes('affine'))) {
+		// 			// 不直接删除，因为可能还有其他实例在使用
+		// 			continue;
+		// 		}
+		// 	}
+		// } catch (e) {
+		// 	console.warn('Error cleaning up styles:', e);
+		// }
 	});
 	export async function getContent() {
 		return await exportDocToJson(editor.doc);
 	}
 </script>
 
-<div class={cn('w-full h-full ', className)} bind:this={editorContainer}></div>
+<!-- CSS 隔离容器，防止 BlockSuite 样式泄露到其他组件 -->
+<div class={cn('w-full h-full blocksuite-isolation-container', className)}>
+	<div class="blocksuite-editor-wrapper" bind:this={editorContainer}></div>
+</div>
+
+<style>
+	/* CSS 隔离：防止 BlockSuite 的全局样式影响其他组件 */
+	.blocksuite-isolation-container {
+		/* 创建新的层叠上下文和包含块 */
+		isolation: isolate;
+		contain: style layout;
+		/* 重置可能被 BlockSuite 影响的样式 */
+		all: initial;
+		/* 恢复必要的布局样式 */
+		display: block;
+		width: 100%;
+		height: 100%;
+		box-sizing: border-box;
+	}
+
+	.blocksuite-editor-wrapper {
+		width: 100%;
+		height: 100%;
+		position: relative;
+		/* 确保编辑器容器有正确的显示属性 */
+		display: block;
+	}
+
+	/* 针对 BlockSuite 可能泄露的特定样式进行重置 */
+	.blocksuite-isolation-container :global(input) {
+		/* 重置 BlockSuite 可能影响的 input 样式 */
+		all: revert;
+	}
+
+	.blocksuite-isolation-container :global(button) {
+		/* 重置 BlockSuite 可能影响的 button 样式 */
+		all: revert;
+	}
+
+	.blocksuite-isolation-container :global(*) {
+		/* 确保 BlockSuite 内部元素不会影响外部 */
+		box-sizing: border-box;
+	}
+</style>

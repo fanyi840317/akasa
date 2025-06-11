@@ -19,6 +19,19 @@
 		// 创建 Shadow DOM
 		shadowRoot = container.attachShadow({ mode: 'open' });
 
+		// 在Shadow DOM中创建样式元素，导入BlockSuite主题
+		const styleElement = document.createElement('style');
+		styleElement.textContent = `
+			@import @toeverything/theme/style.css;
+			/* 确保编辑器容器样式 */
+			:host {
+				display: block;
+				width: 100%;
+				height: 100%;
+			}
+		`;
+		shadowRoot.appendChild(styleElement);
+
 		// 创建一个容器元素
 		const editorContainer = document.createElement('div');
 		editorContainer.style.width = '100%';
@@ -37,8 +50,12 @@
 
 		// 保存 unmount 函数以便清理
 		unmountEditor = () => {
-			if (editorInstance && typeof editorInstance.$destroy === 'function') {
-				editorInstance.$destroy();
+			// 在 Svelte 5 中，组件实例会自动清理，无需手动调用 $destroy()
+			// 只需要清理编辑器相关的资源
+			if (editorInstance) {
+				// 如果编辑器有自己的清理方法，可以在这里调用
+				// editorInstance.dispose?.();
+				editorInstance = null;
 			}
 		};
 
