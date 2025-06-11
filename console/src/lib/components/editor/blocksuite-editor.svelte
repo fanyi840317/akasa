@@ -87,10 +87,10 @@
 					mutation.addedNodes.forEach((node) => {
 						if (node.nodeType === Node.ELEMENT_NODE) {
 							const element = node as Element;
-							// 只检查包含 input 样式的元素
+							// 只检查包含 input 元素选择器的样式
 							if (element.tagName === 'STYLE') {
 								const content = element.textContent || '';
-								if (content.includes('input')) {
+								if (content.match(/\binput\b/)) {
 									// 为包含 input 的样式添加作用域限制
 									try {
 										scopeInputStyles(element);
@@ -123,17 +123,17 @@
 			const style = styleElement as HTMLStyleElement;
 			let cssText = style.textContent || '';
 			
-			// 只处理包含 input 的样式规则
-			if (cssText.includes('input')) {
+			// 只处理包含 input 元素选择器的样式规则
+			if (cssText.match(/\binput\b/)) {
 				// 将 input 相关的全局样式限制在 .blocksuite-isolation-container 内
 				cssText = cssText.replace(
-					/(^|\}\s*)([^{}]*input[^{}]*\{[^{}]*\})/g,
+					/(^|\}\s*)([^{}]*\binput\b[^{}]*\{[^{}]*\})/g,
 					(match, prefix, rule) => {
 						const selector = rule.split('{')[0].trim();
 						const declarations = rule.split('{')[1];
 						
-						// 如果选择器包含 input，添加作用域前缀
-						if (selector.includes('input')) {
+						// 如果选择器包含完整的 input 单词，添加作用域前缀
+						if (selector.match(/\binput\b/)) {
 							return `${prefix}.blocksuite-isolation-container ${selector} {${declarations}`;
 						}
 						return match;
@@ -149,8 +149,8 @@
 		const existingStyles = document.querySelectorAll('style');
 		existingStyles.forEach(style => {
 			const content = style.textContent || '';
-			// 只检查是否包含 input 相关内容
-			if (content.includes('input')) {
+			// 只检查是否包含 input 元素选择器
+			if (content.match(/\binput\b/)) {
 				try {
 			
 					scopeInputStyles(style);
