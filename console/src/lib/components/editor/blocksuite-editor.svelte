@@ -90,10 +90,12 @@
 							// 只检查包含 input 元素选择器的样式
 							if (element.tagName === 'STYLE') {
 								const content = element.textContent || '';
-								if (content.match(/\binput\b/)) {
+								if (content.match(/input\s*[{:\[,]|input\s*$/m)) {
 									// 为包含 input 的样式添加作用域限制
 									try {
 										scopeInputStyles(element);
+										console.log("---scopeInputStyles---")
+
 									} catch (e) {
 										console.warn('Failed to scope input styles:', e);
 									}
@@ -124,7 +126,8 @@
 			let cssText = style.textContent || '';
 			
 			// 只处理包含 input 元素选择器的样式规则
-			if (cssText.match(/\binput\b/)) {
+			if (cssText.match(/input\s*[{:\[,]|input\s*$/m)) {
+				// console.log(cssText);
 				// 将 input 相关的全局样式限制在 .blocksuite-isolation-container 内
 				cssText = cssText.replace(
 					/(^|\}\s*)([^{}]*\binput\b[^{}]*\{[^{}]*\})/g,
@@ -134,32 +137,20 @@
 						
 						// 如果选择器包含完整的 input 单词，添加作用域前缀
 						if (selector.match(/\binput\b/)) {
-							return `${prefix}.blocksuite-isolation-container ${selector} {${declarations}`;
+							const returnText = `${prefix}.blocksuite-isolation-container ${selector} {${declarations}`;
+							// console.log("---scopeInputStyles---",returnText);
+
+							return returnText;
 						}
 						return match;
 					}
 				);
+				// console.log(cssText)
 				style.textContent = cssText;
 			}
 		}
 	}
 
-	// 处理已存在的包含 input 的样式
-	function processExistingInputStyles() {
-		const existingStyles = document.querySelectorAll('style');
-		existingStyles.forEach(style => {
-			const content = style.textContent || '';
-			// 只检查是否包含 input 元素选择器
-			if (content.match(/\binput\b/)) {
-				try {
-			
-					scopeInputStyles(style);
-				} catch (e) {
-					console.warn('Failed to scope existing input styles:', e);
-				}
-			}
-		});
-	}
 	onMount(async () => {
 		// 延迟初始化effects，只在编辑器实例创建前才注册
 		// 这样可以最大程度减少对其他组件的影响
@@ -199,19 +190,15 @@
 		}
 
 		// 在 effects 初始化之前开始监控样式，因为 effects 会立即注入全局样式
-		// styleCleanup = setupStyleIsolation();
+		styleCleanup = setupStyleIsolation();
 		
 		// 只在编辑器实例创建前才注册effects，最小化对其他组件的影响
 		if (!(window as any).__blocksuite_effects_initialized) {
 			blocksEffects();
 			presetsEffects();
 			(window as any).__blocksuite_effects_initialized = true;
-			
-			// effects 初始化后，立即处理已经注入的样式
-			setTimeout(() => {
-				processExistingInputStyles();
-			}, 0);
 		}
+		
 		
 		editor = new AffineEditorContainer();
 		editor.doc = doc;
@@ -340,19 +327,4 @@
 		display: block;
 	}
 
-	/* 针对 BlockSuite 可能泄露的特定样式进行重置 */
-	.blocksuite-isolation-container :global(input) {
-		/* 重置 BlockSuite 可能影响的 input 样式 */
-		all: revert;
-	}
-
-	.blocksuite-isolation-container :global(button) {
-		/* 重置 BlockSuite 可能影响的 button 样式 */
-		all: revert;
-	}
-
-	.blocksuite-isolation-container :global(*) {
-		/* 确保 BlockSuite 内部元素不会影响外部 */
-		box-sizing: border-box;
-	}
 </style>
