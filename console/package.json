@@ -69,6 +69,7 @@
 	"dependencies": {
 		"@mapbox/mapbox-gl-geocoder": "^5.0.3",
 		"@types/mapbox__mapbox-gl-geocoder": "^5.0.0",
+		"appwrite": "^18.1.1",
 		"mapbox-gl": "^3.12.0",
 		"marked": "^15.0.12",
 		"mode-watcher": "^1.0.7"

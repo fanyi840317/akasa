@@ -1,3 +1,17 @@
+import { Client, Account, Databases, Storage } from 'appwrite';
+
+const client = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1') // 设置你的Appwrite API端点
+    .setProject('67ac15990027bfb157f9') // 设置你的项目ID
+export const account = new Account(client);
+export const databases = new Databases(client);
+export const storage = new Storage(client);
+
+export const appwriteConfig = {
+    databaseId: '67d3a4480018e2e09b68',
+    usersCollectionId: 'users',
+    eventsCollectionId: 'events'
+};
 export const DEFAULT_LOCATION = {
     coordinates: {
 		lat: 31.2304,

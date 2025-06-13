@@ -79,7 +79,7 @@
 	function setupStyleIsolation() {
 		// 记录初始样式表数量
 		const initialStyleSheetCount = document.styleSheets.length;
-		
+
 		// 创建 MutationObserver 监控 head 中的样式变化
 		const styleObserver = new MutationObserver((mutations) => {
 			mutations.forEach((mutation) => {
@@ -94,8 +94,7 @@
 									// 为包含 input 的样式添加作用域限制
 									try {
 										scopeInputStyles(element);
-										console.log("---scopeInputStyles---")
-
+										console.log('---scopeInputStyles---');
 									} catch (e) {
 										console.warn('Failed to scope input styles:', e);
 									}
@@ -124,7 +123,7 @@
 		if (styleElement.tagName === 'STYLE') {
 			const style = styleElement as HTMLStyleElement;
 			let cssText = style.textContent || '';
-			
+
 			// 只处理包含 input 元素选择器的样式规则
 			if (cssText.match(/input\s*[{:\[,]|input\s*$/m)) {
 				// console.log(cssText);
@@ -134,7 +133,7 @@
 					(match, prefix, rule) => {
 						const selector = rule.split('{')[0].trim();
 						const declarations = rule.split('{')[1];
-						
+
 						// 如果选择器包含完整的 input 单词，添加作用域前缀
 						if (selector.match(/\binput\b/)) {
 							const returnText = `${prefix}.blocksuite-isolation-container ${selector} {${declarations}`;
@@ -154,7 +153,7 @@
 	onMount(async () => {
 		// 延迟初始化effects，只在编辑器实例创建前才注册
 		// 这样可以最大程度减少对其他组件的影响
-		
+
 		const currentTheme = document.documentElement.dataset.theme;
 		// const colorScheme = currentTheme === 'dark' ? ColorScheme.Dark : ColorScheme.Light;
 		const colorScheme = ColorScheme.Dark;
@@ -191,15 +190,14 @@
 
 		// 在 effects 初始化之前开始监控样式，因为 effects 会立即注入全局样式
 		styleCleanup = setupStyleIsolation();
-		
+
 		// 只在编辑器实例创建前才注册effects，最小化对其他组件的影响
 		if (!(window as any).__blocksuite_effects_initialized) {
 			blocksEffects();
 			presetsEffects();
 			(window as any).__blocksuite_effects_initialized = true;
 		}
-		
-		
+
 		editor = new AffineEditorContainer();
 		editor.doc = doc;
 		editor.mode = 'edgeless';
@@ -263,13 +261,13 @@
 			styleCleanup();
 			styleCleanup = null;
 		}
-		
+
 		// 清理 ResizeObserver
 		if (resizeObserver) {
 			resizeObserver.disconnect();
 			resizeObserver = null;
 		}
-		
+
 		// 清理编辑器实例
 		if (editor) {
 			try {
@@ -278,7 +276,7 @@
 				console.warn('Error disposing editor:', e);
 			}
 		}
-		
+
 		// 尝试清理可能影响其他组件的全局样式
 		// try {
 		// 	// 移除可能的全局样式污染
@@ -326,5 +324,4 @@
 		/* 确保编辑器容器有正确的显示属性 */
 		display: block;
 	}
-
 </style>

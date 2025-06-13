@@ -53,8 +53,8 @@
 	});
 </script>
 
-<div class={cn('flex-center flex-col', className)}>
-	<Card class="w-full p-2">
+<div class={cn('flex-end flex-col', className)}>
+	<div class="w-full rounded-2xl p-2 bg-card border">
 		<form>
             <textarea
                 {rows}
@@ -67,7 +67,7 @@
             </textarea>
         </form>
         <!-- 按钮组 -->
-        <div class="flex-between">
+        <div class="flex-between px-2">
             <!-- 左侧按钮组 -->
             <div class="flex-center gap-2">
                 <!-- 搜索建议按钮 -->
@@ -111,7 +111,7 @@
                 </Button>
             </div>
         </div>
-	</Card>
+	</div>
     {#if showRemind}
 	<p class="text-xs text-foreground/40 text-center mt-1">Akasa AI. 回答可能不准确或不完整。</p>
     {/if}
