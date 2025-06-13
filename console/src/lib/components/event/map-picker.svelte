@@ -9,21 +9,23 @@
 	import { toast } from 'svelte-sonner';
 	import { PUBLIC_MAPBOX_TOKEN } from '$env/static/public';
 	import { DEFAULT_LOCATION } from '$lib/constants';
+	import Mask from './mask.svelte';
 
-	let { 
+	let {
 		value = '',
 		onSave,
-		children 
+		isSaving = $bindable(false),
+		isOpen = $bindable(false),
+		children
 	} = $props<{
 		value?: string;
+		isOpen?: boolean;
+		isSaving?: boolean;
 		onSave?: (locationData: any) => void;
 		children?: Snippet;
 	}>();
 
 	// 状态管理
-	let isOpen = $state(false);
-	let isEditing = $state(false);
-	let isSaving = $state(false);
 	let isLocating = $state(false);
 	let isSearching = $state(false);
 
@@ -50,7 +52,7 @@
 				`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${PUBLIC_MAPBOX_TOKEN}&limit=5&language=zh`
 			);
 			const data = await response.json();
-			
+
 			if (data.features) {
 				searchResults = data.features;
 				showResults = true;
@@ -78,7 +80,7 @@
 		};
 		searchInput = feature.place_name;
 		showResults = false;
-		
+
 		// 更新地图位置
 		if (mapRef) {
 			mapRef.flyTo(lng, lat, { zoom: 15 });
@@ -103,14 +105,14 @@
 			});
 
 			const { latitude: lat, longitude: lng } = position.coords;
-			
+
 			// 反向地理编码获取地址
 			try {
 				const response = await fetch(
 					`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${PUBLIC_MAPBOX_TOKEN}&language=zh`
 				);
 				const data = await response.json();
-				
+
 				if (data.features && data.features.length > 0) {
 					const feature = data.features[0];
 					locationData = {
@@ -154,13 +156,13 @@
 	// 地图点击处理
 	function handleMapClick(e: { lngLat: { lng: number; lat: number } }) {
 		const { lng, lat } = e.lngLat;
-		
+
 		// 反向地理编码获取地址
 		fetch(
 			`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${PUBLIC_MAPBOX_TOKEN}&language=zh`
 		)
-			.then(response => response.json())
-			.then(data => {
+			.then((response) => response.json())
+			.then((data) => {
 				if (data.features && data.features.length > 0) {
 					const feature = data.features[0];
 					locationData = {
@@ -178,7 +180,7 @@
 					searchInput = locationData.address;
 				}
 			})
-			.catch(error => {
+			.catch((error) => {
 				console.error('反向地理编码失败:', error);
 				locationData = {
 					coordinates: { lng, lat },
@@ -191,25 +193,12 @@
 
 	// 保存位置数据
 	function saveLocationData() {
-		isSaving = true;
-		try {
-			// 将位置数据转换为JSON字符串保存
-			const locationString = JSON.stringify(locationData);
-			onSave?.(locationString);
-			isOpen = false;
-			isEditing = false;
-			toast.success('位置保存成功');
-		} catch (error) {
-			console.error('保存位置失败:', error);
-			toast.error('保存位置失败');
-		} finally {
-			isSaving = false;
-		}
+		const locationString = JSON.stringify(locationData);
+		onSave?.(locationString);
 	}
 
 	// 取消编辑
 	function cancelEdit() {
-		isEditing = false;
 		isOpen = false;
 		// 重置为原始值
 		locationData = value ? JSON.parse(value) : DEFAULT_LOCATION;
@@ -232,32 +221,33 @@
 	}
 </script>
 
+<Mask bind:show={isOpen} onCancel={cancelEdit} />
 <Popover.Root bind:open={isOpen}>
-	<Popover.Trigger>
+	<Popover.Trigger class={isOpen ? 'relative z-50' : ''}>
 		{@render children()}
 	</Popover.Trigger>
-	<Popover.Content class="w-[500px] h-[400px] p-0 border-0 bg-transparent" align="start">
+	<Popover.Content class="w-[500px] h-[400px] p-0 border-0 bg-transparent z-50" align="start">
 		<Card.Root class="w-full h-full pb-0">
 			<Card.Header>
 				<Card.Title>Event location</Card.Title>
 				<Card.Description>Event happens on this location</Card.Description>
 				<Card.Action class="gap-2">
-					<Button 
-						variant="ghost" 
-						onclick={getCurrentLocation}
-						disabled={isLocating}
-					>
+					<Button variant="ghost" onclick={getCurrentLocation} disabled={isLocating}>
 						{#if isLocating}
 							<Loader2 class="size-4 animate-spin" />
 						{:else}
 							<MapPinHouse class="size-4 text-foreground/50" />
 						{/if}
 					</Button>
-					<Button 
-						variant="secondary" 
-						onclick={saveLocationData}
+					<Button
+						variant="ghost"
+						class="text-foreground/50"
+						onclick={cancelEdit}
 						disabled={isSaving}
 					>
+						cancel
+					</Button>
+					<Button variant="secondary" onclick={saveLocationData} disabled={isSaving}>
 						{#if isSaving}
 							<Loader2 class="size-4 animate-spin mr-2" />
 						{/if}
@@ -267,22 +257,28 @@
 			</Card.Header>
 			<Card.Content>
 				<div class="w-full relative">
-					<Input 
-						class="placeholder:text-xs w-full pl-8 relative" 
+					<Input
+						class="placeholder:text-xs w-full pl-8 relative"
 						placeholder="you can select a location or type in an address"
 						bind:value={searchInput}
 						oninput={handleSearchInput}
 						onblur={handleClickOutside}
 					/>
 					{#if isSearching}
-						<Loader2 class="text-foreground/50 absolute right-2 top-1/2 transform -translate-y-1/2 size-4 animate-spin" />
+						<Loader2
+							class="text-foreground/50 absolute right-2 top-1/2 transform -translate-y-1/2 size-4 animate-spin"
+						/>
 					{:else}
-						<MapIcon class="text-foreground/50 absolute left-2 top-1/2 transform -translate-y-1/2 size-4" />
+						<MapIcon
+							class="text-foreground/50 absolute left-2 top-1/2 transform -translate-y-1/2 size-4"
+						/>
 					{/if}
-					
+
 					<!-- 搜索结果下拉列表 -->
 					{#if showResults && searchResults.length > 0}
-						<div class="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-50 max-h-40 overflow-y-auto">
+						<div
+							class="absolute top-full left-0 right-0 bg-background border border-border rounded-[16px] shadow-lg z-50 max-h-40 overflow-y-auto"
+						>
 							{#each searchResults as result}
 								<button
 									class="w-full text-left px-3 py-2 hover:bg-muted text-sm border-b border-border last:border-b-0"
@@ -296,8 +292,8 @@
 					{/if}
 				</div>
 			</Card.Content>
-			<Map 
-				class="rounded-b-3xl" 
+			<Map
+				class="rounded-b-3xl"
 				bind:this={mapRef}
 				bind:locationData
 				onClick={handleMapClick}

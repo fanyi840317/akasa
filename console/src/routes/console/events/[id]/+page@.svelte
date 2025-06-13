@@ -14,6 +14,7 @@
 	// 页面状态
 	let showEditor = $state(false);
 	let showTimePicker = $state(false);
+	let showMapPicker = $state(false);
 
 	let blocksuiteEditorRef = $state<any>(null);
 	let isLoading = $state(false);
@@ -107,6 +108,7 @@
 			
 			showEditor = false;
 			showTimePicker = false;
+			showMapPicker = false;
 		} catch (error) {
 			console.error('保存事件失败:', error);
 			toast.error((error as Error).message || '保存失败');
@@ -214,6 +216,7 @@
 			{isSaving}
 			bind:showEditor
 			bind:showTimePicker
+			bind:showMapPicker
 			onBack={() => goto('/console/events')}
 			onNameSave={handleNameSave}
 			onTimeSave={handleTimeSave}

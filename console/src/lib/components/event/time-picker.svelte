@@ -9,6 +9,7 @@
 	import Textarea from '../ui/textarea/textarea.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import Button from '../ui/button/button.svelte';
+	import Mask from './mask.svelte';
 
 	let {
 		children,
@@ -132,12 +133,7 @@
 </script>
 
 <Popover.Root bind:open={showPicker}>
-	<!-- 背景蒙层 -->
-	{#if showPicker}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="fixed inset-0 bg-black/50 z-40" onclick={cancelEdit}></div>
-	{/if}
+	<Mask bind:show={showPicker} onCancel={cancelEdit} />
 
 	<Popover.Trigger class={showPicker ? 'relative z-50' : ''}>
 		{@render children?.()}

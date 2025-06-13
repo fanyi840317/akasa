@@ -6,6 +6,7 @@
 	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 	import type { Snippet } from 'svelte';
 	import { Loader2Icon } from '@lucide/svelte';
+	import Mask from './mask.svelte';
 
 	let {
 		children,
@@ -43,12 +44,7 @@
 </script>
 
 <Popover.Root bind:open={showEditor}>
-	<!-- 背景蒙层 -->
-	{#if showEditor}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="fixed inset-0 bg-black/50 z-40" onclick={cancelEdit}></div>
-	{/if}
+	<Mask bind:show={showEditor} onCancel={cancelEdit} />
 
 	<Popover.Trigger class={showEditor ? 'relative z-50' : ''}>
 		{@render children?.()}

@@ -18,6 +18,7 @@
 		isSaving = false,
 		showEditor = $bindable(false),
 		showTimePicker = $bindable(false),
+		showMapPicker = $bindable(false),
 		onBack,
 		onNameSave,
 		onTimeSave,
@@ -32,6 +33,7 @@
 		isSaving?: boolean;
 		showEditor?: boolean;
 		showTimePicker?: boolean;
+		showMapPicker?: boolean;
 		onBack?: () => void;
 		onNameSave?: (name: string, summary: string) => void;
 		onTimeSave?: (date: string | Date) => void;
@@ -83,6 +85,8 @@
 		<MapPicker
 			value={eventData.location}
 			onSave={onMapSave}
+			bind:isSaving
+			bind:isOpen={showMapPicker}
 		>{@render propBtn('地点')}</MapPicker>
 		<CoverPicker
 			onSelect={onCoverSelect}
