@@ -19,6 +19,7 @@
 		showEditor = $bindable(false),
 		showTimePicker = $bindable(false),
 		showMapPicker = $bindable(false),
+		showCoverPicker = $bindable(false),
 		onBack,
 		onNameSave,
 		onTimeSave,
@@ -33,6 +34,7 @@
 		showEditor?: boolean;
 		showTimePicker?: boolean;
 		showMapPicker?: boolean;
+		showCoverPicker?: boolean;
 		onBack?: () => void;
 		onNameSave?: (name: string, summary: string) => void;
 		onTimeSave?: (date: string | Date) => void;
@@ -89,7 +91,8 @@
 		<CoverPicker
 			onSelect={onCoverSelect}
 			onLinkSubmit={onCoverLinkSubmit}
-			userId="user-123">{@render propBtn('封面')}</CoverPicker
+			userId="user-123"
+			bind:isOpen={showCoverPicker}>{@render propBtn('封面')}</CoverPicker
 		>
 
 		<MoreMenu onSettings={onSettings}>

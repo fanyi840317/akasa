@@ -9,12 +9,14 @@
 	import { Input } from '$lib/components/ui/input';
 	import { uploadToImgBB, type UploadProgress } from '$lib/utils';
 	import type { Snippet } from 'svelte';
+	import Mask from './mask.svelte';
 
 	// 使用 $props() 定义组件属性，接收回调函数
-	let { onSelect, onLinkSubmit, userId, children } = $props<{
+	let { onSelect, onLinkSubmit, userId, children, isOpen = $bindable(false) } = $props<{
 		onSelect: (url: string) => void;
 		onLinkSubmit: (url: string) => void;
 		userId: string; // 添加 userId 属性
+		isOpen?: boolean;
 		children?: Snippet;
 	}>();
 
@@ -178,13 +180,23 @@
 		const imageRegex = /\.(jpg|jpeg|png|gif|webp|bmp)$/i;
 		return isValidUrl(trimmedLink) && imageRegex.test(trimmedLink);
 	});
+
+	// 取消编辑
+	function cancelEdit() {
+		isOpen = false;
+		coverLink = '';
+		showValidationError = false;
+		uploadError = null;
+		uploadSuccess = false;
+	}
 </script>
 
-<Popover.Root>
-	<Popover.Trigger>
+<Mask bind:show={isOpen} onCancel={cancelEdit} />
+<Popover.Root bind:open={isOpen}>
+	<Popover.Trigger class={isOpen ? 'relative z-50' : ''}>
 		{@render children()}
 	</Popover.Trigger>
-	<Popover.Content class="w-[500px] h-auto p-0 border-0 bg-transparent" align="start">
+	<Popover.Content class="w-[500px] h-auto p-0 border-0 bg-transparent z-50" align="start">
 		<Card.Root class="h-full flex flex-col pb-0">
 			<Card.Header class="flex-shrink-0">
 				<Card.Title>Event cover</Card.Title>
