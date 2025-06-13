@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { Separator } from '$lib/components/ui/separator';
-	import { ArrowLeft, MoreHorizontal } from '@lucide/svelte';
+import { Separator } from '$lib/components/ui/separator';
+import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import UserAvatar from '$lib/components/user';
 	import TimePicker from './time-picker.svelte';
@@ -12,6 +12,22 @@
 	import type { Event } from '$lib/types/event';
 	import type { Snippet } from 'svelte';
 	import { parseDate, getLocalTimeZone } from '@internationalized/date';
+
+	// 格式化日期显示
+	function formatDate(date: string | Date): string {
+		if (!date) return '';
+		try {
+			const dateObj = typeof date === 'string' ? new Date(date) : date;
+			return dateObj.toLocaleDateString('zh-CN', {
+				month: 'short',
+				day: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit'
+			});
+		} catch {
+			return '无效日期';
+		}
+	}
 
 	let {
 		eventData,
@@ -80,20 +96,36 @@
 			bind:isSaving
 			onSave={onTimeSave}
 		>
-			{@render propBtn('时间')}
+			{#if eventData.date}
+				{@render propBtn('时间', formatDate(eventData.date))}
+			{:else}
+				{@render iconBtn(Clock, '时间')}
+			{/if}
 		</TimePicker>
 		<MapPicker
 			value={eventData.location_data}
 			onSave={onMapSave}
 			bind:isSaving
 			bind:isOpen={showMapPicker}
-		>{@render propBtn('地点')}</MapPicker>
+		>
+			{#if eventData.location_data}
+				{@render propBtn('地点', eventData.location_data.name || eventData.location_data.address || '未知地点')}
+			{:else}
+				{@render iconBtn(MapPin, '地点')}
+			{/if}
+		</MapPicker>
 		<CoverPicker
 			onSelect={onCoverSelect}
 			onLinkSubmit={onCoverLinkSubmit}
 			userId="user-123"
-			bind:isOpen={showCoverPicker}>{@render propBtn('封面')}</CoverPicker
+			bind:isOpen={showCoverPicker}
 		>
+			{#if eventData.cover_url}
+				{@render propBtn('封面', '已设置')}
+			{:else}
+				{@render iconBtn(Image, '封面')}
+			{/if}
+		</CoverPicker>
 
 		<MoreMenu onSettings={onSettings}>
 			<Button variant="secondary">
@@ -129,9 +161,19 @@
 	</div>
 </header>
 
-{#snippet propBtn(label: string)}
+{#snippet propBtn(label: string, value: string)}
+	<Button variant="outline" class="text-foreground/50 text-xs border-0 max-w-32">
+		<Badge class="size-4 rounded-full bg-accent text-foreground/50">✓</Badge>
+		<div class="text-left text-xs min-w-0 flex-1">
+			<div class="text-foreground/70 font-medium">{label}</div>
+			<div class="text-foreground/50 truncate" title={value}>{value}</div>
+		</div>
+	</Button>
+{/snippet}
+
+{#snippet iconBtn(IconComponent: any, label: string)}
 	<Button variant="outline" class="text-foreground/50 text-xs border-0">
-		<Badge class="size-4 rounded-full bg-accent text-foreground/50">?</Badge>
+		<IconComponent class="size-4 text-foreground/50" />
 		<div class="text-center text-xs">{label}</div>
 	</Button>
 {/snippet}
