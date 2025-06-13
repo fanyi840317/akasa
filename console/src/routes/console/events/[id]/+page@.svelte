@@ -187,10 +187,7 @@
 		}
 	}
 
-	function handleCoverFileUpload(file: File) {
-		console.log('上传封面文件:', file.name);
-		// 这里需要实现文件上传到 Appwrite Storage 的逻辑
-	}
+
 
 	// 处理设置菜单
 	function handleSettings() {
@@ -224,7 +221,6 @@
 			onSave={saveEvent}
 			onCoverSelect={handleCoverSelect}
 			onCoverLinkSubmit={handleCoverLinkSubmit}
-			onCoverFileUpload={handleCoverFileUpload}
 			onSettings={handleSettings}
 		/>
 		<Resizable.PaneGroup direction="horizontal" class="w-full flex-1 ">

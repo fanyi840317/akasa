@@ -26,7 +26,6 @@
 		onMapSave,
 		onCoverSelect,
 		onCoverLinkSubmit,
-		onCoverFileUpload,
 		onSettings
 	} = $props<{
 		eventData: Event;
@@ -41,7 +40,6 @@
 		onMapSave?: (location: string) => void;
 		onCoverSelect?: (url: string) => void;
 		onCoverLinkSubmit?: (url: string) => void;
-		onCoverFileUpload?: (file: File) => void;
 		onSettings?: () => void;
 	}>();
 </script>
@@ -83,7 +81,7 @@
 			{@render propBtn('时间')}
 		</TimePicker>
 		<MapPicker
-			value={eventData.location}
+			value={eventData.location_data}
 			onSave={onMapSave}
 			bind:isSaving
 			bind:isOpen={showMapPicker}
@@ -91,7 +89,6 @@
 		<CoverPicker
 			onSelect={onCoverSelect}
 			onLinkSubmit={onCoverLinkSubmit}
-			onFileUpload={onCoverFileUpload}
 			userId="user-123">{@render propBtn('封面')}</CoverPicker
 		>
 

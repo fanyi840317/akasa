@@ -98,6 +98,8 @@
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
+	--radius-input: 16px;
+	
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-base-200: var(--base-200);
@@ -152,4 +154,26 @@
   .flex-between {
 		@apply flex justify-between items-center;
   }
+
+	/* Map marker styles */
+	.user-location-marker {
+		@apply w-6 h-6 bg-primary rounded-full border-2 border-white shadow-lg;
+		position: relative;
+		transform: translate(-50%, -50%);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+
+	.user-location-marker::before {
+		content: '';
+		@apply absolute inset-0 bg-primary rounded-full animate-ping opacity-75;
+		animation-duration: 2s;
+	}
+
+	.user-location-marker::after {
+		content: '';
+		@apply absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full;
+		transform: translate(-50%, -50%);
+	}
 }

@@ -121,11 +121,14 @@
 			map.on('click', (e) => {
 				if (!clickable) return;
 				console.log('Map clicked at:', e.lngLat);
+				
+				// 立即创建或更新标记
+				createMarker([e.lngLat.lng, e.lngLat.lat]);
+				
 				if (onClick) {
 					onClick(e);
 				}
 
-				map!.setCenter(e.lngLat);
 				// 更新位置数据
 				locationData = {
 					coordinates: {
@@ -176,6 +179,14 @@
 
 	// onDestroy already calls cleanupMap
 	onDestroy(cleanupMap);
+
+	// 监听locationData变化，自动更新标记
+	$effect(() => {
+		if (map && locationData?.coordinates) {
+			const { lng, lat } = locationData.coordinates;
+			createMarker([lng, lat]);
+		}
+	});
 
 	export function setLocation(lng: number, lat: number) {
 		if (map) {

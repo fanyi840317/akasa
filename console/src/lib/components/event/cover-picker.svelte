@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Link, Upload } from '@lucide/svelte';
+	import { Link, Upload, X, CheckCircle, AlertCircle } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
@@ -7,19 +7,25 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
+	import { uploadToImgBB, type UploadProgress } from '$lib/utils';
 	import type { Snippet } from 'svelte';
 
 	// 使用 $props() 定义组件属性，接收回调函数
-	let { onSelect, onLinkSubmit, onFileUpload, userId, children } = $props<{
+	let { onSelect, onLinkSubmit, userId, children } = $props<{
 		onSelect: (url: string) => void;
 		onLinkSubmit: (url: string) => void;
-		onFileUpload: (file: File) => void; // 新增属性用于传递文件
 		userId: string; // 添加 userId 属性
 		children?: Snippet;
 	}>();
 
 	let coverLink = $state('');
 	let showValidationError = $state(false); // 控制是否显示验证错误信息
+
+	// 上传状态管理
+	let isUploading = $state(false);
+	let uploadProgress = $state<UploadProgress | null>(null);
+	let uploadError = $state<string | null>(null);
+	let uploadSuccess = $state(false);
 
 	// 使用 store 中的数据
 	// 修改为包含缩略图 URL 的数据结构
@@ -75,12 +81,64 @@
 		onSelect(imageUrl);
 	}
 
-	// 处理文件选择
-	function handleFileSelect(event: Event) {
+	// 处理文件选择和上传
+	async function handleFileSelect(event: Event) {
 		const input = event.target as HTMLInputElement;
-		if (input.files && input.files[0]) {
-			onFileUpload(input.files[0]); // 将文件传递给父组件
-			input.value = ''; // 清空文件输入，以便再次选择同一文件
+		if (!input.files || !input.files[0]) return;
+
+		const file = input.files[0];
+		
+		// 验证文件类型
+		if (!file.type.startsWith('image/')) {
+			uploadError = '请选择有效的图片文件';
+			return;
+		}
+
+		// 验证文件大小 (最大 10MB)
+		if (file.size > 10 * 1024 * 1024) {
+			uploadError = '图片文件大小不能超过 10MB';
+			return;
+		}
+
+		// 重置状态
+		uploadError = null;
+		uploadSuccess = false;
+		isUploading = true;
+		uploadProgress = null;
+
+		try {
+			const result = await uploadToImgBB(file, (progress) => {
+				uploadProgress = progress;
+			});
+
+			if (result.success && result.data) {
+				// 上传成功，添加到用户图片列表
+				const newImage = {
+					imageUrl: result.data.url,
+					thumbnailUrl: result.data.thumb.url,
+					provider: 'ImgBB'
+				};
+				userImages = [newImage, ...userImages];
+				
+				// 自动选择刚上传的图片
+				onSelect(result.data.url);
+				
+				uploadSuccess = true;
+				
+				// 3秒后隐藏成功状态
+				setTimeout(() => {
+					uploadSuccess = false;
+				}, 3000);
+			} else {
+				uploadError = result.error?.message || '上传失败，请重试';
+			}
+		} catch (error) {
+			console.error('上传错误:', error);
+			uploadError = error instanceof Error ? error.message : '上传失败，请重试';
+		} finally {
+			isUploading = false;
+			uploadProgress = null;
+			input.value = ''; // 清空文件输入
 		}
 	}
 
@@ -139,10 +197,63 @@
 						variant="secondary"
 						onclick={() => document.getElementById('file-upload-input')?.click()}
 						size="icon"
+						disabled={isUploading}
 					>
-						<Upload class="size-4" />
+						{#if isUploading}
+							<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+						{:else}
+							<Upload class="size-4" />
+						{/if}
 					</Button>
 				</Card.Action>
+				
+				<!-- 上传状态显示 -->
+				{#if isUploading && uploadProgress}
+					<div class="mt-3 space-y-2" in:fade={{ duration: 200 }}>
+						<div class="flex items-center justify-between text-sm">
+							<span class="text-muted-foreground">上传中...</span>
+							<span class="text-muted-foreground">{uploadProgress.percentage}%</span>
+						</div>
+						<div class="w-full bg-secondary rounded-full h-2">
+							<div
+								class="bg-primary h-2 rounded-full transition-all duration-300"
+								style="width: {uploadProgress.percentage}%"
+							></div>
+						</div>
+					</div>
+				{/if}
+				
+				<!-- 上传成功提示 -->
+				{#if uploadSuccess}
+					<div
+						class="mt-3 flex items-center gap-2 text-sm text-green-600"
+						in:fade={{ duration: 200 }}
+						out:fade={{ duration: 200 }}
+					>
+						<CheckCircle class="size-4" />
+						<span>上传成功！</span>
+					</div>
+				{/if}
+				
+				<!-- 上传错误提示 -->
+				{#if uploadError}
+					<div
+						class="mt-3 flex items-center gap-2 text-sm text-destructive"
+						in:fade={{ duration: 200 }}
+						out:fade={{ duration: 200 }}
+					>
+						<AlertCircle class="size-4" />
+						<span>{uploadError}</span>
+						<Button
+							variant="ghost"
+							size="sm"
+							onclick={() => (uploadError = null)}
+							class="ml-auto h-auto p-1"
+						>
+							<X class="size-3" />
+						</Button>
+					</div>
+				{/if}
 			</Card.Header>
 
 			<Card.Content class="flex-1 py-0">

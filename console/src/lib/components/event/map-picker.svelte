@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Popover from '$lib/components/ui/popover';
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import * as Card from '$lib/components/ui/card';
 	import Button from '../ui/button/button.svelte';
 	import Map from '../map/map.svelte';
@@ -29,8 +29,6 @@
 	let isLocating = $state(false);
 	let isSearching = $state(false);
 
-	// 地址搜索相关
-	let searchInput = $state('');
 	let searchResults = $state<any[]>([]);
 	let showResults = $state(false);
 
@@ -38,6 +36,26 @@
 	let locationData = $state(value ? JSON.parse(value) : DEFAULT_LOCATION);
 	let mapRef: any;
 
+	// 地址搜索相关
+	let searchInput = $state('');
+
+	// 监听value变化，更新locationData和searchInput
+	$effect(() => {
+		if (value) {
+			try {
+				const parsedData = JSON.parse(value);
+				locationData = parsedData;
+				searchInput = parsedData.address || '';
+			} catch (error) {
+				console.error('解析位置数据失败:', error);
+				locationData = DEFAULT_LOCATION;
+				searchInput = '';
+			}
+		} else {
+			locationData = DEFAULT_LOCATION;
+			searchInput = '';
+		}
+	});
 	// 搜索地址
 	async function searchAddress(query: string) {
 		if (!query.trim() || query.length < 3) {
@@ -219,6 +237,7 @@
 			showResults = false;
 		}, 200);
 	}
+
 </script>
 
 <Mask bind:show={isOpen} onCancel={cancelEdit} />
