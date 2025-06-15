@@ -39,12 +39,16 @@
 	}>();
 
 	// State
-	let scrollAreaRef = $state<HTMLDivElement | null>(null);
+	let scrollAreaRef = $state<any>(null);
 
 	// 滚动到底部函数
 	function scrollToBottom() {
 		if (scrollAreaRef) {
-			scrollAreaRef.scrollTop = scrollAreaRef.scrollHeight;
+			// 使用ScrollArea的viewport来滚动
+			const viewport = scrollAreaRef.querySelector('[data-slot="scroll-area-viewport"]');
+			if (viewport) {
+				viewport.scrollTop = viewport.scrollHeight;
+			}
 		}
 	}
 

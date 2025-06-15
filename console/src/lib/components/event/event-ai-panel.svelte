@@ -50,72 +50,139 @@
 		// 检查是否是生成标题的请求
 		if (text.includes('生成') && text.includes('标题') && currentEvent?.content) {
 			await handleTitleGeneration(text);
+		} else if (text.includes('总结') && text.includes('事件') && currentEvent?.content) {
+			await handleEventSummary(text);
+		} else if (text.includes('分析') && text.includes('关键信息') && currentEvent?.content) {
+			await handleKeyInfoAnalysis(text);
+		} else if (text.includes('改进建议') && currentEvent?.content) {
+			await handleImprovementSuggestions(text);
 		} else {
 			// 发送普通消息
 			await chatStore.sendMessage(text);
 		}
 	}
 
-	// 处理标题生成
-	async function handleTitleGeneration(userMessage: string) {
+	// 通用AI生成处理函数
+	async function handleAIGeneration(config: {
+		userMessage: string;
+		promptType: string;
+		loadingText: string;
+		errorText: string;
+		formatResult: (result: string) => { content: string; data?: any };
+	}) {
 		if (!currentEvent?.content) return;
 
 		try {
 			// 先发送用户消息
-			await chatStore.sendMessage(userMessage);
+			await chatStore.sendMessage(config.userMessage);
 
 			// 添加加载消息
 			const loadingMessage = {
 				id: Date.now().toString() + '_loading',
 				role: 'assistant' as const,
-				content: '正在为您生成标题...'
+				content: config.loadingText
 			};
 			chatStore.messages = [...chatStore.messages, loadingMessage];
 
-			// 调用API生成标题
+			// 调用API
 			const response = await fetch('/api/ai/generate', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					promptType: 'generateTitle',
+					promptType: config.promptType,
 					markdownContent: currentEvent.content
 				})
 			});
 
 			if (!response.ok) {
-				throw new Error('生成标题失败');
+				throw new Error(`${config.errorText}`);
 			}
 
 			const result = await response.json();
-			const generatedTitle = result.text?.text || result.text;
+			const generatedContent = result.text?.text || result.text;
 
-			// 移除加载消息，添加标题建议消息
+			// 移除加载消息
 			chatStore.messages = chatStore.messages.filter((m: { id: string; }) => m.id !== loadingMessage.id);
 			
-			const titleMessage = {
-				id: Date.now().toString() + '_title',
+			// 格式化结果并添加消息
+			const formattedResult = config.formatResult(generatedContent);
+			const responseMessage = {
+				id: Date.now().toString() + '_' + config.promptType,
 				role: 'assistant' as const,
-				content: `我为您生成了以下标题建议：\n\n**${generatedTitle}**\n\n您是否要采用这个标题？`,
-				data: {
-					type: 'title-suggestion',
-					title: generatedTitle
-				}
+				content: formattedResult.content,
+				...(formattedResult.data && { data: formattedResult.data })
 			};
-			chatStore.messages = [...chatStore.messages, titleMessage];
+			chatStore.messages = [...chatStore.messages, responseMessage];
 
 		} catch (error) {
-			console.error('生成标题错误:', error);
+			console.error(`${config.errorText}:`, error);
 			// 移除加载消息，添加错误消息
 			chatStore.messages = chatStore.messages.filter((m: { id: string | string[]; }) => !m.id.includes('_loading'));
 			const errorMessage = {
 				id: Date.now().toString() + '_error',
 				role: 'assistant' as const,
-				content: '抱歉，生成标题时出现错误，请稍后重试。'
+				content: `抱歉，${config.errorText}，请稍后重试。`
 			};
 			chatStore.messages = [...chatStore.messages, errorMessage];
 		}
+	}
+
+	// 处理标题生成
+	async function handleTitleGeneration(userMessage: string) {
+		await handleAIGeneration({
+			userMessage,
+			promptType: 'generateTitle',
+			loadingText: '正在为您生成标题...',
+			errorText: '生成标题失败',
+			formatResult: (result: string) => ({
+				content: `我为您生成了以下标题建议：\n\n**${result}**\n\n您是否要采用这个标题？`,
+				data: {
+					type: 'title-suggestion',
+					title: result
+				}
+			})
+		});
+	}
+
+	// 处理事件总结
+	async function handleEventSummary(userMessage: string) {
+		await handleAIGeneration({
+			userMessage,
+			promptType: 'generateSummary',
+			loadingText: '正在为您总结事件...',
+			errorText: '生成总结失败',
+			formatResult: (result: string) => ({
+				content: `## 事件总结\n\n${result}`
+			})
+		});
+	}
+
+	// 处理关键信息分析
+	async function handleKeyInfoAnalysis(userMessage: string) {
+		await handleAIGeneration({
+			userMessage,
+			promptType: 'analyzeKeyInfo',
+			loadingText: '正在分析关键信息...',
+			errorText: '分析关键信息失败',
+			formatResult: (result: string) => ({
+				content: `## 关键信息分析\n\n${result}`
+			})
+		});
+	}
+
+	// 处理改进建议
+	async function handleImprovementSuggestions(userMessage: string) {
+		await handleAIGeneration({
+			userMessage,
+			promptType: 'improvementSuggestions',
+			loadingText: '正在生成改进建议...',
+			errorText: '生成改进建议失败',
+			formatResult: (result: string) => ({
+				content: `## 改进建议\n\n${result}`
+			})
+		});
 	}
 
 	// 处理采用标题

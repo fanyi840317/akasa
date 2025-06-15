@@ -89,7 +89,7 @@
 			{isSaving}
 			bind:showEditor
 		>
-			<Button variant="link">
+			<Button variant="link" class=" max-w-64 truncate">
 				{eventData.name || 'New Event'}
 			</Button>
 		</NameEditor>
