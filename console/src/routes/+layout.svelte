@@ -7,4 +7,6 @@
 </script>
 <Toaster position="top-center"/>
 <ModeWatcher />
-{@render children()}
+<div class="flex flex-col min-h-screen">
+	{@render children()}
+</div>

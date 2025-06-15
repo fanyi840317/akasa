@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import AiInput from '$lib/components/ai/ai-input.svelte';
+	import EventAiPanel from '$lib/components/event/event-ai-panel.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Resizable from '$lib/components/ui/resizable/index.js';
 	import { BlocksuiteEditor } from '$lib/components/editor/index.js';
@@ -10,6 +10,7 @@
 	import { eventStore } from '$lib/stores/event.svelte';
 	import type { Event } from '$lib/types/event';
 	import { toast } from 'svelte-sonner';
+	import Empty from '$lib/components/event/empty.svelte';
 
 	// 页面状态
 	let showEditor = $state(false);
@@ -24,6 +25,13 @@
 	// 事件数据
 	let eventData = $state<Event | null>(null);
 	let eventId = $state<string>('');
+
+	// 当前用户信息
+	let currentUser = $state({
+		id: 'current-user',
+		name: 'Current User',
+		avatar: ''
+	});
 
 	// 从路由参数获取事件ID
 	$effect(() => {
@@ -196,6 +204,15 @@
 		console.log('打开设置');
 	}
 
+	// 处理AI生成的标题
+	function handleTitleGenerated(title: string) {
+		if (eventData) {
+			eventData.name = title;
+			// 自动保存
+			saveEvent();
+		}
+	}
+
 	// 键盘快捷键保存
 	function handleKeydown(event: KeyboardEvent) {
 		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
@@ -206,11 +223,12 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="w-full h-full flex flex-col" onkeydown={handleKeydown}>
+<div class="w-full min-h-screen flex-center flex-col" onkeydown={handleKeydown}>
 	{#if isLoading}
 		<Loading />
 	{:else if eventData}
 		<EventHeader
+			class="mb-4"
 			{eventData}
 			{isSaving}
 			bind:showEditor
@@ -226,24 +244,24 @@
 			onCoverLinkSubmit={handleCoverLinkSubmit}
 			onSettings={handleSettings}
 		/>
-		<Resizable.PaneGroup direction="horizontal" class="w-full flex-1 ">
-			<Resizable.Pane defaultSize={30} class="p-2 pr-0 flex flex-col h-[calc(100vh-56px)]">
-				<div class="flex-end flex-col h-full border rounded-2xl p-4 bg-base-200/50">
-					<AiInput class="w-full" />
+		<Resizable.PaneGroup direction="horizontal" class="w-full flex-1 h-[calc(100vh-56px)]">
+			<Resizable.Pane defaultSize={30} class="p-2 pr-0 flex flex-col ">
+				<div class="flex-end flex-col h-full border rounded-2xl bg-base-200/50 overflow-hidden">
+					<EventAiPanel 
+						class="w-full " 
+						height="h-[calc(100vh-240px)]"
+						currentEvent={eventData}
+						user={currentUser}
+						onTitleGenerated={handleTitleGenerated}
+					/>
 				</div>
 			</Resizable.Pane>
 			<Resizable.Handle class="bg-transparent" />
-			<Resizable.Pane defaultSize={70} class="flex flex-col p-2">
+			<Resizable.Pane defaultSize={70} class="flex flex-col p-2 rounded-2xl border-border">
 				<BlocksuiteEditor bind:this={blocksuiteEditorRef} initialJsonContent={eventData.content} />
 			</Resizable.Pane>
 		</Resizable.PaneGroup>
 	{:else}
-		<div class="flex-center h-full">
-			<div class="text-center">
-				<p class="text-lg font-semibold mb-2">事件未找到</p>
-				<p class="text-muted-foreground mb-4">请检查事件ID是否正确</p>
-				<Button onclick={() => goto('/console/events')}>返回事件列表</Button>
-			</div>
-		</div>
+		<Empty />
 	{/if}
 </div>

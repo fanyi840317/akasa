@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-import { Separator } from '$lib/components/ui/separator';
-import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte';
+	import { Separator } from '$lib/components/ui/separator';
+	import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image, Loader2Icon } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import UserAvatar from '$lib/components/user';
 	import TimePicker from './time-picker.svelte';
@@ -16,20 +16,23 @@ import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte'
 	// 格式化日期显示
 	function formatDate(date: string | Date): string {
 		if (!date) return '';
+		if (typeof date === 'string') {
+			return date;
+		}
 		try {
-			const dateObj = typeof date === 'string' ? new Date(date) : date;
-			return dateObj.toLocaleDateString('zh-CN', {
+			return date.toLocaleDateString('zh-CN', {
 				month: 'short',
 				day: 'numeric',
 				hour: '2-digit',
 				minute: '2-digit'
 			});
 		} catch {
-			return '无效日期';
+			return 'Invalid Date';
 		}
 	}
 
 	let {
+		class: className,
 		eventData,
 		isSaving = false,
 		showEditor = $bindable(false),
@@ -45,6 +48,7 @@ import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte'
 		onCoverLinkSubmit,
 		onSettings
 	} = $props<{
+		class ?: string;
 		eventData: Event;
 		isSaving?: boolean;
 		showEditor?: boolean;
@@ -62,7 +66,7 @@ import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte'
 	}>();
 </script>
 
-<header class="px-4 h-14 flex-between">
+<header class="w-full px-4 h-[56px] flex-between {className}">
 	<div class="flex-center gap-2">
 		<Button
 			variant="ghost"
@@ -97,9 +101,9 @@ import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte'
 			onSave={onTimeSave}
 		>
 			{#if eventData.date}
-				{@render propBtn('时间', formatDate(eventData.date))}
+				{@render propBtn(Clock,'时间', formatDate(eventData.date))}
 			{:else}
-				{@render iconBtn(Clock, '时间')}
+				{@render iconBtn( '时间')}
 			{/if}
 		</TimePicker>
 		<MapPicker
@@ -109,9 +113,12 @@ import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte'
 			bind:isOpen={showMapPicker}
 		>
 			{#if eventData.location_data}
-				{@render propBtn('地点', eventData.location_data.name || eventData.location_data.address || '未知地点')}
+				{@render propBtn(MapPin, 
+					'地点',
+					JSON.parse(eventData.location_data).name || JSON.parse(eventData.location_data).address || '未知地点'
+				)}
 			{:else}
-				{@render iconBtn(MapPin, '地点')}
+				{@render iconBtn('地点')}
 			{/if}
 		</MapPicker>
 		<CoverPicker
@@ -120,15 +127,15 @@ import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte'
 			userId="user-123"
 			bind:isOpen={showCoverPicker}
 		>
-			{#if eventData.cover_url}
-				{@render propBtn('封面', '已设置')}
+			{#if eventData.cover}
+				{@render propBtn(Image, '封面', '已设置')}
 			{:else}
-				{@render iconBtn(Image, '封面')}
+				{@render iconBtn('封面')}
 			{/if}
 		</CoverPicker>
 
-		<MoreMenu onSettings={onSettings}>
-			<Button variant="secondary">
+		<MoreMenu {onSettings}>
+			<Button variant="ghost">
 				<MoreHorizontal class="size-4" />
 			</Button>
 		</MoreMenu>
@@ -136,16 +143,14 @@ import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte'
 
 	<div class="flex-center gap-2">
 		<!-- 保存状态指示器 -->
-		{#if isSaving}
-			<div class="flex-center gap-2 text-sm text-muted-foreground">
-				<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-				保存中...
-			</div>
-		{:else}
-			<Button variant="outline" onclick={onSave} disabled={isSaving}>保存 (Ctrl+S)</Button>
-		{/if}
+		<Button variant="outline" onclick={onSave} disabled={isSaving}>
+			{#if isSaving}
+				<Loader2Icon class="animate-spin"></Loader2Icon>
+			{/if}
+			保存 (Ctrl+S)</Button
+		>
 
-		<Button variant="secondary" class="px-2 pr-3 rounded-full">
+		<Button variant="ghost" class="px-2 pr-3 rounded-full">
 			<div
 				class="*:data-[slot=avatar]:ring-background/20 *:data-[slot=avatar]:ring-2 flex -space-x-2 *:data-[slot=avatar]:grayscale"
 			>
@@ -161,19 +166,22 @@ import { ArrowLeft, MoreHorizontal, Clock, MapPin, Image } from '@lucide/svelte'
 	</div>
 </header>
 
-{#snippet propBtn(label: string, value: string)}
-	<Button variant="outline" class="text-foreground/50 text-xs border-0 max-w-32">
-		<Badge class="size-4 rounded-full bg-accent text-foreground/50">✓</Badge>
+{#snippet propBtn(IconComponent: any, label: string, value: string)}
+	<Button variant="ghost" class="text-foreground/50 text-xs border-0 max-w-32">
+		<IconComponent class="size-4 text-foreground/50" />
 		<div class="text-left text-xs min-w-0 flex-1">
-			<div class="text-foreground/70 font-medium">{label}</div>
+			<!-- <div class="text-foreground/70 font-medium">{label}</div> -->
+			
 			<div class="text-foreground/50 truncate" title={value}>{value}</div>
 		</div>
 	</Button>
 {/snippet}
 
-{#snippet iconBtn(IconComponent: any, label: string)}
+{#snippet iconBtn(label: string)}
 	<Button variant="outline" class="text-foreground/50 text-xs border-0">
-		<IconComponent class="size-4 text-foreground/50" />
+		<!--  -->
+		
+		<Badge class="size-4 rounded-full bg-accent text-foreground/50">?</Badge>
 		<div class="text-center text-xs">{label}</div>
 	</Button>
 {/snippet}

@@ -14,7 +14,7 @@
 	};
 </script>
 
-<div class="flex-center h-full {className}">
+<div class="flex-center size-full {className}">
 	<div class="text-center">
 		<div class="animate-spin rounded-full {sizeClasses[size]} border-b-2 border-primary mx-auto mb-2"></div>
 		<p class="text-sm text-muted-foreground">{text}</p>

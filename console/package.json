@@ -67,11 +67,17 @@
 		]
 	},
 	"dependencies": {
+		"@agentic/duck-duck-go": "^7.6.7",
+		"@ai-sdk/google": "^1.2.19",
+		"@ai-sdk/svelte": "^2.1.12",
 		"@mapbox/mapbox-gl-geocoder": "^5.0.3",
 		"@types/mapbox__mapbox-gl-geocoder": "^5.0.0",
+		"ai": "^4.3.16",
 		"appwrite": "^18.1.1",
 		"mapbox-gl": "^3.12.0",
 		"marked": "^15.0.12",
-		"mode-watcher": "^1.0.7"
+		"mode-watcher": "^1.0.7",
+		"undici": "^7.10.0",
+		"zod": "^3.25.64"
 	}
 }
