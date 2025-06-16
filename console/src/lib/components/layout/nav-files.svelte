@@ -5,12 +5,16 @@
 		FileIcon,
 		MoreHorizontalIcon,
 		EyeIcon,
-		TrashIcon
+		TrashIcon,
+
+		EllipsisIcon
+
 	} from '@lucide/svelte';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import type { Component, ComponentProps } from 'svelte';
+	import Button from '../ui/button/button.svelte';
 
 	let {
 		files,
@@ -50,25 +54,31 @@
 	{#if !items.length}
 		<Sidebar.MenuItem>
 			<Sidebar.MenuButton
-				isActive={name === 'button.svelte'}
-				class="data-[active=true]:bg-transparent cursor-pointer group flex items-center justify-between w-full"
+				class="data-[active=true]:bg-transparent cursor-pointer group flex items-center justify-between "
 				onclick={() => handleFileClick(name)}
 			>
-				<div class="flex items-center gap-2 truncate">
+				<div class="flex items-center gap-2 truncate text-xs text-foreground/70">
 					<!-- <FileIcon /> -->
 					{name}
 				</div>
 				{#if isEvent}
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
-							<button
+              {#snippet child({ props })}
+              <Sidebar.MenuAction showOnHover {...props}>
+                <EllipsisIcon />
+                <span class="sr-only">More</span>
+              </Sidebar.MenuAction>
+              {/snippet}
+							<!-- <Button
 								class="opacity-0 group-hover:opacity-100 p-1 hover:bg-accent rounded transition-opacity"
 								onclick={(e) => {
 									e.stopPropagation();
 								}}
 							>
-								<MoreHorizontalIcon class="h-4 w-4" />
-							</button>
+								<MoreHorizontalIcon class="h-4 w-4" /> -->
+                
+							<!-- </Button> -->
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content class="w-48 rounded-[16px]" align="start">
 							<DropdownMenu.Item
