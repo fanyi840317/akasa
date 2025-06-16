@@ -6,9 +6,7 @@
 		MoreHorizontalIcon,
 		EyeIcon,
 		TrashIcon,
-
 		EllipsisIcon
-
 	} from '@lucide/svelte';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -53,23 +51,17 @@
 	{@const isEvent = isObject && item.type === 'event'}
 	{#if !items.length}
 		<Sidebar.MenuItem>
-			<Sidebar.MenuButton
-				class="data-[active=true]:bg-transparent cursor-pointer group flex items-center justify-between "
-				onclick={() => handleFileClick(name)}
-			>
-				<div class="flex items-center gap-2 truncate text-xs text-foreground/70">
-					<!-- <FileIcon /> -->
-					{name}
-				</div>
+			<Sidebar.MenuButton onclick={() => handleFileClick(name)} class="text-xs truncate line-clamp-1">
+				{name}
 				{#if isEvent}
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
-              {#snippet child({ props })}
-              <Sidebar.MenuAction showOnHover {...props}>
-                <EllipsisIcon />
-                <span class="sr-only">More</span>
-              </Sidebar.MenuAction>
-              {/snippet}
+							{#snippet child({ props })}
+								<Sidebar.MenuAction showOnHover {...props}>
+									<EllipsisIcon />
+									<span class="sr-only">More</span>
+								</Sidebar.MenuAction>
+							{/snippet}
 							<!-- <Button
 								class="opacity-0 group-hover:opacity-100 p-1 hover:bg-accent rounded transition-opacity"
 								onclick={(e) => {
@@ -77,7 +69,7 @@
 								}}
 							>
 								<MoreHorizontalIcon class="h-4 w-4" /> -->
-                
+
 							<!-- </Button> -->
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content class="w-48 rounded-[16px]" align="start">
