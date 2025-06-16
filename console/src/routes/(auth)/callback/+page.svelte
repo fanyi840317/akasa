@@ -13,12 +13,12 @@
 				goto('/console');
 			} else {
 				toast.error('Authentication failed');
-				goto('/auth/login');
+				goto('/login');
 			}
 		} catch (error) {
 			console.error('OAuth callback error:', error);
 			toast.error('Authentication failed');
-			goto('/auth/login');
+			goto('/login');
 		}
 	});
 </script>

@@ -162,7 +162,7 @@
 						</div>
 						<div class="text-center text-sm">
 							Already have an account?
-							<a href="/auth/login" class="underline underline-offset-4"> Sign in </a>
+							<a href="/login" class="underline underline-offset-4"> Sign in </a>
 						</div>
 					</div>
 				</form>

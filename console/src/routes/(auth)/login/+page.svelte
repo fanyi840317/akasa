@@ -113,7 +113,7 @@
 								<div class="flex items-center">
 									<Label for="password">Password</Label>
 									<a
-										href="/auth/forgot-password"
+										href="/forgot-password"
 										class="ml-auto text-sm underline-offset-4 hover:underline"
 									>
 										Forgot your password?
@@ -136,7 +136,7 @@
 						</div>
 						<div class="text-center text-sm">
 							Don't have an account?
-							<a href="/auth/register" class="underline underline-offset-4"> Sign up </a>
+							<a href="/register" class="underline underline-offset-4"> Sign up </a>
 						</div>
 					</div>
 				</form>

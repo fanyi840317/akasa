@@ -1,15 +1,15 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
-import { DamIcon } from '@lucide/svelte';
-import UserAvatar from '$lib/components/user';
-import UserMenu from '$lib/components/user/user-menu.svelte';
-import { page } from '$app/state';
-import { eventStore } from '$lib/stores/event.svelte';
-import { authStore } from '$lib/stores/auth.svelte';
-import { onMount } from 'svelte';
-import { goto } from '$app/navigation';
-import { browser } from '$app/environment';
+	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
+	import { DamIcon } from '@lucide/svelte';
+	import UserAvatar from '$lib/components/user';
+	import UserMenu from '$lib/components/user/user-menu.svelte';
+	import { page } from '$app/state';
+	import { eventStore } from '$lib/stores/event.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 
 	let { children } = $props();
 	let activeMenu = $state('');
@@ -34,14 +34,18 @@ import { browser } from '$app/environment';
 		}
 	]);
 	// 使用真实的认证用户信息
-let user = $derived(authStore.user ? {
-		name: authStore.user.name,
-		email: authStore.user.email
-	} : null);
+	let user = $derived(
+		authStore.user
+			? {
+					name: authStore.user.name,
+					email: authStore.user.email
+				}
+			: null
+	);
 	// 使用 eventStore 获取用户创建的事件
 	let userEvents = $state<any[]>([]);
 	let files = $derived([
-		...userEvents.map(event => ({ name: `${event.name}.event`, id: event.$id, type: 'event' }))
+		...userEvents.map((event) => ({ name: `${event.name}`, id: event.$id, type: 'event' }))
 	]);
 
 	// 在组件挂载时检查认证状态并加载用户事件
@@ -49,19 +53,19 @@ let user = $derived(authStore.user ? {
 		if (browser) {
 			// 等待认证检查完成
 			while (authStore.loading) {
-				await new Promise(resolve => setTimeout(resolve, 100));
+				await new Promise((resolve) => setTimeout(resolve, 100));
 			}
-			
+
 			// 如果用户未认证，重定向到登录页面
 			if (!authStore.isAuthenticated) {
-				goto('/auth/login');
+				goto('/login');
 				return;
 			}
-			
+
 			// 加载用户事件
 			try {
 				if (authStore.user?.email) {
-					userEvents = await eventStore.getEvents(authStore.user.email);
+					userEvents = await eventStore.getEvents(authStore.user.$id);
 				}
 			} catch (error) {
 				console.error('Failed to load user events:', error);
@@ -78,30 +82,24 @@ let user = $derived(authStore.user ? {
 		console.log('User logout');
 		const result = await authStore.logout();
 		if (result.success) {
-			goto('/auth/login');
+			goto('/login');
 		}
 	};
 
 	const handleCreateEvent = () => {
 		console.log('Creating new event');
 		// 这里可以添加创建事件的逻辑，比如打开创建事件的模态框或跳转到创建页面
-		goto("/console/events/new");
+		goto('/console/events/new');
 	};
 
 	const handleFileClick = (fileName: string) => {
 		console.log('File clicked:', fileName);
-		
+
 		// 检查是否是事件文件
-		if (fileName.endsWith('.event')) {
-			const eventName = fileName.replace('.event', '');
-			const event = userEvents.find(e => e.name === eventName);
-			if (event) {
-				// 跳转到事件详情页面
-				goto(`/console/events/${event.$id}`);
-			}
-		} else {
-			// 处理其他文件类型的点击
-			console.log('Opening file:', fileName);
+		const event = userEvents.find((e) => e.name === fileName);
+		if (event) {
+			// 跳转到事件详情页面
+			goto(`/console/events/${event.$id}`);
 		}
 	};
 
@@ -140,15 +138,19 @@ let user = $derived(authStore.user ? {
 			open = state;
 		}}
 	>
-		<AppSidebar {actions} {files} bind:isOpen={open} onCreateEvent={handleCreateEvent} onFileClick={handleFileClick} onEventView={handleEventView} onEventDelete={handleEventDelete} />
+		<AppSidebar
+			{actions}
+			{files}
+			bind:isOpen={open}
+			onCreateEvent={handleCreateEvent}
+			onFileClick={handleFileClick}
+			onEventView={handleEventView}
+			onEventDelete={handleEventDelete}
+		/>
 		<Sidebar.Inset class="">
 			<header class="w-full h-14 flex-between px-2 -mt-2">
 				<Sidebar.Trigger class="-ml-1" />
-				<UserMenu 
-					{user} 
-					onMenuAction={handleUserMenuAction}
-					onLogout={handleLogout}
-				>
+				<UserMenu {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout}>
 					<UserAvatar {user} size="size-8" />
 				</UserMenu>
 			</header>

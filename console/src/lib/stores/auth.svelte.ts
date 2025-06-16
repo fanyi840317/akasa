@@ -1,13 +1,8 @@
-import { Client, Account, ID, type Models } from 'appwrite';
+import { Client, Account, ID, type Models, OAuthProvider } from 'appwrite';
 import { browser } from '$app/environment';
-import { PUBLIC_APPWRITE_ENDPOINT, PUBLIC_APPWRITE_PROJECT_ID } from '$env/static/public';
+import { databases, appwriteConfig ,account} from '$lib/constants';
 
 // Appwrite configuration
-const client = new Client()
-	.setEndpoint(PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1')
-	.setProject(PUBLIC_APPWRITE_PROJECT_ID || 'console');
-
-const account = new Account(client);
 
 // Auth state
 class AuthStore {
@@ -109,9 +104,9 @@ class AuthStore {
 	async loginWithGoogle() {
 		try {
 			this.#error = null;
-			account.createOAuth2Session('google', 
+			account.createOAuth2Session(OAuthProvider.Google, 
 				`${window.location.origin}/console`,
-				`${window.location.origin}/auth/login`
+				`${window.location.origin}/login`
 			);
 		} catch (error: any) {
 			this.#error = error.message || 'Google login failed';
@@ -123,9 +118,9 @@ class AuthStore {
 	async loginWithApple() {
 		try {
 			this.#error = null;
-			account.createOAuth2Session('apple', 
+			account.createOAuth2Session(OAuthProvider.Apple, 
 				`${window.location.origin}/console`,
-				`${window.location.origin}/auth/login`
+				`${window.location.origin}/login`
 			);
 		} catch (error: any) {
 			this.#error = error.message || 'Apple login failed';

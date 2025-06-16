@@ -15,7 +15,7 @@
 			if (authStore.isAuthenticated) {
 				goto('/console');
 			} else {
-				goto('/auth/login');
+				goto('/login');
 			}
 		}
 	});
