@@ -51,7 +51,7 @@
 	{@const isEvent = isObject && item.type === 'event'}
 	{#if !items.length}
 		<Sidebar.MenuItem>
-			<Sidebar.MenuButton onclick={() => handleFileClick(name)} class="text-xs truncate line-clamp-1">
+			<Sidebar.MenuButton onclick={() => handleFileClick(name)} class="text-xs truncate line-clamp-1 ">
 				{name}
 				{#if isEvent}
 					<DropdownMenu.Root>
