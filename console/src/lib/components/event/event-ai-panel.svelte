@@ -19,13 +19,16 @@
 		onAdopt?: (type: string, data: any) => void;
 	}>();
 
-	// 建议消息
+	// 建议消息 - 重构为对象格式
 	const suggestions = [
-		'帮我总结这个事件',
-		'为这个事件生成标题',
-		'分析事件的关键信息',
-		'提供改进建议'
+		{ text: '帮我总结这个事件', type: 'summary', action: 'generateSummary' },
+		{ text: '为这个事件生成标题', type: 'title', action: 'generateTitle' },
+		{ text: '分析事件的关键信息', type: 'entities', action: 'extractEntities' },
+		{ text: '提供改进建议', type: 'improvement', action: 'improvementSuggestions' }
 	];
+
+	// 提取建议文本用于UI显示
+	const suggestionTexts = suggestions.map(s => s.text);
 
 	// 初始化聊天
 	onMount(() => {
@@ -47,18 +50,36 @@
 	async function handleSubmit(text: string) {
 		console.log('Message submitted:', text);
 
-		// 检查是否是生成标题的请求
-		if (text.includes('生成') && text.includes('标题') && currentEvent?.content) {
-			await handleTitleGeneration(text);
-		} else if (text.includes('总结') && text.includes('事件') && currentEvent?.content) {
-			await handleEventSummary(text);
-		} else if (text.includes('分析') && text.includes('关键信息') && currentEvent?.content) {
-			await handleKeyInfoAnalysis(text);
-		} else if (text.includes('改进建议') && currentEvent?.content) {
-			await handleImprovementSuggestions(text);
+		// 检查是否是预定义的建议
+		const suggestion = suggestions.find(s => s.text === text);
+		
+		if (suggestion && currentEvent?.content) {
+			// 处理预定义建议
+			await handleSuggestionAction(suggestion, text);
 		} else {
 			// 发送普通消息
 			await chatStore.sendMessage(text);
+		}
+	}
+
+	// 处理建议动作
+	async function handleSuggestionAction(suggestion: any, userMessage: string) {
+		switch (suggestion.action) {
+			case 'generateTitle':
+				await handleTitleGeneration(userMessage);
+				break;
+			case 'generateSummary':
+				await handleEventSummary(userMessage);
+				break;
+			case 'extractEntities':
+				await handleKeyInfoAnalysis(userMessage);
+				break;
+			case 'improvementSuggestions':
+				await handleImprovementSuggestions(userMessage);
+				break;
+			default:
+				// 发送普通消息
+				await chatStore.sendMessage(userMessage);
 		}
 	}
 
@@ -274,7 +295,7 @@
 	error={chatStore.error}
 	input={chatStore.input}
 	{user}
-	{suggestions}
+	suggestions={suggestionTexts}
 	onSubmit={handleSubmit}
 	onCopyMessage={handleCopyMessage}
 	onRegenerateMessage={handleRegenerateMessage}

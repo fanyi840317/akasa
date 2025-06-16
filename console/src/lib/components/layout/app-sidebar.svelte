@@ -3,17 +3,32 @@
 	import NavActions from './nav-actions.svelte';
 	import type { ComponentProps } from 'svelte';
 	import NavFiles from './nav-files.svelte';
+	import { PlusIcon } from '@lucide/svelte';
 
 	let {
 		actions,
 		files,
+		chats,
 		isOpen = $bindable(true),
+		onCreateEvent,
+		onFileClick,
+		onEventView,
+		onEventDelete,
 		...restProps
 	}: ComponentProps<typeof Sidebar.Root> & {
 		actions?: any;
 		isOpen?: boolean;
+		chats?:string[];
 		files?: any;
+		onCreateEvent?: () => void;
+		onFileClick?: (fileName: string) => void;
+		onEventView?: (eventId: string) => void;
+		onEventDelete?: (eventId: string) => void;
 	} = $props();
+
+	const handleCreateEvent = () => {
+		onCreateEvent?.();
+	};
 </script>
 
 <Sidebar.Root variant="inset" collapsible="icon">
@@ -31,8 +46,17 @@
 			<NavActions items={actions} />
 		</Sidebar.Group>
 		<Sidebar.Group>
-			<Sidebar.GroupLabel>Files</Sidebar.GroupLabel>
-			<NavFiles {files} />
+			<div class="flex items-center justify-between py-1">
+				<Sidebar.GroupLabel>My Files</Sidebar.GroupLabel>
+				<button 
+					class="p-1 rounded-md hover:bg-accent transition-colors" 
+					onclick={handleCreateEvent}
+					title="创建事件"
+				>
+					<PlusIcon class="w-4 h-4" />
+				</button>
+			</div>
+			<NavFiles {files} {onFileClick} {onEventView} {onEventDelete} />
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer />

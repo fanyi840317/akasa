@@ -1,10 +1,28 @@
 <script lang="ts">
-  import { ChevronRightIcon, FolderIcon, FileIcon } from '@lucide/svelte';
+  import { ChevronRightIcon, FolderIcon, FileIcon, MoreHorizontalIcon, EyeIcon, TrashIcon } from '@lucide/svelte';
   import * as Collapsible from "$lib/components/ui/collapsible/index.js";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
   import type { Component, ComponentProps } from "svelte";
-  let { files }: { files: [] } =
-		$props();
+  
+  let { files, onFileClick, onEventView, onEventDelete }: { 
+    files: []; 
+    onFileClick?: (fileName: string) => void;
+    onEventView?: (eventId: string) => void;
+    onEventDelete?: (eventId: string) => void;
+  } = $props();
+
+  const handleFileClick = (fileName: string) => {
+    onFileClick?.(fileName);
+  };
+
+  const handleEventView = (eventId: string) => {
+    onEventView?.(eventId);
+  };
+
+  const handleEventDelete = (eventId: string) => {
+    onEventDelete?.(eventId);
+  };
 
 </script>
 
@@ -15,15 +33,50 @@
     {/each}
   </Sidebar.Menu>
 
-  {#snippet Tree({ item }: { item: string | any[] })}
-  {@const [name, ...items] = Array.isArray(item) ? item : [item]}
+  {#snippet Tree({ item }: { item: string | any[] | { name: string; id: string; type: string } })}
+  {@const isObject = typeof item === 'object' && !Array.isArray(item)}
+  {@const [name, ...items] = isObject ? [item.name] : (Array.isArray(item) ? item : [item])}
+  {@const isEvent = isObject && item.type === 'event'}
   {#if !items.length}
     <Sidebar.MenuButton
       isActive={name === "button.svelte"}
-      class="data-[active=true]:bg-transparent"
+      class="data-[active=true]:bg-transparent cursor-pointer group flex items-center justify-between w-full"
+      onclick={() => handleFileClick(name)}
     >
-      <FileIcon />
-      {name}
+      <div class="flex items-center gap-2">
+        <FileIcon />
+        {name}
+      </div>
+      {#if isEvent}
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <button
+              class="opacity-0 group-hover:opacity-100 p-1 hover:bg-accent rounded transition-opacity"
+              onclick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <MoreHorizontalIcon class="h-4 w-4" />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content align="end">
+            <DropdownMenu.Item
+              onclick={() => handleEventView(item.id)}
+              class="flex items-center gap-2"
+            >
+              <EyeIcon class="h-4 w-4" />
+              查看事件
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              onclick={() => handleEventDelete(item.id)}
+              class="flex items-center gap-2 text-destructive"
+            >
+              <TrashIcon class="h-4 w-4" />
+              删除事件
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      {/if}
     </Sidebar.MenuButton>
   {:else}
     <Sidebar.MenuItem>
