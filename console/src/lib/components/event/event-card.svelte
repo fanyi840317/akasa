@@ -38,7 +38,7 @@
 	<Card.Header>
 		<div class="flex justify-between items-start">
 			<div class="flex-1">
-				<Card.Title class="line-clamp-2">{event.name}</Card.Title>
+				<Card.Title class="line-clamp-1">{event.name}</Card.Title>
 				<Card.Description class="line-clamp-3 mt-2">{event.summary || '暂无描述'}</Card.Description>
 			</div>
 			<!-- {#if event.status}

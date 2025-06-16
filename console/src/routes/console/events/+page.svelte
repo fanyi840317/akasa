@@ -30,10 +30,4 @@
 		</div>
 	</div>
 </div>
-<!-- <div class="container px-10">
-	<header class="p-6">
-		<h1 class="text-foreground text-sm font-extrabold">Connected integrations</h1>
-		<p class="text-sm text-foreground/50">Manage your connected data sources</p>
-	</header>
 
-</div> -->

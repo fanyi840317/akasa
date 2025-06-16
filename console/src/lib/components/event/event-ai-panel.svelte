@@ -10,13 +10,13 @@
 		currentEvent,
         height,
 		user,
-		onTitleGenerated
+		onAdopt
 	} = $props<{
 		class?: string;
         height?: string;
 		currentEvent?: Event;
 		user?: any;
-		onTitleGenerated?: (title: string) => void;
+		onAdopt?: (type: string, data: any) => void;
 	}>();
 
 	// 建议消息
@@ -154,7 +154,11 @@
 			loadingText: '正在为您总结事件...',
 			errorText: '生成总结失败',
 			formatResult: (result: string) => ({
-				content: `## 事件总结\n\n${result}`
+				content: `## 事件总结\n\n${result}\n\n您是否要保存这个摘要？`,
+				data: {
+					type: 'summary-suggestion',
+					summary: result
+				}
 			})
 		});
 	}
@@ -163,12 +167,25 @@
 	async function handleKeyInfoAnalysis(userMessage: string) {
 		await handleAIGeneration({
 			userMessage,
-			promptType: 'analyzeKeyInfo',
+			promptType: 'extractEntities',
 			loadingText: '正在分析关键信息...',
 			errorText: '分析关键信息失败',
-			formatResult: (result: string) => ({
-				content: `## 关键信息分析\n\n${result}`
-			})
+			formatResult: (result: string) => {
+				try {
+					const entities = JSON.parse(result);
+					return {
+						content: `## 关键信息分析\n\n**人物：** ${entities.people?.map((p: any) => `${p.name}(${p.role})`).join(', ') || '无'}\n\n**地点：** ${entities.locations?.map((l: any) => l.name).join(', ') || '无'}\n\n**时间线：** ${entities.timeline?.map((t: any) => `${t.time}: ${t.event}`).join('\n') || '无'}\n\n您是否要保存这些实体信息？`,
+						data: {
+							type: 'entities-suggestion',
+							entities: entities
+						}
+					};
+				} catch {
+					return {
+						content: `## 关键信息分析\n\n${result}`
+					};
+				}
+			}
 		});
 	}
 
@@ -185,17 +202,38 @@
 		});
 	}
 
-	// 处理采用标题
-	function handleAdoptTitle(title: string) {
-		if (onTitleGenerated) {
-			onTitleGenerated(title);
+	// 处理采用数据
+	function handleAdopt(type: string, data: any) {
+		if (onAdopt) {
+			onAdopt(type, data);
 		}
 		
 		// 添加确认消息
+		let confirmText = '';
+		switch (type) {
+			case 'title-suggestion':
+				confirmText = '已将标题设置为：**' + data.title + '**';
+				break;
+			case 'summary-suggestion':
+				confirmText = '已保存事件摘要';
+				break;
+			case 'entities-suggestion':
+				confirmText = '已保存实体信息';
+				break;
+			case 'date-suggestion':
+				confirmText = '已保存日期信息';
+				break;
+			case 'location-suggestion':
+				confirmText = '已保存地点信息';
+				break;
+			default:
+				confirmText = '已保存数据';
+		}
+		
 		const confirmMessage = {
 			id: Date.now().toString() + '_confirm',
 			role: 'assistant' as const,
-			content: `已将标题设置为：**${title}**`
+			content: `**${confirmText}**`
 		};
 		chatStore.messages = [...chatStore.messages, confirmMessage];
 	}
@@ -242,5 +280,5 @@
 	onRegenerateMessage={handleRegenerateMessage}
 	onLikeMessage={handleLikeMessage}
 	onDislikeMessage={handleDislikeMessage}
-	onAdoptTitle={handleAdoptTitle}
+	onAdopt={handleAdopt}
 />

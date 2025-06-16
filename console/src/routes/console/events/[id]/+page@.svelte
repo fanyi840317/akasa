@@ -204,12 +204,69 @@
 		console.log('打开设置');
 	}
 
-	// 处理AI生成的标题
-	function handleTitleGenerated(title: string) {
-		if (eventData) {
-			eventData.name = title;
-			// 自动保存
-			saveEvent();
+	// 处理AI生成的数据保存
+	function handleAdopt(type: string, data: any) {
+		if (!eventData) return;
+		
+		switch (type) {
+			case 'title-suggestion':
+				// 保存标题
+				if (data.title) {
+					eventData.name = data.title;
+					saveEvent();
+					toast.success('标题已保存');
+				}
+				break;
+			case 'summary-suggestion':
+				// 保存摘要到事件描述或专门的摘要字段
+				if (data.summary) {
+					eventData.summary = data.summary;
+					saveEvent();
+					toast.success('事件摘要已保存');
+				}
+				break;
+			case 'entities-suggestion':
+				// 保存实体信息
+				if (data.entities) {
+					// 保存人物信息
+					// if (data.entities.people) {
+					// 	eventData.people = data.entities.people;
+					// }
+					// // 保存地点信息
+					// if (data.entities.locations && data.entities.locations.length > 0) {
+					// 	const location = data.entities.locations[0];
+					// 	eventData.location_data = {
+					// 		name: location.name,
+					// 		address: location.description,
+					// 		coordinates: location.coordinates
+					// 	};
+					// }
+					// // 保存时间线信息
+					// if (data.entities.timeline) {
+					// 	eventData.timeline = data.entities.timeline;
+					// }
+					saveEvent();
+					toast.success('实体信息已保存');
+				}
+				break;
+			case 'date-suggestion':
+				// 保存日期信息
+				if (data.date) {
+					eventData.date = data.date;
+					saveEvent();
+					toast.success('日期信息已保存');
+				}
+				break;
+			case 'location-suggestion':
+				// 保存地点信息
+				if (data.location) {
+					eventData.location_data = data.location;
+					saveEvent();
+					toast.success('地点信息已保存');
+				}
+				break;
+			default:
+				console.log('未知的数据类型:', type, data);
 		}
 	}
 
@@ -228,7 +285,6 @@
 		<Loading />
 	{:else if eventData}
 		<EventHeader
-			class="mb-4"
 			{eventData}
 			{isSaving}
 			bind:showEditor
@@ -245,20 +301,20 @@
 			onSettings={handleSettings}
 		/>
 		<Resizable.PaneGroup direction="horizontal" class="w-full flex-1 h-[calc(100vh-56px)]">
-			<Resizable.Pane defaultSize={30} class="p-2 pr-0 flex flex-col ">
+			<Resizable.Pane defaultSize={25} class="p-2 pr-0 flex flex-col ">
 				<div class="flex-end flex-col h-full border rounded-2xl bg-base-200/50 overflow-hidden">
 					<EventAiPanel 
 						class="w-full " 
 						height="h-[calc(100vh-240px)]"
 						currentEvent={eventData}
 						user={currentUser}
-						onTitleGenerated={handleTitleGenerated}
+						onAdopt={handleAdopt}
 					/>
 				</div>
 			</Resizable.Pane>
 			<Resizable.Handle class="bg-transparent" />
-			<Resizable.Pane defaultSize={70} class="flex flex-col p-2 rounded-2xl border-border">
-				<BlocksuiteEditor bind:this={blocksuiteEditorRef} initialJsonContent={eventData.content} />
+			<Resizable.Pane defaultSize={75} class="flex flex-col p-2 ">
+				<BlocksuiteEditor class="rounded-2xl border-border" bind:this={blocksuiteEditorRef} initialJsonContent={eventData.content} />
 			</Resizable.Pane>
 		</Resizable.PaneGroup>
 	{:else}

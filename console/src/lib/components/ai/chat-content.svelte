@@ -20,7 +20,7 @@
 		onRegenerateMessage,
 		onLikeMessage,
 		onDislikeMessage,
-		onAdoptTitle
+		onAdopt
 	} = $props<{
 		class?: string;
 		height?: string;
@@ -35,7 +35,7 @@
 		onRegenerateMessage?: (messageId: string) => void;
 		onLikeMessage?: (messageId: string) => void;
 		onDislikeMessage?: (messageId: string) => void;
-		onAdoptTitle?: (title: string) => void;
+		onAdopt?: (type: string, data: any) => void;
 	}>();
 
 	// State
@@ -80,10 +80,10 @@
 	});
 </script>
 
-<div class="flex flex-col h-full {className}">
+<div class="flex flex-col h-full {className} relative">
 	<!-- Chat Messages -->
 	<ScrollArea
-		class="px-4 {height}"
+		class="p-4 {height}"
 		orientation="vertical"
 		bind:ref={scrollAreaRef}
 	>
@@ -98,8 +98,8 @@
 
 					<div class="flex flex-col gap-4">
 						{#each suggestions as suggestion}
-							<Button
-								class="w-56 py-5 text-xs rounded-full"
+							<Button variant="secondary"
+								class="w-56 py-2 text-xs rounded-full"
 								onclick={() => {
 									handleSubmit(suggestion);
 								}}>{suggestion}</Button
@@ -111,15 +111,15 @@
 			<div class="flex flex-col gap-4 pb-4">
 				{#each messages as message}
 					<ChatMessage
-						{message}
-						{status}
-						{user}
-						onCopy={onCopyMessage}
-						onRegenerate={onRegenerateMessage}
-						onLike={onLikeMessage}
-						onDislike={onDislikeMessage}
-						onAdoptTitle={onAdoptTitle}
-					/>
+					{message}
+					{status}
+					{user}
+					onCopy={onCopyMessage}
+					onRegenerate={onRegenerateMessage}
+					onLike={onLikeMessage}
+					onDislike={onDislikeMessage}
+					onAdopt={onAdopt}
+				/>
 				{/each}
 			</div>
 		</div>
@@ -127,7 +127,7 @@
 
 	<!-- 输入区域 -->
 	<AiInput 
-		class="mx-4" 
+		class="mx-4 absolute bottom-0 left-0 right-0 z-10" 
 		placeholder="输入消息..." 
 		bind:inputValue={input} 
 		onSubmit={handleSubmit}

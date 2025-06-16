@@ -70,7 +70,7 @@
 			<!-- 左侧按钮组 -->
 			<div class="flex-center gap-2">
 				<!-- 搜索建议下拉菜单 -->
-				<DropdownMenu.Root >
+				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
 						<Button
 							variant="ghost"
@@ -80,7 +80,7 @@
 							<Globe class="w-5 h-5" />
 						</Button>
 					</DropdownMenu.Trigger>
-					<DropdownMenu.Content class="w-56" align="start">
+					<DropdownMenu.Content class="w-56 rounded-[16px]" align="start">
 						<DropdownMenu.Label>建议</DropdownMenu.Label>
 						<DropdownMenu.Separator />
 						{#each suggestions as suggestion}

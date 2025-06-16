@@ -6,7 +6,7 @@
 	import type { User } from '$lib/types/user';
 	import { Button } from '$lib/components/ui/button';
 
-	let { message, onCopy, onRegenerate, onLike, onDislike, status, user, onAdoptTitle } = $props<{
+	let { message, onCopy, onRegenerate, onLike, onDislike, status, user, onAdopt } = $props<{
 		message: Message;
 		onCopy?: (messageId: string) => void;
 		onRegenerate?: (messageId: string) => void;
@@ -14,7 +14,7 @@
 		onDislike?: (messageId: string) => void;
 		user?: User;
 		status?: 'success' | 'error' | 'loading';
-		onAdoptTitle?: (title: string) => void;
+		onAdopt?: (type: string, data: any) => void;
 	}>();
 
 	// 渲染Markdown
@@ -144,7 +144,7 @@
 	{:else}
 		<div class="flex-shrink-0">
 			<div
-				class=" text-xs font-semibold rounded-full flex-center"
+				class=" text-xs font-semibold rounded-full flex-center py-2"
 			>
 				Aksas
 			</div>
@@ -181,17 +181,21 @@
 				{@html renderMarkdown(message.content)}
 			{/if}
 
-			<!-- 标题建议的特殊处理 -->
-			{#if message.data?.type === 'title-suggestion'}
+			<!-- 通用的数据确认保存处理 -->
+			{#if message.data?.type}
 				<div class="mt-3 flex gap-2">
 					<Button 
 						variant="outline"
 						size="sm"
-						onclick={() => onAdoptTitle?.(message.data.title)}
+						onclick={() => onAdopt?.(message.data.type, message.data)}
 					>
-						采用这个标题
+						保存
 					</Button>
-					<Button variant="ghost" size="sm">
+					<Button 
+						variant="ghost" 
+						size="sm"
+						onclick={() => onRegenerate?.(message.id)}
+					>
 						重新生成
 					</Button>
 				</div>
