@@ -80,8 +80,13 @@ class EventStore {
 		this.isLoading = true;
 		this.error = null;
 		try {
-			// 排除数据库不支持的字段
-			const { createdAt, updatedAt, ...dbEventData } = eventData;
+			// 排除数据库不支持的字段并转换
+			const { createdAt, updatedAt, ...rest } = eventData;
+			const dbEventData = { ...rest };
+			// 将 location_data 转换为字符串
+			if (dbEventData.location_data) {
+				(dbEventData as any).location_data = JSON.stringify(dbEventData.location_data);
+			}
 			const response = await databases.createDocument(
 				appwriteConfig.databaseId,
 				appwriteConfig.eventsCollectionId,
@@ -107,8 +112,13 @@ class EventStore {
 		this.isLoading = true;
 		this.error = null;
 		try {
-			// 排除数据库不支持的字段
-			const { createdAt, updatedAt, ...dbEventData } = eventData;
+			// 排除数据库不支持的字段并转换
+			const { createdAt, updatedAt, ...rest } = eventData;
+			const dbEventData = { ...rest };
+			// 将 location_data 转换为字符串
+			if (dbEventData.location_data) {
+				(dbEventData as any).location_data = JSON.stringify(dbEventData.location_data);
+			}
 			const response = await databases.updateDocument(
 				appwriteConfig.databaseId,
 				appwriteConfig.eventsCollectionId,

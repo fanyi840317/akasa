@@ -42,7 +42,7 @@
 		{/if}
 	</Sidebar.Header>
 	<Sidebar.Content class="py-6">
-		<Sidebar.Group class="px-0">
+		<Sidebar.Group class="px-1">
 			<NavActions items={actions} />
 		</Sidebar.Group>
 		<Sidebar.Group class="px-2">

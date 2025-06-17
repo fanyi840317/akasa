@@ -169,25 +169,27 @@
 	</div>
 {:else if event}
 	<!-- 顶部导航栏 -->
-	<div class=" border-b flex-center ">
+	<div class=" border-b flex-center">
 		<div
 			class="flex w-full max-w-6xl flex-col items-start gap-5 p-6 sm:gap-6 sm:p-9 [@media(min-width:1700px)]:max-w-[1600px]"
 		>
-			<Button variant="ghost" size="sm"
-				class="text-xs -ml-4"
+			<button
+				class="text-xs text-foreground/50 hover:text-foreground flex-row flex-center"
 				onclick={() => goto('/console/events')}
 			>
 				<ArrowLeft class="size-4" />
 				<span>Back</span>
-			</Button>
+			</button>
 			<div
 				class="flex w-full flex-col items-start justify-between gap-4 sm:flex-row sm:items-center sm:gap-2"
 			>
 				<div class="flex flex-col gap-2 text-left">
 					<div class="flex items-center gap-1.5">
-						<UserAvatar user={{ name: event.creator_name || '', avatar: event.creator_avatar }}
+						<UserAvatar
+							class="size-6"
+							user={{ name: event.creator_name || '', avatar: event.creator_avatar }}
 						></UserAvatar>
-						<p class="text-sm font-medium text-gray-500">{event.creator_name}</p>
+						<p class="text-sm font-medium text-gray-500">{event.creator_name || 'Unknown'}</p>
 					</div>
 					<div class="flex items-center gap-2">
 						<div class="line-clamp-1 text-base font-semibold sm:text-xl">
@@ -218,54 +220,13 @@
 					</Toggle>
 				</div>
 			</div>
-		</div>
+		</div> 
+	</div>
+	<div class="flex w-full max-w-6xl mx-auto p-6 sm:p-9 [@media(min-width:1700px)]:max-w-[1600px]">
+		<Card.Root class="w-full h-[400px] p-0 border-0">
+			<BlocksuiteEditor initialJsonContent={event.content} readonly={true} />
+		</Card.Root>
 	</div>
 
 	<!-- 主要内容区域 -->
-	<div class="min-h-screen">
-		<div class="container mx-auto px-6 py-8 max-w-6xl">
-			<!-- 事件内容卡片 -->
-			{#if event.content}
-				<Card.Root class="shadow-sm">
-					<Card.Header class="pb-3">
-						<Card.Title class="text-lg font-semibold">Content</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<div class="prose prose-sm max-w-none text-sm leading-relaxed">
-							<BlocksuiteEditor initialJsonContent={eventData.content} />
-						</div>
-					</Card.Content>
-				</Card.Root>
-			{:else}
-				<Card.Root class="shadow-sm">
-					<Card.Content class="p-8 text-center">
-						<div class="text-muted-foreground">
-							<CalendarIcon class="h-8 w-8 mx-auto mb-3 opacity-50" />
-							<p class="font-medium mb-1">No content available</p>
-							<p class="text-sm">This event doesn't have any detailed content yet.</p>
-							{#if isOwner}
-								<Button onclick={handleEdit} class="mt-4" variant="outline" size="sm">
-									<Edit class="h-4 w-4 mr-2" />
-									Add Content
-								</Button>
-							{/if}
-						</div>
-					</Card.Content>
-				</Card.Root>
-			{/if}
-
-			<!-- 实体数据卡片 -->
-			{#if event.entities_data}
-				<Card.Root class="shadow-sm">
-					<Card.Header class="pb-3">
-						<Card.Title class="text-lg font-semibold">Entities Data</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<pre
-							class="bg-muted/50 p-4 rounded-lg text-xs overflow-auto border">{event.entities_data}</pre>
-					</Card.Content>
-				</Card.Root>
-			{/if}
-		</div>
-	</div>
 {/if}
