@@ -39,7 +39,7 @@
 	};
 </script>
 
-<Sidebar.Menu>
+<Sidebar.Menu >
 	{#each files as item, index (index)}
 		{@render Tree({ item })}
 	{/each}

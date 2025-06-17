@@ -10,6 +10,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import Loading from '$lib/components/ui/loading';
 
 	let { children } = $props();
 	let activeMenu = $state('');
@@ -99,7 +100,7 @@
 		const event = userEvents.find((e) => e.name === fileName);
 		if (event) {
 			// 跳转到事件详情页面
-			goto(`/console/events/${event.$id}`);
+			goto(`/console/events/my-${event.$id}`);
 		}
 	};
 
@@ -125,12 +126,7 @@
 </script>
 
 {#if authStore.loading}
-	<div class="flex min-h-screen items-center justify-center">
-		<div class="text-center">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-			<p>Loading...</p>
-		</div>
-	</div>
+	<Loading />
 {:else if user}
 	<Sidebar.Provider
 		style="--sidebar-width:224px"

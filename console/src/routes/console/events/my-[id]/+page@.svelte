@@ -11,6 +11,7 @@
 	import type { Event } from '$lib/types/event';
 	import { toast } from 'svelte-sonner';
 	import Empty from '$lib/components/event/empty.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	// 页面状态
 	let showEditor = $state(false);
@@ -27,11 +28,7 @@
 	let eventId = $state<string>('');
 
 	// 当前用户信息
-	let currentUser = $state({
-		id: 'current-user',
-		name: 'Current User',
-		avatar: ''
-	});
+	let currentUser = $derived(authStore.user);
 
 	// 从路由参数获取事件ID
 	$effect(() => {
@@ -105,8 +102,8 @@
 					cover: eventData.cover,
 					location_data: eventData.location_data,
 					entities_data: eventData.entities_data,
-					creator_name: eventData.creator_name,
-					creator_avatar: eventData.creator_avatar,
+					creator_name: currentUser?.name,
+					// creator_avatar: currentUser.,
 					folder_id: eventData.folder_id
 				});
 				eventData = newEvent;

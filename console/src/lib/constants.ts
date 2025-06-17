@@ -10,7 +10,10 @@ export const storage = new Storage(client);
 export const appwriteConfig = {
     databaseId: '67d3a4480018e2e09b68',
     usersCollectionId: 'users',
-    eventsCollectionId: 'events'
+    eventsCollectionId: 'events',
+    interactionsCollectionId: 'interactions',
+    favoritesCollectionId: 'favorites',
+    foldersCollectionId: 'folders',
 };
 export const DEFAULT_LOCATION = {
     coordinates: {

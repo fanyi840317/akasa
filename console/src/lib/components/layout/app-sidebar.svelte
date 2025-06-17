@@ -41,11 +41,11 @@
 			</span>
 		{/if}
 	</Sidebar.Header>
-	<Sidebar.Content class="py-6 px-2">
-		<Sidebar.Group>
+	<Sidebar.Content class="py-6">
+		<Sidebar.Group class="px-0">
 			<NavActions items={actions} />
 		</Sidebar.Group>
-		<Sidebar.Group>
+		<Sidebar.Group class="px-2">
 			<div class="flex items-center justify-between py-1">
 				<Sidebar.GroupLabel>My Files</Sidebar.GroupLabel>
 				<button 

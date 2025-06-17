@@ -1,6 +1,7 @@
 import { Client, Account, ID, type Models, OAuthProvider } from 'appwrite';
 import { browser } from '$app/environment';
 import { databases, appwriteConfig ,account} from '$lib/constants';
+import type { User } from '$lib/types/user';
 
 // Appwrite configuration
 
@@ -10,7 +11,20 @@ class AuthStore {
 	#loading = $state(true);
 	#error = $state<string | null>(null);
 
-	get user() {
+	get user(): User | null {
+		if (!this.#user) return null;
+		
+		return {
+			$id: this.#user.$id,
+			name: this.#user.name,
+			email: this.#user.email,
+			createdAt: new Date(this.#user.$createdAt),
+			updatedAt: new Date(this.#user.$updatedAt),
+			avatar: this.#user.prefs?.avatar as string | undefined
+		};
+	}
+
+	get rawUser() {
 		return this.#user;
 	}
 

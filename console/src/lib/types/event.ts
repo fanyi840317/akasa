@@ -1,6 +1,7 @@
 import type { Entity } from './entity';
 
 export type Event = Entity & {
+	title?: string;
 	content?: string;
 	summary?: string;
 	categories?: string[];
@@ -15,4 +16,6 @@ export type Event = Entity & {
 	creator_name?: string;
 	creator_avatar?: string;
 	folder_id?: string;
+	likes?: number;
+	views?: number;
 };
