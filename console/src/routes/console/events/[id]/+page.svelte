@@ -50,9 +50,16 @@
 	// 格式化位置信息
 	function formatLocation(locationData: any): string {
 		if (!locationData) return 'No location';
-		if (typeof locationData === 'string')
-			locationData = JSON.parse(locationData);
-		if (locationData.address) return locationData.address;
+		if (typeof locationData === 'string') {
+			try {
+				locationData = JSON.parse(locationData);
+			} catch {
+				return 'Invalid location data';
+			}
+		}
+		// 确保解析后的数据不为null
+		if (!locationData || typeof locationData !== 'object') return 'No location';
+		if (locationData["address"]) return locationData.address;
 		if (locationData.name) return locationData.name;
 		return 'Unknown location';
 	}
