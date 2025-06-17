@@ -222,11 +222,16 @@
 			</div>
 		</div> 
 	</div>
-	<div class="flex w-full max-w-6xl mx-auto p-6 sm:p-9 [@media(min-width:1700px)]:max-w-[1600px]">
+	<div class="flex flex-col w-full gap-5 max-w-6xl mx-auto p-6 sm:p-9 [@media(min-width:1700px)]:max-w-[1600px]">
 		<Card.Root class="w-full h-[400px] p-0 border-0">
 			<BlocksuiteEditor initialJsonContent={event.content} readonly={true} />
 		</Card.Root>
+		<div class="flex flex-col gap-4">
+			<h1 class="text-2xl font-semibold">Summary</h1>
+			{event.summary}
+		</div>
 	</div>
 
 	<!-- 主要内容区域 -->
+	 
 {/if}
