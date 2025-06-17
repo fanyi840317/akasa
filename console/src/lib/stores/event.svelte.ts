@@ -17,7 +17,7 @@ function mapDocumentToEvent(doc: any): Event {
 		privacy: doc.privacy,
 		user_id: doc.user_id,
 		cover: doc.cover,
-		location_data: doc.location_data,
+		location_data: JSON.parse(doc.location_data)|| {},
 		status: doc.status,
 		entities_data: doc.entities_data,
 		creator_name: doc.creator_name,

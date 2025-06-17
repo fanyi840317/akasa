@@ -161,7 +161,7 @@
 		if (!eventData) return;
 		
 		// 保存位置数据为字符串格式
-		eventData.location_data = locationData;
+		eventData.location_data =  locationData;
 		
 		// 自动保存
 		saveEvent();

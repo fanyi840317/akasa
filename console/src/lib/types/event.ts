@@ -10,7 +10,7 @@ export type Event = Entity & {
 	privacy?: string;
 	user_id: string;
 	cover?: string;
-	location_data?: Location | string;
+	location_data?: Location;
 	status?: string;
 	entities_data?: string;
 	creator_name?: string;

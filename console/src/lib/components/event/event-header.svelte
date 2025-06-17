@@ -10,26 +10,11 @@
 	import MoreMenu from './more-menu.svelte';
 	import NameEditor from './name-editor.svelte';
 	import type { Event } from '$lib/types/event';
-	import type { Snippet } from 'svelte';
-	import { parseDate, getLocalTimeZone } from '@internationalized/date';
+import type { Snippet } from 'svelte';
+import { parseDate, getLocalTimeZone } from '@internationalized/date';
+import { formatDate } from '$lib/utils.js';
 
-	// 格式化日期显示
-	function formatDate(date: string | Date): string {
-		if (!date) return '';
-		if (typeof date === 'string') {
-			return date;
-		}
-		try {
-			return date.toLocaleDateString('zh-CN', {
-				month: 'short',
-				day: 'numeric',
-				hour: '2-digit',
-				minute: '2-digit'
-			});
-		} catch {
-			return 'Invalid Date';
-		}
-	}
+
 
 	let {
 		class: className,
@@ -101,13 +86,13 @@
 			onSave={onTimeSave}
 		>
 			{#if eventData.date}
-				{@render propBtn(Clock,'时间', formatDate(eventData.date))}
+				{@render propBtn(Clock,'时间', formatDate(eventData.date, { includeTime: true }))}
 			{:else}
 				{@render iconBtn( '时间')}
 			{/if}
 		</TimePicker>
 		<MapPicker
-			value={eventData.location_data}
+			location={eventData.location_data}
 			onSave={onMapSave}
 			bind:isSaving
 			bind:isOpen={showMapPicker}
@@ -115,7 +100,7 @@
 			{#if eventData.location_data}
 				{@render propBtn(MapPin, 
 					'地点',
-					JSON.parse(eventData.location_data).name || JSON.parse(eventData.location_data).address || '未知地点'
+					eventData.location_data.name || eventData.location_data.address || '未知地点'
 				)}
 			{:else}
 				{@render iconBtn('地点')}

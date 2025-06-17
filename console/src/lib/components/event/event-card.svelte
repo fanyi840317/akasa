@@ -2,7 +2,8 @@
 	import * as Card from '$lib/components/ui/card';
 	import { goto } from '$app/navigation';
 	import type { Event } from '$lib/types/event';
-	import UserAvatar from '../user/user-avatar.svelte';
+import UserAvatar from '../user/user-avatar.svelte';
+import { formatDate } from '$lib/utils.js';
 
 	let { event }: { event: Event } = $props();
 
@@ -10,15 +11,7 @@
 		goto(`/console/events/${event.$id}`);
 	}
 
-	function formatDate(date?: Date | string) {
-		if (!date) return '';
-		const dateObj = date instanceof Date ? date : new Date(date);
-		return dateObj.toLocaleDateString('zh-CN', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
-		});
-	}
+
 
 	function getStatusColor(status?: string) {
 		switch (status) {
@@ -69,7 +62,7 @@
 	</Card.Content>
 
 	<Card.Footer class="flex justify-between items-center">
-		<span class="text-sm text-foreground/50">{formatDate(event.createdAt)}</span>
+		<span class="text-sm text-foreground/50">{formatDate(event.createdAt, { includeYear: true })}</span>
 		<!-- <UserAvatar class="size-6" user={{ name: event.creator_name || '?', avatar: event.creator_avatar || '' }} /> -->
 	</Card.Footer>
 </Card.Root>

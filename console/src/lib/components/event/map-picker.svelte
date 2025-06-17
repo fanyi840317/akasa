@@ -12,13 +12,13 @@
 	import Mask from './mask.svelte';
 
 	let {
-		value = '',
+		location = $bindable(''),
 		onSave,
 		isSaving = $bindable(false),
 		isOpen = $bindable(false),
 		children
 	} = $props<{
-		value?: string;
+		location?: Location;
 		isOpen?: boolean;
 		isSaving?: boolean;
 		onSave?: (locationData: any) => void;
@@ -33,7 +33,7 @@
 	let showResults = $state(false);
 
 	// 地图数据
-	let locationData = $state(value ? JSON.parse(value) : DEFAULT_LOCATION);
+	let locationData = $state(location || DEFAULT_LOCATION);
 	let mapRef: any;
 
 	// 地址搜索相关
@@ -41,11 +41,10 @@
 
 	// 监听value变化，更新locationData和searchInput
 	$effect(() => {
-		if (value) {
+		if (location) {
 			try {
-				const parsedData = JSON.parse(value);
-				locationData = parsedData;
-				searchInput = parsedData.address || '';
+				locationData = location;
+				searchInput = location.address || '';
 			} catch (error) {
 				console.error('解析位置数据失败:', error);
 				locationData = DEFAULT_LOCATION;
@@ -219,7 +218,7 @@
 	function cancelEdit() {
 		isOpen = false;
 		// 重置为原始值
-		locationData = value ? JSON.parse(value) : DEFAULT_LOCATION;
+		locationData = location || DEFAULT_LOCATION;
 		searchInput = locationData.address || '';
 		showResults = false;
 	}
