@@ -11,6 +11,7 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import Loading from '$lib/components/ui/loading';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	let { children } = $props();
 	let activeMenu = $state('');
@@ -143,16 +144,16 @@
 			onEventView={handleEventView}
 			onEventDelete={handleEventDelete}
 		/>
-		<Sidebar.Inset class="">
+		<Sidebar.Inset class="overflow-hidden">
 			<header class="w-full h-14 flex-between px-2 -mt-2">
 				<Sidebar.Trigger class="-ml-1" />
 				<UserMenu {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout}>
 					<UserAvatar {user} size="size-8" />
 				</UserMenu>
 			</header>
-			<div class=" w-full bg-base-200 rounded-3xl h-full">
+			<ScrollArea orientation="vertical" class=" h-[calc(100vh-72px)] rounded-md border bg-base-200">
 				{@render children()}
-			</div>
+			</ScrollArea>
 		</Sidebar.Inset>
 	</Sidebar.Provider>
 {/if}

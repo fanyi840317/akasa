@@ -15,8 +15,11 @@
 </script>
 
 <div class="flex-center flex-col p-10 gap-10">
-	<h1 class="text-2xl font-extrabold">what do you want to create today?</h1>
+	<h1 class="text-3xl font-extrabold">What do you want to create today?</h1>
 	<AiInput class="w-4xl max-w-2xl" />
+	<div class="">
+		<p class="text-sm text-muted-foreground">Create a new event</p>
+	</div>
 	<div class="flex flex-col items-start gap-4 min-w-4xl pt-10">
 		<header class="flex-center gap-2">
 			<FolderIcon class="w-6 h-6 text-foreground/50" />

@@ -189,7 +189,7 @@
 							class="size-6"
 							user={{ name: event.creator_name || '', avatar: event.creator_avatar }}
 						></UserAvatar>
-						<p class="text-sm font-medium text-gray-500">{event.creator_name || 'Unknown'}</p>
+						<p class="text-sm font-medium">{event.creator_name || 'Unknown'}</p>
 					</div>
 					<div class="flex items-center gap-2">
 						<div class="line-clamp-1 text-base font-semibold sm:text-xl">
@@ -227,8 +227,9 @@
 			<BlocksuiteEditor initialJsonContent={event.content} readonly={true} />
 		</Card.Root>
 		<div class="flex flex-col gap-4">
-			<h1 class="text-2xl font-semibold">Summary</h1>
-			{event.summary}
+			<h1 class="text-sm font-semibold">Summary</h1>
+			<p class="text-sm text-muted-foreground">{event.summary || 'No summary provided.'}</p>
+			
 		</div>
 	</div>
 

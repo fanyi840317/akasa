@@ -131,20 +131,21 @@
 	}
 </style>
 
-<div class="flex flex-row gap-3 {message.role === 'user' ? 'items-start' : 'items-start'} mb-4">
+<div class="flex flex-col {message.role === 'user' ? 'items-end' : 'items-start'} mb-4">
 	{#if message.role === 'user'}
-		<div class="flex-shrink-0">
+		<!-- <div class="flex-shrink-0 ">
 			<UserAvatar fallbackClass="text-xs" {user}></UserAvatar>
-		</div>
+		</div> -->
 		<div
-			class="bg-card text-foreground text-sm px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%]"
+			class="bg-card text-foreground text-sm px-4 py-2 rounded-2xl rounded-tr-none max-w-[80%]"
 		>
 			{message.content}
+			<p>{message.timestamp}</p>
 		</div>
 	{:else}
-		<div class="flex-shrink-0">
+		<div class="flex-shrink-0 ">
 			<div
-				class=" text-xs font-semibold rounded-full flex-center py-2"
+				class=" text-xs font-semibold rounded-2xl border flex-center p-2"
 			>
 				Aksas
 			</div>
