@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 from enum import Enum
 
-
 class MysteryEventType(Enum):
     """神秘事件类型枚举"""
     UFO = "ufo"
