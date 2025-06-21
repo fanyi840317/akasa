@@ -60,7 +60,7 @@
 			: null
 	);
 	// 使用 eventStore 获取用户创建的事件
-	let userEvents = $state<any[]>([]);
+	let userEvents = $state<Array<{ name: string; $id: string }>>([]);
 	let files = $derived([
 		...userEvents.map((event) => ({ name: `${event.name}`, id: event.$id, type: 'event' }))
 	]);

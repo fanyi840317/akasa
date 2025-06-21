@@ -20,29 +20,31 @@
 	}: {
 		title: string;
 		description?: string;
-		data: any;
+		data: Record<string, unknown>;
 		fields: Field[];
 	} = $props();
 
 	// 获取嵌套对象的值
-	const getValue = (obj: any, path: string): any => {
-		return path.split('.').reduce((current, key) => {
-			return current && current[key] !== undefined ? current[key] : '';
+	const getValue = (obj: Record<string, unknown>, path: string): unknown => {
+		return path.split('.').reduce((current: unknown, key) => {
+			return current && typeof current === 'object' && current !== null && key in current
+				? (current as Record<string, unknown>)[key]
+				: '';
 		}, obj);
 	};
 
 	// 设置嵌套对象的值
-	const setValue = (obj: any, path: string, value: any): void => {
+	const setValue = (obj: Record<string, unknown>, path: string, value: unknown): void => {
 		const keys = path.split('.');
 		const lastKey = keys.pop()!;
 		
 		// 确保路径上的所有对象都存在
-		let current = obj;
+		let current: Record<string, unknown> = obj;
 		for (const key of keys) {
 			if (!current[key] || typeof current[key] !== 'object') {
 				current[key] = {};
 			}
-			current = current[key];
+			current = current[key] as Record<string, unknown>;
 		}
 		
 		// 设置最终值
@@ -52,7 +54,7 @@
 	// 处理输入变化
 	const handleInputChange = (field: Field, event: Event) => {
 		const target = event.target as HTMLInputElement;
-		let value: any;
+		let value: unknown;
 		
 		switch (field.type) {
 			case 'checkbox':
@@ -80,7 +82,7 @@
 		{/if}
 	</CardHeader>
 	<CardContent class="space-y-4">
-		{#each fields as field, index}
+		{#each fields as field, index (field.key)}
 			<div class="space-y-2">
 				<Label for={`${title}-${field.key}`}>{field.label}</Label>
 				{#if field.type === 'checkbox'}

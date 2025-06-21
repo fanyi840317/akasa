@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import ConfigSection from './config-section.svelte';
 
@@ -128,7 +128,7 @@ describe('ConfigSection Component', () => {
 	});
 
 	it('updates data when input values change', async () => {
-		let data = { testField: 'initial' };
+		const data = { testField: 'initial' };
 		
 		const props = {
 			title: 'Test Section',
@@ -142,7 +142,7 @@ describe('ConfigSection Component', () => {
 			]
 		};
 
-		const { component } = render(ConfigSection, { props });
+		render(ConfigSection, { props });
 
 		const input = screen.getByLabelText('Test Field') as HTMLInputElement;
 		
@@ -154,7 +154,7 @@ describe('ConfigSection Component', () => {
 	});
 
 	it('updates checkbox data when toggled', async () => {
-		let data = { enabled: false };
+		const data = { enabled: false };
 		
 		const props = {
 			title: 'Test Section',
@@ -180,7 +180,7 @@ describe('ConfigSection Component', () => {
 	});
 
 	it('handles number input conversion correctly', async () => {
-		let data = { count: 5 };
+		const data = { count: 5 };
 		
 		const props = {
 			title: 'Test Section',
@@ -206,7 +206,7 @@ describe('ConfigSection Component', () => {
 	});
 
 	it('creates nested objects when setting deep paths', async () => {
-		let data = {};
+		const data = {};
 		
 		const props = {
 			title: 'Test Section',

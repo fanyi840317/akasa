@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Separator } from '$lib/components/ui/separator';
 	import { toast } from 'svelte-sonner';
-	import { Settings, Save, RotateCcw, CheckCircle, AlertCircle } from 'lucide-svelte';
+	import { Settings, Save, RotateCcw, CheckCircle, AlertCircle } from '@lucide/svelte';
 	import ConfigSection from './config-section.svelte';
 	import { configStore } from '$lib/stores/config.svelte';
 
@@ -23,8 +21,8 @@
 	});
 
 	// 验证结果
-	let validationResults = $state([]);
-	let isValid = $state(true);
+	let validationResults = $state<Array<{ section: string; valid: boolean; message: string }>>([]);
+	let isValid = $state<boolean>(true);
 
 	// 加载配置
 	const loadConfig = async () => {
@@ -40,7 +38,7 @@
 			}
 		} catch (error) {
 			toast.error('加载配置失败', {
-				description: error.message
+				description: error instanceof Error ? error.message : String(error)
 			});
 		} finally {
 			loading = false;
@@ -63,7 +61,7 @@
 			}
 		} catch (error) {
 			toast.error('保存配置失败', {
-				description: error.message
+				description: error instanceof Error ? error.message : String(error)
 			});
 		} finally {
 			saving = false;
@@ -90,7 +88,7 @@
 			}
 		} catch (error) {
 			toast.error('重置配置失败', {
-				description: error.message
+				description: error instanceof Error ? error.message : String(error)
 			});
 		} finally {
 			loading = false;
@@ -104,7 +102,7 @@
 			const result = await configStore.validateConfig(config);
 			if (result.success) {
 				validationResults = result.results || [];
-				isValid = result.valid;
+				isValid = result.valid ?? true;
 				if (isValid) {
 					toast.success('配置验证通过');
 				} else {
@@ -117,7 +115,7 @@
 			}
 		} catch (error) {
 			toast.error('验证配置失败', {
-				description: error.message
+				description: error instanceof Error ? error.message : String(error)
 			});
 		} finally {
 			validating = false;
@@ -191,8 +189,8 @@
 			</CardHeader>
 			<CardContent>
 				<div class="space-y-2">
-					{#each validationResults as result}
-						<div class="flex items-center space-x-2">
+					{#each validationResults as result, index (index)}
+					<div class="flex items-center space-x-2">
 							{#if result.valid}
 								<CheckCircle class="h-4 w-4 text-green-600" />
 							{:else}

@@ -3,7 +3,6 @@
 	import { Toaster } from "$lib/components/ui/sonner/index.js";
 	import { ModeWatcher } from "mode-watcher";
 	import {onMount} from "svelte";
-	import { Button } from '$lib/components/ui/button';
 
 	let { children } = $props();
 

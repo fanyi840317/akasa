@@ -4,10 +4,10 @@
 
 interface ConfigResponse {
 	success: boolean;
-	data?: any;
+	data?: Record<string, unknown>;
 	error?: string;
 	valid?: boolean;
-	results?: any[];
+	results?: ValidationResult[];
 	message?: string;
 }
 
@@ -144,7 +144,7 @@ class ConfigStore {
 	/**
 	 * Update configuration
 	 */
-	async updateConfig(config: any): Promise<ConfigResponse> {
+	async updateConfig(config: Record<string, unknown>): Promise<ConfigResponse> {
 		try {
 			const response = await fetch(`${this.baseUrl}/update`, {
 				method: 'POST',
@@ -202,7 +202,7 @@ class ConfigStore {
 	/**
 	 * Validate configuration
 	 */
-	async validateConfig(config?: any): Promise<ConfigResponse> {
+	async validateConfig(config?: Record<string, unknown>): Promise<ConfigResponse> {
 		try {
 			const options: RequestInit = {
 				method: 'POST',

@@ -123,9 +123,6 @@ class InteractionStore {
 	// 获取用户对事件的交互状态
 	async getUserInteractionState(eventId: string, userId: string): Promise<UserInteractionState> {
 		try {
-			// 先从缓存加载
-			const localState = this.loadUserStateFromCache(eventId, userId);
-			
 			// 检查用户是否点赞了该事件
 			const likesResponse = await databases.listDocuments(
 				appwriteConfig.databaseId,
@@ -157,9 +154,10 @@ class InteractionStore {
 			this.userStates.set(`${eventId}_${userId}`, state);
 			
 			return state;
-		} catch (error: any) {
+		} catch (error: unknown) {
 			// 如果服务器请求失败，返回缓存状态
-			console.warn('Failed to get user interaction state from server, using cached state:', error);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			console.warn('Failed to get user interaction state from server, using cached state:', errorMessage);
 			const localState = this.loadUserStateFromCache(eventId, userId);
 			this.userStates.set(`${eventId}_${userId}`, localState);
 			return localState;
@@ -221,8 +219,8 @@ class InteractionStore {
 			await this.getInteractionStats(eventId);
 
 			return newLikedState;
-		} catch (error: any) {
-			this.error = error.message || 'Failed to toggle like';
+		} catch (error: unknown) {
+			this.error = error instanceof Error ? error.message : 'Failed to toggle like';
 			throw error;
 		}
 	}
@@ -287,8 +285,8 @@ class InteractionStore {
 			await this.getInteractionStats(eventId);
 
 			return newFavoritedState;
-		} catch (error: any) {
-			this.error = error.message || 'Failed to toggle favorite';
+		} catch (error: unknown) {
+			this.error = error instanceof Error ? error.message : 'Failed to toggle favorite';
 			throw error;
 		}
 	}
@@ -309,8 +307,8 @@ class InteractionStore {
 			);
 
 			return favoritesResponse.documents.map(doc => doc.item_id);
-		} catch (error: any) {
-			this.error = error.message || 'Failed to get user favorites';
+		} catch (error: unknown) {
+			this.error = error instanceof Error ? error.message : 'Failed to get user favorites';
 			throw error;
 		} finally {
 			this.isLoading = false;
