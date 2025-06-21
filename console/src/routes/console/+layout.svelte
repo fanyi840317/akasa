@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
-	import { DamIcon } from '@lucide/svelte';
+	import { LayoutDashboard, Bot, Calendar, Settings } from '@lucide/svelte';
 	import UserAvatar from '$lib/components/user';
 	import UserMenu from '$lib/components/user/user-menu.svelte';
 	import { page } from '$app/state';
@@ -18,20 +18,36 @@
 	$effect(() => {
 		if (currentPath.startsWith('/console/events')) {
 			activeMenu = 'events';
+		} else if (currentPath.startsWith('/console/agents')) {
+			activeMenu = 'agents';
+		} else if (currentPath.startsWith('/console/config')) {
+			activeMenu = 'config';
 		}
 	});
 	let actions = $derived([
 		{
 			title: 'Dashboard',
 			url: '/dashboard',
-			icon: DamIcon,
+			icon: LayoutDashboard,
 			isActive: false
+		},
+		{
+			title: 'Agents',
+			url: '/console/agents',
+			icon: Bot,
+			isActive: activeMenu === 'agents'
 		},
 		{
 			title: 'Events',
 			url: '/console/events',
-			icon: DamIcon,
+			icon: Calendar,
 			isActive: activeMenu === 'events'
+		},
+		{
+			title: 'Config',
+			url: '/console/config',
+			icon: Settings,
+			isActive: activeMenu === 'config'
 		}
 	]);
 	// 使用真实的认证用户信息
@@ -77,35 +93,28 @@
 			goto('/login');
 		}
 	};
-
-
 </script>
 
 {#if authStore.loading}
 	<Loading />
 {:else if user}
-	<Sidebar.Provider 
+	<Sidebar.Provider
 		style="--sidebar-width:224px"
 		onOpenChange={(state) => {
 			open = state;
 		}}
 	>
-		<AppSidebar
-			{actions}
-			{files}
-			bind:isOpen={open}
-		
-		/>
-		<Sidebar.Inset class="overflow-hidden">
-			<header class="w-full h-14 flex justify-between items-center px-2 -mt-2">
-				<Sidebar.Trigger class="-ml-1" />
+		<AppSidebar {actions} {files} bind:isOpen={open} />
+		<main class="size-full px-2">
+			<header class=" flex h-14 w-full items-center justify-between pr-2">
+				<Sidebar.Trigger class="" />
 				<UserMenu {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout}>
 					<UserAvatar {user} size="size-8" />
 				</UserMenu>
 			</header>
-			<ScrollArea orientation="vertical" class=" h-[calc(100vh-64px)] rounded-input border bg-base-200">
+			<ScrollArea orientation="vertical" class=" rounded-input bg-base-200 h-[calc(100vh-64px)]  ">
 				{@render children()}
 			</ScrollArea>
-		</Sidebar.Inset>
+		</main>
 	</Sidebar.Provider>
 {/if}

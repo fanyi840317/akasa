@@ -1,0 +1,204 @@
+# 默认组件配置
+components:
+  default_search_engine: "tavily"
+  default_rag_provider: "openai"
+  default_analysis_engine: "spacy"
+  default_data_extractor: "beautifulsoup"
+  default_llm_provider: "openai"
+  
+  # 组件优先级
+  priority:
+    search_engines: ["tavily", "google", "bing", "duckduckgo", "serper"]
+    rag_providers: ["openai", "pinecone", "weaviate", "chroma"]
+    analysis_engines: ["openai_analysis", "spacy", "transformers"]
+    data_extractors: ["playwright", "selenium", "beautifulsoup"]
+  
+  # 故障转移配置
+  fallback:
+    enabled: true
+    max_retries: 3
+    retry_delay: 2.0
+    circuit_breaker:
+      failure_threshold: 5
+      recovery_timeout: 60
+      half_open_max_calls: 3
+
+# 神秘事件类型配置
+mystery_events:
+  ufo:
+    keywords: ["UFO", "不明飞行物", "飞碟", "外星人", "alien", "spacecraft", "sighting", "encounter", "abduction"]
+    credibility_factors:
+      witness_count: 0.3
+      evidence_quality: 0.4
+      official_confirmation: 0.3
+    data_sources:
+      - news
+      - forum
+      - government
+      - witness_report
+  
+  cryptid:
+    keywords: ["大脚怪", "雪人", "尼斯湖水怪", "bigfoot", "yeti", "cryptid", "creature", "beast", "monster"]
+    credibility_factors:
+      witness_count: 0.2
+      evidence_quality: 0.5
+      scientific_backing: 0.3
+    data_sources:
+      - news
+      - forum
+      - documentary
+      - witness_report
+  
+  paranormal:
+    keywords: ["超自然", "鬼魂", "灵异", "paranormal", "ghost", "supernatural", "haunted", "spirit", "poltergeist"]
+    credibility_factors:
+      witness_count: 0.4
+      evidence_quality: 0.3
+      historical_precedent: 0.3
+    data_sources:
+      - news
+      - forum
+      - documentary
+      - witness_report
+  
+  ancient_mystery:
+    keywords: ["古代文明", "失落文明", "古迹", "ancient", "civilization", "mystery", "archaeological", "artifact", "ruins"]
+    credibility_factors:
+      archaeological_evidence: 0.5
+      historical_records: 0.3
+      expert_consensus: 0.2
+    data_sources:
+      - news
+      - documentary
+      - government
+  
+  disappearance:
+    keywords: ["失踪", "消失", "disappearance", "missing", "vanished", "lost", "gone", "whereabouts"]
+    credibility_factors:
+      official_investigation: 0.4
+      witness_reliability: 0.3
+      evidence_trail: 0.3
+    data_sources:
+      - news
+      - government
+      - witness_report
+  
+  natural_anomaly:
+    keywords: ["自然异象", "异常现象", "anomaly", "phenomenon", "unusual", "strange", "unexplained", "bizarre"]
+    credibility_factors:
+      scientific_measurement: 0.5
+      reproducibility: 0.3
+      expert_analysis: 0.2
+    data_sources:
+      - news
+      - documentary
+      - government
+
+# 神秘事件数据源配置
+mystery:
+  data_sources:
+    news:
+      name: "新闻媒体"
+      type: "news"
+      base_url: "https://newsapi.org/v2"
+      api_key: ${NEWS_API_KEY}
+      enabled: true
+      max_results: 100
+      timeout: 30
+      credibility_weight: 0.7
+      search_params:
+        language: "zh,en"
+        sort_by: "relevancy"
+        page_size: 20
+    
+    forum:
+      name: "论坛讨论"
+      type: "forum"
+      base_url: "https://www.reddit.com/api"
+      api_key: ${REDDIT_API_KEY}
+      enabled: true
+      max_results: 50
+      timeout: 30
+      credibility_weight: 0.4
+      search_params:
+        subreddits: ["UFOs", "Paranormal", "Mystery", "UnresolvedMysteries"]
+        time_filter: "month"
+        sort: "hot"
+    
+    documentary:
+      name: "纪录片资源"
+      type: "documentary"
+      base_url: "https://api.themoviedb.org/3"
+      api_key: ${TMDB_API_KEY}
+      enabled: true
+      max_results: 20
+      timeout: 30
+      credibility_weight: 0.8
+      search_params:
+        genre: "documentary"
+        keywords: ["mystery", "paranormal", "unexplained"]
+    
+    government:
+      name: "政府文件"
+      type: "government"
+      base_url: "https://www.foia.gov/api"
+      api_key: ${FOIA_API_KEY}
+      enabled: true
+      max_results: 30
+      timeout: 60
+      credibility_weight: 0.9
+      search_params:
+        agencies: ["CIA", "FBI", "NSA", "DOD"]
+        classification: ["declassified", "unclassified"]
+    
+    witness_report:
+      name: "目击者报告"
+      type: "witness_report"
+      base_url: "https://nuforc.org/api"
+      api_key: ${NUFORC_API_KEY}
+      enabled: true
+      max_results: 200
+      timeout: 30
+      credibility_weight: 0.5
+      search_params:
+        date_range: "30d"
+        location_radius: "100km"
+        verification_status: ["pending", "verified"]
+
+# 报告模板配置
+report_templates:
+  default:
+    sections:
+      - "executive_summary"
+      - "methodology"
+      - "findings"
+      - "credibility_analysis"
+      - "correlation_analysis"
+      - "academic_sources"
+      - "processing_observations"
+      - "conclusions"
+      - "recommendations"
+    
+    formatting:
+      title_level: 1
+      section_level: 2
+      subsection_level: 3
+      include_toc: true
+      include_charts: true
+      include_maps: true
+  
+  academic:
+    sections:
+      - "abstract"
+      - "introduction"
+      - "literature_review"
+      - "methodology"
+      - "results"
+      - "discussion"
+      - "conclusion"
+      - "references"
+    
+    formatting:
+      citation_style: "APA"
+      include_bibliography: true
+      academic_tone: true
