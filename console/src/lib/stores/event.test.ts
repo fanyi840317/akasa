@@ -172,7 +172,7 @@ describe('EventStore', () => {
 			eventStore.events = [mockEvent];
 			eventStore.currentEvent = mockEvent;
 
-			vi.mocked(databases.deleteDocument).mockResolvedValue({} as any);
+			vi.mocked(databases.deleteDocument).mockResolvedValue({} as never);
 
 			await eventStore.deleteEvent('test-event-1');
 

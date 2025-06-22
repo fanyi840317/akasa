@@ -112,8 +112,8 @@ class InteractionStore {
 
 			this.stats.set(eventId, stats);
 			return stats;
-		} catch (error: any) {
-			this.error = error.message || 'Failed to get interaction stats';
+		} catch (error: unknown) {
+			this.error = error instanceof Error ? error.message : 'Failed to get interaction stats';
 			throw error;
 		} finally {
 			this.isLoading = false;

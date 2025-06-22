@@ -7,7 +7,7 @@ class ChatStore {
 	chat = $state<Chat | null>(null);
 	messages = $state<Message[]>([]);
 	status = $state<string>('ready');
-	error = $state<any>(undefined);
+	error = $state<string | null>(null);
 	input = $state<string>('');
 	currentEventId = $state<string | null>(null);
 
@@ -163,7 +163,7 @@ class ChatStore {
 	}
 
 	// 获取错误
-	getError(): any {
+	getError(): string | null {
 		return this.error;
 	}
 

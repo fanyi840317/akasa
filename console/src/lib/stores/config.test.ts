@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { configStore } from './config.svelte';
 
 // Mock fetch globally
-const mockFetch = vi.fn();
+const mockFetch = vi.fn() as unknown as typeof fetch;
 global.fetch = mockFetch;
 
 describe('ConfigStore', () => {
@@ -16,19 +16,19 @@ describe('ConfigStore', () => {
 
 	describe('loadConfig', () => {
 		it('successfully loads configuration', async () => {
-			const mockResponse = {
-				success: true,
-				data: {
-					system: { name: 'Test System' },
-					components: {},
-					llm: {}
-				}
-			};
+			const mockResponse: { success: boolean; data: Record<string, unknown> } = {
+			success: true,
+			data: {
+				system: { name: 'Test System' },
+				components: {},
+				llm: {}
+			}
+		};
 
 			mockFetch.mockResolvedValueOnce({
-				ok: true,
-				json: () => Promise.resolve(mockResponse)
-			});
+			ok: true,
+			json: () => Promise.resolve(mockResponse)
+		} as Response);
 
 			const result = await configStore.loadConfig();
 
@@ -89,10 +89,10 @@ describe('ConfigStore', () => {
 
 	describe('loadComponentsConfig', () => {
 		it('successfully loads components configuration', async () => {
-			const mockResponse = {
-				success: true,
-				data: { search: { enabled: true } }
-			};
+			const mockResponse: { success: boolean; data: Record<string, unknown> } = {
+			success: true,
+			data: { search: { enabled: true } }
+		};
 
 			mockFetch.mockResolvedValueOnce({
 				ok: true,
@@ -108,10 +108,10 @@ describe('ConfigStore', () => {
 
 	describe('loadLLMConfig', () => {
 		it('successfully loads LLM configuration', async () => {
-			const mockResponse = {
-				success: true,
-				data: { openai: { api_key: 'sk-test' } }
-			};
+			const mockResponse: { success: boolean; data: Record<string, unknown> } = {
+			success: true,
+			data: { openai: { api_key: 'sk-test' } }
+		};
 
 			mockFetch.mockResolvedValueOnce({
 				ok: true,
@@ -127,14 +127,14 @@ describe('ConfigStore', () => {
 
 	describe('loadRawConfig', () => {
 		it('successfully loads raw configuration', async () => {
-			const mockResponse = {
-				success: true,
-				data: {
-					default: { system: { name: 'Default' } },
-					user: { system: { name: 'User Override' } },
-					merged: { system: { name: 'User Override' } }
-				}
-			};
+			const mockResponse: { success: boolean; data: Record<string, unknown> } = {
+			success: true,
+			data: {
+				default: { system: { name: 'Default' } },
+				user: { system: { name: 'User Override' } },
+				merged: { system: { name: 'User Override' } }
+			}
+		};
 
 			mockFetch.mockResolvedValueOnce({
 				ok: true,
@@ -154,10 +154,10 @@ describe('ConfigStore', () => {
 				system: { name: 'Updated System' }
 			};
 
-			const mockResponse = {
-				success: true,
-				message: 'Configuration updated successfully'
-			};
+			const mockResponse: { success: boolean; message: string } = {
+			success: true,
+			message: 'Configuration updated successfully'
+		};
 
 			mockFetch.mockResolvedValueOnce({
 				ok: true,
@@ -178,7 +178,7 @@ describe('ConfigStore', () => {
 
 		it('handles update errors', async () => {
 			const configData = { system: { name: 'Invalid' } };
-			const errorResponse = {
+			const errorResponse: { success: boolean; error: string } = {
 				success: false,
 				error: 'Validation failed'
 			};
@@ -200,10 +200,10 @@ describe('ConfigStore', () => {
 
 	describe('resetConfig', () => {
 		it('successfully resets configuration', async () => {
-			const mockResponse = {
-				success: true,
-				message: 'Configuration reset to defaults'
-			};
+			const mockResponse: { success: boolean; message: string } = {
+			success: true,
+			message: 'Configuration reset to defaults'
+		};
 
 			mockFetch.mockResolvedValueOnce({
 				ok: true,
@@ -221,13 +221,13 @@ describe('ConfigStore', () => {
 
 	describe('validateConfig', () => {
 		it('validates configuration without data', async () => {
-			const mockResponse = {
-				success: true,
-				valid: true,
-				results: [
-					{ section: 'system', valid: true, message: 'Valid' }
-				]
-			};
+			const mockResponse: { success: boolean; valid: boolean; results: Array<{ section: string; valid: boolean; message: string }> } = {
+			success: true,
+			valid: true,
+			results: [
+				{ section: 'system', valid: true, message: 'Valid' }
+			]
+		};
 
 			mockFetch.mockResolvedValueOnce({
 				ok: true,
@@ -250,7 +250,7 @@ describe('ConfigStore', () => {
 				system: { name: 'Test System' }
 			};
 
-			const mockResponse = {
+			const mockResponse: { success: boolean; valid: boolean; results: Array<{ section: string; valid: boolean; message: string }> } = {
 				success: true,
 				valid: true,
 				results: [
@@ -277,7 +277,7 @@ describe('ConfigStore', () => {
 
 		it('handles validation errors', async () => {
 			const configData = { invalid: 'data' };
-			const errorResponse = {
+			const errorResponse: { success: boolean; valid: boolean; error: string } = {
 				success: false,
 				valid: false,
 				error: 'Invalid configuration'
@@ -300,14 +300,14 @@ describe('ConfigStore', () => {
 
 	describe('getConfigSchema', () => {
 		it('successfully gets configuration schema', async () => {
-			const mockResponse = {
-				success: true,
-				data: {
-					system: {
-						type: 'object',
-						properties: {
-							name: { type: 'string' }
-						}
+			const mockResponse: { success: boolean; data: Record<string, unknown> } = {
+			success: true,
+			data: {
+				system: {
+					type: 'object',
+					properties: {
+						name: { type: 'string' }
+					}
 					}
 				}
 			};

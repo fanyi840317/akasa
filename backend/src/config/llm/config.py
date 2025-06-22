@@ -1,13 +1,82 @@
 # Copyright (c) 2024 Lingjing
 # SPDX-License-Identifier: MIT
 
+import os
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 from functools import lru_cache
 
+# Create logger
+logger = logging.getLogger(__name__)
+
 from enum import Enum
 from ..base import BaseConfig, ConfigType, ConfigLoader, APIConfig
+
+# Try to import LangChain LLM classes
+try:
+    from langchain_openai import ChatOpenAI
+except ImportError:
+    ChatOpenAI = None
+
+try:
+    from langchain_anthropic import ChatAnthropic
+except ImportError:
+    ChatAnthropic = None
+
+try:
+    from langchain_google_genai import ChatGoogleGenerativeAI
+except ImportError:
+    ChatGoogleGenerativeAI = None
+
+try:
+    from langchain_community.llms import Ollama
+except ImportError:
+    Ollama = None
+
+# Global LLM cache
+_llm_cache: Dict[str, Any] = {}
+
+# Default LLM configurations for different providers and types
+DEFAULT_LLM_CONFIGS: Dict[str, Dict[str, Dict[str, Any]]] = {
+    "openai": {
+        "basic": {"model": "gpt-3.5-turbo", "temperature": 0.7},
+        "reasoning": {"model": "gpt-4", "temperature": 0.3},
+        "vision": {"model": "gpt-4-vision-preview", "temperature": 0.7},
+        "fast": {"model": "gpt-3.5-turbo", "temperature": 0.5},
+        "embedding": {"model": "text-embedding-ada-002"},
+        "code": {"model": "gpt-4", "temperature": 0.1},
+        "research": {"model": "gpt-4", "temperature": 0.3},
+        "analysis": {"model": "gpt-4", "temperature": 0.2}
+    },
+    "anthropic": {
+        "basic": {"model": "claude-3-haiku-20240307", "temperature": 0.7},
+        "reasoning": {"model": "claude-3-opus-20240229", "temperature": 0.3},
+        "vision": {"model": "claude-3-opus-20240229", "temperature": 0.7},
+        "fast": {"model": "claude-3-haiku-20240307", "temperature": 0.5},
+        "code": {"model": "claude-3-opus-20240229", "temperature": 0.1},
+        "research": {"model": "claude-3-opus-20240229", "temperature": 0.3},
+        "analysis": {"model": "claude-3-opus-20240229", "temperature": 0.2}
+    },
+    "google": {
+        "basic": {"model": "gemini-pro", "temperature": 0.7},
+        "reasoning": {"model": "gemini-pro", "temperature": 0.3},
+        "vision": {"model": "gemini-pro-vision", "temperature": 0.7},
+        "fast": {"model": "gemini-pro", "temperature": 0.5},
+        "code": {"model": "gemini-pro", "temperature": 0.1},
+        "research": {"model": "gemini-pro", "temperature": 0.3},
+        "analysis": {"model": "gemini-pro", "temperature": 0.2}
+    },
+    "ollama": {
+        "basic": {"model": "llama2", "temperature": 0.7},
+        "reasoning": {"model": "llama2", "temperature": 0.3},
+        "fast": {"model": "llama2", "temperature": 0.5},
+        "code": {"model": "codellama", "temperature": 0.1},
+        "research": {"model": "llama2", "temperature": 0.3},
+        "analysis": {"model": "llama2", "temperature": 0.2}
+    }
+}
 
 
 class LLMType(Enum):
@@ -414,7 +483,7 @@ def create_llm_from_config(
     file_config = _load_config_file()
     
     # Get default configuration for provider and type
-    default_config = DEFAULT_LLM_CONFIGS.get(provider, {}).get(llm_type, {})
+    default_config = DEFAULT_LLM_CONFIGS.get(provider, {}).get(llm_type.value, {})
     
     # Get configuration from file
     provider_config = file_config.get("llm", {}).get(provider, {})
@@ -569,7 +638,7 @@ def get_llm_info(llm_type: LLMType, provider: Optional[str] = None) -> Dict[str,
         provider = _detect_default_provider()
     
     config = _load_config_file()
-    default_config = DEFAULT_LLM_CONFIGS.get(provider, {}).get(llm_type, {})
+    default_config = DEFAULT_LLM_CONFIGS.get(provider, {}).get(llm_type.value, {})
     env_config = _get_env_llm_conf(llm_type.value, provider)
     
     return {

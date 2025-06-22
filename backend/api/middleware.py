@@ -32,8 +32,13 @@ def setup_logging(app: Flask) -> None:
     @app.before_request
     def log_request_info():
         app.logger.debug('Request: %s %s', request.method, request.url)
-        if request.get_json():
-            app.logger.debug('Request body: %s', request.get_json())
+        if request.method in ['POST', 'PUT', 'PATCH'] and request.is_json:
+            try:
+                json_data = request.get_json()
+                if json_data:
+                    app.logger.debug('Request body: %s', json_data)
+            except Exception:
+                pass  # Ignore JSON parsing errors in logging
 
 
 def setup_error_handlers(app: Flask) -> None:

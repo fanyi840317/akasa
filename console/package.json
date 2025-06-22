@@ -25,7 +25,7 @@
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/vite": "^4.0.0",
 		"@vitest/browser": "^3.2.3",
-		"bits-ui": "^2.7.0",
+		"bits-ui": "^2.8.8",
 		"clsx": "^2.1.1",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
@@ -57,6 +57,8 @@
 	"dependencies": {
 		"@testing-library/svelte": "^5.2.8",
 		"appwrite": "^18.1.1",
-		"mode-watcher": "^1.0.8"
+		"date-fns": "^4.1.0",
+		"mode-watcher": "^1.0.8",
+		"zod": "^3.25.67"
 	}
 }

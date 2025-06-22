@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: MIT
 
+import os
 from langgraph.prebuilt import create_react_agent
 from typing import List, Any
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from prompts import apply_prompt_template
 from config.llm import get_llm_by_type
-from config.agents import AGENT_LLM_MAP
+from config.agents import AGENT_LLM_MAP, AgentType
 
 
 def create_agent(agent_name: str, agent_type: str, tools: list, prompt_template: str):
@@ -20,14 +25,22 @@ def create_agent(agent_name: str, agent_type: str, tools: list, prompt_template:
 
 
 def create_mystery_agent(
-    agent_name: str, 
-    agent_type: str, 
-    tools: list, 
+    agent_name: str,
+    agent_type: str,
+    tools: list,
     prompt_template: str,
     mystery_config: dict = None
 ):
     """Factory function to create mystery research agents with specialized configuration."""
-    llm = get_llm_by_type(AGENT_LLM_MAP[agent_type])
+    # Map string agent_type to AgentType enum for LLM lookup
+    agent_type_map = {
+        "researcher": AgentType.MYSTERY_RESEARCHER,
+        "planner": AgentType.DATA_COLLECTOR,
+        "reporter": AgentType.REPORT_GENERATOR,
+        "analyzer": AgentType.CREDIBILITY_ANALYZER
+    }
+    agent_enum = agent_type_map.get(agent_type, AgentType.MYSTERY_RESEARCHER)
+    llm = get_llm_by_type(AGENT_LLM_MAP[agent_enum])
     
     # Enhance prompt with mystery research context
     def enhanced_prompt(state):

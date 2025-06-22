@@ -3,7 +3,7 @@ import type { Event } from '$lib/types/event';
 import { ID, Query } from 'appwrite';
 
 // 统一的文档映射函数
-function mapDocumentToEvent(doc: any): Event {
+function mapDocumentToEvent(doc: Record<string, unknown>): Event {
 	return {
 		$id: doc.$id,
 		name: doc.name || '',
@@ -81,11 +81,12 @@ class EventStore {
 		this.error = null;
 		try {
 			// 排除数据库不支持的字段并转换
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { createdAt, updatedAt, ...rest } = eventData;
 			const dbEventData = { ...rest };
 			// 将 location_data 转换为字符串
 			if (dbEventData.location_data) {
-				(dbEventData as any).location_data = JSON.stringify(dbEventData.location_data);
+				(dbEventData as Record<string, unknown>).location_data = JSON.stringify(dbEventData.location_data);
 			}
 			const response = await databases.createDocument(
 				appwriteConfig.databaseId,
@@ -113,11 +114,12 @@ class EventStore {
 		this.error = null;
 		try {
 			// 排除数据库不支持的字段并转换
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { createdAt, updatedAt, ...rest } = eventData;
 			const dbEventData = { ...rest };
 			// 将 location_data 转换为字符串
 			if (dbEventData.location_data) {
-				(dbEventData as any).location_data = JSON.stringify(dbEventData.location_data);
+				(dbEventData as Record<string, unknown>).location_data = JSON.stringify(dbEventData.location_data);
 			}
 			const response = await databases.updateDocument(
 				appwriteConfig.databaseId,

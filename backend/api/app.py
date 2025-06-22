@@ -3,13 +3,25 @@
 Flask application factory for Akasa API.
 """
 
+import sys
+import os
+from pathlib import Path
+
+# Add src directory to Python path
+src_path = Path(__file__).parent.parent / 'src'
+sys.path.insert(0, str(src_path))
+
+# Add api directory to Python path for absolute imports
+api_path = Path(__file__).parent.parent
+sys.path.insert(0, str(api_path))
+
 from flask import Flask
 from flask_cors import CORS
 import logging
 from typing import Optional
 
-from .routes import config_bp
-from .middleware import setup_error_handlers, setup_logging
+from api.routes import config_bp, agents_bp
+from api.middleware import setup_error_handlers, setup_logging
 
 
 def create_app(config_name: Optional[str] = None) -> Flask:
@@ -38,6 +50,7 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     
     # Register blueprints
     app.register_blueprint(config_bp, url_prefix='/api/config')
+    app.register_blueprint(agents_bp, url_prefix='/api/agents')
     
     @app.route('/api/health')
     def health_check():

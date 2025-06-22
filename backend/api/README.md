@@ -36,7 +36,7 @@ GET /api/health
 
 返回服务器状态信息。
 
-### 配置管理
+### 配置管理 (`/api/config`)
 
 #### 获取所有配置
 
@@ -129,6 +129,104 @@ GET /api/config/schema
 ```
 
 返回配置的JSON Schema，用于前端表单验证。
+
+### 代理管理 (`/api/agents`)
+
+#### 获取所有代理配置
+
+```http
+GET /api/agents/
+```
+
+返回所有可用的代理配置、代理-LLM映射关系和可用的代理类型。
+
+#### 获取特定代理配置
+
+```http
+GET /api/agents/{agent_type}
+```
+
+返回指定代理类型的配置信息。
+
+示例：
+```http
+GET /api/agents/mystery_researcher
+```
+
+#### 更新代理配置
+
+```http
+PUT /api/agents/{agent_type}
+Content-Type: application/json
+
+{
+  "name": "Updated Mystery Researcher",
+  "description": "An enhanced mystery researcher",
+  "system_prompt": "You are an expert mystery researcher...",
+  "temperature": 0.8,
+  "max_tokens": 3000
+}
+```
+
+更新指定代理的配置。
+
+#### 删除代理配置
+
+```http
+DELETE /api/agents/{agent_type}
+```
+
+删除用户自定义的代理配置，恢复为默认配置。
+
+#### 创建代理实例
+
+```http
+POST /api/agents/create
+Content-Type: application/json
+
+{
+  "agent_type": "mystery_researcher",
+  "config": {
+    // 可选的配置覆盖
+  }
+}
+```
+
+创建代理实例进行测试。
+
+#### 获取代理类型
+
+```http
+GET /api/agents/types
+```
+
+返回所有可用的代理类型、LLM类型和它们之间的映射关系。
+
+#### 验证代理配置
+
+```http
+POST /api/agents/validate
+Content-Type: application/json
+
+{
+  "name": "Test Agent",
+  "description": "A test agent",
+  "system_prompt": "You are a helpful assistant",
+  "temperature": 0.7,
+  "max_tokens": 2000
+}
+```
+
+验证代理配置的有效性。
+
+#### 支持的代理类型
+
+- `mystery_researcher` - 神秘事件研究员
+- `academic_researcher` - 学术研究员
+- `credibility_analyzer` - 可信度分析师
+- `correlation_analyzer` - 关联分析师
+- `mystery_planner` - 神秘事件规划师
+- `mystery_reporter` - 神秘事件报告员
 
 ## 响应格式
 

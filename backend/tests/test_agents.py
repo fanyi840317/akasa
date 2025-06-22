@@ -19,6 +19,7 @@ from agents.agents import (
     create_mystery_planner_agent,
     create_mystery_reporter_agent
 )
+from config.llm import LLMType
 
 
 class TestCreateAgent:
@@ -27,7 +28,7 @@ class TestCreateAgent:
     @patch('agents.agents.create_react_agent')
     @patch('agents.agents.get_llm_by_type')
     @patch('agents.agents.apply_prompt_template')
-    @patch('agents.agents.AGENT_LLM_MAP', {'researcher': 'research_llm'})
+    @patch('config.agents.AGENT_LLM_MAP', {'researcher': LLMType.RESEARCH})
     def test_create_agent_basic(self, mock_apply_prompt, mock_get_llm, mock_create_react):
         """Test basic agent creation."""
         # Setup mocks
@@ -46,7 +47,7 @@ class TestCreateAgent:
         )
         
         # Verify calls
-        mock_get_llm.assert_called_once_with('research_llm')
+        mock_get_llm.assert_called_once_with(LLMType.RESEARCH)
         mock_create_react.assert_called_once()
         
         # Check create_react_agent arguments
@@ -66,7 +67,7 @@ class TestCreateAgent:
     
     @patch('agents.agents.create_react_agent')
     @patch('agents.agents.get_llm_by_type')
-    @patch('agents.agents.AGENT_LLM_MAP', {})
+    @patch('config.agents.AGENT_LLM_MAP', {})
     def test_create_agent_missing_type(self, mock_get_llm, mock_create_react):
         """Test agent creation with missing agent type."""
         with pytest.raises(KeyError):
@@ -84,7 +85,7 @@ class TestCreateMysteryAgent:
     @patch('agents.agents.create_react_agent')
     @patch('agents.agents.get_llm_by_type')
     @patch('agents.agents.apply_prompt_template')
-    @patch('agents.agents.AGENT_LLM_MAP', {'researcher': 'research_llm'})
+    @patch('config.agents.AGENT_LLM_MAP', {'researcher': LLMType.RESEARCH})
     def test_create_mystery_agent_basic(self, mock_apply_prompt, mock_get_llm, mock_create_react):
         """Test basic mystery agent creation."""
         # Setup mocks
@@ -104,7 +105,7 @@ class TestCreateMysteryAgent:
         )
         
         # Verify basic calls
-        mock_get_llm.assert_called_once_with('research_llm')
+        mock_get_llm.assert_called_once_with(LLMType.RESEARCH)
         mock_create_react.assert_called_once()
         
         # Check create_react_agent arguments
