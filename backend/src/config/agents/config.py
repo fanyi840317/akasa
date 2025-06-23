@@ -72,7 +72,7 @@ class AgentConfig:
 def load_agents_config(config_path: Optional[str] = None) -> Dict[str, AgentConfig]:
     """Load agents configuration from YAML file."""
     if config_path is None:
-        config_path = Path(__file__).parent / "agents.yaml"
+        config_path = str(Path(__file__).parent / "agents.yaml")
     
     loader = ConfigLoader()
     data = loader.load_yaml(config_path)

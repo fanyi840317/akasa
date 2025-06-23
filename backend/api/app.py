@@ -20,7 +20,7 @@ from flask_cors import CORS
 import logging
 from typing import Optional
 
-from api.routes import config_bp, agents_bp
+from api.routes import agents_bp
 from api.middleware import setup_error_handlers, setup_logging
 
 
@@ -49,7 +49,7 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     setup_error_handlers(app)
     
     # Register blueprints
-    app.register_blueprint(config_bp, url_prefix='/api/config')
+    # app.register_blueprint(config_bp, url_prefix='/api/config')
     app.register_blueprint(agents_bp, url_prefix='/api/agents')
     
     @app.route('/api/health')

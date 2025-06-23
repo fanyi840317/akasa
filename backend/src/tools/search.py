@@ -13,12 +13,20 @@ from langchain_core.tools import BaseTool, tool
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 
-from src.config import SearchEngine, RAGProvider
-from src.config.system import MysteryEventType, DataSourceType, MysteryEventConfig
-# from src.tools.tavily_search.tavily_search_results_with_images import (
-#     TavilySearchResultsWithImages,
+# Add src directory to Python path if not already added
+import sys
+from pathlib import Path
+
+src_path = Path(__file__).parent.parent
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
+
+from config import SearchEngine, RAGProvider
+from config.system import MysteryEventType, DataSourceType, MysteryEventConfig
+# from tools.tavily_search.tavily_search_results_with_images import (
+#     tavily_search_results_with_images
 # )
-from src.tools.decorators import create_logged_tool, log_io
+from tools.decorators import create_logged_tool, log_io
 
 logger = logging.getLogger(__name__)
 

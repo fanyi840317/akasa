@@ -49,23 +49,23 @@
 
 	const getTypeColor = (type: AgentType) => {
 		switch (type) {
-			case AgentType.BASIC:
-				return 'bg-blue-100 text-blue-800 border-blue-200';
-			case AgentType.REASONING:
-				return 'bg-purple-100 text-purple-800 border-purple-200';
-			case AgentType.VISION:
-				return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-			case AgentType.FAST:
-				return 'bg-green-100 text-green-800 border-green-200';
-			case AgentType.CODE:
-				return 'bg-orange-100 text-orange-800 border-orange-200';
-			case AgentType.RESEARCH:
-				return 'bg-teal-100 text-teal-800 border-teal-200';
-			case AgentType.REPORT_GENERATOR:
+		case AgentType.MYSTERY_RESEARCHER:
+			return 'bg-purple-100 text-purple-800 border-purple-200';
+		case AgentType.ACADEMIC_RESEARCHER:
+			return 'bg-blue-100 text-blue-800 border-blue-200';
+		case AgentType.CORRELATION_ANALYZER:
+			return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+		case AgentType.REPORT_GENERATOR:
 			return 'bg-pink-100 text-pink-800 border-pink-200';
-			default:
-				return 'bg-gray-100 text-gray-800 border-gray-200';
-		}
+		case AgentType.DATA_ANALYST:
+			return 'bg-green-100 text-green-800 border-green-200';
+		case AgentType.CONTENT_CREATOR:
+			return 'bg-orange-100 text-orange-800 border-orange-200';
+		case AgentType.STRATEGY_ADVISOR:
+			return 'bg-teal-100 text-teal-800 border-teal-200';
+		default:
+			return 'bg-gray-100 text-gray-800 border-gray-200';
+	}
 	};
 
 	const handleEdit = () => dispatch('edit', { agent });

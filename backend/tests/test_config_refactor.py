@@ -17,7 +17,15 @@ def test_llm_config():
     print("\n=== 测试LLM配置 ===")
     
     try:
-        from src.config.llm.config import load_llm_config, LLMType
+        # Add src directory to Python path
+import sys
+from pathlib import Path
+
+src_path = Path(__file__).parent.parent / 'src'
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
+
+from config.llm.config import load_llm_config, LLMType
         
         # 加载配置
         config = load_llm_config()
@@ -47,7 +55,7 @@ def test_system_config():
     print("\n=== 测试系统配置 ===")
     
     try:
-        from src.config.system.config import load_system_config, MysteryEventType
+        from config.system.config import load_system_config, MysteryEventType
         
         # 加载配置
         config = load_system_config()
@@ -86,7 +94,7 @@ def test_config_integration():
     print("\n=== 测试配置集成 ===")
     
     try:
-        from src.config import load_config
+        from config import load_config
         
         # 加载完整配置
         config = load_config()

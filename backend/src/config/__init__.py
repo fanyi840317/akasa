@@ -13,11 +13,15 @@ from .system import (
     load_system_config
 )
 
-# Components configuration
-from .components import (
-    SearchEngine, RAGProvider, AnalysisEngine, DataExtractor, AgentType,
-    ToolConfig, AgentConfig, ComponentsConfig,
-    load_components_config
+# Agents configuration
+from .agents import (
+    AgentType, AgentConfig, load_agents_config
+)
+
+# Tools configuration
+from .tools import (
+    SearchEngine, RAGProvider, AnalysisEngine, DataExtractor,
+    ToolConfig, load_tools_config
 )
 
 # LLM configuration
@@ -34,20 +38,22 @@ from .validator import (
 
 # Unified configuration loader
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Dict
 
 @dataclass
 class Config:
     """Unified configuration container."""
     system: Optional[SystemConfig] = None
-    components: Optional[ComponentsConfig] = None
+    agents: Optional[Dict[str, AgentConfig]] = None
+    tools: Optional[ToolConfig] = None
     llm: Optional[LLMConfig] = None
 
 def load_config() -> Config:
     """Load all configurations."""
     return Config(
         system=load_system_config(),
-        components=load_components_config(),
+        agents=load_agents_config(),
+        tools=load_tools_config(),
         llm=load_llm_config()
     )
 
@@ -71,16 +77,18 @@ __all__ = [
     'SystemConfig',
     'load_system_config',
     
-    # Components
+    # Agents
+    'AgentType',
+    'AgentConfig',
+    'load_agents_config',
+    
+    # Tools
     'SearchEngine',
     'RAGProvider',
     'AnalysisEngine',
     'DataExtractor',
-    'AgentType',
     'ToolConfig',
-    'AgentConfig',
-    'ComponentsConfig',
-    'load_components_config',
+    'load_tools_config',
     
     # LLMs
     'LLMType',

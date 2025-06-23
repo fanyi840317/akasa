@@ -26,7 +26,7 @@
 	// Form state
 	let formData = $state({
 		name: '',
-		type: AgentType.BASIC,
+		type: AgentType.REPORT_GENERATOR,
 		description: '',
 		prompt: '',
 		tags: [] as string[],
@@ -69,7 +69,7 @@
 			// Reset to defaults for new agent
 			formData = {
 				name: '',
-				type: AgentType.BASIC,
+				type: AgentType.REPORT_GENERATOR,
 				description: '',
 				prompt: '',
 				tags: [],

@@ -47,7 +47,7 @@ def mock_config():
 class TestAgentsAPI:
     """Test cases for agents API."""
     
-    @patch('api.routes.agents.load_components_config')
+    @patch('api.routes.agents.load_agents_config')
     def test_get_all_agents(self, mock_load_config, client, mock_config):
         """Test getting all agents."""
         mock_load_config.return_value = mock_config
@@ -61,7 +61,7 @@ class TestAgentsAPI:
         assert 'agent_llm_mapping' in data['data']
         assert 'available_types' in data['data']
     
-    @patch('api.routes.agents.load_components_config')
+    @patch('api.routes.agents.load_agents_config')
     def test_get_specific_agent(self, mock_load_config, client, mock_config):
         """Test getting specific agent."""
         mock_load_config.return_value = mock_config
@@ -84,7 +84,7 @@ class TestAgentsAPI:
         assert data['success'] is False
         assert 'Invalid agent type' in data['error']
     
-    @patch('api.routes.agents.load_components_config')
+    @patch('api.routes.agents.load_agents_config')
     def test_get_nonexistent_agent(self, mock_load_config, client):
         """Test getting non-existent agent."""
         mock_config = MagicMock()

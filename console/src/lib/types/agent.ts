@@ -13,14 +13,13 @@ export interface Agent extends Entity {
 }
 
 export enum AgentType {
-	BASIC = 'basic',
-	REASONING = 'reasoning',
-	VISION = 'vision',
-	FAST = 'fast',
-	EMBEDDING = 'embedding',
-	CODE = 'code',
-	RESEARCH = 'research',
-	ANALYSIS = 'analysis'
+	MYSTERY_RESEARCHER = 'mystery_researcher',
+	ACADEMIC_RESEARCHER = 'academic_researcher',
+	CORRELATION_ANALYZER = 'correlation_analyzer',
+	REPORT_GENERATOR = 'report_generator',
+	DATA_ANALYST = 'data_analyst',
+	CONTENT_CREATOR = 'content_creator',
+	STRATEGY_ADVISOR = 'strategy_advisor'
 }
 
 export enum AgentStatus {

@@ -11,7 +11,8 @@ from urllib.parse import urlparse
 
 from .base import BaseConfig, ConfigLoader
 from .system import SystemConfig
-from .components import ComponentsConfig
+from .agents import AgentConfig
+from .tools import ToolConfig
 from .llm import LLMConfig
 
 
@@ -107,15 +108,29 @@ class ConfigValidator:
         
         return self.reports
     
-    def validate_components_config(self, config: ComponentsConfig) -> List[ValidationReport]:
-        """Validate components configuration object."""
+    def validate_agents_config(self, config: Dict[str, AgentConfig]) -> List[ValidationReport]:
+        """Validate agents configuration object."""
+        self.reports = []
+        
+        for agent_name, agent_config in config.items():
+            if not agent_config.validate():
+                self.reports.append(ValidationReport(
+                    level=self.validation_level,
+                    result=ValidationResult.FAILED,
+                    message=f"Agent configuration validation failed for {agent_name}"
+                ))
+        
+        return self.reports
+    
+    def validate_tools_config(self, config: ToolConfig) -> List[ValidationReport]:
+        """Validate tools configuration object."""
         self.reports = []
         
         if not config.validate():
             self.reports.append(ValidationReport(
                 level=self.validation_level,
                 result=ValidationResult.FAILED,
-                message="Components configuration validation failed"
+                message="Tools configuration validation failed"
             ))
         
         return self.reports
@@ -135,7 +150,7 @@ class ConfigValidator:
     
     def _validate_structure(self, config_data: Dict[str, Any]):
         """Validate basic configuration structure."""
-        required_sections = ['system', 'components', 'llm']
+        required_sections = ['system', 'agents', 'tools', 'llm']
         
         for section in required_sections:
             if section not in config_data:
@@ -162,9 +177,22 @@ class ConfigValidator:
                     suggestions=[f"Set {key} in environment variables or configuration"]
                 ))
         
-        # Check components API configs
-        components_config = config_data.get('components', {})
-        api_configs = components_config.get('api_configs', {})
+        # Check agents API configs
+        agents_config = config_data.get('agents', {})
+        for agent_name, agent in agents_config.items():
+            api_config = agent.get('api_config', {})
+            api_key = api_config.get('api_key', '')
+            if api_key and len(api_key) < 10:
+                self.reports.append(ValidationReport(
+                    level=self.validation_level,
+                    result=ValidationResult.WARNING,
+                    message=f"API key for agent {agent_name} seems too short",
+                    suggestions=[f"Check API key length for agent {agent_name}"]
+                ))
+        
+        # Check tools API configs
+        tools_config = config_data.get('tools', {})
+        api_configs = tools_config.get('api_configs', {})
         
         for name, config in api_configs.items():
             api_key = config.get('api_key', '')
@@ -232,8 +260,8 @@ class ConfigValidator:
     
     def _validate_search_engines(self, config_data: Dict[str, Any]):
         """Validate search engine configurations."""
-        components_config = config_data.get('components', {})
-        search_engine = components_config.get('search_engine')
+        tools_config = config_data.get('tools', {})
+        search_engine = tools_config.get('search_engine')
         
         if not search_engine:
             self.reports.append(ValidationReport(
@@ -244,7 +272,7 @@ class ConfigValidator:
             ))
         
         # Validate search tools
-        tools = components_config.get('tools', {})
+        tools = tools_config.get('tools', {})
         search_tools = [name for name, tool in tools.items() 
                        if tool.get('type') == 'search']
         
@@ -258,8 +286,8 @@ class ConfigValidator:
     
     def _validate_crawlers(self, config_data: Dict[str, Any]):
         """Validate crawler configurations."""
-        components_config = config_data.get('components', {})
-        tools = components_config.get('tools', {})
+        tools_config = config_data.get('tools', {})
+        tools = tools_config.get('tools', {})
         
         # Check for web scraper tool
         scraper_tools = [name for name, tool in tools.items() 
@@ -288,10 +316,9 @@ class ConfigValidator:
     
     def _validate_workflow(self, config_data: Dict[str, Any]):
         """Validate workflow configurations."""
-        components_config = config_data.get('components', {})
-        agents = components_config.get('agents', {})
+        agents_config = config_data.get('agents', {})
         
-        if not agents:
+        if not agents_config:
             self.reports.append(ValidationReport(
                 level=self.validation_level,
                 result=ValidationResult.WARNING,
@@ -300,8 +327,9 @@ class ConfigValidator:
             ))
         
         # Check agent-tool dependencies
-        tools = components_config.get('tools', {})
-        for agent_name, agent_config in agents.items():
+        tools_config = config_data.get('tools', {})
+        tools = tools_config.get('tools', {})
+        for agent_name, agent_config in agents_config.items():
             agent_tools = agent_config.get('tools', [])
             for tool_name in agent_tools:
                 if tool_name not in tools:

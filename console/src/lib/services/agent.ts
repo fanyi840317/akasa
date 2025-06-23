@@ -35,13 +35,15 @@ class AgentService {
 			params.append('sortField', sort.field);
 			params.append('sortOrder', sort.order);
 		}
-
-		const response = await fetch(`${API_BASE}/agents?${params}`);
+		// ?${params}
+		const response = await fetch(`${API_BASE}/agents`);
 		if (!response.ok) {
 			throw new Error(`Failed to fetch agents: ${response.statusText}`);
 		}
 
-		return response.json();
+		const data = await response.json();
+		console.log(data);
+		return data;
 	}
 
 	async getAgent(id: string): Promise<Agent> {
