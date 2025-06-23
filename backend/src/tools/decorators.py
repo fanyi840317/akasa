@@ -24,7 +24,7 @@ def log_io(func: Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         start_time = time.time()
-        function_name = func.__name__
+        function_name = getattr(func, '__name__', getattr(func, 'name', str(func)))
         
         # 记录输入
         logger.info(f"[{function_name}] Starting execution")
@@ -58,14 +58,45 @@ def log_io(func: Callable) -> Callable:
             execution_time = time.time() - start_time
             logger.error(f"[{function_name}] Failed after {execution_time:.3f}s with error: {repr(e)}")
             
-            # 返回错误结果
+            # 为batch_crawl_tool返回特殊的错误结构
+            if function_name == 'batch_crawl_tool' and len(args) > 0:
+                try:
+                    urls = args[0] if args else []
+                    if isinstance(urls, list):
+                        return {
+                            "total_urls": len(urls),
+                            "successful": 0,
+                            "failed": len(urls),
+                            "error": str(e),
+                            "results": [],
+                            "timestamp": datetime.now().isoformat()
+                        }
+                except:
+                    pass
+            
+            # 为mystery_site_crawler返回特殊的错误结构
+            if function_name == 'mystery_site_crawler' and len(args) > 0:
+                try:
+                    site_type = args[0] if args else "unknown"
+                    search_terms = args[1] if len(args) > 1 else []
+                    return {
+                        "site_type": site_type,
+                        "search_terms": search_terms,
+                        "total_results": 0,
+                        "error": str(e),
+                        "results": []
+                    }
+                except:
+                    pass
+            
+            # 返回通用错误结果
             error_result = {
                 "error": str(e),
                 "function": function_name,
                 "execution_time": execution_time,
                 "timestamp": datetime.now().isoformat()
             }
-            return json.dumps(error_result, ensure_ascii=False)
+            return error_result
     
     return wrapper
 
@@ -124,7 +155,7 @@ def performance_monitor(threshold_seconds: float = 1.0):
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             start_time = time.time()
-            function_name = func.__name__
+            function_name = getattr(func, '__name__', getattr(func, 'name', str(func)))
             
             try:
                 result = func(*args, **kwargs)
@@ -163,7 +194,7 @@ def retry_on_failure(max_retries: int = 3, delay_seconds: float = 1.0, backoff_f
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            function_name = func.__name__
+            function_name = getattr(func, '__name__', getattr(func, 'name', str(func)))
             last_exception = None
             
             for attempt in range(max_retries + 1):
@@ -202,7 +233,7 @@ def validate_input(validation_func: Callable[[Any], bool], error_message: str = 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            function_name = func.__name__
+            function_name = getattr(func, '__name__', getattr(func, 'name', str(func)))
             
             try:
                 # 验证输入
@@ -214,7 +245,7 @@ def validate_input(validation_func: Callable[[Any], bool], error_message: str = 
                         "validation_failed": True,
                         "timestamp": datetime.now().isoformat()
                     }
-                    return json.dumps(error_result, ensure_ascii=False)
+                    return error_result
                 
                 return func(*args, **kwargs)
                 
@@ -226,7 +257,7 @@ def validate_input(validation_func: Callable[[Any], bool], error_message: str = 
                     "validation_error": True,
                     "timestamp": datetime.now().isoformat()
                 }
-                return json.dumps(error_result, ensure_ascii=False)
+                return error_result
         
         return wrapper
     return decorator
@@ -246,7 +277,7 @@ def cache_result(cache_duration_seconds: int = 300):
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            function_name = func.__name__
+            function_name = getattr(func, '__name__', getattr(func, 'name', str(func)))
             
             # 创建缓存键
             cache_key = f"{function_name}_{hash(str(args) + str(sorted(kwargs.items())))}"
@@ -288,7 +319,7 @@ def rate_limit(calls_per_minute: int = 60):
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            function_name = func.__name__
+            function_name = getattr(func, '__name__', getattr(func, 'name', str(func)))
             current_time = time.time()
             
             # 清理过期的调用记录（超过1分钟）
@@ -303,7 +334,7 @@ def rate_limit(calls_per_minute: int = 60):
                     "rate_limited": True,
                     "timestamp": datetime.now().isoformat()
                 }
-                return json.dumps(error_result, ensure_ascii=False)
+                return error_result
             
             # 记录调用时间
             call_times.append(current_time)
@@ -336,7 +367,7 @@ def sanitize_output(sanitize_func: Optional[Callable[[Any], Any]] = None):
                         if key in data:
                             data[key] = "[REDACTED]"
                 
-                return json.dumps(data, ensure_ascii=False)
+                return data
             except (json.JSONDecodeError, TypeError):
                 return result
         
@@ -368,7 +399,7 @@ def measure_memory_usage(func: Callable) -> Callable:
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
-        function_name = func.__name__
+        function_name = getattr(func, '__name__', getattr(func, 'name', str(func)))
         
         try:
             import psutil

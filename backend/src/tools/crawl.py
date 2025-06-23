@@ -102,7 +102,7 @@ class MysteryWebCrawler:
 _crawler = MysteryWebCrawler()
 
 
-@mystery_tool
+@mystery_tool()
 @tool
 def crawl_tool(
     url: str,
@@ -142,7 +142,7 @@ def crawl_tool(
         }
 
 
-@mystery_tool
+@mystery_tool()
 @tool
 def batch_crawl_tool(
     urls: List[str],
@@ -186,7 +186,7 @@ def batch_crawl_tool(
         }
 
 
-@mystery_tool
+@mystery_tool()
 @tool
 def mystery_site_crawler(
     site_type: str,

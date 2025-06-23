@@ -21,12 +21,12 @@ src_path = Path(__file__).parent.parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from config import SearchEngine, RAGProvider
-from config.system import MysteryEventType, DataSourceType, MysteryEventConfig
+from ..config import SearchEngine, RAGProvider
+from ..config.system import MysteryEventType, DataSourceType, MysteryEventConfig
 # from tools.tavily_search.tavily_search_results_with_images import (
 #     tavily_search_results_with_images
 # )
-from tools.decorators import create_logged_tool, log_io
+from .decorators import create_logged_tool, log_io
 
 logger = logging.getLogger(__name__)
 

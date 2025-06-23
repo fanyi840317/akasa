@@ -1,55 +1,56 @@
 # LLM 配置文件
 # Large Language Model Configuration
 # =============================================================================
-# OpenAI Configuration
-openai:
-  api_key: ${OPENAI_API_KEY}
-  base_url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
-  organization: ${OPENAI_ORG_ID:}
-  models:
-    basic: gpt-4o-mini
-    reasoning: gpt-4o
-    vision: gpt-4o
-    fast: gpt-3.5-turbo
-    embedding: text-embedding-ada-002
-    code: gpt-4o
-    research: gpt-4o
-    analysis: gpt-4o
-  model_configs:
-    basic:
-      model: gpt-4o-mini
-      temperature: 0.7
-      max_tokens: 4000
-    reasoning:
-      model: gpt-4o
-      temperature: 0.3
-      max_tokens: 8000
-    vision:
-      model: gpt-4o
-      temperature: 0.5
-      max_tokens: 4000
-    fast:
-      model: gpt-3.5-turbo
-      temperature: 0.7
-      max_tokens: 2000
-    code:
-      model: gpt-4o
-      temperature: 0.1
-      max_tokens: 6000
-    research:
-      model: gpt-4o
-      temperature: 0.3
-      max_tokens: 8000
-    analysis:
-      model: gpt-4o
-      temperature: 0.2
-      max_tokens: 6000
-    default_params:
-      temperature: 0.3
-      max_tokens: 4000
-      top_p: 1.0
-      frequency_penalty: 0.0
-      presence_penalty: 0.0
+providers:
+  # OpenAI Configuration
+  openai:
+    api_key: ${OPENAI_API_KEY}
+    base_url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+    organization: ${OPENAI_ORG_ID:}
+    models:
+      basic: gpt-4o-mini
+      reasoning: gpt-4o
+      vision: gpt-4o
+      fast: gpt-3.5-turbo
+      embedding: text-embedding-ada-002
+      code: gpt-4o
+      research: gpt-4o
+      analysis: gpt-4o
+    model_configs:
+      basic:
+        model: gpt-4o-mini
+        temperature: 0.7
+        max_tokens: 4000
+      reasoning:
+        model: gpt-4o
+        temperature: 0.3
+        max_tokens: 8000
+      vision:
+        model: gpt-4o
+        temperature: 0.5
+        max_tokens: 4000
+      fast:
+        model: gpt-3.5-turbo
+        temperature: 0.7
+        max_tokens: 2000
+      code:
+        model: gpt-4o
+        temperature: 0.1
+        max_tokens: 6000
+      research:
+        model: gpt-4o
+        temperature: 0.3
+        max_tokens: 8000
+      analysis:
+        model: gpt-4o
+        temperature: 0.2
+        max_tokens: 6000
+      default_params:
+        temperature: 0.3
+        max_tokens: 4000
+        top_p: 1.0
+        frequency_penalty: 0.0
+        presence_penalty: 0.0
 
   # Anthropic Claude Configuration
   anthropic:
@@ -232,32 +233,23 @@ openai:
 
   # Baidu ERNIE Configuration (百度文心一言)
   baidu:
-    api_key: ${BAIDU_API_KEY}
-    secret_key: ${BAIDU_SECRET_KEY}
-    base_url: ${BAIDU_BASE_URL:https://aip.baidubce.com}
-    models:
-      basic: ernie-bot-turbo
-      reasoning: ernie-bot-4
-      vision: ernie-bot-4
-      fast: ernie-bot-turbo
-      embedding: embedding-v1
-      code: ernie-bot-4
-      research: ernie-bot-4
-      analysis: ernie-bot-4
-    default_params:
-      temperature: 0.3
-      max_output_tokens: 4000
-      top_p: 1.0
+      api_key: ${BAIDU_API_KEY}
+      secret_key: ${BAIDU_SECRET_KEY}
+      base_url: ${BAIDU_BASE_URL:https://aip.baidubce.com}
+      models:
+        basic: ernie-bot-turbo
+        reasoning: ernie-bot-4
+        vision: ernie-bot-4
+        fast: ernie-bot-turbo
+        embedding: embedding-v1
+        code: ernie-bot-4
+        research: ernie-bot-4
+        analysis: ernie-bot-4
+      default_params:
+        temperature: 0.3
+        max_output_tokens: 4000
+        top_p: 1.0
 
-# Default provider priority (按优先级排序)
-default_providers:
-  - openai
-  - anthropic
-  - qwen
-  - google
-  - zhipu
-  - baidu
-  - ollama
 
 # LLM type to provider mapping (可以为不同类型指定不同的提供商)
 type_provider_mapping:
