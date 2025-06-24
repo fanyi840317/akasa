@@ -4,10 +4,15 @@ import json
 import pytest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
+import sys
 
 from api.app import create_app
 from config.agents import AgentType, AgentConfig
 from config.llm import LLMType
+
+api_path = str((Path(__file__).parent.parent / "api").resolve())
+if api_path not in sys.path:
+    sys.path.insert(0, api_path)
 
 
 @pytest.fixture

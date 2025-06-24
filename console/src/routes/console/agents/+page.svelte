@@ -6,6 +6,9 @@
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { Button } from '$lib/components/ui/button';
+	import { Plus } from '@lucide/svelte';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	// State for form modal
 	let showForm = $state(false);
@@ -23,16 +26,17 @@
 		showForm = true;
 	};
 
-	const handleView = (event: CustomEvent<{ agent: Agent }>) => {
-		const agent = event.detail.agent;
+	const handleView = (agent: Agent) => {
 		// Navigate to agent detail page (to be implemented)
 		goto(`/console/agents/${agent.$id}`);
 	};
 
 	const handleDelete = async (event: CustomEvent<{ agent: Agent }>) => {
 		const agent = event.detail.agent;
-		
-		if (!confirm(`Are you sure you want to delete "${agent.name}"? This action cannot be undone.`)) {
+
+		if (
+			!confirm(`Are you sure you want to delete "${agent.name}"? This action cannot be undone.`)
+		) {
 			return;
 		}
 
@@ -40,21 +44,25 @@
 			await agentStore.deleteAgent(agent.$id);
 			toast.success(`Agent "${agent.name}" deleted successfully`);
 		} catch (error) {
-			toast.error(`Failed to delete agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			toast.error(
+				`Failed to delete agent: ${error instanceof Error ? error.message : 'Unknown error'}`
+			);
 		}
 	};
 
 	const handleDuplicate = async (event: CustomEvent<{ agent: Agent }>) => {
 		const agent = event.detail.agent;
 		const newName = prompt(`Enter name for duplicated agent:`, `${agent.name} (Copy)`);
-		
+
 		if (!newName) return;
 
 		try {
 			await agentStore.duplicateAgent(agent.$id, newName);
 			toast.success(`Agent duplicated as "${newName}"`);
 		} catch (error) {
-			toast.error(`Failed to duplicate agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			toast.error(
+				`Failed to duplicate agent: ${error instanceof Error ? error.message : 'Unknown error'}`
+			);
 		}
 	};
 
@@ -65,9 +73,11 @@
 	};
 
 	// Handle form submission
-	const handleFormSave = async (event: CustomEvent<{ data: CreateAgentRequest | UpdateAgentRequest }>) => {
+	const handleFormSave = async (
+		event: CustomEvent<{ data: CreateAgentRequest | UpdateAgentRequest }>
+	) => {
 		formLoading = true;
-		
+
 		try {
 			if (editingAgent) {
 				// Update existing agent
@@ -78,11 +88,13 @@
 				await agentStore.createAgent(event.detail.data as CreateAgentRequest);
 				toast.success(`Agent "${event.detail.data.name}" created successfully`);
 			}
-			
+
 			showForm = false;
 			editingAgent = null;
 		} catch (error) {
-			toast.error(`Failed to ${editingAgent ? 'update' : 'create'} agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			toast.error(
+				`Failed to ${editingAgent ? 'update' : 'create'} agent: ${error instanceof Error ? error.message : 'Unknown error'}`
+			);
 		} finally {
 			formLoading = false;
 		}
@@ -104,23 +116,30 @@
 	<title>Agents - Akasa Console</title>
 	<meta name="description" content="Manage your AI agents and their configurations" />
 </svelte:head>
+<ScrollArea orientation="vertical" class=" rounded-input bg-base-200 h-[calc(100vh-64px)]  ">
+	<div class="container mx-auto space-y-6 p-6">
+		<!-- Header -->
+		<div class="flex items-center justify-between">
+			<div>
+				<h1 class="text-3xl font-bold tracking-tight">浏览代理</h1>
+				<p class="text-muted-foreground mt-2">
+					发现并创建适合您的代理，将概念、统计和知识的任何任务组合在一起。
+				</p>
+			</div>
+			<Button>
+				<Plus class="mr-2 h-4 w-4" />
+				创建
+			</Button>
+		</div>
+		<AgentList oncreate={handleCreate} onview={handleView} />
 
-<div class="container mx-auto p-6 space-y-6">
-	<AgentList
-		on:create={handleCreate}
-		on:edit={handleEdit}
-		on:view={handleView}
-		on:delete={handleDelete}
-		on:duplicate={handleDuplicate}
-		on:test={handleTest}
-	/>
-
-	<!-- Agent Form Modal -->
-	<AgentForm
-		open={showForm}
-		agent={editingAgent}
-		loading={formLoading}
-		on:save={handleFormSave}
-		on:close={handleFormClose}
-	/>
-</div>
+		<!-- Agent Form Modal -->
+		<AgentForm
+			open={showForm}
+			agent={editingAgent}
+			loading={formLoading}
+			on:save={handleFormSave}
+			on:close={handleFormClose}
+		/>
+	</div>
+</ScrollArea>

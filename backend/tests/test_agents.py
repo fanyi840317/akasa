@@ -5,9 +5,11 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
 import sys
+from config.llm import LLMType
 
-# Add src to path
-sys.path.append(str(Path(__file__).parent.parent / "src"))
+src_path = str((Path(__file__).parent.parent / "src").resolve())
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
 from agents.agents import (
     create_agent,
@@ -19,7 +21,6 @@ from agents.agents import (
     create_mystery_planner_agent,
     create_mystery_reporter_agent
 )
-from config.llm import LLMType
 
 
 class TestCreateAgent:

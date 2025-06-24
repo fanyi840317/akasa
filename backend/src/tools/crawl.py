@@ -12,6 +12,7 @@ import requests
 from typing import Dict, Any, Optional, List
 from urllib.parse import urljoin, urlparse
 from langchain_core.tools import tool
+from datetime import datetime
 
 from .decorators import mystery_tool
 
@@ -233,7 +234,6 @@ def mystery_site_crawler(
                     "timestamp": None
                 }
                 
-                from datetime import datetime
                 mock_result["timestamp"] = datetime.now().isoformat()
                 results.append(mock_result)
         

@@ -42,6 +42,7 @@ def get_all_agents():
         i = 0
         for agent_name, agent_config in agents_config.items():
             agents_data.append({
+                "$id": agent_config.name,
                 'name': agent_config.name,
                 'description': agent_config.description,
                 'prompt': agent_config.prompt_template,

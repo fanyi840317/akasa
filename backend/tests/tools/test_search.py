@@ -167,9 +167,9 @@ class TestSearchToolFactories:
         tool_tavily = get_web_search_tool(5, SearchEngine.TAVILY)
         assert tool_tavily is not None
         
-        # Test Bing
-        tool_bing = get_web_search_tool(5, SearchEngine.BING)
-        assert tool_bing is not None
+        # Test Brave Search
+        tool_brave = get_web_search_tool(5, SearchEngine.BRAVE_SEARCH)
+        assert tool_brave is not None
     
     def test_get_academic_search_tool(self):
         """Test get_academic_search_tool factory."""

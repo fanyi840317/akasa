@@ -21,8 +21,8 @@ src_path = Path(__file__).parent.parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from ..config import SearchEngine, RAGProvider
-from ..config.system import MysteryEventType, DataSourceType, MysteryEventConfig
+from config import SearchEngine, RAGProvider
+from config.mystery_config import MysteryEventType, DataSourceType, MysteryEventConfig
 # from tools.tavily_search.tavily_search_results_with_images import (
 #     tavily_search_results_with_images
 # )
@@ -45,7 +45,7 @@ class AcademicSearch(BaseTool):
     databases: List[str] = ["arxiv", "cnki", "wanfang"]
     api_keys: Dict[str, str] = {}
     
-    def __init__(self, max_results: int = 5, databases: List[str] = None, **kwargs):
+    def __init__(self, max_results: int = 5, databases: Optional[List[str]] = None, **kwargs):
         """Initialize the academic search tool.
         
         Args:
@@ -84,6 +84,8 @@ class AcademicSearch(BaseTool):
             try:
                 arxiv_tool = LoggedArxivSearch(
                     api_wrapper=ArxivAPIWrapper(
+                        arxiv_search=None,  # Replace with actual arxiv_search instance if available
+                        arxiv_exceptions=None,  # Replace with actual arxiv_exceptions instance if available
                         top_k_results=self.max_results,
                         load_max_docs=self.max_results,
                         load_all_available_meta=True,
@@ -162,7 +164,7 @@ class MysterySearch(BaseTool):
     api_keys: Dict[str, str] = {}
     config: Dict[str, Any] = {}
     
-    def __init__(self, max_results: int = 5, event_types: List[str] = None, **kwargs):
+    def __init__(self, max_results: int = 5, event_types: Optional[List[str]] = None, **kwargs):
         """Initialize the mystery search tool.
         
         Args:
@@ -295,34 +297,29 @@ def get_web_search_tool(max_search_results: int, engine: SearchEngine = SearchEn
         return LoggedDuckDuckGoSearch(name="web_search", max_results=max_search_results)
     elif engine == SearchEngine.DUCKDUCKGO:
         return LoggedDuckDuckGoSearch(name="web_search", max_results=max_search_results)
-    elif engine == SearchEngine.BING:
+    elif engine == SearchEngine.BRAVE_SEARCH:
+        from pydantic import SecretStr
         return LoggedBraveSearch(
             name="web_search",
             search_wrapper=BraveSearchWrapper(
-                api_key=os.getenv("BRAVE_SEARCH_API_KEY", ""),
+                api_key=SecretStr(os.getenv("BRAVE_SEARCH_API_KEY", "")),
                 search_kwargs={"count": max_search_results},
             ),
         )
-    elif engine == SearchEngine.BAIDU:
-        return LoggedArxivSearch(
-            name="web_search",
-            api_wrapper=ArxivAPIWrapper(
-                top_k_results=max_search_results,
-                load_max_docs=max_search_results,
-                load_all_available_meta=True,
-            ),
-        )
+    # elif engine == SearchEngine.BAIDU:
+    #     # BAIDU search not implemented or not available in SearchEngine
+    #     return LoggedDuckDuckGoSearch(name="web_search", max_results=max_search_results)
     else:
         # Default to DuckDuckGo for unsupported engines
         return LoggedDuckDuckGoSearch(name="web_search", max_results=max_search_results)
 
 
-def get_academic_search_tool(max_search_results: int = 5, databases: List[str] = None):
+def get_academic_search_tool(max_search_results: int = 5, databases: Optional[List[str]] = None):
     """Get the academic search tool."""
     return AcademicSearch(max_results=max_search_results, databases=databases)
 
 
-def get_mystery_search_tool(max_search_results: int = 5, event_types: List[str] = None):
+def get_mystery_search_tool(max_search_results: int = 5, event_types: Optional[List[str]] = None):
     """Get the mystery search tool."""
     return MysterySearch(max_results=max_search_results, event_types=event_types)
 

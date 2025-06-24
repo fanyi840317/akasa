@@ -112,9 +112,8 @@
 					<UserAvatar {user} size="size-8" />
 				</UserMenu>
 			</header>
-			<ScrollArea orientation="vertical" class=" rounded-input bg-base-200 h-[calc(100vh-64px)]  ">
-				{@render children()}
-			</ScrollArea>
+			{@render children()}
+		
 		</main>
 	</Sidebar.Provider>
 {/if}

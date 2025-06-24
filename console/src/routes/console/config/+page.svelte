@@ -269,6 +269,37 @@
 					{ key: 'cache.ttl', label: '缓存过期时间(秒)', type: 'number', placeholder: '3600' }
 				]}
 			/>
+
+			<Separator />
+
+			<!-- 工具管理快速访问 -->
+			<Card class="border-blue-200 bg-blue-50">
+				<CardHeader>
+					<CardTitle class="flex items-center space-x-2">
+						<Settings class="h-5 w-5 text-blue-600" />
+						<span class="text-blue-800">工具管理</span>
+					</CardTitle>
+					<CardDescription class="text-blue-700">
+						管理系统中可用的工具，启用或禁用特定功能
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div class="flex items-center justify-between">
+						<p class="text-sm text-blue-600">
+							配置和管理系统工具，包括搜索引擎、网络爬虫等功能模块
+						</p>
+						<Button 
+							variant="outline" 
+							size="sm"
+							class="border-blue-300 text-blue-700 hover:bg-blue-100"
+							onclick={() => window.location.href = '/console/config/tools'}
+						>
+							<Settings class="h-4 w-4 mr-2" />
+							管理工具
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
 		</div>
 	{/if}
 </div>

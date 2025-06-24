@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: MIT
 
-import os
 from langgraph.prebuilt import create_react_agent
-from typing import List, Any
-
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from typing import List, Any, Optional
 
 from prompts import apply_prompt_template
 from config.llm import get_llm_by_type
-from config.agents import AGENT_LLM_MAP, AgentType
+from config.agents import AGENT_LLM_MAP
 
 
 def create_agent(agent_name: str, agent_type: str, tools: list, prompt_template: str):
@@ -25,22 +20,14 @@ def create_agent(agent_name: str, agent_type: str, tools: list, prompt_template:
 
 
 def create_mystery_agent(
-    agent_name: str,
-    agent_type: str,
-    tools: list,
+    agent_name: str, 
+    agent_type: str, 
+    tools: list, 
     prompt_template: str,
-    mystery_config: dict = None
+    mystery_config: Optional[dict] = None
 ):
     """Factory function to create mystery research agents with specialized configuration."""
-    # Map string agent_type to AgentType enum for LLM lookup
-    agent_type_map = {
-        "researcher": AgentType.MYSTERY_RESEARCHER,
-        "planner": AgentType.DATA_COLLECTOR,
-        "reporter": AgentType.REPORT_GENERATOR,
-        "analyzer": AgentType.CREDIBILITY_ANALYZER
-    }
-    agent_enum = agent_type_map.get(agent_type, AgentType.MYSTERY_RESEARCHER)
-    llm = get_llm_by_type(AGENT_LLM_MAP[agent_enum])
+    llm = get_llm_by_type(AGENT_LLM_MAP[agent_type])
     
     # Enhance prompt with mystery research context
     def enhanced_prompt(state):
@@ -104,7 +91,7 @@ def create_mystery_agent(
     )
 
 
-def create_mystery_researcher_agent(tools: list, mystery_config: dict = None):
+def create_mystery_researcher_agent(tools: list, mystery_config: Optional[dict] = None):
     """Create a specialized mystery researcher agent."""
     return create_mystery_agent(
         agent_name="mystery_researcher",
@@ -115,7 +102,7 @@ def create_mystery_researcher_agent(tools: list, mystery_config: dict = None):
     )
 
 
-def create_academic_researcher_agent(tools: list, mystery_config: dict = None):
+def create_academic_researcher_agent(tools: list, mystery_config: Optional[dict] = None):
     """Create a specialized academic researcher agent."""
     return create_mystery_agent(
         agent_name="academic_researcher",
@@ -126,7 +113,7 @@ def create_academic_researcher_agent(tools: list, mystery_config: dict = None):
     )
 
 
-def create_credibility_analyzer_agent(tools: list, mystery_config: dict = None):
+def create_credibility_analyzer_agent(tools: list, mystery_config: Optional[dict] = None):
     """Create a specialized credibility analyzer agent."""
     return create_mystery_agent(
         agent_name="credibility_analyzer",
@@ -137,7 +124,7 @@ def create_credibility_analyzer_agent(tools: list, mystery_config: dict = None):
     )
 
 
-def create_correlation_analyzer_agent(tools: list, mystery_config: dict = None):
+def create_correlation_analyzer_agent(tools: list, mystery_config: Optional[dict] = None):
     """Create a specialized correlation analyzer agent."""
     return create_mystery_agent(
         agent_name="correlation_analyzer",
@@ -148,7 +135,7 @@ def create_correlation_analyzer_agent(tools: list, mystery_config: dict = None):
     )
 
 
-def create_mystery_planner_agent(tools: list, mystery_config: dict = None):
+def create_mystery_planner_agent(tools: list, mystery_config: Optional[dict] = None):
     """Create a specialized mystery research planner agent."""
     return create_mystery_agent(
         agent_name="mystery_planner",
@@ -159,7 +146,7 @@ def create_mystery_planner_agent(tools: list, mystery_config: dict = None):
     )
 
 
-def create_mystery_reporter_agent(tools: list, mystery_config: dict = None):
+def create_mystery_reporter_agent(tools: list, mystery_config: Optional[dict] = None):
     """Create a specialized mystery research reporter agent."""
     return create_mystery_agent(
         agent_name="mystery_reporter",

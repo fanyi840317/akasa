@@ -52,6 +52,10 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     # app.register_blueprint(config_bp, url_prefix='/api/config')
     app.register_blueprint(agents_bp, url_prefix='/api/agents')
     
+    # Import and register tools blueprint
+    from api.routes import tools_bp
+    app.register_blueprint(tools_bp, url_prefix='/api/tools')
+    
     @app.route('/api/health')
     def health_check():
         """Health check endpoint."""

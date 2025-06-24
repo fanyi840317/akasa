@@ -41,7 +41,7 @@ class AgentService {
 			throw new Error(`Failed to fetch agents: ${response.statusText}`);
 		}
 
-		const data = await response.json();
+		const data = await response.json().then((data) => data.data);
 		console.log(data);
 		return data;
 	}

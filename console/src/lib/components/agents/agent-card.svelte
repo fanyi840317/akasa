@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Agent } from '$lib/types/agent.js';
 	import { AgentStatus, AgentType } from '$lib/types/agent.js';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import {
@@ -15,22 +15,19 @@
 		Activity
 	} from '@lucide/svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { createEventDispatcher } from 'svelte';
 	import { formatDistanceToNow } from 'date-fns';
+	import CardFooter from '../ui/card/card-footer.svelte';
 
 	interface Props {
 		agent: Agent;
+		onedit?: (agent: Agent) => void;
+		ondelete?: (agent: Agent) => void;
+		onduplicate?: (agent: Agent) => void;
+		ontest?: (agent: Agent) => void;
+		onview?: (agent: Agent) => void;
 	}
 
-	let { agent }: Props = $props();
-
-	const dispatch = createEventDispatcher<{
-		edit: { agent: Agent };
-		delete: { agent: Agent };
-		duplicate: { agent: Agent };
-		test: { agent: Agent };
-		view: { agent: Agent };
-	}>();
+	let { agent, onedit, ondelete, onduplicate, ontest, onview }: Props = $props();
 
 	const getStatusColor = (status: AgentStatus) => {
 		switch (status) {
@@ -68,62 +65,31 @@
 	}
 	};
 
-	const handleEdit = () => dispatch('edit', { agent });
-	const handleDelete = () => dispatch('delete', { agent });
-	const handleDuplicate = () => dispatch('duplicate', { agent });
-	const handleTest = () => dispatch('test', { agent });
-	const handleView = () => dispatch('view', { agent });
+	const handleEdit = () => onedit?.(agent);
+	const handleDelete = () => ondelete?.(agent);
+	const handleDuplicate = () => onduplicate?.(agent);
+	const handleTest = () => ontest?.(agent);
+	const handleView = () => onview?.(agent);
 </script>
 
-<Card class="group hover:shadow-md transition-shadow cursor-pointer" onclick={handleView}>
+<Card class="group h-[300px] hover:shadow-md transition-shadow cursor-pointer" onclick={handleView}>
 	<CardHeader class="pb-3">
-		<div class="flex items-start justify-between">
-			<div class="flex items-center gap-2">
-				<Bot class="h-5 w-5 text-muted-foreground" />
-				<CardTitle class="text-lg font-semibold truncate">{agent.name}</CardTitle>
-			</div>
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger>
-					<Button
-						variant="ghost"
-						size="sm"
-						class="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-						onclick={(e) => e.stopPropagation()}
-					>
-						<MoreVertical class="h-4 w-4" />
-					</Button>
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Content align="end">
-					<DropdownMenu.Item onclick={handleTest}>
-						<Play class="mr-2 h-4 w-4" />
-						Test Agent
-					</DropdownMenu.Item>
-					<DropdownMenu.Item onclick={handleEdit}>
-						<Edit class="mr-2 h-4 w-4" />
-						Edit
-					</DropdownMenu.Item>
-					<DropdownMenu.Item onclick={handleDuplicate}>
-						<Copy class="mr-2 h-4 w-4" />
-						Duplicate
-					</DropdownMenu.Item>
-					<DropdownMenu.Separator />
-					<DropdownMenu.Item onclick={handleDelete} class="text-destructive">
-						<Trash2 class="mr-2 h-4 w-4" />
-						Delete
-					</DropdownMenu.Item>
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
-		</div>
-		<div class="flex items-center gap-2 mt-2">
+		<CardTitle>{agent.name}</CardTitle>
+		<CardDescription>{agent.description}</CardDescription>
+	
+		<!-- <div class="flex items-center gap-2 mt-2">
 			<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border {getStatusColor(agent.status)}">
 				{agent.status}
 			</span>
 			<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border {getTypeColor(agent.type)}">
 				{agent.type}
 			</span>
-		</div>
+		</div> -->
 	</CardHeader>
-	<CardContent class="pt-0">
+	<CardContent class="flex-1 ">
+		
+	</CardContent>
+	<!-- <CardContent class="pt-0">
 		{#if agent.description}
 			<p class="text-sm text-muted-foreground mb-3 line-clamp-2">
 				{agent.description}
@@ -164,7 +130,43 @@
 				<span>Updated {formatDistanceToNow(agent.updatedAt)} ago</span>
 			{/if}
 		</div>
-	</CardContent>
+	</CardContent> -->
+	<CardFooter>
+		<div class="flex w-full items-center justify-between">
+			<Bot class="size-4"></Bot>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					<Button
+						variant="ghost"
+						size="sm"
+						class="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+						onclick={(e) => e.stopPropagation()}
+					>
+						<MoreVertical class="h-4 w-4" />
+					</Button>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content align="start" class="rounded-[16px]">
+					<DropdownMenu.Item onclick={handleTest}>
+						<Play class="mr-2 h-4 w-4" />
+						Test Agent
+					</DropdownMenu.Item>
+					<DropdownMenu.Item onclick={handleEdit}>
+						<Edit class="mr-2 h-4 w-4" />
+						Edit
+					</DropdownMenu.Item>
+					<DropdownMenu.Item onclick={handleDuplicate}>
+						<Copy class="mr-2 h-4 w-4" />
+						Duplicate
+					</DropdownMenu.Item>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Item onclick={handleDelete} class="text-destructive">
+						<Trash2 class="mr-2 h-4 w-4" />
+						Delete
+					</DropdownMenu.Item>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		</div>
+	</CardFooter>
 </Card>
 
 <style>

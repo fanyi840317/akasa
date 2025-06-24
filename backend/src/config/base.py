@@ -48,7 +48,7 @@ class BaseConfig(ABC):
         pass
         
     @classmethod
-    def from_yaml(cls: Type[T], file_path: Union[str, Path], environment: str = None) -> T:
+    def from_yaml(cls: Type[T], file_path: Union[str, Path], environment: Optional[str] = None) -> T:
         """Create configuration from YAML file.
         
         Args:
@@ -71,7 +71,7 @@ class BaseConfig(ABC):
         return cls.from_dict(config_data)
         
     @classmethod
-    def from_yaml_files(cls: Type[T], *file_paths: Union[str, Path], environment: str = None) -> T:
+    def from_yaml_files(cls: Type[T], *file_paths: Union[str, Path], environment: Optional[str] = None) -> T:
         """Create configuration from multiple YAML files.
         
         Args:
@@ -161,7 +161,7 @@ class ConfigLoader:
         return result
         
     @staticmethod
-    def load_config_files(*file_paths: Union[str, Path], environment: str = None) -> Dict[str, Any]:
+    def load_config_files(*file_paths: Union[str, Path], environment: Optional[str] = None) -> Dict[str, Any]:
         """Load and merge multiple YAML configuration files.
         
         Args:

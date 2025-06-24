@@ -214,7 +214,10 @@ def retry_on_failure(max_retries: int = 3, delay_seconds: float = 1.0, backoff_f
                         logger.error(f"[RETRY] {function_name} all {max_retries + 1} attempts failed")
             
             # 所有重试都失败了，抛出最后一个异常
-            raise last_exception
+            if last_exception is not None:
+                raise last_exception
+            else:
+                raise RuntimeError(f"{function_name} failed but no exception was captured.")
         
         return wrapper
     return decorator
