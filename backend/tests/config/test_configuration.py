@@ -10,11 +10,7 @@ import builtins
 import importlib
 from src.config.configuration import Configuration
 
-src_path = str((Path(__file__).parent.parent.parent / "src").resolve())
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
 
-# Patch sys.path so relative import works
 
 # Patch Resource for import
 mock_resource = type("Resource", (), {})
@@ -27,7 +23,7 @@ if module_name not in sys.modules:
     retriever_mod.Resource = mock_resource
     sys.modules[module_name] = retriever_mod
 
-# Relative import of Configuration
+
 
 
 def test_default_configuration():

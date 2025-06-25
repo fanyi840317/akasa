@@ -2,13 +2,30 @@
 # SPDX-License-Identifier: MIT
 
 from langgraph.graph import MessagesState
-from typing import List, Dict, Any
+from typing import TypedDict, List, Optional, Dict, Any
+from enum import Enum
+from langgraph.graph import START, END
 
 from prompts.planner_model import Plan
 from rag import Resource, MysteryEvent
 
 
-class State(MessagesState):
+class GraphNodes(str, Enum):
+    START = START
+    END = END
+    COORDINATOR = "coordinator"
+    PLANNER = "planner"
+    REPORTER = "reporter"
+    MYSTERY_RESEARCHER = "mystery_researcher"
+    ACADEMIC_RESEARCHER = "academic_researcher"
+    CREDIBILITY_ANALYZER = "credibility_analyzer"
+    CORRELATION_ANALYZER = "correlation_analyzer"
+    GRAPH_STORAGE = "graph_storage"
+    HUMAN_FEEDBACK = "human_feedback"
+    BACKGROUND_INVESTIGATION = "background_investigator"
+
+
+class State(TypedDict, total=False):
     """State for the mystery research agent system, extends MessagesState with mystery-specific fields."""
 
     # Runtime Variables (inherited from deer-flow)

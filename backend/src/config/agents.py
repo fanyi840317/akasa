@@ -1,13 +1,30 @@
 # Copyright (c) 2024 Lingjing
 # SPDX-License-Identifier: MIT
 
-from .types import LLMType
-from typing import Dict
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Dict, Any
 
-# 延迟导入以避免循环依赖
-def _get_llm_by_type(llm_type: LLMType):
-    from .llm import get_llm_by_type
-    return get_llm_by_type(llm_type)
+from .types import LLMType
+
+
+class AgentType(str, Enum):
+    MYSTERY_RESEARCHER = "mystery_researcher"
+    ACADEMIC_RESEARCHER = "academic_researcher"
+    CREDIBILITY_ANALYZER = "credibility_analyzer"
+    CORRELATION_ANALYZER = "correlation_analyzer"
+    MYSTERY_PLANNER = "mystery_planner"
+    MYSTERY_REPORTER = "mystery_reporter"
+
+
+@dataclass
+class AgentConfig:
+    name: str
+    type: AgentType
+    llm_type: LLMType
+    description: str
+    prompt_template: str
+    parameters: Dict[str, Any] = field(default_factory=dict)
 
 # Agent to LLM type mapping
 AGENT_LLM_MAP: Dict[str, LLMType] = {
@@ -170,6 +187,32 @@ DEFAULT_AGENT_SETTINGS = {
     "retry_delay": 1.0,
 }
 
+def get_agent_config(agent_name: str) -> AgentConfig:
+    """获取指定代理的配置"""
+    if agent_name not in AGENT_CONFIGS:
+        raise ValueError(f"Agent '{agent_name}' not found in configuration.")
+
+    agent_info = AGENT_CONFIGS[agent_name]
+    agent_type = AgentType(agent_name)
+    llm_type = AGENT_LLM_MAP.get(agent_name, LLMType.BASIC)  # Default to BASIC if not specified
+
+    # Combine default and specific settings
+    parameters = DEFAULT_AGENT_SETTINGS.copy()
+    parameters.update(agent_info)
+
+    return AgentConfig(
+        name=agent_name,
+        type=agent_type,
+        llm_type=llm_type,
+        description=agent_info.get("description", ""),
+        prompt_template=agent_info.get("prompt_template", ""),
+        parameters=parameters
+    )
+
+def load_agents_config() -> Dict[str, AgentConfig]:
+    """加载所有代理的配置"""
+    return {name: get_agent_config(name) for name in AGENT_CONFIGS}
+
 # Agent role descriptions for system prompts
 AGENT_ROLES = {
     "mystery_researcher": "你是一位专业的神秘事件研究专家",
@@ -184,6 +227,11 @@ AGENT_ROLES = {
 def get_agent_llm_type(agent_type: str) -> LLMType:
     """Get the LLM type for a given agent type."""
     return AGENT_LLM_MAP.get(agent_type, LLMType.BASIC)
+
+
+def load_agents_config() -> dict:
+    """Load all agent configurations."""
+    return AGENT_CONFIGS
 
 
 def get_agent_config(agent_name: str) -> dict:

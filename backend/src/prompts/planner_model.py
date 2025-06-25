@@ -4,6 +4,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from enum import Enum
+from graph.types import GraphNodes
 
 
 class StepType(str, Enum):
@@ -20,13 +21,26 @@ class StepType(str, Enum):
     GRAPH_STORAGE = "graph_storage"  # 图谱存储
 
 
+STEP_TYPE_TO_NODE_MAP = {
+    StepType.INFORMATION_COLLECTION: GraphNodes.MYSTERY_RESEARCHER,
+    StepType.DATA_ANALYSIS: GraphNodes.CORRELATION_ANALYZER,  # or a more general analysis node
+    StepType.CREDIBILITY_ASSESSMENT: GraphNodes.CREDIBILITY_ANALYZER,
+    StepType.CORRELATION_ANALYSIS: GraphNodes.CORRELATION_ANALYZER,
+    StepType.ACADEMIC_RESEARCH: GraphNodes.ACADEMIC_RESEARCHER,
+    StepType.MYSTERY_INVESTIGATION: GraphNodes.MYSTERY_RESEARCHER,
+    StepType.BACKGROUND_INVESTIGATION: GraphNodes.BACKGROUND_INVESTIGATION,
+    StepType.REPORT_GENERATION: GraphNodes.REPORTER,
+    StepType.HUMAN_FEEDBACK: GraphNodes.HUMAN_FEEDBACK,
+    StepType.GRAPH_STORAGE: GraphNodes.GRAPH_STORAGE,
+}
+
 class ResearchStep(BaseModel):
     """研究步骤模型"""
     step_type: StepType = Field(..., description="步骤类型")
     description: str = Field(..., description="步骤描述")
     priority: int = Field(default=1, description="优先级 (1-5, 5最高)")
     estimated_duration: Optional[str] = Field(None, description="预估耗时")
-    dependencies: List[str] = Field(default_factory=list, description="依赖的前置步骤")
+    dependencies: List[int] = Field(default_factory=list, description="依赖的前置步骤的索引")
     resources_needed: List[str] = Field(default_factory=list, description="所需资源")
     success_criteria: Optional[str] = Field(None, description="成功标准")
     completed: bool = Field(default=False, description="是否已完成")

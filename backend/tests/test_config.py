@@ -2,16 +2,12 @@
 
 import os
 import sys
+from pathlib import Path
 import pytest
 import tempfile
 import yaml
 from pathlib import Path
-from unittest.mock import patch, mock_open
-
-# 添加 backend 目录到 Python 路径，确保 from src.xxx 能被正确导入
-backend_path = str((Path(__file__).parent.parent).resolve())
-if backend_path not in sys.path:
-    sys.path.insert(0, backend_path)
+from unittest.mock import Mock, patch, mock_open
 
 # 模拟缺失的模块
 import types
@@ -24,9 +20,9 @@ import types
 # sys.modules['rag'] = rag_module
 # sys.modules['rag.retriever'] = rag_retriever_module
 
-from src.config.configuration import Configuration, load_yaml_config
+from config.configuration import Configuration, load_yaml_config
 
-from src.config.mystery_config import MysteryEventConfig
+from config.config import MysteryEventConfig
 
 
 class TestConfigurationLoading:
@@ -97,16 +93,18 @@ class TestConfigurationLoading:
     
     def test_load_default_yaml_config(self):
         """测试加载默认配置文件"""
-        # 假设default.yaml在backend目录下
-        backend_dir = Path(__file__).parent.parent
-        default_config_path = backend_dir / 'default.yaml'
-        
+        current_dir = Path(__file__).parent
+        backend_root = current_dir.parent
+        default_config_path = backend_root / "src" / "config" / "default.yaml"
+
         if default_config_path.exists():
             result = load_yaml_config(str(default_config_path))
             assert isinstance(result, dict)
             assert 'system' in result
             assert 'ai' in result
             assert result['system']['name'] == '神秘事件研究系统'
+        else:
+            pytest.skip(f"Default config file not found at {default_config_path}")
     
     def test_load_llm_config_yaml(self):
         """测试加载LLM配置文件"""
@@ -172,7 +170,7 @@ class TestConfigurationIntegration:
         
         # 如果from_runnable_config需要RunnableConfig类型，需先转换
         # 假设RunnableConfig是一个dataclass或类似结构
-        from src.config.configuration import RunnableConfig  # 确保已导入正确类型
+        from langchain_core.runnables import RunnableConfig  # 确保已导入正确类型
         config_obj = RunnableConfig(**runnable_config["configurable"])
         config = Configuration.from_runnable_config(config=config_obj)
         # 注意：from_runnable_config可能不会覆盖所有字段，只检查实际设置的值
@@ -319,7 +317,3 @@ class TestConfigurationValidation:
         
         assert isinstance(keywords, list)
         assert isinstance(sources, list)
-
-
-
-result = load_yaml_config(str(default_config_path))

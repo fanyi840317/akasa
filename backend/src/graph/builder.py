@@ -5,7 +5,8 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from prompts.planner_model import StepType
 
-from .types import State
+from .types import State, GraphNodes
+from prompts.planner_model import STEP_TYPE_TO_NODE_MAP
 from .nodes import (
     coordinator_node,
     planner_node,
@@ -21,64 +22,47 @@ from .nodes import (
 
 
 def continue_to_running_research_team(state: State):
-    """Determine the next node based on current plan and mystery research requirements."""
+    """Determine the next node based on the current plan."""
     current_plan = state.get("current_plan")
-    if not current_plan or not current_plan.steps:
-        return "planner"
-    if all(step.execution_res for step in current_plan.steps):
-        return "planner"
+    if not current_plan or not current_plan.get_next_step():
+        # If there is no plan or all steps are completed, go to analysis
+        return GraphNodes.CORRELATION_ANALYZER
+
+    next_step = current_plan.get_next_step()
+
+    # Route based on the step type using the map
+    if next_step.step_type in STEP_TYPE_TO_NODE_MAP:
+        return STEP_TYPE_TO_NODE_MAP[next_step.step_type].value
     
-    # Find the next unexecuted step
-    for step in current_plan.steps:
-        if not step.execution_res:
-            break
-    
-    # Route based on step type and mystery research features
-    if step.step_type and step.step_type == StepType.RESEARCH:
-        # Check if academic search is needed
-        if state.get("enable_academic_search") and "academic" in step.description.lower():
-            return "academic_researcher"
-        else:
-            return "mystery_researcher"
-    elif step.step_type and step.step_type == StepType.PROCESSING:
-        # Check what kind of processing is needed
-        if "credibility" in step.description.lower() and state.get("enable_credibility_filter"):
-            return "credibility_analyzer"
-        elif "correlation" in step.description.lower() and state.get("enable_correlation_analysis"):
-            return "correlation_analyzer"
-        elif "graph" in step.description.lower() and state.get("enable_graph_storage"):
-            return "graph_storage"
-        else:
-            return "mystery_researcher"
-    
-    return "planner"
+    # Fallback to a default researcher if no specific mapping is found
+    return GraphNodes.MYSTERY_RESEARCHER.value
 
 
 def should_continue_analysis(state: State):
     """Determine if additional analysis steps are needed."""
     current_plan = state.get("current_plan")
     if not current_plan:
-        return "reporter"
+        return GraphNodes.REPORTER
     
     # Check if credibility analysis is needed and enabled
     if (state.get("enable_credibility_filter") and 
         not state.get("credibility_scores") and 
         state.get("mystery_events")):
-        return "credibility_analyzer"
+        return GraphNodes.CREDIBILITY_ANALYZER
     
     # Check if correlation analysis is needed and enabled
     if (state.get("enable_correlation_analysis") and 
         not state.get("correlation_results") and 
         len(state.get("mystery_events", [])) > 1):
-        return "correlation_analyzer"
+        return GraphNodes.CORRELATION_ANALYZER
     
     # Check if graph storage is needed and enabled
     if (state.get("enable_graph_storage") and 
         not state.get("graph_relationships") and 
         state.get("mystery_events")):
-        return "graph_storage"
+        return GraphNodes.GRAPH_STORAGE
     
-    return "reporter"
+    return GraphNodes.REPORTER
 
 
 def _build_base_graph():
@@ -86,74 +70,94 @@ def _build_base_graph():
     builder = StateGraph(State)
     
     # Add all nodes
-    builder.add_edge(START, "coordinator")
-    builder.add_node("coordinator", coordinator_node)
-    builder.add_node("background_investigator", background_investigation_node)
-    builder.add_node("planner", planner_node)
-    builder.add_node("reporter", reporter_node)
-    builder.add_node("mystery_researcher", mystery_researcher_node)
-    builder.add_node("academic_researcher", academic_researcher_node)
-    builder.add_node("credibility_analyzer", credibility_analyzer_node)
-    builder.add_node("correlation_analyzer", correlation_analyzer_node)
-    builder.add_node("graph_storage", graph_storage_node)
-    builder.add_node("human_feedback", human_feedback_node)
+    builder.add_edge(START, GraphNodes.COORDINATOR)
+    builder.add_node(GraphNodes.COORDINATOR, coordinator_node)
+    builder.add_node(GraphNodes.BACKGROUND_INVESTIGATION, background_investigation_node)
+    builder.add_node(GraphNodes.PLANNER, planner_node)
+    builder.add_node(GraphNodes.REPORTER, reporter_node)
+    builder.add_node(GraphNodes.MYSTERY_RESEARCHER, mystery_researcher_node)
+    builder.add_node(GraphNodes.ACADEMIC_RESEARCHER, academic_researcher_node)
+    builder.add_node(GraphNodes.CREDIBILITY_ANALYZER, credibility_analyzer_node)
+    builder.add_node(GraphNodes.CORRELATION_ANALYZER, correlation_analyzer_node)
+    builder.add_node(GraphNodes.GRAPH_STORAGE, graph_storage_node)
+    builder.add_node(GraphNodes.HUMAN_FEEDBACK, human_feedback_node)
     
     # Add edges
-    builder.add_edge("background_investigator", "planner")
+    builder.add_edge(GraphNodes.BACKGROUND_INVESTIGATION, GraphNodes.PLANNER)
     
     # Conditional edges from coordinator
     builder.add_conditional_edges(
-        "coordinator",
-        lambda state: "background_investigator" if state.get("enable_background_investigation") else "planner",
-        ["background_investigator", "planner"]
+        GraphNodes.COORDINATOR,
+        lambda state: GraphNodes.BACKGROUND_INVESTIGATION if state.get("enable_background_investigation") else GraphNodes.PLANNER,
+        [GraphNodes.BACKGROUND_INVESTIGATION, GraphNodes.PLANNER]
     )
     
     # Conditional edges from planner
     builder.add_conditional_edges(
-        "planner",
+        GraphNodes.PLANNER,
         continue_to_running_research_team,
-        [
-            "mystery_researcher",
-            "academic_researcher", 
-            "credibility_analyzer",
-            "correlation_analyzer",
-            "graph_storage",
-            "human_feedback",
-            "reporter"
-        ],
+        {
+            GraphNodes.MYSTERY_RESEARCHER: GraphNodes.MYSTERY_RESEARCHER,
+            GraphNodes.ACADEMIC_RESEARCHER: GraphNodes.ACADEMIC_RESEARCHER,
+            GraphNodes.CREDIBILITY_ANALYZER: GraphNodes.CREDIBILITY_ANALYZER,
+            GraphNodes.CORRELATION_ANALYZER: GraphNodes.CORRELATION_ANALYZER,
+            GraphNodes.GRAPH_STORAGE: GraphNodes.GRAPH_STORAGE,
+            GraphNodes.HUMAN_FEEDBACK: GraphNodes.HUMAN_FEEDBACK,
+            GraphNodes.REPORTER: GraphNodes.REPORTER,
+            GraphNodes.PLANNER: GraphNodes.PLANNER,
+        },
     )
     
     # Research nodes back to planner or analysis
     builder.add_conditional_edges(
-        "mystery_researcher",
+        GraphNodes.MYSTERY_RESEARCHER,
         should_continue_analysis,
-        ["planner", "credibility_analyzer", "correlation_analyzer", "graph_storage", "reporter"]
+        {
+            GraphNodes.PLANNER: GraphNodes.PLANNER,
+            GraphNodes.CREDIBILITY_ANALYZER: GraphNodes.CREDIBILITY_ANALYZER,
+            GraphNodes.CORRELATION_ANALYZER: GraphNodes.CORRELATION_ANALYZER,
+            GraphNodes.GRAPH_STORAGE: GraphNodes.GRAPH_STORAGE,
+            GraphNodes.REPORTER: GraphNodes.REPORTER,
+        }
     )
     
     builder.add_conditional_edges(
-        "academic_researcher",
+        GraphNodes.ACADEMIC_RESEARCHER,
         should_continue_analysis,
-        ["planner", "credibility_analyzer", "correlation_analyzer", "graph_storage", "reporter"]
+        {
+            GraphNodes.PLANNER: GraphNodes.PLANNER,
+            GraphNodes.CREDIBILITY_ANALYZER: GraphNodes.CREDIBILITY_ANALYZER,
+            GraphNodes.CORRELATION_ANALYZER: GraphNodes.CORRELATION_ANALYZER,
+            GraphNodes.GRAPH_STORAGE: GraphNodes.GRAPH_STORAGE,
+            GraphNodes.REPORTER: GraphNodes.REPORTER,
+        }
     )
     
     # Analysis nodes
     builder.add_conditional_edges(
-        "credibility_analyzer",
+        GraphNodes.CREDIBILITY_ANALYZER,
         should_continue_analysis,
-        ["correlation_analyzer", "graph_storage", "reporter"]
+        {
+            GraphNodes.CORRELATION_ANALYZER: GraphNodes.CORRELATION_ANALYZER,
+            GraphNodes.GRAPH_STORAGE: GraphNodes.GRAPH_STORAGE,
+            GraphNodes.REPORTER: GraphNodes.REPORTER,
+        }
     )
     
     builder.add_conditional_edges(
-        "correlation_analyzer",
+        GraphNodes.CORRELATION_ANALYZER,
         should_continue_analysis,
-        ["graph_storage", "reporter"]
+        {
+            GraphNodes.GRAPH_STORAGE: GraphNodes.GRAPH_STORAGE,
+            GraphNodes.REPORTER: GraphNodes.REPORTER,
+        }
     )
     
-    builder.add_edge("graph_storage", "reporter")
+    builder.add_edge(GraphNodes.GRAPH_STORAGE, GraphNodes.REPORTER)
     
     # Human feedback and reporter
-    builder.add_edge("human_feedback", "planner")
-    builder.add_edge("reporter", END)
+    builder.add_edge(GraphNodes.HUMAN_FEEDBACK, GraphNodes.PLANNER)
+    builder.add_edge(GraphNodes.REPORTER, END)
     
     return builder
 

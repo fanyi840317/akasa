@@ -3,257 +3,158 @@
 
 import re
 import logging
+import hashlib
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
+from bs4 import BeautifulSoup
+
 from src.crawler.crawler import Crawler
-from src.rag.retriever import Document, MysteryEvent
-from src.config.mystery_config import MysteryEventType, DataSourceType
+from src.rag.retriever import Document, Chunk
+from config.config import DataSourceConfig
 
 logger = logging.getLogger(__name__)
 
 
 class DocumentaryCrawler(Crawler):
-    """Specialized crawler for documentary and video content about mysterious events."""
-    
-    def __init__(self):
-        super().__init__()
-        self.documentary_patterns = {
-            "title": [
-                r'<h1[^>]*>([^<]+)</h1>',
-                r'<title>([^<]+)</title>',
-                r'"title"\s*:\s*"([^"]+)"',
-                r'<meta[^>]*property="og:title"[^>]*content="([^"]+)"',
-            ],
-            "description": [
-                r'<meta[^>]*name="description"[^>]*content="([^"]+)"',
-                r'<meta[^>]*property="og:description"[^>]*content="([^"]+)"',
-                r'"description"\s*:\s*"([^"]+)"',
-                r'<p[^>]*class="[^"]*description[^"]*"[^>]*>([^<]+)</p>',
-            ],
-            "duration": [
-                r'"duration"\s*:\s*"([^"]+)"',
-                r'Duration:\s*([\d:]+)',
-                r'<span[^>]*class="[^"]*duration[^"]*"[^>]*>([^<]+)</span>',
-            ],
-            "release_date": [
-                r'"datePublished"\s*:\s*"([^"]+)"',
-                r'Released:\s*([\d\-/]+)',
-                r'<time[^>]*datetime="([^"]+)"',
-            ],
-            "producer": [
-                r'"director"\s*:\s*"([^"]+)"',
-                r'"producer"\s*:\s*"([^"]+)"',
-                r'Produced by:\s*([^\n<]+)',
-                r'Director:\s*([^\n<]+)',
-            ],
-            "genre": [
-                r'"genre"\s*:\s*"([^"]+)"',
-                r'Genre:\s*([^\n<]+)',
-                r'<span[^>]*class="[^"]*genre[^"]*"[^>]*>([^<]+)</span>',
-            ],
-            "transcript": [
-                r'<div[^>]*class="[^"]*transcript[^"]*"[^>]*>([^<]+)</div>',
-                r'"transcript"\s*:\s*"([^"]+)"',
-            ],
+    """纪录片和视频爬虫"""
+
+    def __init__(self, config: DataSourceConfig):
+        super().__init__(config)
+        self._initialize_selectors()
+
+    def _initialize_selectors(self):
+        """初始化纪录片网站的CSS选择器"""
+        super()._initialize_selectors()
+        doc_selectors = {
+            'video_container': ['#video-player', '.video-container', 'div[data-video-id]'],
+            'video_url': ['video > source[src]', 'iframe[src]'],
+            'mystery_type': ['.tags a', '.category', 'meta[name="keywords"]']
         }
-        
-        self.mystery_keywords = {
-            MysteryEventType.UFO: ["ufo", "alien", "extraterrestrial", "flying saucer", "abduction"],
-            MysteryEventType.CRYPTID: ["bigfoot", "sasquatch", "yeti", "loch ness", "chupacabra"],
-            MysteryEventType.PARANORMAL: ["ghost", "haunted", "paranormal", "supernatural", "poltergeist"],
-            MysteryEventType.ANCIENT_MYSTERY: ["ancient", "pyramid", "stonehenge", "atlantis", "civilization"],
-            MysteryEventType.DISAPPEARANCE: ["missing", "disappeared", "vanished", "bermuda triangle"],
-            MysteryEventType.NATURAL_ANOMALY: ["anomaly", "phenomenon", "unexplained", "strange weather"]
-        }
-    
-    async def parse_documentary_html(self, html: str, url: str) -> Dict[str, Any]:
-        """Parse documentary-specific content from HTML."""
-        parsed_data = {
-            "title": "",
-            "description": "",
-            "duration": "",
-            "release_date": "",
-            "producer": "",
-            "genre": "",
-            "transcript": "",
-            "mystery_type": MysteryEventType.UNKNOWN,
-            "credibility_score": 0.0,
-        }
-        
-        # Extract basic documentary information
-        for field, patterns in self.documentary_patterns.items():
-            for pattern in patterns:
-                match = re.search(pattern, html, re.IGNORECASE | re.DOTALL)
-                if match:
-                    parsed_data[field] = match.group(1).strip()
-                    break
-        
-        # Determine mystery event type
-        content_text = (parsed_data["title"] + " " + parsed_data["description"]).lower()
-        for event_type, keywords in self.mystery_keywords.items():
-            if any(keyword in content_text for keyword in keywords):
-                parsed_data["mystery_type"] = event_type
-                break
-        
-        # Calculate credibility score for documentary content
-        parsed_data["credibility_score"] = self._calculate_documentary_credibility(
-            parsed_data, url
-        )
-        
-        return parsed_data
-    
-    def _calculate_documentary_credibility(self, data: Dict[str, Any], url: str) -> float:
-        """Calculate credibility score for documentary content."""
-        score = 0.6  # Base score for documentary content
-        
-        # Producer/Director credibility
-        if data.get("producer"):
-            reputable_producers = [
-                "national geographic", "discovery", "history channel", "bbc", "pbs",
-                "nova", "smithsonian", "netflix", "amazon prime"
-            ]
-            producer_lower = data["producer"].lower()
-            if any(prod in producer_lower for prod in reputable_producers):
-                score += 0.3
-        
-        # URL domain credibility
-        domain = urlparse(url).netloc.lower()
-        reputable_domains = [
-            "nationalgeographic.com", "discovery.com", "history.com", "bbc.com",
-            "pbs.org", "smithsonianmag.com", "netflix.com", "amazon.com"
-        ]
-        if any(domain.endswith(d) for d in reputable_domains):
-            score += 0.2
-        
-        # Content quality indicators
-        if data.get("duration") and ":" in data["duration"]:
-            # Longer documentaries tend to be more thorough
-            try:
-                parts = data["duration"].split(":")
-                minutes = int(parts[0]) * 60 + int(parts[1]) if len(parts) >= 2 else int(parts[0])
-                if minutes > 30:  # More than 30 minutes
-                    score += 0.1
-            except ValueError:
-                pass
-        
-        # Release date (more recent might be more credible)
-        if data.get("release_date"):
-            try:
-                # Simple year extraction
-                year_match = re.search(r'(\d{4})', data["release_date"])
-                if year_match:
-                    year = int(year_match.group(1))
-                    current_year = datetime.now().year
-                    if current_year - year < 5:  # Within last 5 years
-                        score += 0.1
-            except ValueError:
-                pass
-        
-        return min(1.0, score)  # Cap at 1.0
-    
-    async def crawl_url(self, url: str) -> Optional[Document]:
-        """Crawl a single documentary URL and return a Document."""
+        for key, value in doc_selectors.items():
+            self.selectors.setdefault(key, []).extend(value)
+
+    async def search(self, query: str, limit: int = 10) -> List[Document]:
+        """在视频网站搜索纪录片"""
+        from urllib.parse import quote
+        if not self.config.search_url:
+            self.logger.warning("Search URL is not configured for this documentary source.")
+            return []
+
+        search_query = quote(query)
+        full_search_url = self.config.search_url.format(query=search_query)
+
         try:
-            html = await self.fetch_html(url)
+            html = await self.fetch_html(full_search_url)
             if not html:
-                return None
+                return []
+
+            soup = BeautifulSoup(html, 'html.parser')
             
-            parsed_data = await self.parse_documentary_html(html, url)
+            # 子类需要定义 'search_result_link' 选择器
+            link_selector = self.selectors.get('search_result_link', ['a[href*="/video/"]', 'a[href*="/watch?"]'])
+            links = soup.select(', '.join(link_selector))
             
-            # Create MysteryEvent if applicable
-            mystery_event = None
-            if parsed_data["mystery_type"] != MysteryEventType.UNKNOWN:
-                mystery_event = MysteryEvent(
-                    title=parsed_data["title"],
-                    description=parsed_data["description"],
-                    event_type=parsed_data["mystery_type"].value,
-                    location="unknown",  # Documentaries may not specify location
-                    date=parsed_data.get("release_date", "unknown"),
-                    source_url=url,
-                    source_type=DataSourceType.DOCUMENTARY.value,
-                    credibility_score=parsed_data["credibility_score"],
-                    witnesses=[],
-                    evidence=[parsed_data.get("transcript", "")],
-                    metadata={
-                        "duration": parsed_data.get("duration", ""),
-                        "producer": parsed_data.get("producer", ""),
-                        "genre": parsed_data.get("genre", ""),
-                        "release_date": parsed_data.get("release_date", ""),
-                    }
-                )
-            
-            # Create Document
-            document = Document(
-                url=url,
-                title=parsed_data["title"],
-                chunks=[],  # Will be populated by content processing
-                mystery_event=mystery_event,
-                credibility_score=parsed_data["credibility_score"],
-                source_type=DataSourceType.DOCUMENTARY.value,
-                publication_date=parsed_data.get("release_date", ""),
-                author=parsed_data.get("producer", ""),
-                metadata={
-                    "duration": parsed_data.get("duration", ""),
-                    "genre": parsed_data.get("genre", ""),
-                    "transcript": parsed_data.get("transcript", ""),
-                    "mystery_type": parsed_data["mystery_type"].value,
-                }
-            )
-            
-            return document
-            
+            video_urls = []
+            for link in links[:limit]:
+                href = link.get('href')
+                if href:
+                    full_url = urljoin(full_search_url, href)
+                    video_urls.append(full_url)
+
+            return await self.batch_crawl(video_urls)
+
         except Exception as e:
-            logger.error(f"Error crawling documentary URL {url}: {e}")
+            self.logger.error(f"Error during documentary search: {e}", exc_info=True)
+            return []
+
+    def _is_documentary_page(self, html: str) -> bool:
+        """判断页面是否为纪录片或视频页面"""
+        soup = BeautifulSoup(html, 'html.parser')
+        return soup.select_one('video, iframe[src*="youtube"], iframe[src*="vimeo"]') is not None
+
+    def _parse_html(self, html: str, url: str) -> Optional[Dict[str, Any]]:
+        """解析纪录片HTML"""
+        if not self._is_documentary_page(html):
+            self.logger.info(f"Skipping non-documentary page: {url}")
             return None
-    
-    async def search(self, query: str, max_results: int = 10) -> List[str]:
-        """Search for documentary URLs related to the query."""
-        # Build documentary-specific search query
-        documentary_query = self._build_documentary_search_query(query)
+
+        parsed_data = super()._parse_html(html, url)
+        if not parsed_data:
+            return None
+
+        soup = BeautifulSoup(html, 'html.parser')
+        video_url = self._extract_video_url(soup, url)
+        mystery_type = self._extract_mystery_type(soup)
+        credibility_score = self._calculate_documentary_credibility(soup, video_url)
+
+        parsed_data['metadata'].update({
+            'video_url': video_url,
+            'mystery_type': mystery_type,
+            'credibility_score': credibility_score
+        })
+
+        return parsed_data
+
+    def _extract_video_url(self, soup: BeautifulSoup, base_url: str) -> Optional[str]:
+        """提取视频URL"""
+        for selector in self.selectors.get('video_url', []):
+            element = soup.select_one(selector)
+            if element:
+                src = element.get('src')
+                if src:
+                    # 将相对URL转换为绝对URL
+                    return urljoin(base_url, src)
+        return None
+
+    def _extract_mystery_type(self, soup: BeautifulSoup) -> Optional[str]:
+        """提取神秘事件类型"""
+        text_content = self._extract_text_by_selectors(soup, ['mystery_type'])
+        if not text_content:
+            # 如果选择器找不到，从整个页面文本中查找
+            text_content = soup.get_text()
+
+        text_content = text_content.upper()
+        # 简单的关键词匹配
+        if 'UFO' in text_content or 'ALIEN' in text_content: return 'UFO'
+        if 'GHOST' in text_content or 'PARANORMAL' in text_content: return 'Ghost'
+        if 'CONSPIRACY' in text_content: return 'Conspiracy'
+        if 'CRYPTOZOOLOGY' in text_content or 'BIGFOOT' in text_content: return 'Cryptozoology'
+        return None
+
+    def _calculate_documentary_credibility(self, soup: BeautifulSoup, video_url: Optional[str]) -> float:
+        """计算纪录片可信度"""
+        score = self._analyze_source(soup)
+        if not video_url:
+            score *= 0.7
+        # 检查来源是否为知名平台
+        if video_url and any(domain in video_url for domain in ['youtube.com', 'vimeo.com', 'dailymotion.com']):
+            score = min(1.0, score + 0.1)
         
-        # Mock search results - in real implementation, this would query
-        # documentary databases, streaming platforms, etc.
-        mock_urls = [
-            f"https://www.nationalgeographic.com/documentary/{query.replace(' ', '-')}-{i}"
-            for i in range(min(max_results, 5))
-        ] + [
-            f"https://www.discovery.com/shows/{query.replace(' ', '-')}-documentary-{i}"
-            for i in range(min(max_results - 5, 5))
-        ]
-        
-        return mock_urls[:max_results]
-    
-    def _build_documentary_search_query(self, query: str) -> str:
-        """Build a documentary-specific search query."""
-        # Add documentary-specific terms
-        documentary_terms = ["documentary", "film", "investigation", "evidence"]
-        
-        # Identify mystery type from query
-        query_lower = query.lower()
-        mystery_terms = []
-        
-        for event_type, keywords in self.mystery_keywords.items():
-            if any(keyword in query_lower for keyword in keywords):
-                mystery_terms.extend(keywords[:2])  # Add top 2 keywords
-                break
-        
-        # Combine terms
-        all_terms = [query] + documentary_terms + mystery_terms
-        return " ".join(all_terms)
-    
-    def get_supported_domains(self) -> List[str]:
-        """Get list of supported documentary domains."""
-        return [
-            "nationalgeographic.com",
-            "discovery.com",
-            "history.com",
-            "bbc.com",
-            "pbs.org",
-            "smithsonianmag.com",
-            "netflix.com",
-            "amazon.com",
-            "youtube.com",
-            "vimeo.com",
-        ]
+        # 检查是否有对专家的引用或采访
+        text = soup.get_text().lower()
+        if any(keyword in text for keyword in ['expert', 'scientist', 'researcher', 'interview with']):
+            score = min(1.0, score + 0.15)
+
+        return round(score, 2)
+
+    def _create_document(self, parsed_data: Dict[str, Any]) -> Document:
+        """创建纪录片文档对象"""
+        document = super()._create_document(parsed_data)
+        metadata = parsed_data['metadata']
+
+        if metadata.get('video_url'):
+            document.chunks.append(Chunk(
+                content=f"Video available at: {metadata['video_url']}",
+                similarity=0.9,
+                metadata={'type': 'video_link'}
+            ))
+        if metadata.get('mystery_type'):
+            document.chunks.append(Chunk(
+                content=f"Mystery Type: {metadata['mystery_type']}",
+                similarity=0.8,
+                metadata={'type': 'mystery_type'}
+            ))
+
+        return document

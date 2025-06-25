@@ -9,14 +9,16 @@ from urllib.parse import quote, urljoin
 
 from src.crawler.crawler import Crawler
 from src.rag.retriever import Document, Chunk, MysteryEvent
-from src.config.mystery_config import DataSourceConfig, MysteryEventType
+from config.config import DataSourceConfig
+from config.types import MysteryEventType
 
 
 class MysteryCrawler(Crawler):
     """神秘事件专用爬虫"""
-    
+
     def __init__(self, config: DataSourceConfig):
         super().__init__(config)
+        self._initialize_selectors()
         self.mystery_keywords = {
             MysteryEventType.UFO: [
                 "UFO", "unidentified flying object", "flying saucer", "alien",
@@ -43,106 +45,151 @@ class MysteryCrawler(Crawler):
                 "geophysical anomaly", "unexplained phenomenon"
             ]
         }
-        
-    async def crawl_url(self, url: str) -> Optional[Document]:
-        """爬取神秘事件页面"""
-        html = await self._fetch_html(url)
-        if not html:
-            return None
-            
-        parsed_data = self._parse_mystery_html(html, url)
-        if not parsed_data:
-            return None
-            
-        doc_id = hashlib.md5(url.encode()).hexdigest()
-        document = self._create_mystery_document(parsed_data, doc_id)
-        
-        return document
-        
+
+    def _initialize_selectors(self):
+        super()._initialize_selectors()
+        mystery_selectors = {
+            'description': [
+                '.story-content', '.event-description', '.case-details',
+                '.incident-report', '.sighting-details', '.article-content',
+                '.post-content', '.content', 'main'
+            ],
+            'location': ['.location', '.place', '.address', '.coordinates'],
+            'event_date': ['.event-date', '.date-of-sighting', '.post-date'],
+            'witnesses': ['.witnesses', '.observers', '.testimonial'],
+            'evidence': ['.evidence', '.proof', 'a.evidence-link', '.gallery-item']
+        }
+        for key, value in mystery_selectors.items():
+            self.selectors.setdefault(key, []).extend(value)
+
+
+
     async def search(self, query: str, limit: int = 10) -> List[Document]:
-        """搜索神秘事件"""
+        """使用Google自定义搜索API搜索神秘事件。"""
+        self.logger.info(f"Performing mystery search for: {query}")
+        api_key = self.config.api_key
+        cse_id = self.config.cse_id  # 自定义搜索引擎ID
+
+        if not api_key or not cse_id:
+            self.logger.error("Google API key or CSE ID is not configured.")
+            return []
+
+        # 添加关键词以聚焦于神秘事件
+        search_query = f"{query} UFO OR cryptid OR paranormal OR ancient mystery"
+        base_url = self.config.api_url
+        if not base_url:
+            self.logger.error("Google Custom Search API URL is not configured.")
+            return []
+        api_url = f"{base_url}/customsearch/v1?q={quote(search_query)}&cx={cse_id}&key={api_key}&num={limit}"
+
+        try:
+            async with self.session.get(api_url, timeout=20) as response:
+                if response.status != 200:
+                    self.logger.error(f"Failed to fetch from Google Custom Search API: {response.status} {await response.text()}")
+                    return []
+                data = await response.json()
+        except Exception as e:
+            self.logger.error(f"Error during Google Custom Search API call: {e}")
+            return []
+
         documents = []
-        
-        # 识别查询的神秘事件类型
-        event_type = self._identify_event_type(query)
-        
-        # 构建神秘事件搜索查询
-        mystery_query = self._build_mystery_query(query, event_type)
-        
-        # 生成搜索URL
-        search_urls = self._generate_mystery_search_urls(mystery_query, limit)
-        
-        for url in search_urls:
+        items = data.get('items', [])
+        for item in items:
+            url = item.get('link')
+            if not url:
+                continue
+            
+            # 对每个搜索结果URL进行爬取和解析
             doc = await self.crawl_url(url)
             if doc:
                 documents.append(doc)
-                
-        return documents[:limit]
-        
-    def _parse_mystery_html(self, html: str, url: str) -> Optional[Dict[str, Any]]:
-        """解析神秘事件HTML"""
+
+        return documents
+
+    def _parse_html(self, html: str, url: str) -> Optional[Dict[str, Any]]:
+        """解析神秘事件HTML，扩展基类方法"""
         from bs4 import BeautifulSoup
-        soup = BeautifulSoup(html, 'html.parser')
-        
-        # 提取标题
-        title = self._extract_title(soup)
-        if not title:
+        parsed_data = super()._parse_html(html, url)
+        if not parsed_data:
             return None
-            
-        # 提取事件描述
-        description = self._extract_mystery_description(soup)
-        
-        # 提取事件类型
-        event_type = self._detect_event_type(title + " " + description)
-        
-        # 提取位置信息
-        location = self._extract_location(soup)
-        
-        # 提取时间信息
-        event_date = self._extract_event_date(soup)
-        
-        # 提取目击者信息
-        witnesses = self._extract_witnesses(soup)
-        
-        # 提取证据信息
-        evidence = self._extract_evidence(soup)
-        
-        # 计算可信度分数
-        credibility_score = self._calculate_credibility(soup, witnesses, evidence)
-        
-        # 创建神秘事件对象
-        mystery_event = MysteryEvent(
-            event_id=hashlib.md5((url + title).encode()).hexdigest()[:16],
-            event_type=event_type.value if event_type else "unknown",
-            title=title,
-            description=description,
-            location=location,
-            date=event_date,
-            credibility_score=credibility_score,
-            source_url=url,
-            witnesses=witnesses,
-            evidence=evidence
-        )
-        
-        metadata = {
-            'url': url,
-            'crawled_at': datetime.now().isoformat(),
-            'source_type': 'mystery',
-            'reliability_score': self.config.reliability_score,
+
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # 提取通用内容，如果基类方法未能提取，则使用特定选择器
+        if not parsed_data.get('content'):
+            parsed_data['content'] = self._extract_text_by_selectors(soup, self.selectors['description'])
+
+        # 提取特定元数据
+        title = parsed_data.get('title', '')
+        content = parsed_data.get('content', '')
+        event_type = self._detect_event_type(title + " " + content)
+        location = self._extract_text_by_selectors(soup, self.selectors['location'])
+        event_date_str = self._extract_text_by_selectors(soup, self.selectors['event_date'])
+        event_date = self._parse_date(event_date_str)
+        witnesses = self._extract_text_by_selectors(soup, self.selectors['witnesses'])
+        evidence_links = [a['href'] for a in soup.select(', '.join(self.selectors.get('evidence', []))) if a.has_attr('href')]
+
+        # 计算可信度
+        credibility_score = self._calculate_credibility(content, witnesses, evidence_links)
+
+        # 更新元数据
+        parsed_data['metadata'].update({
             'event_type': event_type.value if event_type else "unknown",
             'location': location,
             'event_date': event_date.isoformat() if event_date else None,
-            'witnesses_count': len(witnesses),
-            'evidence_count': len(evidence),
+            'witnesses': witnesses,
+            'evidence_links': evidence_links,
             'credibility_score': credibility_score
-        }
-        
-        return {
-            'title': title,
-            'content': description,
-            'mystery_event': mystery_event,
-            'metadata': metadata
-        }
+        })
+
+        # 如果基类没有解析出发布日期，尝试使用事件日期
+        if not parsed_data.get('publication_date') and event_date:
+            parsed_data['publication_date'] = event_date.isoformat()
+
+        return parsed_data
+
+    def _calculate_credibility(self, content: str, witnesses: str, evidence: List[str]) -> float:
+        """计算神秘事件可信度"""
+        score = 0.5  # 基础分数
+        if witnesses and witnesses.strip():
+            score = min(1.0, score + 0.15)
+        if evidence:
+            score = min(1.0, score + 0.25)
+        if len(content) < 200:
+            score *= 0.85
+        return round(score, 2)
+
+    def _create_document(self, parsed_data: Dict[str, Any]) -> Document:
+        """创建神秘事件文档对象"""
+        document = super()._create_document(parsed_data)
+        metadata = parsed_data['metadata']
+
+        # 添加特定于神秘事件的块
+        mystery_chunks = []
+        if metadata.get('location'):
+            mystery_chunks.append(Chunk(content=f"Location: {metadata['location']}", similarity=0.9, metadata={'type': 'location'}))
+        if metadata.get('event_date'):
+            mystery_chunks.append(Chunk(content=f"Date: {metadata['event_date']}", similarity=0.9, metadata={'type': 'date'}))
+        if metadata.get('witnesses'):
+            mystery_chunks.append(Chunk(content=f"Witnesses: {metadata['witnesses']}", similarity=0.85, metadata={'type': 'witnesses'}))
+        document.chunks.extend(mystery_chunks)
+
+        # 创建并附加MysteryEvent对象
+        mystery_event = MysteryEvent(
+            event_id=hashlib.md5((document.url + document.title).encode()).hexdigest()[:16],
+            event_type=metadata.get('event_type', 'unknown'),
+            title=document.title,
+            description=parsed_data.get('content', ''),
+            location=metadata.get('location'),
+            date=self._parse_date(metadata.get('event_date')),
+            credibility_score=metadata.get('credibility_score', 0.5),
+            source_url=document.url,
+            witnesses=[w.strip() for w in metadata.get('witnesses', '').split(',') if w.strip()],
+            evidence=metadata.get('evidence_links', [])
+        )
+        document.metadata['mystery_event'] = mystery_event.dict()
+
+        return document
         
     def _extract_mystery_description(self, soup) -> str:
         """提取神秘事件描述"""

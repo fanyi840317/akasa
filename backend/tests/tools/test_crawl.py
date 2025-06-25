@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2024 Lingjing
 # SPDX-License-Identifier: MIT
-import sys
-from pathlib import Path
-backend_path = str((Path(__file__).parent.parent.parent).resolve())
-if backend_path not in sys.path:
-    sys.path.insert(0, backend_path)
     
 import json
 import pytest

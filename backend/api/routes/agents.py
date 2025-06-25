@@ -18,10 +18,8 @@ if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
 # Import agent types and configurations
-from config.agents import load_agents_config
-from config.agents import AgentType, AgentConfig
-from config.llm import LLMType
-from config.agents.mapping import AGENT_LLM_MAP
+from src.config.agents import AGENT_LLM_MAP, AgentConfig, AgentType, load_agents_config
+from src.config.types import LLMType
 
 # Configuration file path
 USER_CONFIG_FILE = Path.home() / '.akasa' / 'config.yaml'

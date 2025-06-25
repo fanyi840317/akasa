@@ -6,6 +6,8 @@ import json
 import logging
 import time
 import functools
+import threading
+from enum import Enum
 from typing import Any, Callable, Dict, Optional, Type
 from datetime import datetime
 
@@ -52,7 +54,17 @@ def log_io(func: Callable) -> Callable:
             except (json.JSONDecodeError, TypeError):
                 logger.debug(f"[{function_name}] Result type: {type(result).__name__}")
             
-            return result
+            # 确保最终返回的是JSON字符串
+            if isinstance(result, str):
+                try:
+                    # 如果已经是json，直接返回
+                    json.loads(result)
+                    return result
+                except (json.JSONDecodeError, TypeError):
+                    # 如果不是有效的json，则包装它
+                    pass
+            
+            return json.dumps(result, ensure_ascii=False, indent=4)
             
         except Exception as e:
             execution_time = time.time() - start_time
@@ -266,14 +278,11 @@ def validate_input(validation_func: Callable[[Any], bool], error_message: str = 
     return decorator
 
 
-def cache_result(cache_duration_seconds: int = 300):
-    """装饰器：缓存函数结果
-    
+def cache_result(duration: int = 3600):
+    """Decorator to cache the result of a function for a specified duration.
+
     Args:
-        cache_duration_seconds: 缓存持续时间（秒）
-        
-    Returns:
-        装饰器函数
+        duration: Cache duration in seconds.
     """
     cache = {}
     
@@ -289,7 +298,7 @@ def cache_result(cache_duration_seconds: int = 300):
             # 检查缓存
             if cache_key in cache:
                 cached_result, cached_time = cache[cache_key]
-                if current_time - cached_time < cache_duration_seconds:
+                if current_time - cached_time < duration:
                     logger.debug(f"[CACHE] {function_name} returning cached result")
                     return cached_result
                 else:
@@ -308,42 +317,42 @@ def cache_result(cache_duration_seconds: int = 300):
     return decorator
 
 
-def rate_limit(calls_per_minute: int = 60):
-    """装饰器：限制函数调用频率
-    
+def rate_limit(calls: int = 30, period: int = 60):
+    """Decorator to limit the call rate of a function.
+
     Args:
-        calls_per_minute: 每分钟允许的调用次数
-        
+        calls (int): The number of calls allowed within the period.
+        period (int): The time period in seconds.
+
     Returns:
-        装饰器函数
+        Callable: The decorated function.
     """
-    call_times = []
-    
     def decorator(func: Callable) -> Callable:
+        call_times = []
+        lock = threading.Lock()
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             function_name = getattr(func, '__name__', getattr(func, 'name', str(func)))
-            current_time = time.time()
-            
-            # 清理过期的调用记录（超过1分钟）
-            call_times[:] = [t for t in call_times if current_time - t < 60]
-            
-            # 检查是否超过限制
-            if len(call_times) >= calls_per_minute:
-                logger.warning(f"[RATE_LIMIT] {function_name} rate limit exceeded ({calls_per_minute} calls/min)")
-                error_result = {
-                    "error": f"Rate limit exceeded: {calls_per_minute} calls per minute",
-                    "function": function_name,
-                    "rate_limited": True,
-                    "timestamp": datetime.now().isoformat()
-                }
-                return error_result
-            
-            # 记录调用时间
-            call_times.append(current_time)
+            with lock:
+                current_time = time.time()
+                # Remove calls older than the period
+                call_times[:] = [t for t in call_times if t > current_time - period]
+
+                if len(call_times) >= calls:
+                    # Calculate wait time based on the oldest timestamp in the current window
+                    time_to_wait = (call_times[0] + period) - current_time
+                    if time_to_wait > 0:
+                        logger.warning(
+                            f"[RATE_LIMIT] Rate limit reached for {function_name}. "
+                            f"Waiting for {time_to_wait:.2f}s"
+                        )
+                        time.sleep(time_to_wait)
+                
+                call_times.append(time.time())
             
             return func(*args, **kwargs)
-        
+
         return wrapper
     return decorator
 
@@ -441,29 +450,63 @@ def measure_memory_usage(func: Callable) -> Callable:
     return wrapper
 
 
-# 组合装饰器
-def mystery_tool(max_retries: int = 2, cache_duration: int = 300, rate_limit_per_minute: int = 30):
-    """神秘事件工具的组合装饰器
-    
+def mystery_tool(event_type: Optional[Any] = None, tool_config: Optional[Dict] = None):
+    """Decorator to add mystery event handling to a tool, including keyword enhancement.
+
     Args:
-        max_retries: 最大重试次数
-        cache_duration: 缓存持续时间（秒）
-        rate_limit_per_minute: 每分钟调用限制
-        
+        event_type: The mystery event type associated with the tool (can be Enum or string).
+        tool_config: Configuration dictionary with keywords.
+
     Returns:
-        组合装饰器
+        A decorator function.
     """
     def decorator(func: Callable) -> Callable:
-        # 应用多个装饰器
-        decorated_func = func
-        decorated_func = log_io(decorated_func)
-        decorated_func = performance_monitor(threshold_seconds=2.0)(decorated_func)
-        decorated_func = retry_on_failure(max_retries=max_retries)(decorated_func)
-        decorated_func = cache_result(cache_duration_seconds=cache_duration)(decorated_func)
-        decorated_func = rate_limit(calls_per_minute=rate_limit_per_minute)(decorated_func)
-        decorated_func = sanitize_output()(decorated_func)
-        decorated_func = measure_memory_usage(decorated_func)
-        
-        return decorated_func
-    
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            # Convert Enum args to their string values for processing
+            processed_args = [arg.name if isinstance(arg, Enum) else arg for arg in args]
+            processed_kwargs = {k: v.name if isinstance(v, Enum) else v for k, v in kwargs.items()}
+
+            # 1. Get the query string
+            query = ""
+            if processed_args:
+                query = processed_args[0]
+            elif 'query' in processed_kwargs:
+                query = processed_kwargs['query']
+
+            # 2. Enhance the query based on the event type
+            event_name = None
+            if 'event_type' in processed_kwargs:
+                event_param = processed_kwargs['event_type']
+                event_name = event_param.name if isinstance(event_param, Enum) else str(event_param)
+            elif event_type:
+                event_name = event_type.name if isinstance(event_type, Enum) else str(event_type)
+
+            if event_name and tool_config and 'keywords' in tool_config:
+                keywords = tool_config['keywords'].get(event_name, [])
+                if keywords:
+                    enhanced_query = f"{query} {' '.join(keywords)}".strip()
+
+                    # Update the query argument
+                    if processed_args:
+                        processed_args[0] = enhanced_query
+                    else:
+                        processed_kwargs['query'] = enhanced_query
+
+                    logger.info(f"[{func.__name__}] Enhanced query for {event_name}: {enhanced_query}")
+
+            # Execute the original function with processed arguments
+            result = func(*processed_args, **processed_kwargs)
+
+            # 3. Wrap the result in a JSON object if it's not already a valid JSON string
+            if isinstance(result, str):
+                try:
+                    json.loads(result)
+                    return result  # It's already a valid JSON string
+                except (json.JSONDecodeError, TypeError):
+                    pass  # Not a valid JSON string, will be wrapped below
+
+            return json.dumps(result, ensure_ascii=False, indent=4)
+            
+        return wrapper
     return decorator

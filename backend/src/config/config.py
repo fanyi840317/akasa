@@ -4,27 +4,42 @@
 import os
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
-from enum import Enum
+
+from dotenv import load_dotenv
+
+from .types import (
+    AnalysisEngine,
+    DataSourceType,
+    LLMType,
+    MysteryEventType,
+    RAGProvider,
+    SearchEngine,
+)
+
+load_dotenv()
 
 
-class MysteryEventType(Enum):
-    """神秘事件类型枚举"""
-    UFO = "ufo"
-    CRYPTID = "cryptid"  # 神秘生物
-    PARANORMAL = "paranormal"  # 超自然现象
-    ANCIENT_MYSTERY = "ancient_mystery"  # 古代谜团
-    DISAPPEARANCE = "disappearance"  # 神秘失踪
-    NATURAL_ANOMALY = "natural_anomaly"  # 自然异象
+@dataclass
+class APIConfig:
+    """API密钥配置"""
+    tavily_api_key: Optional[str] = os.getenv("TAVILY_API_KEY")
+    anthropic_api_key: Optional[str] = os.getenv("ANTHROPIC_API_KEY")
+    openai_api_key: Optional[str] = os.getenv("OPENAI_API_KEY")
+    google_api_key: Optional[str] = os.getenv("GOOGLE_API_KEY")
+    jina_api_key: Optional[str] = os.getenv("JINA_API_KEY")
+    cnki_api_key: Optional[str] = os.getenv("CNKI_API_KEY")
+    wanfang_api_key: Optional[str] = os.getenv("WANFANG_API_KEY")
+    webofscience_api_key: Optional[str] = os.getenv("WEBOFSCIENCE_API_KEY")
+    mufon_api_key: Optional[str] = os.getenv("MUFON_API_KEY")
+    paranormal_db_api_key: Optional[str] = os.getenv("PARANORMAL_DB_API_KEY")
 
 
-class DataSourceType(Enum):
-    """数据源类型枚举"""
-    ACADEMIC = "academic"  # 学术数据库
-    NEWS = "news"  # 新闻媒体
-    FORUM = "forum"  # 论坛社区
-    DOCUMENTARY = "documentary"  # 纪录片
-    GOVERNMENT = "government"  # 政府报告
-    RESEARCH_INSTITUTE = "research_institute"  # 研究机构
+@dataclass
+class Neo4jConfig:
+    """Neo4j图数据库配置"""
+    uri: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+    user: str = os.getenv("NEO4J_USER", "neo4j")
+    password: str = os.getenv("NEO4J_PASSWORD", "password")
 
 
 @dataclass
@@ -45,15 +60,18 @@ class DataSourceConfig:
 @dataclass
 class MysteryEventConfig:
     """神秘事件研究配置"""
-    
-    # UFO相关关键词
+    academic_search_types: List[str] = field(default_factory=lambda: ["arxiv", "cnki", "wanfang", "webofscience"])
+    mystery_search_types: Dict[MysteryEventType, List[str]] = field(default_factory=lambda: {
+        MysteryEventType.UFO: ["mufon", "nuforc"],
+        MysteryEventType.CRYPTID: ["paranormal_db"],
+        MysteryEventType.PARANORMAL: ["paranormal_db"],
+    })
+
     ufo_keywords: List[str] = field(default_factory=lambda: [
-        "UFO目击报告", "不明飞行物现象", "飞碟目击", "外星人接触", 
+        "UFO目击报告", "不明飞行物现象", "飞碟目击", "外星人接触",
         "UFO sighting", "unidentified flying object", "alien encounter",
         "close encounter", "extraterrestrial", "flying saucer"
     ])
-    
-    # 其他神秘事件关键词
     mystery_keywords: Dict[MysteryEventType, List[str]] = field(default_factory=lambda: {
         MysteryEventType.CRYPTID: [
             "尼斯湖水怪", "大脚怪", "雪人", "天蛾人", "泽西恶魔",
@@ -67,7 +85,7 @@ class MysteryEventConfig:
         ],
         MysteryEventType.ANCIENT_MYSTERY: [
             "玛雅文明神秘现象", "金字塔之谜", "巨石阵", "复活节岛石像", "亚特兰蒂斯",
-            "Maya civilization mystery", "pyramid mystery", "Stonehenge", 
+            "Maya civilization mystery", "pyramid mystery", "Stonehenge",
             "Easter Island statues", "Atlantis", "ancient aliens", "lost civilization"
         ],
         MysteryEventType.DISAPPEARANCE: [
@@ -77,14 +95,11 @@ class MysteryEventConfig:
         ],
         MysteryEventType.NATURAL_ANOMALY: [
             "球状闪电", "极光异象", "地震光", "天空异象", "气象异常",
-            "ball lightning", "aurora anomaly", "earthquake lights", 
+            "ball lightning", "aurora anomaly", "earthquake lights",
             "sky phenomenon", "weather anomaly", "atmospheric phenomenon"
         ]
     })
-    
-    # 数据源配置
     data_sources: List[DataSourceConfig] = field(default_factory=lambda: [
-        # 学术数据库
         DataSourceConfig(
             name="知网",
             source_type=DataSourceType.ACADEMIC,
@@ -106,7 +121,6 @@ class MysteryEventConfig:
             reliability_score=0.95,
             requires_login=True
         ),
-        # 权威新闻媒体
         DataSourceConfig(
             name="BBC News",
             source_type=DataSourceType.NEWS,
@@ -125,7 +139,6 @@ class MysteryEventConfig:
             base_url="https://www.xinhuanet.com",
             reliability_score=0.9
         ),
-        # 专业研究机构
         DataSourceConfig(
             name="MUFON",
             source_type=DataSourceType.RESEARCH_INSTITUTE,
@@ -139,39 +152,48 @@ class MysteryEventConfig:
             reliability_score=0.75
         )
     ])
-    
-    # 信息筛选配置
-    credibility_threshold: float = 0.6  # 可信度阈值
-    max_age_days: int = 365 * 5  # 信息最大年龄（天）
-    min_detail_score: float = 0.5  # 最小细节丰富度评分
-    
-    # 关联分析配置
-    time_window_days: int = 30  # 时间窗口（天）
-    location_radius_km: float = 100.0  # 地理位置半径（公里）
-    similarity_threshold: float = 0.7  # 相似度阈值
-    
-    # Neo4j图数据库配置
-    neo4j_uri: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-    neo4j_user: str = os.getenv("NEO4J_USER", "neo4j")
-    neo4j_password: str = os.getenv("NEO4J_PASSWORD", "password")
-    
+    credibility_threshold: float = 0.6
+    max_age_days: int = 365 * 5
+    min_detail_score: float = 0.5
+    time_window_days: int = 30
+    location_radius_km: float = 100.0
+    similarity_threshold: float = 0.7
+
     def get_all_keywords(self) -> List[str]:
         """获取所有关键词"""
         all_keywords = self.ufo_keywords.copy()
         for keywords in self.mystery_keywords.values():
             all_keywords.extend(keywords)
-        return list(set(all_keywords))  # 去重
-    
+        return list(set(all_keywords))
+
     def get_keywords_by_type(self, event_type: MysteryEventType) -> List[str]:
         """根据事件类型获取关键词"""
         if event_type == MysteryEventType.UFO:
             return self.ufo_keywords
         return self.mystery_keywords.get(event_type, [])
-    
+
     def get_sources_by_type(self, source_type: DataSourceType) -> List[DataSourceConfig]:
         """根据数据源类型获取数据源配置"""
         return [source for source in self.data_sources if source.source_type == source_type]
-    
+
     def get_reliable_sources(self, min_score: float = 0.8) -> List[DataSourceConfig]:
         """获取高可靠性数据源"""
         return [source for source in self.data_sources if source.reliability_score >= min_score]
+
+
+@dataclass
+class Config:
+    """统一配置类"""
+    api: APIConfig = field(default_factory=APIConfig)
+    neo4j: Neo4jConfig = field(default_factory=Neo4jConfig)
+    mystery: MysteryEventConfig = field(default_factory=MysteryEventConfig)
+
+    # 工具选择
+    selected_search_engine: SearchEngine = SearchEngine(os.getenv("SEARCH_ENGINE", "tavily"))
+    selected_rag_provider: RAGProvider = RAGProvider(os.getenv("RAG_PROVIDER", "neo4j"))
+    selected_analysis_engine: AnalysisEngine = AnalysisEngine(os.getenv("ANALYSIS_ENGINE", "correlation_analyzer"))
+
+
+
+# 全局配置实例
+config = Config()

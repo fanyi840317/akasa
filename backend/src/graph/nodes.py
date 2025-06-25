@@ -40,47 +40,7 @@ from config import SELECTED_SEARCH_ENGINE, SearchEngine
 logger = logging.getLogger(__name__)
 
 
-@tool
-def handoff_to_planner(
-    task_title: Annotated[str, "The title of the task to be handed off."],
-    locale: Annotated[str, "The user's detected language locale (e.g., en-US, zh-CN)."],
-):
-    """Handoff to planner agent to do plan."""
-    return
 
-
-@tool
-def handoff_to_mystery_researcher(
-    task_title: Annotated[str, "The title of the mystery research task."],
-    event_type: Annotated[str, "The type of mystery event to research."],
-):
-    """Handoff to mystery researcher to collect mystery event data."""
-    return
-
-
-@tool
-def handoff_to_academic_researcher(
-    task_title: Annotated[str, "The title of the academic research task."],
-    keywords: Annotated[str, "Academic search keywords."],
-):
-    """Handoff to academic researcher to search academic databases."""
-    return
-
-
-@tool
-def handoff_to_credibility_analyzer(
-    task_title: Annotated[str, "The title of the credibility analysis task."],
-):
-    """Handoff to credibility analyzer to assess information reliability."""
-    return
-
-
-@tool
-def handoff_to_correlation_analyzer(
-    task_title: Annotated[str, "The title of the correlation analysis task."],
-):
-    """Handoff to correlation analyzer to find event relationships."""
-    return
 
 
 def background_investigation_node(state: State, config: RunnableConfig):

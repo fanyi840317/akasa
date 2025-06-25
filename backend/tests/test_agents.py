@@ -3,13 +3,9 @@
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
-import sys
-from config.llm import LLMType
 
-src_path = str((Path(__file__).parent.parent / "src").resolve())
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
+
+from config.types import LLMType
 
 from agents.agents import (
     create_agent,
@@ -66,8 +62,8 @@ class TestCreateAgent:
         
         assert result == mock_agent
     
-    @patch('agents.agents.create_react_agent')
-    @patch('agents.agents.get_llm_by_type')
+    @patch('src.agents.agents.create_react_agent')
+    @patch('src.agents.agents.get_llm_by_type')
     @patch('config.agents.AGENT_LLM_MAP', {})
     def test_create_agent_missing_type(self, mock_get_llm, mock_create_react):
         """Test agent creation with missing agent type."""
@@ -83,10 +79,10 @@ class TestCreateAgent:
 class TestCreateMysteryAgent:
     """Test the create_mystery_agent function."""
     
-    @patch('agents.agents.create_react_agent')
-    @patch('agents.agents.get_llm_by_type')
-    @patch('agents.agents.apply_prompt_template')
-    @patch('config.agents.AGENT_LLM_MAP', {'researcher': LLMType.RESEARCH})
+    @patch('src.agents.agents.create_react_agent')
+    @patch('src.agents.agents.get_llm_by_type')
+    @patch('src.agents.agents.apply_prompt_template')
+    @patch('src.config.agents.AGENT_LLM_MAP', {'researcher': LLMType.RESEARCH})
     def test_create_mystery_agent_basic(self, mock_apply_prompt, mock_get_llm, mock_create_react):
         """Test basic mystery agent creation."""
         # Setup mocks
@@ -118,10 +114,10 @@ class TestCreateMysteryAgent:
         
         assert result == mock_agent
     
-    @patch('agents.agents.create_react_agent')
-    @patch('agents.agents.get_llm_by_type')
-    @patch('agents.agents.apply_prompt_template')
-    @patch('agents.agents.AGENT_LLM_MAP', {'researcher': 'research_llm'})
+    @patch('src.agents.agents.create_react_agent')
+    @patch('src.agents.agents.get_llm_by_type')
+    @patch('src.agents.agents.apply_prompt_template')
+    @patch('config.agents.AGENT_LLM_MAP', {'researcher': 'research_llm'})
     def test_create_mystery_agent_with_config(self, mock_apply_prompt, mock_get_llm, mock_create_react):
         """Test mystery agent creation with mystery config."""
         # Setup mocks
@@ -162,10 +158,10 @@ class TestCreateMysteryAgent:
         assert "0.7" in result_prompt
         assert "启用" in result_prompt
     
-    @patch('agents.agents.create_react_agent')
-    @patch('agents.agents.get_llm_by_type')
-    @patch('agents.agents.apply_prompt_template')
-    @patch('agents.agents.AGENT_LLM_MAP', {'researcher': 'research_llm'})
+    @patch('src.agents.agents.create_react_agent')
+    @patch('src.agents.agents.get_llm_by_type')
+    @patch('src.agents.agents.apply_prompt_template')
+    @patch('src.config.agents.AGENT_LLM_MAP', {'researcher': 'research_llm'})
     def test_create_mystery_agent_with_state_data(self, mock_apply_prompt, mock_get_llm, mock_create_react):
         """Test mystery agent with various state data."""
         # Setup mocks

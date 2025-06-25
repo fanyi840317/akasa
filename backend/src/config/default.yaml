@@ -118,6 +118,21 @@ crawler:
   max_crawl_depth: 3
   max_content_length: 1048576  # 1MB
   
+  # CSS选择器
+  selectors:
+    default:
+      title: "h1, h2, title"
+      content: "p, article, div.content, section.main"
+      publish_time: "time, span.date, p.time"
+    news:
+      title: "h1.story-title, .headline"
+      content: ".story-body, .article-content"
+      publish_time: "time.published-date, .timestamp"
+    forum:
+      title: ".thread-title, h1.post-title"
+      content: ".post-content, .post-body"
+      publish_time: ".post-date, .timestamp"
+
   # Selenium配置
   selenium:
     headless: true

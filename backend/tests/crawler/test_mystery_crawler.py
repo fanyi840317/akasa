@@ -5,13 +5,11 @@ import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+from pathlib import Path
 
-from crawler.mystery_crawler import MysteryCrawler
-from config.mystery_config import DataSourceConfig, DataSourceType, MysteryEventType
-from rag.retriever import Document, MysteryEvent
+from src.crawler.mystery_crawler import MysteryCrawler
+from src.config.config import DataSourceConfig, DataSourceType, MysteryEventType
+from src.rag.retriever import Document, MysteryEvent
 
 
 class TestMysteryCrawler:
@@ -88,7 +86,7 @@ class TestMysteryCrawler:
         </html>
         """
     
-    def test_init(self, crawler):
+    def test_init(self, crawler, config):
         """测试初始化"""
         assert crawler.config.source_type == DataSourceType.MYSTERY
         assert len(crawler.mystery_keywords) == 6
@@ -130,7 +128,7 @@ class TestMysteryCrawler:
             assert len(results) <= 2
             assert all(isinstance(doc, type(mock_doc)) for doc in results)
     
-    def test_parse_mystery_html_ufo(self, crawler, sample_ufo_html):
+    def test_extract_event_details_ufo(self, crawler, config, sample_ufo_html):
         """测试UFO事件HTML解析"""
         result = crawler._parse_mystery_html(sample_ufo_html, "https://mystery.example.com/phoenix-lights")
         
@@ -142,7 +140,7 @@ class TestMysteryCrawler:
         assert result['metadata']['evidence_count'] == 3
         assert isinstance(result['mystery_event'], MysteryEvent)
     
-    def test_parse_mystery_html_cryptid(self, crawler, sample_cryptid_html):
+    def test_extract_event_details_cryptid(self, crawler, config, sample_cryptid_html):
         """测试神秘生物事件HTML解析"""
         result = crawler._parse_mystery_html(sample_cryptid_html, "https://mystery.example.com/bigfoot")
         
@@ -151,7 +149,7 @@ class TestMysteryCrawler:
         assert result['metadata']['event_type'] == MysteryEventType.CRYPTID.value
         assert "Olympic National Forest" in result['metadata']['location']
     
-    def test_parse_mystery_html_no_title(self, crawler):
+    def test_parse_mystery_html_no_title(self, crawler, config):
         """测试无标题的HTML"""
         html = "<html><body><p>Content without title</p></body></html>"
         
@@ -159,7 +157,7 @@ class TestMysteryCrawler:
         
         assert result is None
     
-    def test_detect_event_type_ufo(self, crawler):
+    def test_detect_event_type_ufo(self, crawler, config):
         """测试UFO事件类型检测"""
         text = "I saw a UFO flying saucer with bright lights over the city"
         
@@ -167,7 +165,7 @@ class TestMysteryCrawler:
         
         assert event_type == MysteryEventType.UFO
     
-    def test_detect_event_type_cryptid(self, crawler):
+    def test_detect_event_type_cryptid(self, crawler, config):
         """测试神秘生物事件类型检测"""
         text = "Bigfoot sasquatch sighting in the forest with large footprints"
         
@@ -175,7 +173,7 @@ class TestMysteryCrawler:
         
         assert event_type == MysteryEventType.CRYPTID
     
-    def test_detect_event_type_paranormal(self, crawler):
+    def test_detect_event_type_paranormal(self, crawler, config):
         """测试超自然事件类型检测"""
         text = "Ghost haunting in the old house with supernatural activities"
         
@@ -183,7 +181,7 @@ class TestMysteryCrawler:
         
         assert event_type == MysteryEventType.PARANORMAL
     
-    def test_detect_event_type_no_match(self, crawler):
+    def test_detect_event_type_no_match(self, crawler, config):
         """测试无匹配的事件类型"""
         text = "Regular news about weather and traffic conditions"
         
@@ -191,7 +189,7 @@ class TestMysteryCrawler:
         
         assert event_type is None
     
-    def test_extract_mystery_description(self, crawler, sample_ufo_html):
+    def test_extract_mystery_description(self, crawler, config, sample_ufo_html):
         """测试神秘事件描述提取"""
         from bs4 import BeautifulSoup
         
@@ -202,7 +200,7 @@ class TestMysteryCrawler:
         assert "V-formation" in description
         assert "Arizona" in description
     
-    def test_extract_location(self, crawler, sample_ufo_html):
+    def test_extract_location(self, crawler, config, sample_ufo_html):
         """测试位置提取"""
         from bs4 import BeautifulSoup
         
@@ -211,7 +209,7 @@ class TestMysteryCrawler:
         
         assert location == "Phoenix, Arizona"
     
-    def test_extract_location_from_text(self, crawler):
+    def test_extract_location_from_text(self, crawler, config):
         """测试从文本中提取位置"""
         from bs4 import BeautifulSoup
         
@@ -222,7 +220,7 @@ class TestMysteryCrawler:
         
         assert "Las Vegas" in location
     
-    def test_extract_event_date(self, crawler, sample_ufo_html):
+    def test_extract_event_date(self, crawler, config, sample_ufo_html):
         """测试事件日期提取"""
         from bs4 import BeautifulSoup
         
@@ -234,7 +232,7 @@ class TestMysteryCrawler:
         assert event_date.month == 3
         assert event_date.day == 13
     
-    def test_parse_date_various_formats(self, crawler):
+    def test_parse_date_various_formats(self, crawler, config):
         """测试各种日期格式解析"""
         dates = [
             "2023-06-15",
@@ -250,7 +248,7 @@ class TestMysteryCrawler:
                 assert parsed.month == 6
                 assert parsed.day == 15
     
-    def test_parse_date_invalid(self, crawler):
+    def test_parse_date_invalid(self, crawler, config):
         """测试无效日期解析"""
         invalid_dates = ["invalid date", "not a date", ""]
         
@@ -258,7 +256,7 @@ class TestMysteryCrawler:
             parsed = crawler._parse_date(date_str)
             assert parsed is None
     
-    def test_extract_witnesses(self, crawler, sample_ufo_html):
+    def test_extract_witnesses(self, crawler, config, sample_ufo_html):
         """测试目击者提取"""
         from bs4 import BeautifulSoup
         
@@ -270,7 +268,7 @@ class TestMysteryCrawler:
         assert "Dr. Lynne Kitei" in witnesses
         assert "Tim Ley" in witnesses
     
-    def test_extract_witnesses_from_text(self, crawler):
+    def test_extract_witnesses_from_text(self, crawler, config):
         """测试从文本中提取目击者"""
         from bs4 import BeautifulSoup
         
@@ -282,7 +280,7 @@ class TestMysteryCrawler:
         assert len(witnesses) > 0
         assert any("John Smith" in witness for witness in witnesses)
     
-    def test_extract_evidence(self, crawler, sample_ufo_html):
+    def test_extract_evidence(self, crawler, config, sample_ufo_html):
         """测试证据提取"""
         from bs4 import BeautifulSoup
         
@@ -294,7 +292,7 @@ class TestMysteryCrawler:
         assert "Photographs from various angles" in evidence
         assert "Radar data from Luke Air Force Base" in evidence
     
-    def test_extract_evidence_with_media(self, crawler):
+    def test_extract_evidence_with_media(self, crawler, config):
         """测试包含媒体的证据提取"""
         from bs4 import BeautifulSoup
         
@@ -314,7 +312,7 @@ class TestMysteryCrawler:
         assert "Media: /images/ufo1.jpg" in evidence
         assert "Media: /videos/sighting.mp4" in evidence
     
-    def test_calculate_credibility_high(self, crawler):
+    def test_calculate_credibility_high(self, crawler, config):
         """测试高可信度计算"""
         from bs4 import BeautifulSoup
         
@@ -332,7 +330,7 @@ class TestMysteryCrawler:
         
         assert credibility > 0.8  # 应该是高可信度
     
-    def test_calculate_credibility_low(self, crawler):
+    def test_calculate_credibility_low(self, crawler, config):
         """测试低可信度计算"""
         from bs4 import BeautifulSoup
         
@@ -345,7 +343,7 @@ class TestMysteryCrawler:
         
         assert credibility == 0.5  # 基础分数
     
-    def test_create_mystery_document(self, crawler):
+    def test_create_mystery_document(self, crawler, config):
         """测试神秘事件文档创建"""
         mystery_event = MysteryEvent(
             event_id="test123",
@@ -378,7 +376,7 @@ class TestMysteryCrawler:
         assert document.mystery_event == mystery_event
         assert len(document.chunks) > 0
     
-    def test_identify_event_type(self, crawler):
+    def test_identify_event_type(self, crawler, config):
         """测试事件类型识别"""
         queries = [
             ("UFO sighting over city", MysteryEventType.UFO),
@@ -393,7 +391,7 @@ class TestMysteryCrawler:
             identified_type = crawler._identify_event_type(query)
             assert identified_type == expected_type
     
-    def test_build_mystery_query(self, crawler):
+    def test_build_mystery_query(self, crawler, config):
         """测试神秘事件查询构建"""
         query = "strange lights"
         event_type = MysteryEventType.UFO
@@ -404,7 +402,7 @@ class TestMysteryCrawler:
         assert "UFO" in mystery_query
         assert len(mystery_query.split()) > 2  # 应该添加了关键词
     
-    def test_build_mystery_query_no_type(self, crawler):
+    def test_build_mystery_query_no_type(self, crawler, config):
         """测试无事件类型的查询构建"""
         query = "strange phenomenon"
         
@@ -412,7 +410,7 @@ class TestMysteryCrawler:
         
         assert mystery_query == query  # 应该保持原样
     
-    def test_generate_mystery_search_urls(self, crawler):
+    def test_generate_mystery_search_urls(self, crawler, config):
         """测试神秘事件搜索URL生成"""
         query = "UFO sighting"
         urls = crawler._generate_mystery_search_urls(query, limit=3)
@@ -422,7 +420,7 @@ class TestMysteryCrawler:
         assert all(isinstance(url, str) for url in urls)
         assert all("UFO%20sighting" in url or "UFO+sighting" in url for url in urls)
     
-    def test_extract_title(self, crawler, sample_ufo_html):
+    def test_extract_title(self, crawler, config, sample_ufo_html):
         """测试标题提取"""
         from bs4 import BeautifulSoup
         
@@ -431,7 +429,7 @@ class TestMysteryCrawler:
         
         assert title == "The Phoenix Lights Incident"
     
-    def test_mystery_keywords_completeness(self, crawler):
+    def test_mystery_keywords_completeness(self, crawler, config):
         """测试神秘关键词的完整性"""
         # 确保所有事件类型都有关键词
         for event_type in MysteryEventType:
@@ -439,7 +437,7 @@ class TestMysteryCrawler:
             assert len(crawler.mystery_keywords[event_type]) > 0
             assert all(isinstance(keyword, str) for keyword in crawler.mystery_keywords[event_type])
     
-    def test_empty_mystery_html(self, crawler):
+    def test_empty_mystery_html(self, crawler, config):
         """测试空神秘事件HTML"""
         empty_html = "<html><body></body></html>"
         
@@ -447,7 +445,7 @@ class TestMysteryCrawler:
         
         assert result is None
     
-    def test_malformed_mystery_html(self, crawler):
+    def test_malformed_mystery_html(self, crawler, config):
         """测试格式错误的神秘事件HTML"""
         malformed_html = "<html><body><h1>Title</h1><div class='event-description'>Broken HTML without closing"
         
@@ -457,7 +455,7 @@ class TestMysteryCrawler:
         # 可能返回部分解析的结果或None，但不应该抛出异常
         assert result is None or isinstance(result, dict)
     
-    def test_credibility_score_bounds(self, crawler):
+    def test_credibility_score_bounds(self, crawler, config):
         """测试可信度分数边界"""
         from bs4 import BeautifulSoup
         
@@ -477,7 +475,7 @@ class TestMysteryCrawler:
         assert 0.0 <= credibility <= 1.0
         assert credibility > 0.9  # 应该接近最大值
     
-    def test_location_extraction_patterns(self, crawler):
+    def test_location_extraction_patterns(self, crawler, config):
         """测试位置提取的各种模式"""
         from bs4 import BeautifulSoup
         

@@ -22,7 +22,7 @@ if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
 from config import SearchEngine, RAGProvider
-from config.mystery_config import MysteryEventType, DataSourceType, MysteryEventConfig
+from src.config import MysteryEventType, DataSourceType, MysteryEventConfig, config
 # from tools.tavily_search.tavily_search_results_with_images import (
 #     tavily_search_results_with_images
 # )
@@ -38,93 +38,67 @@ LoggedArxivSearch = create_logged_tool(ArxivQueryRun)
 
 
 class AcademicSearch(BaseTool):
-    """Tool for searching academic databases for mystery research."""
+    """An academic search tool that searches across multiple databases."""
     name: str = "academic_search"
-    description: str = "Search academic databases for scholarly articles and papers related to mysterious events."
+    description: str = "Searches academic databases like Arxiv, CNKI, etc."
     max_results: int = 5
-    databases: List[str] = ["arxiv", "cnki", "wanfang"]
+    databases: List[str] = []
     api_keys: Dict[str, str] = {}
-    
-    def __init__(self, max_results: int = 5, databases: Optional[List[str]] = None, **kwargs):
-        """Initialize the academic search tool.
-        
-        Args:
-            max_results: Maximum number of results to return
-            databases: List of academic databases to search (e.g., "cnki", "wanfang", "webofscience")
-        """
-        # API keys and configurations
-        api_keys = {
-            "cnki": os.getenv("CNKI_API_KEY", ""),
-            "wanfang": os.getenv("WANFANG_API_KEY", ""),
-            "webofscience": os.getenv("WEBOFSCIENCE_API_KEY", ""),
+
+    def __init__(self, **kwargs):
+        """Initialize the academic search tool."""
+        super().__init__(**kwargs)
+        self.databases = self.databases or config.mystery.academic_search_types
+        self.api_keys = {
+            "cnki": config.api.cnki_api_key or "",
+            "wanfang": config.api.wanfang_api_key or "",
+            "webofscience": config.api.webofscience_api_key or "",
         }
-        
-        super().__init__(
-            max_results=max_results,
-            databases=databases or ["arxiv", "cnki", "wanfang"],
-            api_keys=api_keys,
-            **kwargs
-        )
     
     def _run(self, query: str) -> List[Dict[str, Any]]:
         """Run the academic search.
-        
+
         Args:
             query: The search query
-            
+
         Returns:
             List of academic search results
         """
         logger.info(f"Searching academic databases: {self.databases} for: {query}")
-        
+
         results = []
-        
+
         # Use ArxivQueryRun for arxiv searches
         if "arxiv" in self.databases:
             try:
                 arxiv_tool = LoggedArxivSearch(
                     api_wrapper=ArxivAPIWrapper(
-                        arxiv_search=None,  # Replace with actual arxiv_search instance if available
-                        arxiv_exceptions=None,  # Replace with actual arxiv_exceptions instance if available
                         top_k_results=self.max_results,
                         load_max_docs=self.max_results,
                         load_all_available_meta=True,
                     ),
                 )
-                arxiv_results = arxiv_tool.invoke(query)
-                
-                # Parse the results
-                if isinstance(arxiv_results, str):
-                    try:
-                        parsed_results = json.loads(arxiv_results)
-                        if isinstance(parsed_results, list):
-                            for result in parsed_results:
-                                results.append({
-                                    "title": result.get("title", ""),
-                                    "authors": result.get("authors", ""),
-                                    "summary": result.get("summary", ""),
-                                    "published": result.get("published", ""),
-                                    "url": result.get("entry_id", ""),
-                                    "source": "arxiv",
-                                    "source_type": "academic"
-                                })
-                    except json.JSONDecodeError:
-                        # Handle as text
-                        results.append({
-                            "title": "Arxiv Search Results",
-                            "content": arxiv_results,
-                            "source": "arxiv",
-                            "source_type": "academic"
-                        })
+                arxiv_results_str = arxiv_tool.invoke(query)
+
+                # The result from ArxivQueryRun is a string, not a list of dicts.
+                # We'll wrap it in a result dictionary.
+                if isinstance(arxiv_results_str, str) and arxiv_results_str:
+                    results.append({
+                        "title": f"Arxiv Search Results for {query}",
+                        "content": arxiv_results_str,
+                        "source": "arxiv",
+                        "source_type": "academic"
+                    })
+
             except Exception as e:
                 logger.error(f"Error searching arxiv: {e}")
-        
+
         # Simulate other academic database searches
         # In a real implementation, these would connect to actual APIs
         for db in self.databases:
             if db == "arxiv":
                 continue  # Already handled above
-                
+
             if db == "cnki" and self.api_keys["cnki"]:
                 # Simulated CNKI search
                 results.append({
@@ -133,7 +107,7 @@ class AcademicSearch(BaseTool):
                     "source": "cnki",
                     "source_type": "academic"
                 })
-            
+
             if db == "wanfang" and self.api_keys["wanfang"]:
                 # Simulated Wanfang search
                 results.append({
@@ -142,7 +116,7 @@ class AcademicSearch(BaseTool):
                     "source": "wanfang",
                     "source_type": "academic"
                 })
-                
+
             if db == "webofscience" and self.api_keys["webofscience"]:
                 # Simulated Web of Science search
                 results.append({
@@ -151,7 +125,7 @@ class AcademicSearch(BaseTool):
                     "source": "webofscience",
                     "source_type": "academic"
                 })
-        
+
         return results[:self.max_results]
 
 
@@ -160,42 +134,22 @@ class MysterySearch(BaseTool):
     name: str = "mystery_search"
     description: str = "Search for information about mysterious events from specialized sources."
     max_results: int = 5
-    event_types: List[str] = []
+    event_types: List[MysteryEventType] = []
     api_keys: Dict[str, str] = {}
-    config: Dict[str, Any] = {}
+    tool_config: Dict[str, Any] = {}
     
-    def __init__(self, max_results: int = 5, event_types: Optional[List[str]] = None, **kwargs):
-        """Initialize the mystery search tool.
-        
-        Args:
-            max_results: Maximum number of results to return
-            event_types: List of mystery event types to focus on
-        """
-        default_event_types = ["UFO", "CRYPTID", "PARANORMAL", "UNEXPLAINED"]
-        
-        # API keys and configurations
-        api_keys = {
-            "mufon": os.getenv("MUFON_API_KEY", ""),
-            "paranormal_db": os.getenv("PARANORMAL_DB_API_KEY", ""),
+    def __init__(self, **kwargs):
+        """Initialize the mystery search tool."""
+        super().__init__(**kwargs)
+        self.event_types = self.event_types or list(config.mystery.mystery_search_types.keys())
+        self.api_keys = {
+            "mufon": config.api.mufon_api_key or "",
+            "paranormal_db": config.api.paranormal_db_api_key or "",
+            "nuforc": "", # NUFORC doesn't require an API key for basic search
         }
-        
-        # Create config with keywords structure
-        config = {
-            "keywords": {
-                "UFO": ["ufo", "flying saucer", "alien", "extraterrestrial"],
-                "PARANORMAL": ["ghost", "spirit", "haunted", "supernatural"],
-                "CRYPTID": ["bigfoot", "sasquatch", "yeti", "monster"],
-                "UNEXPLAINED": ["mystery", "unexplained", "anomaly", "phenomenon"]
-            }
+        self.tool_config = {
+            "keywords": config.mystery.mystery_keywords
         }
-        
-        super().__init__(
-            max_results=max_results,
-            event_types=event_types or default_event_types,
-            api_keys=api_keys,
-            config=config,
-            **kwargs
-        )
     
     def _run(self, query: str) -> List[Dict[str, Any]]:
         """Run the mystery search.
@@ -240,51 +194,51 @@ class MysterySearch(BaseTool):
         
         # Simulate specialized mystery database searches
         # In a real implementation, these would connect to actual APIs
-        
-        # Check if query is related to UFOs
-        if any(keyword in query.lower() for keyword in self.config.get("keywords", {}).get("UFO", [])):
-            if self.api_keys["mufon"]:
-                # Simulated MUFON database search
-                results.append({
-                    "title": "MUFON UFO Sighting Report",
-                    "content": f"Simulated MUFON database search results for UFO query: {query}",
-                    "source": "mufon",
-                    "source_type": "specialized_database"
-                })
-        
-        # Check if query is related to paranormal events
-        if any(keyword in query.lower() for keyword in self.config.get("keywords", {}).get("PARANORMAL", [])):
-            if self.api_keys["paranormal_db"]:
-                # Simulated paranormal database search
-                results.append({
-                    "title": "Paranormal Activity Database Report",
-                    "content": f"Simulated paranormal database search results for: {query}",
-                    "source": "paranormal_db",
-                    "source_type": "specialized_database"
-                })
-        
+        event_type = self._detect_event_type(query)
+        if event_type and event_type in config.mystery.mystery_search_types:
+            search_sources = config.mystery.mystery_search_types[event_type]
+            for source in search_sources:
+                if source == "mufon" and self.api_keys.get("mufon"):
+                    results.append(self._simulated_search(query, "mufon", "MUFON UFO Sighting Report"))
+                elif source == "nuforc": # No API key needed
+                    results.append(self._simulated_search(query, "nuforc", "NUFORC UFO Sighting Report"))
+                elif source == "paranormal_db" and self.api_keys.get("paranormal_db"):
+                    results.append(self._simulated_search(query, "paranormal_db", "Paranormal Activity Database Report"))
+
         return results[:self.max_results]
     
+    def _simulated_search(self, query: str, source: str, title_prefix: str) -> Dict[str, str]:
+        """Simulate a search to a specialized database."""
+        return {
+            "title": f"{title_prefix} for {query}",
+            "content": f"Simulated {source} database search results for: {query}",
+            "source": source,
+            "source_type": "specialized_database"
+        }
+
+    def _detect_event_type(self, query: str) -> Optional[str]:
+        """Detect event type from query and return its string name."""
+        query_lower = query.lower()
+        for event_name, keywords in self.tool_config.get("keywords", {}).items():
+            if any(keyword.lower() in query_lower for keyword in keywords):
+                return event_name
+        return None
+
     def _enhance_query(self, query: str) -> str:
         """Enhance the query with mystery-specific keywords."""
-        # Detect event type
-        event_type = None
-        keywords_dict = self.config.get("keywords", {})
-        for et, keywords in keywords_dict.items():
-            if any(keyword.lower() in query.lower() for keyword in keywords):
-                event_type = et
-                break
+        event_type = self._detect_event_type(query)
         
         if not event_type:
             return query
         
         # Add relevant keywords to the query
         enhanced_terms = []
+        keywords_dict = self.tool_config.get("keywords", {})
         if event_type in keywords_dict:
             # Add up to 2 additional keywords
             enhanced_terms = keywords_dict[event_type][:2]
         
-        enhanced_query = f"{query} {' '.join(enhanced_terms)}"
+        enhanced_query = f"{query} {' '.join(enhanced_terms)}".strip()
         logger.info(f"Enhanced query: {enhanced_query}")
         return enhanced_query
 
@@ -302,7 +256,7 @@ def get_web_search_tool(max_search_results: int, engine: SearchEngine = SearchEn
         return LoggedBraveSearch(
             name="web_search",
             search_wrapper=BraveSearchWrapper(
-                api_key=SecretStr(os.getenv("BRAVE_SEARCH_API_KEY", "")),
+                api_key=SecretStr(config.api.brave_search_api_key or ""),
                 search_kwargs={"count": max_search_results},
             ),
         )

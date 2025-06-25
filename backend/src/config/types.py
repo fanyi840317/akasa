@@ -5,6 +5,56 @@ from enum import Enum
 from typing import Literal
 
 
+class DataSourceType(str, Enum):
+    """数据源类型"""
+    ACADEMIC = "academic"
+    NEWS = "news"
+    FORUM = "forum"
+    DOCUMENTARY = "documentary"
+    RESEARCH_INSTITUTE = "research_institute"
+    MYSTERY = "mystery"
+
+
+class SearchEngine(str, Enum):
+    """搜索引擎类型"""
+    TAVILY = "tavily"
+    GOOGLE = "google"
+    DUCKDUCKGO = "duckduckgo"
+    BRAVE_SEARCH = "brave_search"
+
+
+class RAGProvider(str, Enum):
+    """RAG提供商类型"""
+    NEO4J = "neo4j"
+    DEFAULT = "default"
+
+
+class MysteryEventType(str, Enum):
+    """神秘事件类型"""
+    UFO = "ufo"
+    CRYPTID = "cryptid"
+    PARANORMAL = "paranormal"
+    ANCIENT_MYSTERY = "ancient_mystery"
+    DISAPPEARANCE = "disappearance"
+    NATURAL_ANOMALY = "natural_anomaly"
+
+
+class ConfigType(str, Enum):
+    """配置类型"""
+    MYSTERY = "mystery"
+    LLM = "llm"
+
+
+class DataExtractor(str, Enum):
+    """数据提取器类型"""
+    DEFAULT = "default"
+
+
+class AnalysisEngine(str, Enum):
+    """Supported analysis engines."""
+    CORRELATION_ANALYZER = "correlation_analyzer"
+
+
 class LLMType(str, Enum):
     """Supported LLM types for different tasks."""
     
@@ -31,169 +81,3 @@ class LLMType(str, Enum):
     
     # Analysis-specific models
     ANALYSIS = "analysis"
-
-
-# Type alias for better type hints
-LLMTypeStr = Literal[
-    "basic",
-    "reasoning", 
-    "vision",
-    "fast",
-    "embedding",
-    "code",
-    "research",
-    "analysis"
-]
-
-
-# Default LLM configurations for different providers
-DEFAULT_LLM_CONFIGS = {
-    "openai": {
-        LLMType.BASIC: {
-            "model": "gpt-4o-mini",
-            "temperature": 0.7,
-            "max_tokens": 4000,
-        },
-        LLMType.REASONING: {
-            "model": "gpt-4o",
-            "temperature": 0.3,
-            "max_tokens": 8000,
-        },
-        LLMType.VISION: {
-            "model": "gpt-4o",
-            "temperature": 0.5,
-            "max_tokens": 4000,
-        },
-        LLMType.FAST: {
-            "model": "gpt-3.5-turbo",
-            "temperature": 0.7,
-            "max_tokens": 2000,
-        },
-        LLMType.CODE: {
-            "model": "gpt-4o",
-            "temperature": 0.1,
-            "max_tokens": 6000,
-        },
-        LLMType.RESEARCH: {
-            "model": "gpt-4o",
-            "temperature": 0.3,
-            "max_tokens": 8000,
-        },
-        LLMType.ANALYSIS: {
-            "model": "gpt-4o",
-            "temperature": 0.2,
-            "max_tokens": 6000,
-        },
-    },
-    "anthropic": {
-        LLMType.BASIC: {
-            "model": "claude-3-haiku-20240307",
-            "temperature": 0.7,
-            "max_tokens": 4000,
-        },
-        LLMType.REASONING: {
-            "model": "claude-3-5-sonnet-20241022",
-            "temperature": 0.3,
-            "max_tokens": 8000,
-        },
-        LLMType.VISION: {
-            "model": "claude-3-5-sonnet-20241022",
-            "temperature": 0.5,
-            "max_tokens": 4000,
-        },
-        LLMType.FAST: {
-            "model": "claude-3-haiku-20240307",
-            "temperature": 0.7,
-            "max_tokens": 2000,
-        },
-        LLMType.CODE: {
-            "model": "claude-3-5-sonnet-20241022",
-            "temperature": 0.1,
-            "max_tokens": 6000,
-        },
-        LLMType.RESEARCH: {
-            "model": "claude-3-5-sonnet-20241022",
-            "temperature": 0.3,
-            "max_tokens": 8000,
-        },
-        LLMType.ANALYSIS: {
-            "model": "claude-3-5-sonnet-20241022",
-            "temperature": 0.2,
-            "max_tokens": 6000,
-        },
-    },
-    "google": {
-        LLMType.BASIC: {
-            "model": "gemini-1.5-flash",
-            "temperature": 0.7,
-            "max_tokens": 4000,
-        },
-        LLMType.REASONING: {
-            "model": "gemini-1.5-pro",
-            "temperature": 0.3,
-            "max_tokens": 8000,
-        },
-        LLMType.VISION: {
-            "model": "gemini-1.5-pro",
-            "temperature": 0.5,
-            "max_tokens": 4000,
-        },
-        LLMType.FAST: {
-            "model": "gemini-1.5-flash",
-            "temperature": 0.7,
-            "max_tokens": 2000,
-        },
-        LLMType.CODE: {
-            "model": "gemini-1.5-pro",
-            "temperature": 0.1,
-            "max_tokens": 6000,
-        },
-        LLMType.RESEARCH: {
-            "model": "gemini-1.5-pro",
-            "temperature": 0.3,
-            "max_tokens": 8000,
-        },
-        LLMType.ANALYSIS: {
-            "model": "gemini-1.5-pro",
-            "temperature": 0.2,
-            "max_tokens": 6000,
-        },
-    },
-    "qwen": {
-        LLMType.BASIC: {
-            "model": "qwen2.5-7b-instruct",
-            "temperature": 0.7,
-            "max_tokens": 4000,
-        },
-        LLMType.REASONING: {
-            "model": "qwen2.5-72b-instruct",
-            "temperature": 0.3,
-            "max_tokens": 8000,
-        },
-        LLMType.VISION: {
-            "model": "qwen2-vl-72b-instruct",
-            "temperature": 0.5,
-            "max_tokens": 4000,
-        },
-        LLMType.FAST: {
-            "model": "qwen2.5-3b-instruct",
-            "temperature": 0.7,
-            "max_tokens": 2000,
-        },
-        LLMType.CODE: {
-            "model": "qwen2.5-coder-32b-instruct",
-            "temperature": 0.1,
-            "max_tokens": 6000,
-        },
-        LLMType.RESEARCH: {
-            "model": "qwen2.5-72b-instruct",
-            "temperature": 0.3,
-            "max_tokens": 8000,
-        },
-        LLMType.ANALYSIS: {
-            "model": "qwen2.5-72b-instruct",
-            "temperature": 0.2,
-            "max_tokens": 6000,
-        },
-    },
-}
