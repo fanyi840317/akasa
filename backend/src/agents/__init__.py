@@ -1,17 +1,6 @@
+# Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-from .agents import (
-    create_agent,
-    create_mystery_agent,
-    create_mystery_researcher_agent,
-    create_mystery_planner_agent,
-    create_mystery_reporter_agent
-)
+from .agents import create_agent
 
-__all__ = [
-    "create_agent",
-    "create_mystery_agent", 
-    "create_mystery_researcher_agent",
-    "create_mystery_planner_agent",
-    "create_mystery_reporter_agent"
-]
+__all__ = ["create_agent"]

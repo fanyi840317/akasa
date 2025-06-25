@@ -1,11 +1,12 @@
-# Copyright (c) 2024 Lingjing
+# Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
 import os
 import dataclasses
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from typing import Dict, Any, List
+from langgraph.prebuilt.chat_agent_executor import AgentState
+from src.config.configuration import Configuration
 
 # Initialize Jinja2 environment
 env = Environment(
@@ -34,15 +35,14 @@ def get_prompt_template(prompt_name: str) -> str:
 
 
 def apply_prompt_template(
-    prompt_name: str, state: Dict[str, Any], configurable: Dict[str, Any] = None
-) -> List[Dict[str, str]]:
+    prompt_name: str, state: AgentState, configurable: Configuration = None
+) -> list:
     """
     Apply template variables to a prompt template and return formatted messages.
 
     Args:
         prompt_name: Name of the prompt template to use
         state: Current agent state containing variables to substitute
-        configurable: Additional configuration variables
 
     Returns:
         List of messages with the system prompt as the first message
@@ -55,23 +55,11 @@ def apply_prompt_template(
 
     # Add configurable variables
     if configurable:
-        if hasattr(configurable, '__dict__'):
-            state_vars.update(configurable.__dict__)
-        elif isinstance(configurable, dict):
-            state_vars.update(configurable)
-        else:
-            state_vars.update(dataclasses.asdict(configurable))
+        state_vars.update(dataclasses.asdict(configurable))
 
     try:
         template = env.get_template(f"{prompt_name}.md")
-        rendered_content = template.render(**state_vars)
-        
-        # Return as a list of messages
-        return [
-            {
-                "role": "system",
-                "content": rendered_content
-            }
-        ]
+        system_prompt = template.render(**state_vars)
+        return [{"role": "system", "content": system_prompt}] + state["messages"]
     except Exception as e:
         raise ValueError(f"Error applying template {prompt_name}: {e}")

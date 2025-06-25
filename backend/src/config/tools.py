@@ -1,29 +1,26 @@
-from enum import Enum
-from typing import Dict, Any
+# Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+# SPDX-License-Identifier: MIT
+
+import os
+import enum
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-class RAGProvider(str, Enum):
-    LLAMA_INDEX = "llama_index"
-    LANGCHAIN = "langchain"
+class SearchEngine(enum.Enum):
+    TAVILY = "tavily"
+    DUCKDUCKGO = "duckduckgo"
+    BRAVE_SEARCH = "brave_search"
+    ARXIV = "arxiv"
 
 
-SELECTED_RAG_PROVIDER = RAGProvider.LLAMA_INDEX
+# Tool configuration
+SELECTED_SEARCH_ENGINE = os.getenv("SEARCH_API", SearchEngine.TAVILY.value)
 
 
-def load_tools_config() -> Dict[str, Any]:
-    # This is a placeholder implementation. In a real application, this would
-    # load the configuration from a file (e.g., YAML or JSON).
-    return {
-        "crawl_mystery_events": {
-            "description": "Crawl mysterious events from various sources.",
-            "parameters": {
-                "source": {"type": "string", "description": "The source to crawl from."}
-            },
-        },
-        "search_academic_papers": {
-            "description": "Search for academic papers on a given topic.",
-            "parameters": {
-                "query": {"type": "string", "description": "The search query."}
-            },
-        },
-    }
+class RAGProvider(enum.Enum):
+    RAGFLOW = "ragflow"
+
+
+SELECTED_RAG_PROVIDER = os.getenv("RAG_PROVIDER")

@@ -1,9 +1,6 @@
-# Copyright (c) 2024 Lingjing
+# Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-"""Utility modules for the Lingjing project."""
-
-from .json_utils import repair_json_output
-from .logger import setup_logger, get_logger
-
-__all__ = ['repair_json_output', 'setup_logger', 'get_logger']
+"""
+工具函数包
+"""
