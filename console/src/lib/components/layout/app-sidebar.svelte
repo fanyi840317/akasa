@@ -32,7 +32,7 @@
 </script>
 
 <Sidebar.Root variant="inset" collapsible="icon">
-	<Sidebar.Header>
+	<Sidebar.Header class="py-1">
 		{#if isOpen}
 			<h1 class="text-xl font-extrabold px-4">Aksas</h1>
 		{:else}

@@ -116,7 +116,7 @@
 	<title>Agents - Akasa Console</title>
 	<meta name="description" content="Manage your AI agents and their configurations" />
 </svelte:head>
-<ScrollArea orientation="vertical" class=" rounded-input bg-base-200 h-[calc(100vh-64px)]  ">
+<ScrollArea orientation="vertical" class=" rounded-input bg-base-200 h-content border ">
 	<div class="container mx-auto space-y-6 p-6">
 		<!-- Header -->
 		<div class="flex items-center justify-between">

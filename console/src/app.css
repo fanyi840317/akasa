@@ -1,26 +1,26 @@
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
-@import "./themes.css";
+@import './themes.css';
 
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
-	font-family: "Geist";
-	src: url("/fonts/Geist/geist.woff2") format("woff2");
+	font-family: 'Geist';
+	src: url('/fonts/Geist/geist.woff2') format('woff2');
 	font-style: normal;
 	font-display: swap;
 }
 @font-face {
-	font-family: "Geist Mono";
-	src: url("/fonts/Geist/geist-mono.woff2") format("woff2");
+	font-family: 'Geist Mono';
+	src: url('/fonts/Geist/geist-mono.woff2') format('woff2');
 	font-style: normal;
 	font-display: swap;
 }
 
 :root {
 	/* --radius: 0.65rem; */
-	--radius: 2.00rem;
+	--radius: 2rem;
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
 	--card: oklch(1 0 0);
@@ -97,7 +97,7 @@
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
 	--radius-input: 16px;
-	
+
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-base-200: var(--base-200);
@@ -138,40 +138,21 @@
 		@apply border-border outline-ring/50;
 	}
 	body {
-		@apply bg-background text-foreground ;
+		@apply bg-background text-foreground;
 	}
 	.flex-end {
-		@apply flex justify-end items-center;
+		@apply flex items-center justify-end;
 	}
 	.flex-center {
-		@apply flex justify-center items-center;
+		@apply flex items-center justify-center;
 	}
-  .flex-start {
-		@apply flex justify-start items-center;
-  }
-  .flex-between {
-		@apply flex justify-between items-center;
-  }
-
-	/* Map marker styles */
-	.user-location-marker {
-		@apply w-6 h-6 bg-primary rounded-full border-2 border-white shadow-lg;
-		position: relative;
-		transform: translate(-50%, -50%);
-		cursor: pointer;
-		transition: all 0.2s ease;
+	.flex-start {
+		@apply flex items-center justify-start;
 	}
-
-
-	.user-location-marker::before {
-		content: '';
-		@apply absolute inset-0 bg-primary rounded-full animate-ping opacity-75;
-		animation-duration: 2s;
+	.flex-between {
+		@apply flex items-center justify-between;
 	}
-
-	.user-location-marker::after {
-		content: '';
-		@apply absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full;
-		transform: translate(-50%, -50%);
+	.h-content {
+		@apply h-[calc(100vh-52px)];
 	}
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
-	import { LayoutDashboard, Bot, Calendar, Settings } from '@lucide/svelte';
+	import { LayoutDashboard, Bot, Calendar, Settings ,MessageSquare } from '@lucide/svelte';
 	import UserAvatar from '$lib/components/user';
 	import UserMenu from '$lib/components/user/user-menu.svelte';
 	import { page } from '$app/state';
@@ -13,41 +13,31 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	let { children } = $props();
-	let activeMenu = $state('');
 	const currentPath = $derived(page.url.pathname);
-	$effect(() => {
-		if (currentPath.startsWith('/console/events')) {
-			activeMenu = 'events';
-		} else if (currentPath.startsWith('/console/agents')) {
-			activeMenu = 'agents';
-		} else if (currentPath.startsWith('/console/config')) {
-			activeMenu = 'config';
-		}
-	});
 	let actions = $derived([
 		{
-			title: 'Dashboard',
-			url: '/dashboard',
-			icon: LayoutDashboard,
-			isActive: false
+			title: 'Chat',
+			url: '/console/chat',
+			icon: MessageSquare,
+			isActive: currentPath.startsWith('/console/chat')
 		},
 		{
 			title: 'Agents',
 			url: '/console/agents',
 			icon: Bot,
-			isActive: activeMenu === 'agents'
+			isActive: currentPath.startsWith('/console/agents')
 		},
 		{
 			title: 'Events',
 			url: '/console/events',
 			icon: Calendar,
-			isActive: activeMenu === 'events'
+			isActive: currentPath.startsWith('/console/events')
 		},
 		{
 			title: 'Config',
 			url: '/console/config',
 			icon: Settings,
-			isActive: activeMenu === 'config'
+			isActive: currentPath.startsWith('/console/config')
 		}
 	]);
 	// 使用真实的认证用户信息
@@ -99,21 +89,21 @@
 	<Loading />
 {:else if user}
 	<Sidebar.Provider
-		style="--sidebar-width:224px"
+		style="--sidebar-width:220px"
 		onOpenChange={(state) => {
 			open = state;
 		}}
 	>
 		<AppSidebar {actions} {files} bind:isOpen={open} />
-		<main class="size-full px-2">
-			<header class=" flex h-14 w-full items-center justify-between pr-2">
-				<Sidebar.Trigger class="" />
+		<main class="size-full px-1">
+			<header class=" flex h-12 w-full items-center justify-between pr-1">
+				<div></div>
+				<!-- <Sidebar.Trigger class="" /> -->
 				<UserMenu {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout}>
-					<UserAvatar {user} size="size-8" />
+					<UserAvatar {user} size="size-6" fallbackClass="text-xs"/>
 				</UserMenu>
 			</header>
 			{@render children()}
-		
 		</main>
 	</Sidebar.Provider>
 {/if}

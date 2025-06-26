@@ -23,7 +23,7 @@
 		<p class="text-destructive mb-2">{title}</p>
 		<p class="text-sm text-muted-foreground mb-4">{message}</p>
 		{#if showRetry && onRetry}
-			<Button onclick={onRetry}>{retryText}</Button>
+			<Button variant="destructive" onclick={onRetry}>{retryText}</Button>
 		{/if}
 	</div>
 </div>
