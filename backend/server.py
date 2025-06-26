@@ -10,6 +10,9 @@ import logging
 import signal
 import sys
 import uvicorn
+import os
+import sys
+from pathlib import Path
 
 # Configure logging
 logging.basicConfig(
@@ -31,6 +34,13 @@ signal.signal(signal.SIGTERM, handle_shutdown)
 signal.signal(signal.SIGINT, handle_shutdown)
 
 if __name__ == "__main__":
+    current_dir = str(Path(__file__).parent.resolve())
+    if current_dir not in sys.path:
+        sys.path.insert(0, current_dir)
+    
+    # Also set PYTHONPATH environment variable for subprocesses
+    os.environ["PYTHONPATH"] = current_dir + os.pathsep + os.environ.get("PYTHONPATH", "")
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Run the DeerFlow API server")
     parser.add_argument(

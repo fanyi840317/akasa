@@ -15,10 +15,7 @@ from server.chat_request import TTSRequest, GeneratePodcastRequest
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["audio"])
-
 INTERNAL_SERVER_ERROR_DETAIL = "Internal Server Error"
-
-router = APIRouter(prefix="/api", tags=["audio"])
 
 
 @router.post("/tts")
@@ -84,7 +81,7 @@ async def generate_podcast(request: GeneratePodcastRequest):
         print(report_content)
         workflow = build_podcast_graph()
         final_state = workflow.invoke({"input": report_content})
-        audio_bytes = final_state["output"]
+        logger.info(f"Generating podcast for content: {report_content[:100]}...")
         return Response(content=audio_bytes, media_type="audio/mp3")
     except Exception as e:
         logger.exception(f"Error occurred during podcast generation: {str(e)}")

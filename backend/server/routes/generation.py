@@ -22,8 +22,6 @@ router = APIRouter(prefix="/api", tags=["generation"])
 
 INTERNAL_SERVER_ERROR_DETAIL = "Internal Server Error"
 
-router = APIRouter(prefix="/api", tags=["generation"])
-
 
 @router.post("/ppt/generate")
 async def generate_ppt(request: GeneratePPTRequest):
