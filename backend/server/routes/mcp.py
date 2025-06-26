@@ -13,8 +13,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/mcp", tags=["mcp"])
 
 INTERNAL_SERVER_ERROR_DETAIL = "Internal Server Error"
-
-
 @router.post("/server/metadata", response_model=MCPServerMetadataResponse)
 async def mcp_server_metadata(request: MCPServerMetadataRequest):
     """Get information about an MCP server."""
