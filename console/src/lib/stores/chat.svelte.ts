@@ -58,7 +58,7 @@ class ChatStore {
 			api: apiEndpoint,
 			onError: (error) => {
 				console.error('Chat error:', error);
-				this.error = error;
+				this.error = error.message;
 			},
 			onFinish: (message) => {
 				console.log('Chat finished:', message);
@@ -72,7 +72,7 @@ class ChatStore {
 			if (this.chat) {
 				this.messages = this.chat.messages;
 				this.status = this.chat.status;
-				this.error = this.chat.error;
+				this.error = this.chat.error?.message || null;
 				this.input = this.chat.input;
 			}
 		});

@@ -1,6 +1,6 @@
-import { Client, Account, ID, type Models, OAuthProvider } from 'appwrite';
+import { ID, type Models, OAuthProvider } from 'appwrite';
 import { browser } from '$app/environment';
-import { databases, appwriteConfig ,account} from '$lib/constants';
+import { account} from '$lib/constants';
 import type { User } from '$lib/types/user';
 
 // Appwrite configuration
@@ -53,9 +53,9 @@ class AuthStore {
 			this.#error = null;
 			const user = await account.get();
 			this.#user = user;
-		} catch (error) {
+		} catch (error: unknown) {
 			this.#user = null;
-			console.log('User not authenticated');
+			console.log('User not authenticated', error);
 		} finally {
 			this.#loading = false;
 		}
@@ -70,8 +70,9 @@ class AuthStore {
 			const user = await account.get();
 			this.#user = user;
 			return { success: true };
-		} catch (error: any) {
-			this.#error = error.message || 'Login failed';
+		} catch (error: unknown) {
+			console.log(error);
+			this.#error = (error as Error).message || 'Login failed';
 			return { success: false, error: this.#error };
 		} finally {
 			this.#loading = false;
@@ -90,8 +91,8 @@ class AuthStore {
 			const user = await account.get();
 			this.#user = user;
 			return { success: true };
-		} catch (error: any) {
-			this.#error = error.message || 'Registration failed';
+		} catch (error: unknown) {
+			this.#error = (error as Error).message || 'Registration failed';
 			return { success: false, error: this.#error };
 		} finally {
 			this.#loading = false;
@@ -106,8 +107,8 @@ class AuthStore {
 			await account.deleteSession('current');
 			this.#user = null;
 			return { success: true };
-		} catch (error: any) {
-			this.#error = error.message || 'Logout failed';
+		} catch (error: unknown) {
+			this.#error = (error as Error).message || 'Logout failed';
 			return { success: false, error: this.#error };
 		} finally {
 			this.#loading = false;
@@ -122,8 +123,8 @@ class AuthStore {
 				`${window.location.origin}/console`,
 				`${window.location.origin}/login`
 			);
-		} catch (error: any) {
-			this.#error = error.message || 'Google login failed';
+		} catch (error: unknown) {
+			this.#error = (error as Error).message || 'Google login failed';
 			return { success: false, error: this.#error };
 		}
 	}
@@ -136,8 +137,8 @@ class AuthStore {
 				`${window.location.origin}/console`,
 				`${window.location.origin}/login`
 			);
-		} catch (error: any) {
-			this.#error = error.message || 'Apple login failed';
+		} catch (error: unknown) {
+			this.#error = (error as Error).message || 'Apple login failed';
 			return { success: false, error: this.#error };
 		}
 	}
