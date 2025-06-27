@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
-	import { Globe, Search, User, FileText, Heading, Sparkles, Save, ArrowUp } from '@lucide/svelte';
+	import { Globe, Search, User, FileText, Heading, Sparkles, Save, ArrowUp, Bot } from '@lucide/svelte';
 	import { Card } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -19,7 +19,10 @@
 		onSubmit,
 		onSuggestionClick,
 		suggestions = [],
-		showRemind = $bindable(false)
+		showRemind = $bindable(false),
+		models = [],
+		selectedModel = $bindable(''),
+		onModelChange
 	} = $props<{
 		class?: string;
 		disabled?: boolean;
@@ -29,6 +32,9 @@
 		onSuggestionClick?: (suggestion: string) => void;
 		suggestions?: string[];
 		showRemind?: boolean;
+		models?: Array<{id: string, name: string}>;
+		selectedModel?: string;
+		onModelChange?: (modelId: string) => void;
 	}>();
 
 	// 根据内容计算行数
@@ -70,6 +76,42 @@
 		<div class="flex-between px-2">
 			<!-- 左侧按钮组 -->
 			<div class="flex-center gap-2">
+				<!-- 模型选择下拉菜单 -->
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger>
+						<Button
+							variant="ghost"
+							title="选择模型"
+							disabled={models.length === 0}
+						>
+							<Bot class="w-5 h-5" />
+						</Button>
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content class="w-56 rounded-[16px]" align="start">
+						<DropdownMenu.Label>选择模型</DropdownMenu.Label>
+						<DropdownMenu.Separator />
+						{#each models as model}
+							<DropdownMenu.Item
+								onclick={() => {
+									selectedModel = model.id;
+									onModelChange?.(model.id);
+								}}
+								class={selectedModel === model.id ? 'bg-accent' : ''}
+							>
+								{model.name}
+								{#if selectedModel === model.id}
+									<span class="ml-auto">✓</span>
+								{/if}
+							</DropdownMenu.Item>
+						{/each}
+						{#if models.length === 0}
+							<DropdownMenu.Item disabled>
+								暂无可用模型
+							</DropdownMenu.Item>
+						{/if}
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+
 				<!-- 搜索建议下拉菜单 -->
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
@@ -100,8 +142,11 @@
 						{/if}
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
+			</div>
 
-				<!-- AI工具按钮 -->
+			<!-- 右侧功能按钮组 -->
+			<div class="flex gap-2">
+					<!-- AI工具按钮 -->
 				<Button
 					variant="ghost"
 					onclick={() => {
@@ -112,10 +157,6 @@
 				>
 					<Sparkles />
 				</Button>
-			</div>
-
-			<!-- 右侧功能按钮组 -->
-			<div class="flex gap-2">
 				<!-- 生成按钮 -->
 				<Button
 					variant="secondary"

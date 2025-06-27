@@ -89,16 +89,16 @@
 	<Loading />
 {:else if user}
 	<Sidebar.Provider
-		style="--sidebar-width:220px"
+		style="--sidebar-width:200px"
 		onOpenChange={(state) => {
 			open = state;
 		}}
 	>
 		<AppSidebar {actions} {files} bind:isOpen={open} />
-		<main class="size-full px-1">
-			<header class=" flex h-12 w-full items-center justify-between pr-1">
-				<div></div>
-				<!-- <Sidebar.Trigger class="" /> -->
+		<main class="size-full px-2">
+			<header class=" flex h-12 w-full items-center justify-between pr-2">
+				<!-- <div></div> -->
+				<Sidebar.Trigger class="" />
 				<UserMenu {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout}>
 					<UserAvatar {user} size="size-6" fallbackClass="text-xs"/>
 				</UserMenu>

@@ -153,6 +153,6 @@
 		@apply flex items-center justify-between;
 	}
 	.h-content {
-		@apply h-[calc(100vh-52px)];
+		@apply h-[calc(100vh-56px)];
 	}
 }
