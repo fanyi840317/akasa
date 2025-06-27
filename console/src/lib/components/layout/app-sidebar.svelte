@@ -32,7 +32,7 @@
 </script>
 
 <Sidebar.Root variant="inset" collapsible="icon">
-	<Sidebar.Header class="py-1">
+	<!-- <Sidebar.Header class="py-1">
 		{#if isOpen}
 			<h1 class="text-xl font-extrabold px-4">Aksas</h1>
 		{:else}
@@ -40,7 +40,7 @@
 				<h1 class="text-md font-extrabold">A</h1>
 			</span>
 		{/if}
-	</Sidebar.Header>
+	</Sidebar.Header> -->
 	<Sidebar.Content class="py-6">
 		<Sidebar.Group class="px-1">
 			<NavActions items={actions} />

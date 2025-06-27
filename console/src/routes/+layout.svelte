@@ -15,5 +15,6 @@
 <Toaster position="top-center"/>
 <ModeWatcher />
 <div class="flex-center flex-col min-h-screen">
+	
 	{@render children()}
 </div>

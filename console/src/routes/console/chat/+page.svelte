@@ -21,9 +21,9 @@
 
 <ScrollArea
 	orientation="vertical"
-	class="rounded-input bg-base-200 h-content relative overflow-hidden border"
+	class=" bg-base-200 h-content relative overflow-hidden "
 >
-	<div class="relative h-full w-full">
+	<div class="relative h-full w-full rounded-input border">
 		<!-- AiInput - 默认居中，提交后移动到底部 -->
 		<div
 			class="absolute w-full px-4 transition-all duration-700 ease-in-out {!isSubmitted

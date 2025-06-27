@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
-	import { LayoutDashboard, Bot, Calendar, Settings ,MessageSquare } from '@lucide/svelte';
+	import { LayoutDashboard, Bot, Calendar, Settings, MessageSquare } from '@lucide/svelte';
 	import UserAvatar from '$lib/components/user';
 	import UserMenu from '$lib/components/user/user-menu.svelte';
 	import { page } from '$app/state';
@@ -88,22 +88,24 @@
 {#if authStore.loading}
 	<Loading />
 {:else if user}
-	<Sidebar.Provider
-		style="--sidebar-width:200px"
-		onOpenChange={(state) => {
-			open = state;
-		}}
-	>
-		<AppSidebar {actions} {files} bind:isOpen={open} />
-		<main class="size-full px-2">
-			<header class=" flex h-12 w-full items-center justify-between pr-2">
-				<!-- <div></div> -->
-				<Sidebar.Trigger class="" />
-				<UserMenu {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout}>
-					<UserAvatar {user} size="size-6" fallbackClass="text-xs"/>
-				</UserMenu>
-			</header>
-			{@render children()}
-		</main>
-	</Sidebar.Provider>
+	<header class=" flex h-12 w-full items-center justify-between pr-2">
+		<!-- <div></div> -->
+		<h1 class="px-4 text-xl font-extrabold">Aksas</h1>
+		<UserMenu {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout}>
+			<UserAvatar {user} size="size-6" fallbackClass="text-xs" />
+		</UserMenu>
+	</header>
+	<div class="h-content flex">
+		<Sidebar.Provider
+			style="--sidebar-width:200px"
+			onOpenChange={(state) => {
+				open = state;
+			}}
+		>
+			<AppSidebar {actions} {files} bind:isOpen={open} />
+			<Sidebar.Inset>
+				{@render children()}
+			</Sidebar.Inset>
+		</Sidebar.Provider>
+	</div>
 {/if}
