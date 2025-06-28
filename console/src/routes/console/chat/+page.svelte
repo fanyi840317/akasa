@@ -1,72 +1,112 @@
 <script lang="ts">
-	import { AiInput } from '$lib/components/ai';
-	import { Button } from '$lib/components/ui/button';
-	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import { goto } from '$app/navigation';
+	import { chatStore } from '$lib/stores/chat.svelte';
+	import ChatInput from '$lib/components/chat/chat-input.svelte';
+	import { Card, CardContent } from '$lib/components/ui/card';
+	import { MessageSquare, Sparkles, Brain, Search } from 'lucide-svelte';
 
-	// 状态管理
-	let isSubmitted = $state(false);
-	let inputValue = $state('');
+	function createNewChat() {
+		const threadId = crypto.randomUUID();
+		chatStore.initializeChat(threadId);
+		return threadId;
+	}
 
-	function handleSubmit(text: string): void {
-		// 设置为已提交状态，触发动画
-		isSubmitted = true;
+	function handleSubmit(text: string) {
+		const threadId = createNewChat();
+		chatStore.setInput(text);
+		chatStore.sendMessage(text);
+		goto(`/console/chat/${threadId}`);
+	}
 
-		// 这里可以添加实际的提交逻辑
-		console.log('Submitted:', text);
+	// 示例提示
+	const suggestions = [
+		{
+			icon: Brain,
+			title: "Deep Analysis",
+			description: "Analyze complex problems with detailed reasoning",
+			prompt: "Help me analyze this complex problem step by step:"
+		},
+		{
+			icon: Search,
+			title: "Research & Investigation",
+			description: "Research topics with background investigation",
+			prompt: "I need you to research and investigate:"
+		},
+		{
+			icon: Sparkles,
+			title: "Creative Writing",
+			description: "Generate creative content and ideas",
+			prompt: "Help me create something creative:"
+		},
+		{
+			icon: MessageSquare,
+			title: "General Chat",
+			description: "Have a casual conversation",
+			prompt: "Let's have a conversation about:"
+		}
+	];
 
-		// 可以在这里添加实际的API调用或其他处理逻辑
-		// throw new Error('Function not implemented.');
+	function handleSuggestionClick(prompt: string) {
+		const threadId = createNewChat();
+		chatStore.setInput(prompt);
+		goto(`/console/chat/${threadId}`);
 	}
 </script>
 
-<ScrollArea
-	orientation="vertical"
-	class=" bg-base-200 h-content relative overflow-hidden "
->
-	<div class="relative h-full w-full rounded-input border">
-		<!-- AiInput - 默认居中，提交后移动到底部 -->
-		<div
-			class="absolute w-full px-4 transition-all duration-700 ease-in-out {!isSubmitted
-				? 'top-1/2'
-				: 'bottom-4'}"
-			style:transform={!isSubmitted ? 'translateY(-70%)' : 'translateY(0)'}
-		>
-		<!-- 标题和描述 - 在提交后淡出 -->
-            {#if !isSubmitted}
-			<div class="flex-center flex-col mb-4">
-				<h1 class="text-3xl font-extrabold">Create a New Event</h1>
-				<p class="text-muted-foreground text-sm">
-					Fill in the details below to create a new event.
-				</p>
+<div class="flex flex-col items-center justify-center min-h-screen p-8">
+	<div class="w-full max-w-4xl space-y-8">
+		<!-- 标题区域 -->
+		<div class="text-center space-y-4">
+			<div class="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+				<MessageSquare class="w-8 h-8 text-primary" />
 			</div>
-            {/if}
-			<div class="flex-center gap-4 flex-col">
-				<AiInput class="w-full max-w-3xl" onSubmit={handleSubmit} bind:inputValue />
-                <div class="flex-center flex-row gap-2">
-                    <Button variant="outline" size="sm">查看最近的事件</Button>
-                    <Button variant="outline" size="sm">创建新事件</Button>
-                    <Button variant="outline" size="sm">21齶190齶2齶 恶10</Button>
-                    <Button variant="outline" size="sm">21齶190齶2齶 恶10</Button>
-                </div>
-			</div>
+			<h1 class="text-4xl font-bold tracking-tight">Start a New Chat</h1>
+			<p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+				Engage with our AI assistant for deep thinking, research, creative tasks, and more.
+			</p>
 		</div>
 
-		<!-- 聊天内容区域 - 仅在提交后显示 -->
-		{#if isSubmitted}
-			<div
-				class="px-4 pb-24 pt-4 transition-all delay-300 duration-700 ease-in-out"
-				class:opacity-0={!isSubmitted}
-				class:opacity-100={isSubmitted}
-			>
-				<!-- 这里可以添加聊天消息列表 -->
-				<div class="space-y-4">
-					<div class="bg-card rounded-lg border p-4">
-						<p class="text-muted-foreground mb-2 text-sm">You:</p>
-						<p>{inputValue}</p>
-					</div>
-					<!-- 可以在这里添加AI回复 -->
-				</div>
-			</div>
-		{/if}
+		<!-- 输入区域 -->
+		<div class="w-full max-w-2xl mx-auto">
+			<ChatInput
+				placeholder="Type your message to start a new conversation..."
+				onSubmit={handleSubmit}
+				autoFocus={true}
+			/>
+		</div>
+
+		<!-- 建议卡片 -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+			{#each suggestions as suggestion}
+				<Card 
+					class="cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] group"
+					onclick={() => handleSuggestionClick(suggestion.prompt)}
+				>
+					<CardContent class="p-6">
+						<div class="flex items-start gap-4">
+							<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+								<svelte:component this={suggestion.icon} class="w-5 h-5 text-primary" />
+							</div>
+							<div class="flex-1">
+								<h3 class="font-semibold mb-1 group-hover:text-primary transition-colors">
+									{suggestion.title}
+								</h3>
+								<p class="text-sm text-muted-foreground">
+									{suggestion.description}
+								</p>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+			{/each}
+		</div>
+
+		<!-- 功能说明 -->
+		<div class="text-center text-sm text-muted-foreground max-w-2xl mx-auto">
+			<p>
+				Our AI assistant supports deep thinking, background investigation, 
+				and iterative planning to provide comprehensive and thoughtful responses.
+			</p>
+		</div>
 	</div>
-</ScrollArea>
+</div>

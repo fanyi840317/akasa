@@ -11,6 +11,9 @@
 	import { browser } from '$app/environment';
 	import Loading from '$lib/components/ui/loading';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import LogoIcon from '$lib/components/layout/logo-icon.svelte';
+	import ConsoleHeader from '$lib/components/layout/console-header.svelte';
+	import { appStore } from '$lib/stores/app-state';
 
 	let { children } = $props();
 	const currentPath = $derived(page.url.pathname);
@@ -70,7 +73,8 @@
 			}
 		}
 	});
-	let open = $state(true);
+	appStore.setSidebarCollapsed(true);
+	let open = $derived($appStore.sidebarCollapsed);
 	const handleUserMenuAction = (action: string) => {
 		console.log('Menu action:', action);
 		// 这里可以添加具体的路由跳转或功能处理
@@ -88,24 +92,16 @@
 {#if authStore.loading}
 	<Loading />
 {:else if user}
-	<header class=" flex h-12 w-full items-center justify-between pr-2">
-		<!-- <div></div> -->
-		<h1 class="px-4 text-xl font-extrabold">Aksas</h1>
-		<UserMenu {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout}>
-			<UserAvatar {user} size="size-6" fallbackClass="text-xs" />
-		</UserMenu>
-	</header>
-	<div class="h-content flex">
-		<Sidebar.Provider
-			style="--sidebar-width:200px"
-			onOpenChange={(state) => {
-				open = state;
-			}}
-		>
-			<AppSidebar {actions} {files} bind:isOpen={open} />
-			<Sidebar.Inset>
-				{@render children()}
-			</Sidebar.Inset>
-		</Sidebar.Provider>
-	</div>
+	<Sidebar.Provider {open}
+		style="--sidebar-width:200px"
+		onOpenChange={(state) => {
+			appStore.setSidebarCollapsed(state);
+		}}
+	>
+		<AppSidebar {actions} {files} />
+		<main class="size-full px-2">
+			<ConsoleHeader {open} {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout} />
+			{@render children()}
+		</main>
+	</Sidebar.Provider>
 {/if}

@@ -1,42 +1,88 @@
-import { Chat } from '@ai-sdk/svelte';
-import type { Message } from '@ai-sdk/svelte';
+import type { Message, Resource } from '$lib/types/message';
+import type { MCPServerMetadata } from '$lib/types/mcp';
+import { chatStream } from '$lib/services/chat';
 import { browser } from '$app/environment';
 
-// Chat store 类
+// 聊天配置接口
+export interface ChatConfig {
+	deepThinking: boolean;
+	backgroundInvestigation: boolean;
+	planIterations: number;
+	temperature: number;
+	maxTokens: number;
+	model: string;
+	streamResponse: boolean;
+	// 保留原有配置以兼容后端
+	auto_accepted_plan?: boolean;
+	max_plan_iterations?: number;
+	max_step_num?: number;
+	max_search_results?: number;
+	enable_deep_thinking?: boolean;
+	enable_background_investigation?: boolean;
+	report_style?: "academic" | "popular_science" | "news" | "social_media";
+	mcp_settings?: {
+		servers: Record<string, MCPServerMetadata & {
+			enabled_tools: string[];
+			add_to_agents: string[];
+		}>;
+	};
+}
+
+// 默认配置
+const DEFAULT_CONFIG: ChatConfig = {
+	deepThinking: true,
+	backgroundInvestigation: false,
+	planIterations: 3,
+	temperature: 0.7,
+	maxTokens: 2000,
+	model: 'gpt-4-turbo',
+	streamResponse: true,
+	// 兼容后端的配置
+	auto_accepted_plan: false,
+	max_plan_iterations: 3,
+	max_step_num: 10,
+	max_search_results: 5,
+	enable_deep_thinking: true,
+	enable_background_investigation: false
+};
+
+// 聊天状态管理类
 class ChatStore {
-	chat = $state<Chat | null>(null);
+	// 响应式状态
 	messages = $state<Message[]>([]);
-	status = $state<string>('ready');
+	currentThreadId = $state<string | null>(null);
+	isStreaming = $state(false);
 	error = $state<string | null>(null);
-	input = $state<string>('');
-	currentEventId = $state<string | null>(null);
+	input = $state('');
+	config = $state<ChatConfig>(DEFAULT_CONFIG);
+	abortController = $state<AbortController | null>(null);
 
 	// 生成存储键名
-	private getStorageKey(eventId: string): string {
-		return `akasa_chat_${eventId}`;
+	private getStorageKey(threadId: string): string {
+		return `akasa_chat_${threadId}`;
 	}
 
 	// 保存聊天记录到本地存储
 	private saveChatToStorage() {
-		if (!browser || !this.currentEventId) return;
+		if (!browser || !this.currentThreadId) return;
 		
 		try {
 			const chatData = {
 				messages: this.messages,
 				timestamp: Date.now()
 			};
-			localStorage.setItem(this.getStorageKey(this.currentEventId), JSON.stringify(chatData));
+			localStorage.setItem(this.getStorageKey(this.currentThreadId), JSON.stringify(chatData));
 		} catch (error) {
 			console.error('Failed to save chat to storage:', error);
 		}
 	}
 
 	// 从本地存储加载聊天记录
-	private loadChatFromStorage(eventId: string): Message[] {
+	private loadChatFromStorage(threadId: string): Message[] {
 		if (!browser) return [];
 		
 		try {
-			const stored = localStorage.getItem(this.getStorageKey(eventId));
+			const stored = localStorage.getItem(this.getStorageKey(threadId));
 			if (stored) {
 				const chatData = JSON.parse(stored);
 				return chatData.messages || [];
@@ -48,108 +94,212 @@ class ChatStore {
 	}
 
 	// 初始化聊天
-	initializeChat(apiEndpoint: string = '/api/chat', eventId?: string) {
-		// 设置当前事件ID
-		if (eventId) {
-			this.currentEventId = eventId;
-		}
+	initializeChat(threadId: string) {
+		this.currentThreadId = threadId;
+		this.messages = this.loadChatFromStorage(threadId);
+		this.error = null;
+	}
 
-		this.chat = new Chat({
-			api: apiEndpoint,
-			onError: (error) => {
-				console.error('Chat error:', error);
-				this.error = error.message;
-			},
-			onFinish: (message) => {
-				console.log('Chat finished:', message);
-				// 消息完成后保存到本地存储
-				this.saveChatToStorage();
-			}
-		});
+	// 添加消息
+	addMessage(message: Omit<Message, 'id'>) {
+		const newMessage: Message = {
+			id: crypto.randomUUID(),
+			...message
+		};
+		this.messages = [...this.messages, newMessage];
+		this.saveChatToStorage();
+		return newMessage;
+	}
 
-		// 绑定状态 - 使用$effect来确保响应式更新
-		$effect(() => {
-			if (this.chat) {
-				this.messages = this.chat.messages;
-				this.status = this.chat.status;
-				this.error = this.chat.error?.message || null;
-				this.input = this.chat.input;
-			}
-		});
-		console.log('Initialized chat:', this.chat);
-		console.log('Loaded saved messages:', eventId);
-		// 如果有事件ID，先加载历史聊天记录
-		if (eventId) {
-			const savedMessages = this.loadChatFromStorage(eventId);
-			console.log('Loaded saved messages:', savedMessages);	
-			if (savedMessages.length > 0) {
-				this.chat.messages = savedMessages;
-				// 手动更新messages状态
-				this.messages = savedMessages;
-			}
+	// 更新消息
+	updateMessage(messageId: string, updates: Partial<Message>) {
+		const index = this.messages.findIndex(m => m.id === messageId);
+		if (index !== -1) {
+			this.messages[index] = { ...this.messages[index], ...updates };
+			this.messages = [...this.messages]; // 触发响应式更新
+			this.saveChatToStorage();
 		}
 	}
 
 	// 发送消息
-	async sendMessage(content: string) {
-		if (!this.chat) {
-			throw new Error('Chat not initialized');
+	async sendMessage(content: string, resources?: Resource[]) {
+		if (!this.currentThreadId || this.isStreaming) return;
+
+		// 添加用户消息
+		const userMessage = this.addMessage({
+			threadId: this.currentThreadId,
+			role: 'user',
+			content,
+			contentChunks: [content],
+			resources
+		});
+
+		// 创建助手消息占位符
+		const assistantMessage = this.addMessage({
+			threadId: this.currentThreadId,
+			role: 'assistant',
+			content: '',
+			contentChunks: [],
+			isStreaming: true
+		});
+
+		this.isStreaming = true;
+		this.error = null;
+		this.abortController = new AbortController();
+
+		try {
+			const stream = chatStream(content, {
+				thread_id: this.currentThreadId,
+				resources,
+				...this.config
+			}, {
+				abortSignal: this.abortController.signal
+			});
+
+			for await (const event of stream) {
+				switch (event.type) {
+					case 'message_chunk':
+						const { content: chunkContent, reasoning_content } = event.data;
+						
+						// 更新助手消息内容
+						if (chunkContent) {
+							this.updateMessage(assistantMessage.id, {
+								content: assistantMessage.content + chunkContent,
+								contentChunks: [...assistantMessage.contentChunks, chunkContent]
+							});
+						}
+						
+						if (reasoning_content) {
+							this.updateMessage(assistantMessage.id, {
+								reasoningContent: (assistantMessage.reasoningContent || '') + reasoning_content,
+								reasoningContentChunks: [...(assistantMessage.reasoningContentChunks || []), reasoning_content]
+							});
+						}
+						
+						// 检查是否完成
+						if (event.data.finish_reason) {
+							this.updateMessage(assistantMessage.id, {
+								isStreaming: false,
+								finishReason: event.data.finish_reason
+							});
+						}
+						break;
+
+					case 'tool_calls':
+						// 处理工具调用
+						this.updateMessage(assistantMessage.id, {
+							toolCalls: event.data.tool_calls.map(tc => ({
+								id: tc.id,
+								name: tc.name,
+								args: tc.args
+							}))
+						});
+						break;
+
+					case 'tool_call_result':
+						// 处理工具调用结果
+						const toolCalls = assistantMessage.toolCalls || [];
+						const toolCallIndex = toolCalls.findIndex(tc => tc.id === event.data.tool_call_id);
+						if (toolCallIndex !== -1) {
+							toolCalls[toolCallIndex].result = event.data.content;
+							this.updateMessage(assistantMessage.id, { toolCalls: [...toolCalls] });
+						}
+						break;
+
+					case 'interrupt':
+						// 处理中断事件
+						this.updateMessage(assistantMessage.id, {
+							options: event.data.options
+						});
+						break;
+				}
+			}
+		} catch (error: any) {
+			if (error.name !== 'AbortError') {
+				console.error('Chat error:', error);
+				this.error = error.message || 'An error occurred';
+				this.updateMessage(assistantMessage.id, {
+					content: 'Sorry, an error occurred while processing your request.',
+					isStreaming: false
+				});
+			}
+		} finally {
+			this.isStreaming = false;
+			this.abortController = null;
 		}
-		const result = await this.chat.append({ role: 'user', content });
-		// 发送消息后保存到本地存储
-		this.saveChatToStorage();
-		return result;
+	}
+
+	// 停止流式传输
+	stopStreaming() {
+		if (this.abortController) {
+			this.abortController.abort();
+			this.abortController = null;
+			this.isStreaming = false;
+		}
 	}
 
 	// 重新生成消息
-	async regenerateMessage() {
-		if (!this.chat) {
-			throw new Error('Chat not initialized');
+	async regenerateMessage(messageId: string) {
+		const messageIndex = this.messages.findIndex(m => m.id === messageId);
+		if (messageIndex > 0) {
+			const userMessage = this.messages[messageIndex - 1];
+			if (userMessage.role === 'user') {
+				// 删除助手消息
+				this.messages = this.messages.slice(0, messageIndex);
+				// 重新发送用户消息
+				await this.sendMessage(userMessage.content, userMessage.resources);
+			}
 		}
-		return await this.chat.reload();
+	}
+
+	// 处理选项点击（用于中断反馈）
+	async handleOptionClick(option: { text: string; value: string }) {
+		if (option.value) {
+			await this.sendMessage(option.value);
+		}
 	}
 
 	// 清空聊天
 	clearChat() {
-		if (this.chat) {
-			this.chat.messages = [];
-		}
-		// 清空后也保存到本地存储
+		this.messages = [];
+		this.error = null;
 		this.saveChatToStorage();
 	}
 
-	// 清除特定事件的聊天记录
-	clearEventChat(eventId: string) {
+	// 清除特定线程的聊天记录
+	clearThreadChat(threadId: string) {
 		if (!browser) return;
 		
 		try {
-			localStorage.removeItem(this.getStorageKey(eventId));
-			// 如果是当前事件，也清空内存中的聊天
-			if (this.currentEventId === eventId) {
+			localStorage.removeItem(this.getStorageKey(threadId));
+			// 如果是当前线程，也清空内存中的聊天
+			if (this.currentThreadId === threadId) {
 				this.clearChat();
 			}
 		} catch (error) {
-			console.error('Failed to clear event chat:', error);
+			console.error('Failed to clear thread chat:', error);
 		}
 	}
 
-	// 切换到不同的事件
-	switchToEvent(eventId: string, apiEndpoint: string = '/api/chat') {
-		// 如果是同一个事件，不需要重新初始化
-		if (this.currentEventId === eventId) {
+	// 切换到不同的线程
+	switchToThread(threadId: string) {
+		// 如果是同一个线程，不需要重新初始化
+		if (this.currentThreadId === threadId) {
 			return;
 		}
 		
 		// 重新初始化聊天并加载对应的聊天记录
-		this.initializeChat(apiEndpoint, eventId);
+		this.initializeChat(threadId);
 	}
 
 	// 设置输入值
 	setInput(value: string) {
-		if (this.chat) {
-			this.chat.input = value;
-		}
 		this.input = value;
+	}
+
+	// 更新配置
+	updateConfig(newConfig: Partial<ChatConfig>) {
+		this.config = { ...this.config, ...newConfig };
 	}
 
 	// 获取消息
@@ -157,9 +307,9 @@ class ChatStore {
 		return this.messages;
 	}
 
-	// 获取状态
-	getStatus(): string {
-		return this.status;
+	// 获取流式状态
+	getIsStreaming(): boolean {
+		return this.isStreaming;
 	}
 
 	// 获取错误
@@ -170,6 +320,16 @@ class ChatStore {
 	// 获取输入值
 	getInput(): string {
 		return this.input;
+	}
+
+	// 获取配置
+	getConfig(): ChatConfig {
+		return this.config;
+	}
+
+	// 清除错误
+	clearError() {
+		this.error = null;
 	}
 }
 

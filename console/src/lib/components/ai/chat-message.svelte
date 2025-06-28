@@ -2,11 +2,11 @@
 	import { UserAvatar } from '$lib/components/user';
 	import { Copy, RotateCcw, ThumbsUp, ThumbsDown } from '@lucide/svelte';
 	import { marked } from 'marked';
-	import type { Message } from '@ai-sdk/svelte';
+	import type { Message } from '$lib/types/message';
 	import type { User } from '$lib/types/user';
 	import { Button } from '$lib/components/ui/button';
 
-	let { message, onCopy, onRegenerate, onLike, onDislike, status, user, onAdopt } = $props<{
+	let { message, onCopy, onRegenerate, onLike, onDislike, status, user, onAdopt, onOptionClick } = $props<{
 		message: Message;
 		onCopy?: (messageId: string) => void;
 		onRegenerate?: (messageId: string) => void;
@@ -15,6 +15,7 @@
 		user?: User;
 		status?: 'success' | 'error' | 'loading';
 		onAdopt?: (type: string, data: any) => void;
+		onOptionClick?: (option: any) => void;
 	}>();
 
 	// 渲染Markdown
@@ -133,93 +134,77 @@
 
 <div class="flex flex-col {message.role === 'user' ? 'items-end' : 'items-start'} mb-4">
 	{#if message.role === 'user'}
-		<!-- <div class="flex-shrink-0 ">
-			<UserAvatar fallbackClass="text-xs" {user}></UserAvatar>
-		</div> -->
-		<div
-			class="bg-card text-foreground text-sm px-4 py-2 rounded-2xl rounded-tr-none max-w-[80%]"
-		>
-			{message.content}
-			<p>{message.timestamp}</p>
-		</div>
-	{:else}
-		<div class="flex-shrink-0 ">
-			<div
-				class=" text-xs font-semibold rounded-2xl border flex-center p-2"
-			>
-				Aksas
+		<div class="flex items-start gap-2 max-w-[80%]">
+			<div class="flex-shrink-0">
+				<UserAvatar fallbackClass="text-xs" {user}></UserAvatar>
+			</div>
+			<div class="bg-primary text-primary-foreground text-sm px-4 py-2 rounded-2xl rounded-tr-none">
+				{message.content}
 			</div>
 		</div>
-		<div class="px-1 rounded-lg flex-1 max-w-[90%] text-sm markdown-content">
-			{#if message.parts && message.parts.length > 0}
-				<!-- 新的流式格式 -->
-				{#each message.parts as part, i (i)}
-					{#if part.type === 'text'}
-						{@html renderMarkdown(part.text)}
-					{:else if part.type === 'tool-invocation'}
-						{@const toolCallId = part.toolInvocation.toolCallId}
-						{@const toolName = part.toolInvocation.toolName}
-						{@const state = part.toolInvocation.state}
-
-						{#if state === 'partial-call'}
-							<div class="text-gray-500 text-sm">
-								正在准备调用工具: {toolName}...
-							</div>
-						{:else if state === 'call'}
-							<div class="text-gray-500 text-sm">
-								正在调用工具: {toolName}...
-							</div>
-						{:else if state === 'result'}
-							<div class="text-gray-500 text-sm bg-base-300 p-2 mb-2 rounded">
-								<strong>工具结果:</strong>
-								{part.toolInvocation.result}
-							</div>
-						{/if}
-					{/if}
-				{/each}
-			{:else}
-				<!-- 旧的格式兼容 -->
+	{:else}
+		<div class="flex items-start gap-2 max-w-[90%]">
+			<div class="flex-shrink-0">
+				<div class="text-xs font-semibold rounded-full border flex items-center justify-center w-8 h-8 bg-muted">
+					AI
+			</div>
+			<div class="flex-1 text-sm markdown-content bg-muted/50 rounded-2xl rounded-tl-none px-4 py-2">
+				<!-- 渲染消息内容 -->
 				{@html renderMarkdown(message.content)}
-			{/if}
+				
+				<!-- 工具调用显示 -->
+				{#if message.toolCalls && message.toolCalls.length > 0}
+					<div class="mt-3 space-y-2">
+						{#each message.toolCalls as toolCall}
+							<div class="bg-background/80 p-3 rounded-lg border">
+								<div class="text-xs font-medium text-muted-foreground mb-1">
+									🔧 工具调用: {toolCall.name}
+								</div>
+								{#if toolCall.result}
+									<div class="text-xs text-muted-foreground">
+										结果: {toolCall.result}
+									</div>
+								{:else}
+									<div class="text-xs text-muted-foreground">
+										执行中...
+									</div>
+								{/if}
+							</div>
+						{/each}
+					</div>
+				{/if}
+				
+				<!-- 选项显示（用于中断处理） -->
+				{#if message.options && message.options.length > 0}
+					<div class="mt-3 space-y-2">
+						<div class="text-xs text-muted-foreground mb-2">请选择:</div>
+						{#each message.options as option}
+							<Button 
+								variant="outline" 
+								size="sm" 
+								class="mr-2 mb-2"
+								onclick={() => onOptionClick?.(option)}
+							>
+								{option.text}
+							</Button>
+						{/each}
+					</div>
+				{/if}
 
-			<!-- 通用的数据确认保存处理 -->
-			{#if message.data?.type}
-				<div class="mt-3 flex gap-2">
-					<Button 
-						variant="outline"
-						size="sm"
-						onclick={() => onAdopt?.(message.data.type, message.data)}
-					>
-						保存
-					</Button>
-					<Button 
-						variant="ghost" 
-						size="sm"
-						onclick={() => onRegenerate?.(message.id)}
-					>
-						重新生成
-					</Button>
-				</div>
-			{/if}
-
-			<div class="opacity-50 mt-2">
-				<div class="flex gap-1">
-					<button class="btn btn-ghost btn-xs" onclick={() => onCopy?.(message.id)} title="复制">
+				<!-- 操作按钮 -->
+				<div class="flex items-center gap-1 mt-2 opacity-60 hover:opacity-100 transition-opacity">
+					<Button variant="ghost" size="sm" onclick={() => onCopy?.(message.id)} title="复制">
 						<Copy class="w-3 h-3" />
-					</button>
-					<button
-						class="btn btn-ghost btn-xs"
-						onclick={() => onRegenerate?.(message.id)}
-						title="重新生成"
-					>
+					</Button>
+					<Button variant="ghost" size="sm" onclick={() => onRegenerate?.(message.id)} title="重新生成">
 						<RotateCcw class="w-3 h-3" />
-					</button>
-					<button class="btn btn-ghost btn-xs" onclick={() => onLike?.(message.id)} title="点赞">
+					</Button>
+					<Button variant="ghost" size="sm" onclick={() => onLike?.(message.id)} title="点赞">
 						<ThumbsUp class="w-3 h-3" />
-					</button>
-					<button class="btn btn-ghost btn-xs" onclick={() => onDislike?.(message.id)} title="点踩">
+					</Button>
+					<Button variant="ghost" size="sm" onclick={() => onDislike?.(message.id)} title="点踩">
 						<ThumbsDown class="w-3 h-3" />
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>

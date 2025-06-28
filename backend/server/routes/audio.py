@@ -13,11 +13,8 @@ from src.tools import VolcengineTTS
 from server.chat_request import TTSRequest, GeneratePodcastRequest
 
 logger = logging.getLogger(__name__)
-
 router = APIRouter(prefix="/api", tags=["audio"])
 INTERNAL_SERVER_ERROR_DETAIL = "Internal Server Error"
-
-
 @router.post("/tts")
 async def text_to_speech(request: TTSRequest):
     """Convert text to speech using volcengine TTS API."""

@@ -32,7 +32,11 @@ async def rag_config():
 @router.get("/config", response_model=ConfigResponse)
 async def config():
     """Get the config of the server."""
-    return ConfigResponse(
-        rag=RAGConfigResponse(provider=SELECTED_RAG_PROVIDER),
-        models=get_configured_llm_models(),
-    )
+    try:
+        return ConfigResponse(
+            rag=RAGConfigResponse(provider=SELECTED_RAG_PROVIDER),
+            models=get_configured_llm_models(),
+        )
+    except Exception as e:
+        logger.exception(f"Error retrieving server config: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve server configuration")
