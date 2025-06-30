@@ -90,7 +90,7 @@
 					<DropdownMenu.Content class="w-56 rounded-[16px]" align="start">
 						<DropdownMenu.Label>选择模型</DropdownMenu.Label>
 						<DropdownMenu.Separator />
-						{#each models as model}
+						{#each models as model (model.id)}
 							<DropdownMenu.Item
 								onclick={() => {
 									selectedModel = model.id;
@@ -126,7 +126,7 @@
 					<DropdownMenu.Content class="w-56 rounded-[16px]" align="start">
 						<DropdownMenu.Label>建议</DropdownMenu.Label>
 						<DropdownMenu.Separator />
-						{#each suggestions as suggestion}
+						{#each suggestions as suggestion (suggestion)}
 							<DropdownMenu.Item
 								onclick={() => {
 									onSuggestionClick?.(suggestion);

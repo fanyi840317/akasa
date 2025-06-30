@@ -2,7 +2,7 @@
 	import { ScrollArea } from '../ui/scroll-area';
 	import ChatMessage from './chat-message.svelte';
 	import AiInput from './ai-input.svelte';
-	import type { Message } from '@ai-sdk/svelte';
+	import type { Message } from '$lib/types/message';
 	import { Button } from '../ui/button';
 
 	// Props - 移除业务相关的props，只保留UI相关的

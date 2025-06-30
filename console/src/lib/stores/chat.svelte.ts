@@ -126,7 +126,7 @@ class ChatStore {
 		if (!this.currentThreadId || this.isStreaming) return;
 
 		// 添加用户消息
-		const userMessage = this.addMessage({
+		this.addMessage({
 			threadId: this.currentThreadId,
 			role: 'user',
 			content,
@@ -151,14 +151,23 @@ class ChatStore {
 			const stream = chatStream(content, {
 				thread_id: this.currentThreadId,
 				resources,
-				...this.config
+				auto_accepted_plan: this.config.auto_accepted_plan ?? false,
+				max_plan_iterations: this.config.max_plan_iterations ?? 3,
+				max_step_num: this.config.max_step_num ?? 10,
+				max_search_results: this.config.max_search_results,
+				enable_deep_thinking: this.config.enable_deep_thinking,
+				enable_background_investigation: this.config.enable_background_investigation ?? false,
+				report_style: this.config.report_style,
+				mcp_settings: this.config.mcp_settings
 			}, {
 				abortSignal: this.abortController.signal
 			});
 
+
 			for await (const event of stream) {
+				console.log(event.type,stream);
 				switch (event.type) {
-					case 'message_chunk':
+					case 'message_chunk': {
 						const { content: chunkContent, reasoning_content } = event.data;
 						
 						// 更新助手消息内容
@@ -184,6 +193,7 @@ class ChatStore {
 							});
 						}
 						break;
+					}
 
 					case 'tool_calls':
 						// 处理工具调用
@@ -196,7 +206,7 @@ class ChatStore {
 						});
 						break;
 
-					case 'tool_call_result':
+					case 'tool_call_result': {
 						// 处理工具调用结果
 						const toolCalls = assistantMessage.toolCalls || [];
 						const toolCallIndex = toolCalls.findIndex(tc => tc.id === event.data.tool_call_id);
@@ -205,6 +215,7 @@ class ChatStore {
 							this.updateMessage(assistantMessage.id, { toolCalls: [...toolCalls] });
 						}
 						break;
+					}
 
 					case 'interrupt':
 						// 处理中断事件
@@ -214,10 +225,10 @@ class ChatStore {
 						break;
 				}
 			}
-		} catch (error: any) {
-			if (error.name !== 'AbortError') {
+		} catch (error: unknown) {
+			if ((error as Error).name !== 'AbortError') {
 				console.error('Chat error:', error);
-				this.error = error.message || 'An error occurred';
+				this.error = (error as Error).message || 'An error occurred';
 				this.updateMessage(assistantMessage.id, {
 					content: 'Sorry, an error occurred while processing your request.',
 					isStreaming: false

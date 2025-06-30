@@ -3,7 +3,8 @@
 	import { chatStore } from '$lib/stores/chat.svelte';
 	import ChatInput from '$lib/components/chat/chat-input.svelte';
 	import { Card, CardContent } from '$lib/components/ui/card';
-	import { MessageSquare, Sparkles, Brain, Search } from 'lucide-svelte';
+	import { MessageSquare, Sparkles, Brain, Search } from '@lucide/svelte';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	function createNewChat() {
 		const threadId = crypto.randomUUID();
@@ -53,15 +54,15 @@
 	}
 </script>
 
-<div class="flex flex-col items-center justify-center min-h-screen p-8">
-	<div class="w-full max-w-4xl space-y-8">
+<ScrollArea class="flex flex-col items-center justify-center h-content p-8 border rounded-2xl bg-base-200">
+	<div class="w-full space-y-8 m">
 		<!-- 标题区域 -->
-		<div class="text-center space-y-4">
-			<div class="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+		<div class="text-center space-y-4 mt-20">
+			<!-- <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
 				<MessageSquare class="w-8 h-8 text-primary" />
-			</div>
+			</div> -->
 			<h1 class="text-4xl font-bold tracking-tight">Start a New Chat</h1>
-			<p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+			<p class="text-xs text-muted-foreground max-w-2xl mx-auto">
 				Engage with our AI assistant for deep thinking, research, creative tasks, and more.
 			</p>
 		</div>
@@ -79,10 +80,10 @@
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
 			{#each suggestions as suggestion}
 				<Card 
-					class="cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] group"
+					class="cursor-pointer transition-all rounded-[16px] hover:shadow-md hover:scale-[1.02] group"
 					onclick={() => handleSuggestionClick(suggestion.prompt)}
 				>
-					<CardContent class="p-6">
+					<CardContent >
 						<div class="flex items-start gap-4">
 							<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
 								<svelte:component this={suggestion.icon} class="w-5 h-5 text-primary" />
@@ -109,4 +110,4 @@
 			</p>
 		</div>
 	</div>
-</div>
+</ScrollArea>

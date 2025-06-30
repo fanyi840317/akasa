@@ -94,7 +94,7 @@
 {:else if user}
 	<Sidebar.Provider {open}
 		style="--sidebar-width:200px"
-		onOpenChange={(state) => {
+		onOpenChange={(state: boolean) => {
 			appStore.setSidebarCollapsed(state);
 		}}
 	>

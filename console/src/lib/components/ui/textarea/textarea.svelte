@@ -11,9 +11,14 @@
 	};
 
 	let { class: className, value = $bindable(), ...restProps }: $$Props = $props();
+
+	// 导出 DOM 元素引用
+	let textareaElement: HTMLTextAreaElement;
+	export { textareaElement as element };
 </script>
 
 <textarea
+	bind:this={textareaElement}
 	bind:value
 	class={textareaVariants({ class: className })}
 	{...restProps}

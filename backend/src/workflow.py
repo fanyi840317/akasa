@@ -3,7 +3,7 @@
 
 import asyncio
 import logging
-from src.graph import build_graph
+from src.graph import build_graph_with_memory
 
 # Configure logging
 logging.basicConfig(
@@ -19,8 +19,8 @@ def enable_debug_logging():
 
 logger = logging.getLogger(__name__)
 
-# Create the graph
-graph = build_graph()
+# Create the graph with memory to support interrupt functionality
+graph = build_graph_with_memory()
 
 
 async def run_agent_workflow_async(

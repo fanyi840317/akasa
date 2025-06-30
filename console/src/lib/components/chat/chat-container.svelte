@@ -1,13 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { chatStore } from '$lib/stores/chat.svelte';
+	import { chatStore, type ChatConfig } from '$lib/stores/chat.svelte';
 	import MessageItem from './message-item.svelte';
 	import ChatInput from './chat-input.svelte';
-	import ChatConfig from './chat-config.svelte';
+	import ChatConfigComponent from './chat-config.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '$lib/components/ui/sheet';
+	import {
+		Sheet,
+		SheetContent,
+		SheetHeader,
+		SheetTitle,
+		SheetTrigger
+	} from '$lib/components/ui/sheet';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Settings, Trash2, AlertCircle } from '@lucide/svelte';
 
@@ -17,13 +23,10 @@
 		autoFocus?: boolean;
 	}
 
-	let {
-		threadId,
-		autoFocus = true
-	}: Props = $props();
+	let { threadId, autoFocus = true }: Props = $props();
 
 	// 组件引用
-	let chatInputRef: any;
+	let chatInputRef: { focus: () => void } | undefined;
 	let messagesContainer: HTMLElement;
 	let configSheetOpen = $state(false);
 
@@ -39,7 +42,7 @@
 		if (threadId) {
 			chatStore.initializeChat(threadId);
 		}
-		
+
 		if (autoFocus) {
 			// 延迟聚焦，确保组件已渲染
 			setTimeout(() => {
@@ -108,7 +111,7 @@
 	}
 
 	// 处理配置变化
-	function handleConfigChange(newConfig: any) {
+	function handleConfigChange(newConfig: Partial<ChatConfig>) {
 		chatStore.updateConfig(newConfig);
 	}
 
@@ -138,22 +141,22 @@
 	}
 </script>
 
-<div class="chat-container flex flex-col h-full">
+<div class="bg-base-200 flex-between h-content flex-col rounded-2xl border">
 	<!-- 头部工具栏 -->
-	<div class="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-		<div class="flex items-center gap-2">
+	<div class="flex-between w-full border-b p-1">
+		<div class="flex items-center gap-2 px-4">
 			<h2 class="text-lg font-semibold">Chat</h2>
 			{#if threadId}
-				<span class="text-sm text-muted-foreground">#{threadId.slice(0, 8)}</span>
+				<span class="text-muted-foreground text-sm">#{threadId.slice(0, 8)}</span>
 			{/if}
 		</div>
-		
+
 		<div class="flex items-center gap-2">
 			<!-- 配置按钮 -->
 			<Sheet bind:open={configSheetOpen}>
-				<SheetTrigger asChild>
+				<SheetTrigger>
 					<Button variant="ghost" size="sm" title="Chat settings">
-						<Settings class="w-4 h-4" />
+						<Settings class="h-4 w-4" />
 					</Button>
 				</SheetTrigger>
 				<SheetContent side="right" class="w-80">
@@ -161,24 +164,24 @@
 						<SheetTitle>Chat Settings</SheetTitle>
 					</SheetHeader>
 					<div class="mt-6">
-						<ChatConfig
-							config={config}
+						<ChatConfigComponent
+							{config}
 							onConfigChange={handleConfigChange}
 							onReset={handleConfigReset}
 						/>
 					</div>
 				</SheetContent>
 			</Sheet>
-			
+
 			<!-- 清空聊天按钮 -->
-			<Button 
-				variant="ghost" 
-				size="sm" 
+			<Button
+				variant="ghost"
+				size="sm"
 				onclick={handleClearChat}
 				title="Clear chat"
 				disabled={messages.length === 0}
 			>
-				<Trash2 class="w-4 h-4" />
+				<Trash2 class="h-4 w-4" />
 			</Button>
 		</div>
 	</div>
@@ -190,12 +193,7 @@
 				<AlertCircle class="h-4 w-4" />
 				<AlertDescription class="flex items-center justify-between">
 					<span>{error}</span>
-					<Button 
-						variant="ghost" 
-						size="sm" 
-						onclick={dismissError}
-						class="h-auto p-1 ml-2"
-					>
+					<Button variant="ghost" size="sm" onclick={dismissError} class="ml-2 h-auto p-1">
 						×
 					</Button>
 				</AlertDescription>
@@ -204,59 +202,35 @@
 	{/if}
 
 	<!-- 消息列表 -->
-	<div class="flex-1 overflow-hidden">
-		<ScrollArea class="h-full">
-			<div 
-				bind:this={messagesContainer}
-				class="p-4 space-y-4 min-h-full"
-			>
-				{#if messages.length === 0}
-					<!-- 空状态 -->
-					<div class="flex items-center justify-center h-full">
-						<Card class="w-full max-w-md">
-							<CardContent class="p-6 text-center">
-								<div class="w-12 h-12 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-									<Settings class="w-6 h-6 text-muted-foreground" />
-								</div>
-								<h3 class="text-lg font-semibold mb-2">Start a conversation</h3>
-								<p class="text-muted-foreground text-sm mb-4">
-									Type a message below to begin chatting with the AI assistant.
-								</p>
-								<Button 
-									variant="outline" 
-									size="sm"
-									onclick={() => configSheetOpen = true}
-								>
-									<Settings class="w-4 h-4 mr-2" />
-									Configure Chat
-								</Button>
-							</CardContent>
-						</Card>
-					</div>
-				{:else}
-					<!-- 消息列表 -->
-					{#each messages as message (message.id)}
-						<MessageItem
-							message={message}
-							onCopy={handleCopy}
-							onRegenerate={handleRegenerate}
-							onLike={handleLike}
-							onDislike={handleDislike}
-							onOptionClick={handleOptionClick}
-						/>
-					{/each}
-				{/if}
+	<div class="w-full flex-1 overflow-hidden">
+		<ScrollArea class=" h-full w-full ">
+			<div class="h-full w-full flex flex-center">
+			<div bind:this={messagesContainer} class="min-h-full min-w-3xl max-w-4xl space-y-4 p-4">
+				<!-- 消息列表 -->
+				{#each messages as message (message.id)}
+					<MessageItem
+						{message}
+						onCopy={handleCopy}
+						onRegenerate={handleRegenerate}
+						onLike={handleLike}
+						onDislike={handleDislike}
+						onOptionClick={handleOptionClick}
+					/>
+				{/each}
+			</div>
+
 			</div>
 		</ScrollArea>
 	</div>
 
 	<!-- 输入区域 -->
-	<div class="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+	<div class="flex-center w-full">
 		<div class="p-4">
 			<ChatInput
+				class="w-3xl"
 				bind:this={chatInputRef}
 				value={input}
-				isStreaming={isStreaming}
+				{isStreaming}
 				onSubmit={handleSubmit}
 				onStop={handleStop}
 				onInput={handleInput}
@@ -267,16 +241,37 @@
 </div>
 
 <style>
+	@reference "../../../app.css";
+
 	.chat-container {
-		@apply bg-background;
+		@apply bg-background rounded-2xl border;
 	}
-	
+
 	/* 自定义滚动条样式 */
 	.chat-container :global(.scroll-area-viewport) {
-		@apply scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20;
+		scrollbar-width: thin;
+		scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
 	}
-	
+
 	.chat-container :global(.scroll-area-viewport:hover) {
-		@apply scrollbar-thumb-muted-foreground/40;
+		scrollbar-color: hsl(var(--muted-foreground) / 0.4) transparent;
+	}
+
+	/* WebKit 浏览器滚动条样式 */
+	.chat-container :global(.scroll-area-viewport::-webkit-scrollbar) {
+		width: 6px;
+	}
+
+	.chat-container :global(.scroll-area-viewport::-webkit-scrollbar-track) {
+		background: transparent;
+	}
+
+	.chat-container :global(.scroll-area-viewport::-webkit-scrollbar-thumb) {
+		background-color: hsl(var(--muted-foreground) / 0.2);
+		border-radius: 3px;
+	}
+
+	.chat-container :global(.scroll-area-viewport:hover::-webkit-scrollbar-thumb) {
+		background-color: hsl(var(--muted-foreground) / 0.4);
 	}
 </style>

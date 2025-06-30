@@ -147,6 +147,7 @@
 			<div class="flex-shrink-0">
 				<div class="text-xs font-semibold rounded-full border flex items-center justify-center w-8 h-8 bg-muted">
 					AI
+				</div>
 			</div>
 			<div class="flex-1 text-sm markdown-content bg-muted/50 rounded-2xl rounded-tl-none px-4 py-2">
 				<!-- 渲染消息内容 -->
@@ -155,7 +156,7 @@
 				<!-- 工具调用显示 -->
 				{#if message.toolCalls && message.toolCalls.length > 0}
 					<div class="mt-3 space-y-2">
-						{#each message.toolCalls as toolCall}
+						{#each message.toolCalls as toolCall (toolCall.id)}
 							<div class="bg-background/80 p-3 rounded-lg border">
 								<div class="text-xs font-medium text-muted-foreground mb-1">
 									🔧 工具调用: {toolCall.name}
@@ -178,7 +179,7 @@
 				{#if message.options && message.options.length > 0}
 					<div class="mt-3 space-y-2">
 						<div class="text-xs text-muted-foreground mb-2">请选择:</div>
-						{#each message.options as option}
+						{#each message.options as option (option.value)}
 							<Button 
 								variant="outline" 
 								size="sm" 

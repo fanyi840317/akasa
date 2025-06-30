@@ -26,7 +26,7 @@
 	}: Props = $props();
 
 	// 渲染 Markdown 内容
-	const renderedContent = $derived({
+	const renderedContent = $derived(() => {
 		if (message.content) {
 			return marked(message.content, { breaks: true });
 		}
@@ -86,7 +86,7 @@
 			<!-- 消息内容 -->
 			{#if message.content}
 				<div class="prose prose-sm max-w-none dark:prose-invert">
-					{@html renderedContent}
+					{@html renderedContent()}
 				</div>
 			{/if}
 
@@ -107,7 +107,7 @@
 			<!-- 工具调用 -->
 			{#if message.toolCalls && message.toolCalls.length > 0}
 				<div class="mt-3 space-y-2">
-					{#each message.toolCalls as toolCall}
+					{#each message.toolCalls as toolCall (toolCall.id)}
 						<div class="border rounded-md p-3 bg-muted/30">
 							<div class="flex items-center gap-2 mb-2">
 								<Badge variant="outline" class="text-xs">
@@ -135,7 +135,7 @@
 			<!-- 选项按钮（用于中断反馈） -->
 			{#if message.options && message.options.length > 0}
 				<div class="mt-3 flex flex-wrap gap-2">
-					{#each message.options as option}
+					{#each message.options as option (option.value)}
 						<Button 
 							variant="outline" 
 							size="sm"
@@ -192,6 +192,8 @@
 </div>
 
 <style>
+	@reference "../../../app.css";
+	
 	.message-item :global(.prose) {
 		@apply text-foreground;
 	}
