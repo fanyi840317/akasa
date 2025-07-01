@@ -38,7 +38,7 @@ const DEFAULT_CONFIG: ChatConfig = {
 	model: 'gpt-4-turbo',
 	streamResponse: true,
 	// 兼容后端的配置
-	auto_accepted_plan: false,
+	auto_accepted_plan: true,
 	max_plan_iterations: 3,
 	max_step_num: 10,
 	max_search_results: 5,

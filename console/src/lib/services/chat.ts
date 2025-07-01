@@ -34,7 +34,7 @@ export async function* chatStream(
 ) {
 	// console.log('chatStream_start', userMessage, params, options);
 	// if (
-	// 	PUBLIC_STATIC_WEBSITE_ONLY ||
+	// 	// PUBLIC_STATIC_WEBSITE_ONLY ||
 	// 	location.search.includes('mock') ||
 	// 	location.search.includes('replay=')
 	// ) {
@@ -53,6 +53,7 @@ export async function* chatStream(
 		});
 
 		for await (const event of stream) {
+			console.log('chatStream', event);
 			yield {
 				type: event.event,
 				data: JSON.parse(event.data)

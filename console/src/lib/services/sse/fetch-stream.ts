@@ -18,6 +18,7 @@ export async function* fetchStream(
   if (response.status !== 200) {
     throw new Error(`Failed to fetch from ${url}: ${response.status}`);
   }
+  console.log(response);
   // Read from response body, event by event. An event always ends with a '\n\n'.
   const reader = response.body
     ?.pipeThrough(new TextDecoderStream())
@@ -25,21 +26,26 @@ export async function* fetchStream(
   if (!reader) {
     throw new Error("Response body is not readable");
   }
+  console.log(reader);
   let buffer = "";
   while (true) {
     const { done, value } = await reader.read();
+    console.log("value:", value);
     if (done) {
       break;
     }
     buffer += value;
     while (true) {
+      console.log(buffer);
       const index = buffer.indexOf("\n\n");
       if (index === -1) {
         break;
       }
       const chunk = buffer.slice(0, index);
       buffer = buffer.slice(index + 2);
+      console.log(chunk);
       const event = parseEvent(chunk);
+      console.log(event);
       if (event) {
         yield event;
       }

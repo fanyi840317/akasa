@@ -8,8 +8,21 @@ from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from langchain_core.messages import AIMessageChunk, ToolMessage, BaseMessage
+from langchain_core.messages import AIMessageChunk, AIMessage, ToolMessage, BaseMessage
 from langgraph.types import Command
+
+# ANSI 颜色代码
+class Colors:
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
 
 from src.config.report_style import ReportStyle
 from src.graph.builder import build_graph_with_memory
@@ -29,6 +42,7 @@ async def chat_stream(request: ChatRequest):
     thread_id = request.thread_id
     if thread_id == "__default__":
         thread_id = str(uuid4())
+    print(f"{Colors.CYAN}[REQUEST]{Colors.END} {Colors.BOLD}request:{Colors.END} {request}")
     return StreamingResponse(
         _astream_workflow_generator(
             request.model_dump()["messages"],
@@ -81,14 +95,17 @@ async def _astream_workflow_generator(
     async for agent, _, event_data in graph.astream(
         input_,
         config={
-            "thread_id": thread_id,
-            "resources": resources,
-            "max_plan_iterations": max_plan_iterations,
-            "max_step_num": max_step_num,
-            "max_search_results": max_search_results,
-            "mcp_settings": mcp_settings,
-            "report_style": report_style.value,
-            "enable_deep_thinking": enable_deep_thinking,
+            "configurable": {
+                "thread_id": thread_id,
+                "resources": resources,
+                "max_plan_iterations": max_plan_iterations,
+                "max_step_num": max_step_num,
+                "max_search_results": max_search_results,
+                "mcp_settings": mcp_settings,
+                "report_style": report_style.value,
+                "enable_deep_thinking": enable_deep_thinking,
+            },
+            "recursion_limit": 100
         },
         stream_mode=["messages", "updates"],
         subgraphs=True,
@@ -120,6 +137,7 @@ async def _astream_workflow_generator(
             "role": "assistant",
             "content": message_chunk.content,
         }
+        print(f"{Colors.BLUE}[MESSAGE_CHUNK_NAME]{Colors.END} {Colors.YELLOW}{message_chunk.id}{Colors.END}")
         if message_chunk.additional_kwargs.get("reasoning_content"):
             event_stream_message["reasoning_content"] = message_chunk.additional_kwargs[
                 "reasoning_content"
@@ -129,10 +147,15 @@ async def _astream_workflow_generator(
                 "finish_reason"
             )
         if isinstance(message_chunk, ToolMessage):
+            print(f"{Colors.GREEN}[TOOL_MESSAGE]{Colors.END} {Colors.BOLD}Processing tool message{Colors.END}")
+            print(f"{Colors.GREEN}{'='*50}{Colors.END}")
             # Tool Message - Return the result of the tool call
             event_stream_message["tool_call_id"] = message_chunk.tool_call_id
             yield _make_event("tool_call_result", event_stream_message)
-        elif isinstance(message_chunk, AIMessageChunk):
+        elif isinstance(message_chunk, AIMessage):
+            print(f"{Colors.MAGENTA}[AI_MESSAGE_CHUNK]{Colors.END} {Colors.BOLD}tool_calls:{Colors.END} {Colors.YELLOW}{message_chunk.tool_calls}{Colors.END}")
+            print(f"{Colors.MAGENTA}[AI_MESSAGE_CHUNK]{Colors.END} {Colors.BOLD}tool_call_chunks:{Colors.END} {Colors.YELLOW}{message_chunk.tool_call_chunks}{Colors.END}")
+            print(f"{Colors.MAGENTA}[AI_MESSAGE_CHUNK]{Colors.END} {Colors.BOLD}message_chunk:{Colors.END} {Colors.CYAN}{message_chunk}{Colors.END}")
             # AI Message - Raw message tokens
             if message_chunk.tool_calls:
                 # AI Message - Tool Call
@@ -148,6 +171,7 @@ async def _astream_workflow_generator(
                 )
                 yield _make_event("tool_call_chunks", event_stream_message)
             else:
+                print(f"{Colors.RED}[FINAL_MESSAGE]{Colors.END} {Colors.BOLD}event_stream_message:{Colors.END} {Colors.WHITE}{event_stream_message}{Colors.END}")
                 # AI Message - Raw message tokens
                 yield _make_event("message_chunk", event_stream_message)
 

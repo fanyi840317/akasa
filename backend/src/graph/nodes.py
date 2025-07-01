@@ -195,6 +195,17 @@ def human_feedback_node(
         else:
             return Command(goto="__end__")
 
+    # Fix missing step_type fields before validation
+    if "steps" in new_plan and isinstance(new_plan["steps"], list):
+        for step in new_plan["steps"]:
+            if isinstance(step, dict) and "step_type" not in step:
+                # Set default step_type based on need_search field
+                if step.get("need_search", True):
+                    step["step_type"] = "research"
+                else:
+                    step["step_type"] = "processing"
+                logger.warning(f"Added missing step_type field to step: {step.get('title', 'Unknown')}")
+
     return Command(
         update={
             "current_plan": Plan.model_validate(new_plan),
