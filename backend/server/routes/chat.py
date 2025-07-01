@@ -153,6 +153,18 @@ async def _astream_workflow_generator(
             event_stream_message["tool_call_id"] = message_chunk.tool_call_id
             yield _make_event("tool_call_result", event_stream_message)
         elif isinstance(message_chunk, AIMessage):
+            print(f"{Colors.BLUE}[AI_MESSAGE]{Colors.END} {Colors.BOLD}tool_calls:{Colors.END} {Colors.YELLOW}{message_chunk.tool_calls}{Colors.END}")
+            print(f"{Colors.BLUE}[AI_MESSAGE]{Colors.END} {Colors.BOLD}message_chunk:{Colors.END} {Colors.CYAN}{message_chunk}{Colors.END}")
+            # AI Message - Complete message
+            if message_chunk.tool_calls:
+                # AI Message - Tool Call
+                event_stream_message["tool_calls"] = message_chunk.tool_calls
+                yield _make_event("tool_calls", event_stream_message)
+            else:
+                print(f"{Colors.RED}[FINAL_AI_MESSAGE]{Colors.END} {Colors.BOLD}event_stream_message:{Colors.END} {Colors.WHITE}{event_stream_message}{Colors.END}")
+                # AI Message - Complete message
+                yield _make_event("message", event_stream_message)
+        elif isinstance(message_chunk, AIMessageChunk):
             print(f"{Colors.MAGENTA}[AI_MESSAGE_CHUNK]{Colors.END} {Colors.BOLD}tool_calls:{Colors.END} {Colors.YELLOW}{message_chunk.tool_calls}{Colors.END}")
             print(f"{Colors.MAGENTA}[AI_MESSAGE_CHUNK]{Colors.END} {Colors.BOLD}tool_call_chunks:{Colors.END} {Colors.YELLOW}{message_chunk.tool_call_chunks}{Colors.END}")
             print(f"{Colors.MAGENTA}[AI_MESSAGE_CHUNK]{Colors.END} {Colors.BOLD}message_chunk:{Colors.END} {Colors.CYAN}{message_chunk}{Colors.END}")

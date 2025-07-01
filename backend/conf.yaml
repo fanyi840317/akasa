@@ -8,7 +8,7 @@
 BASIC_MODEL:
   base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
   model: "gemini-2.0-flash"
-  api_key: AIzaSyDksqW5x7dD_z6ndiHg0ZP8mwCsQFvZQ94
+  api_key: AIzaSyCoIT16w5DVwhygqQ51EXT_LxV50JY0jIk
 
 # Reasoning model is optional.
 # Uncomment the following settings if you want to use reasoning model
@@ -17,4 +17,4 @@ BASIC_MODEL:
 REASONING_MODEL:
   base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
   model: "gemini-2.0-flash"
-  api_key: AIzaSyDksqW5x7dD_z6ndiHg0ZP8mwCsQFvZQ94
+  api_key: AIzaSyCoIT16w5DVwhygqQ51EXT_LxV50JY0jIk
