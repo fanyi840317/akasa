@@ -19,12 +19,15 @@ export interface ChatConfig {
 	max_search_results?: number;
 	enable_deep_thinking?: boolean;
 	enable_background_investigation?: boolean;
-	report_style?: "academic" | "popular_science" | "news" | "social_media";
+	report_style?: 'academic' | 'popular_science' | 'news' | 'social_media';
 	mcp_settings?: {
-		servers: Record<string, MCPServerMetadata & {
-			enabled_tools: string[];
-			add_to_agents: string[];
-		}>;
+		servers: Record<
+			string,
+			MCPServerMetadata & {
+				enabled_tools: string[];
+				add_to_agents: string[];
+			}
+		>;
 	};
 }
 
@@ -65,7 +68,7 @@ class ChatStore {
 	// 保存聊天记录到本地存储
 	private saveChatToStorage() {
 		if (!browser || !this.currentThreadId) return;
-		
+
 		try {
 			const chatData = {
 				messages: this.messages,
@@ -80,7 +83,7 @@ class ChatStore {
 	// 从本地存储加载聊天记录
 	private loadChatFromStorage(threadId: string): Message[] {
 		if (!browser) return [];
-		
+
 		try {
 			const stored = localStorage.getItem(this.getStorageKey(threadId));
 			if (stored) {
@@ -113,7 +116,7 @@ class ChatStore {
 
 	// 更新消息
 	updateMessage(messageId: string, updates: Partial<Message>) {
-		const index = this.messages.findIndex(m => m.id === messageId);
+		const index = this.messages.findIndex((m) => m.id === messageId);
 		if (index !== -1) {
 			this.messages[index] = { ...this.messages[index], ...updates };
 			this.messages = [...this.messages]; // 触发响应式更新
@@ -148,28 +151,30 @@ class ChatStore {
 		this.abortController = new AbortController();
 
 		try {
-			const stream = chatStream(content, {
-				thread_id: this.currentThreadId,
-				resources,
-				auto_accepted_plan: this.config.auto_accepted_plan ?? false,
-				max_plan_iterations: this.config.max_plan_iterations ?? 3,
-				max_step_num: this.config.max_step_num ?? 10,
-				max_search_results: this.config.max_search_results,
-				enable_deep_thinking: this.config.enable_deep_thinking,
-				enable_background_investigation: this.config.enable_background_investigation ?? false,
-				report_style: this.config.report_style,
-				mcp_settings: this.config.mcp_settings
-			}, {
-				abortSignal: this.abortController.signal
-			});
-
+			const stream = chatStream(
+				content,
+				{
+					thread_id: this.currentThreadId,
+					resources,
+					auto_accepted_plan: this.config.auto_accepted_plan ?? false,
+					max_plan_iterations: this.config.max_plan_iterations ?? 3,
+					max_step_num: this.config.max_step_num ?? 10,
+					max_search_results: this.config.max_search_results,
+					enable_deep_thinking: this.config.enable_deep_thinking,
+					enable_background_investigation: this.config.enable_background_investigation ?? false,
+					report_style: this.config.report_style,
+					mcp_settings: this.config.mcp_settings
+				},
+				{
+					abortSignal: this.abortController.signal
+				}
+			);
 
 			for await (const event of stream) {
-				console.log(event.type,stream);
 				switch (event.type) {
 					case 'message_chunk': {
 						const { content: chunkContent, reasoning_content } = event.data;
-						
+
 						// 更新助手消息内容
 						if (chunkContent) {
 							this.updateMessage(assistantMessage.id, {
@@ -177,14 +182,17 @@ class ChatStore {
 								contentChunks: [...assistantMessage.contentChunks, chunkContent]
 							});
 						}
-						
+
 						if (reasoning_content) {
 							this.updateMessage(assistantMessage.id, {
 								reasoningContent: (assistantMessage.reasoningContent || '') + reasoning_content,
-								reasoningContentChunks: [...(assistantMessage.reasoningContentChunks || []), reasoning_content]
+								reasoningContentChunks: [
+									...(assistantMessage.reasoningContentChunks || []),
+									reasoning_content
+								]
 							});
 						}
-						
+
 						// 检查是否完成
 						if (event.data.finish_reason) {
 							this.updateMessage(assistantMessage.id, {
@@ -198,7 +206,7 @@ class ChatStore {
 					case 'tool_calls':
 						// 处理工具调用
 						this.updateMessage(assistantMessage.id, {
-							toolCalls: event.data.tool_calls.map(tc => ({
+							toolCalls: event.data.tool_calls.map((tc) => ({
 								id: tc.id,
 								name: tc.name,
 								args: tc.args
@@ -209,7 +217,7 @@ class ChatStore {
 					case 'tool_call_result': {
 						// 处理工具调用结果
 						const toolCalls = assistantMessage.toolCalls || [];
-						const toolCallIndex = toolCalls.findIndex(tc => tc.id === event.data.tool_call_id);
+						const toolCallIndex = toolCalls.findIndex((tc) => tc.id === event.data.tool_call_id);
 						if (toolCallIndex !== -1) {
 							toolCalls[toolCallIndex].result = event.data.content;
 							this.updateMessage(assistantMessage.id, { toolCalls: [...toolCalls] });
@@ -251,7 +259,7 @@ class ChatStore {
 
 	// 重新生成消息
 	async regenerateMessage(messageId: string) {
-		const messageIndex = this.messages.findIndex(m => m.id === messageId);
+		const messageIndex = this.messages.findIndex((m) => m.id === messageId);
 		if (messageIndex > 0) {
 			const userMessage = this.messages[messageIndex - 1];
 			if (userMessage.role === 'user') {
@@ -280,7 +288,7 @@ class ChatStore {
 	// 清除特定线程的聊天记录
 	clearThreadChat(threadId: string) {
 		if (!browser) return;
-		
+
 		try {
 			localStorage.removeItem(this.getStorageKey(threadId));
 			// 如果是当前线程，也清空内存中的聊天
@@ -298,7 +306,7 @@ class ChatStore {
 		if (this.currentThreadId === threadId) {
 			return;
 		}
-		
+
 		// 重新初始化聊天并加载对应的聊天记录
 		this.initializeChat(threadId);
 	}

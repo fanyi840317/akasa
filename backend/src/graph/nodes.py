@@ -195,17 +195,6 @@ def human_feedback_node(
         else:
             return Command(goto="__end__")
 
-    # Fix missing step_type fields before validation
-    if "steps" in new_plan and isinstance(new_plan["steps"], list):
-        for step in new_plan["steps"]:
-            if isinstance(step, dict) and "step_type" not in step:
-                # Set default step_type based on need_search field
-                if step.get("need_search", True):
-                    step["step_type"] = "research"
-                else:
-                    step["step_type"] = "processing"
-                logger.warning(f"Added missing step_type field to step: {step.get('title', 'Unknown')}")
-
     return Command(
         update={
             "current_plan": Plan.model_validate(new_plan),
@@ -467,17 +456,16 @@ async def _setup_and_execute_agent_step(
 
     # Create and execute agent with MCP tools if available
     if mcp_servers:
-        client = MultiServerMCPClient(mcp_servers)
-        tools = await client.get_tools()
-        loaded_tools = default_tools[:]
-        for tool in tools:
-            if tool.name in enabled_tools:
-                tool.description = (
-                    f"Powered by '{enabled_tools[tool.name]}'." f"{tool.description}"
-                )
-                loaded_tools.append(tool)
-        agent = create_agent(agent_type, agent_type, loaded_tools, agent_type)
-        return await _execute_agent_step(state, agent, agent_type)
+        async with MultiServerMCPClient(mcp_servers) as client:
+            loaded_tools = default_tools[:]
+            for tool in client.get_tools():
+                if tool.name in enabled_tools:
+                    tool.description = (
+                        f"Powered by '{enabled_tools[tool.name]}'.\n{tool.description}"
+                    )
+                    loaded_tools.append(tool)
+            agent = create_agent(agent_type, agent_type, loaded_tools, agent_type)
+            return await _execute_agent_step(state, agent, agent_type)
     else:
         # Use default tools if no MCP servers are configured
         agent = create_agent(agent_type, agent_type, default_tools, agent_type)

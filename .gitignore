@@ -17,6 +17,7 @@
 config/secrets.yaml
 config/local.yaml
 secrets/
+.venv
 
 # -----------------------------------------------------------------------------
 # Node.js & Frontend 相关 (Node.js & Frontend Related)

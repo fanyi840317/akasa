@@ -41,8 +41,6 @@ export async function* chatStream(
 	// 	yield* chatReplayStream(userMessage, params, options);
 	// 	return;
 	// }
-
-	console.log('chatStream', userMessage, params, options);
 	try {
 		const stream = fetchStream('http://localhost:8000/api/chat/stream', {
 			body: JSON.stringify({
