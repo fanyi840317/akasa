@@ -2,11 +2,10 @@ import type { Resource } from '../types/message';
 import type { MCPServerMetadata } from '../types/mcp';
 import { extractReplayIdFromSearchParams } from './replay';
 import { fetchStream } from './sse';
-import { sleep } from './utils';
+import { sleep } from '../tools';
 
-// import { PUBLIC_STATIC_WEBSITE_ONLY } from '$env/static/public';
 import type { ChatEvent } from '../types/message';
-import { PUBLIC_STATIC_WEBSITE_ONLY } from '$env/static/public';
+// import { PUBLIC_STATIC_WEBSITE_ONLY } from '$env/static/public';
 
 export async function* chatStream(
 	userMessage: string,
@@ -33,12 +32,12 @@ export async function* chatStream(
 	},
 	options: { abortSignal?: AbortSignal } = {}
 ) {
-	if (
-		PUBLIC_STATIC_WEBSITE_ONLY ||
-		location.search.includes("mock") ||
-		location.search.includes("replay=")
-	) 
-		return yield* chatReplayStream(userMessage, params, options);
+	// if (
+	// 	PUBLIC_STATIC_WEBSITE_ONLY ||
+	// 	location.search.includes("mock") ||
+	// 	location.search.includes("replay=")
+	// ) 
+	// 	return yield* chatReplayStream(userMessage, params, options);
 	try {
 		const stream = fetchStream('http://localhost:8000/api/chat/stream', {
 			body: JSON.stringify({

@@ -40,6 +40,7 @@
 
 	// 自动聚焦
 	onMount(() => {
+			console.log('Chat initialized with threadId:',messages);
 		if (autoFocus) {
 			// 延迟聚焦，确保组件已渲染
 			setTimeout(() => {
@@ -212,8 +213,8 @@
 	<!-- 消息列表 -->
 	<div class="w-full flex-1 overflow-hidden">
 		<ScrollArea class="h-full w-full">
-			<div bind:this={messagesContainer} class="min-h-full flex-center" >
-				<div class="max-w-4xl space-y-4 p-4">
+			<div bind:this={messagesContainer} class="min-h-full w-full flex items-start justify-center " >
+				<div class="max-w-4xl w-full space-y-4 p-4 flex flex-col">
 				<!-- 消息列表 -->
 				{#each messages as message (message.id)}
 					<MessageItem

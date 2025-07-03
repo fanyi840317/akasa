@@ -1,71 +1,9 @@
 import type { MCPServerMetadata } from '$lib/types/mcp';
 import { chatStream } from '$lib/services/chat';
 import { browser } from '$app/environment';
-import type { Message, Resource, ChatEvent } from '$lib/types/message';
+import type { Message, Resource } from '$lib/types/message';
+import { mergeMessage } from './merge-message';
 
-// 消息合并函数，参考 deer-flow 实现
-function mergeMessage(message: Message, event: ChatEvent): Message {
-	const { type, data } = event;
-	
-	switch (type) {
-		case 'message_chunk': {
-			const updatedMessage = { ...message };
-			
-			if (data.content) {
-				updatedMessage.content = (message.content || '') + data.content;
-				updatedMessage.contentChunks = [...(message.contentChunks || []), data.content];
-			}
-			
-			if (data.reasoning_content) {
-				updatedMessage.reasoningContent = (message.reasoningContent || '') + data.reasoning_content;
-				updatedMessage.reasoningContentChunks = [...(message.reasoningContentChunks || []), data.reasoning_content];
-			}
-			
-			if (data.finish_reason) {
-				updatedMessage.finishReason = data.finish_reason;
-				updatedMessage.isStreaming = false;
-			}
-			
-			return updatedMessage;
-		}
-		
-		case 'tool_calls': {
-			return {
-				...message,
-				toolCalls: data.tool_calls.map(tc => ({
-					id: tc.id,
-					name: tc.name,
-					args: tc.args
-				}))
-			};
-		}
-		
-		case 'tool_call_result': {
-			const toolCalls = [...(message.toolCalls || [])];
-			const toolCallIndex = toolCalls.findIndex(tc => tc.id === data.tool_call_id);
-			if (toolCallIndex !== -1) {
-				toolCalls[toolCallIndex] = {
-					...toolCalls[toolCallIndex],
-					result: data.content
-				};
-			}
-			return {
-				...message,
-				toolCalls
-			};
-		}
-		
-		case 'interrupt': {
-			return {
-				...message,
-				options: data.options
-			};
-		}
-		
-		default:
-			return message;
-	}
-}
 
 // 聊天配置接口
 export interface ChatConfig {
@@ -316,6 +254,7 @@ class ChatStore {
 						}
 						
 						const mergedMessage = mergeMessage(currentAssistantMessage, event);
+						console.log('message_chunk:', event);
 						this.messages.set(currentAssistantMessage.id, mergedMessage);
 						currentAssistantMessage = mergedMessage;
 						break;

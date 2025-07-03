@@ -39,6 +39,7 @@
 
 	// 初始化聊天
 	onMount(() => {
+		alert(0);
 		if (threadId) {
 			chatStore.initializeChat(threadId);
 		}
@@ -54,6 +55,7 @@
 	// 监听消息变化，自动滚动到底部
 	$effect(() => {
 		if (messages.length > 0) {
+			console.log('Chat initialized with threadId:',messages);
 			setTimeout(() => {
 				scrollToBottom();
 			}, 100);

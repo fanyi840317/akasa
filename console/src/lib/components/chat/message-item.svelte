@@ -79,7 +79,7 @@
 	}
 </script>
 
-{#if message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast' || startOfResearch}
+{#if message.role === 'user' || message.role === 'assistant' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast' || startOfResearch}
 	<div
 		class="mt-10"
 		in:fly={{ y: 24, duration: 200, delay: 0 }}
