@@ -94,11 +94,13 @@ class ChatStore {
 
 		try {
 			const stored = localStorage.getItem(this.getStorageKey(threadId));
+			// console.log(this.getStorageKey(threadId),stored);
 			if (stored) {
 				const chatData = JSON.parse(stored);
 				const messageIds = chatData.messageIds || [];
 				const messagesArray = chatData.messages || [];
 				const messages = new Map(messagesArray as [string, Message][]);
+				console.log("",chatData.messages);
 				return { messageIds, messages };
 			}
 		} catch (error) {
@@ -174,7 +176,10 @@ class ChatStore {
 			this.appendResearchActivity(newMessage);
 		}
 		
-		this.messageIds = [...this.messageIds, id];
+		// 只有当消息不存在时才添加到 messageIds
+		if (!this.messageIds.includes(id)) {
+			this.messageIds = [...this.messageIds, id];
+		}
 		this.messages.set(id, newMessage);
 		this.saveChatToStorage();
 		return newMessage;
@@ -217,6 +222,8 @@ class ChatStore {
 		this.error = null;
 		this.abortController = new AbortController();
 
+		let messageId: string | undefined;
+
 		try {
 			const stream = chatStream(
 				content,
@@ -237,65 +244,33 @@ class ChatStore {
 				}
 			);
 
-			let currentAssistantMessage: Message | null = null;
-
 			for await (const event of stream) {
-				switch (event.type) {
-					case 'message_chunk': {
-						// 查找或创建助手消息
-						if (!currentAssistantMessage) {
-							currentAssistantMessage = this.addMessage({
-								threadId: this.currentThreadId,
-								role: 'assistant',
-								content: '',
-								contentChunks: [],
-								isStreaming: true
-							});
-						}
-						
-						const mergedMessage = mergeMessage(currentAssistantMessage, event);
-						console.log('message_chunk:', event);
-						this.messages.set(currentAssistantMessage.id, mergedMessage);
-						currentAssistantMessage = mergedMessage;
-						break;
-					}
+				const { type, data } = event;
+				messageId = data.id;
+				let message: Message | undefined;
 
-					case 'tool_calls': {
-						// 查找或创建助手消息
-						if (!currentAssistantMessage) {
-							currentAssistantMessage = this.addMessage({
-								threadId: this.currentThreadId,
-								role: 'assistant',
-								content: '',
-								contentChunks: [],
-								isStreaming: true
-							});
-						}
-						
-						const mergedMessage = mergeMessage(currentAssistantMessage, event);
-						this.messages.set(currentAssistantMessage.id, mergedMessage);
-						currentAssistantMessage = mergedMessage;
-						break;
-					}
+				if (type === 'tool_call_result') {
+					message = this.findMessageByToolCallId(data.tool_call_id);
+				} else if (!this.existsMessage(messageId)) {
+					// 基于事件 ID 创建新消息
+					message = {
+						id: messageId,
+						threadId: data.thread_id,
+						agent: data.agent,
+						role: data.role,
+						content: '',
+						contentChunks: [],
+						reasoningContent: '',
+						reasoningContentChunks: [],
+						isStreaming: true
+					};
+					this.addMessage(message);
+				}
 
-					case 'tool_call_result': {
-						// 查找包含该工具调用的消息
-						const targetMessage = this.findMessageByToolCallId(event.data.tool_call_id);
-						if (targetMessage) {
-							const mergedMessage = mergeMessage(targetMessage, event);
-							this.messages.set(targetMessage.id, mergedMessage);
-						}
-						break;
-					}
-
-					case 'interrupt': {
-						if (currentAssistantMessage) {
-							const mergedMessage = mergeMessage(currentAssistantMessage, event);
-							this.messages.set(currentAssistantMessage.id, mergedMessage);
-							currentAssistantMessage = mergedMessage;
-						}
-						break;
-					}
+				message ??= this.getMessage(messageId);
+				if (message) {
+					const mergedMessage = mergeMessage(message, event);
+					this.messages.set(message.id, mergedMessage);
 				}
 			}
 		} catch (error: unknown) {
@@ -303,6 +278,15 @@ class ChatStore {
 				console.error('Chat error:', error);
 				this.error = (error as Error).message || 'An error occurred';
 			}
+			// 更新消息状态
+			if (messageId != null) {
+				const message = this.getMessage(messageId);
+				if (message?.isStreaming) {
+					message.isStreaming = false;
+					this.messages.set(messageId, message);
+				}
+			}
+			this.ongoingResearchId = null;
 		} finally {
 			this.isStreaming = false;
 			this.abortController = null;

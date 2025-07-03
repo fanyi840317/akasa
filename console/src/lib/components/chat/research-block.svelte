@@ -100,7 +100,7 @@
 </script>
 
 {#if researchId}
-	<Card class={cn('h-full flex flex-col', className)}>
+	<Card class={cn('h-full flex flex-col bg-base-200 rounded-2xl', className)}>
 		<!-- 头部 -->
 		<CardHeader class="flex-row items-center justify-between space-y-0 pb-4">
 			<div class="flex items-center gap-3">

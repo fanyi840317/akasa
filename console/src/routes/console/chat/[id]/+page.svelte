@@ -23,7 +23,7 @@
 		class={cn(
 			'flex h-full w-full transition-all duration-300 ease-out',
 			!doubleColumnMode && 'justify-center',
-			doubleColumnMode && 'justify-center gap-8 px-4'
+			doubleColumnMode && 'justify-center gap-2'
 		)}
 	>
 		<MessagesBlock
@@ -37,7 +37,7 @@
 		/>
 		{#if doubleColumnMode}
 			<ResearchBlock
-				class="h-full w-[min(max(calc((100vw-538px)*0.75),575px),960px)] transition-all duration-300 ease-out"
+				class="h-full w-full transition-all duration-300 ease-out"
 				researchId={openResearchId}
 			/>
 		{/if}

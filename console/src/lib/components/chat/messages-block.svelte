@@ -40,7 +40,6 @@
 
 	// 自动聚焦
 	onMount(() => {
-			console.log('Chat initialized with threadId:',messages);
 		if (autoFocus) {
 			// 延迟聚焦，确保组件已渲染
 			setTimeout(() => {
@@ -52,6 +51,7 @@
 	// 监听消息变化，自动滚动到底部
 	$effect(() => {
 		if (messages.length > 0) {
+			console.log('Chat messages:', messages);
 			setTimeout(() => {
 				scrollToBottom();
 			}, 100);
@@ -213,24 +213,23 @@
 	<!-- 消息列表 -->
 	<div class="w-full flex-1 overflow-hidden">
 		<ScrollArea class="h-full w-full">
-			<div bind:this={messagesContainer} class="min-h-full w-full flex items-start justify-center " >
-				<div class="max-w-4xl w-full space-y-4 p-4 flex flex-col">
-				<!-- 消息列表 -->
-				{#each messages as message (message.id)}
-					<MessageItem
-						{message}
-						waitForFeedback={false}
-						interruptMessage={null}
-						onCopy={handleCopy}
-						onRegenerate={handleRegenerate}
-						onLike={handleLike}
-						onDislike={handleDislike}
-						onOptionClick={handleOptionClick}
-						onSendMessage={handleSendMessage}
-						onToggleResearch={handleToggleResearch}
-					/>
-				{/each}
-
+			<div bind:this={messagesContainer} class="flex min-h-full w-full items-start justify-center">
+				<div class="flex w-full max-w-4xl flex-col space-y-4 p-4">
+					<!-- 消息列表 -->
+					{#each messages as message (message.id)}
+						<MessageItem
+							{message}
+							waitForFeedback={false}
+							interruptMessage={null}
+							onCopy={handleCopy}
+							onRegenerate={handleRegenerate}
+							onLike={handleLike}
+							onDislike={handleDislike}
+							onOptionClick={handleOptionClick}
+							onSendMessage={handleSendMessage}
+							onToggleResearch={handleToggleResearch}
+						/>
+					{/each}
 				</div>
 			</div>
 		</ScrollArea>
