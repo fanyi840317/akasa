@@ -6,6 +6,7 @@ import { sleep } from './utils';
 
 // import { PUBLIC_STATIC_WEBSITE_ONLY } from '$env/static/public';
 import type { ChatEvent } from '../types/message';
+import { PUBLIC_STATIC_WEBSITE_ONLY } from '$env/static/public';
 
 export async function* chatStream(
 	userMessage: string,
@@ -32,15 +33,12 @@ export async function* chatStream(
 	},
 	options: { abortSignal?: AbortSignal } = {}
 ) {
-	// console.log('chatStream_start', userMessage, params, options);
-	// if (
-	// 	// PUBLIC_STATIC_WEBSITE_ONLY ||
-	// 	location.search.includes('mock') ||
-	// 	location.search.includes('replay=')
-	// ) {
-	// 	yield* chatReplayStream(userMessage, params, options);
-	// 	return;
-	// }
+	if (
+		PUBLIC_STATIC_WEBSITE_ONLY ||
+		location.search.includes("mock") ||
+		location.search.includes("replay=")
+	) 
+		return yield* chatReplayStream(userMessage, params, options);
 	try {
 		const stream = fetchStream('http://localhost:8000/api/chat/stream', {
 			body: JSON.stringify({
