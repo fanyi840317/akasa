@@ -15,7 +15,7 @@
 	class={cn(
 		'group flex w-fit  flex-col rounded-2xl px-4 py-3 shadow-sm',
 		message.role === 'user' && 'max-w-[85%] bg-primary text-primary-foreground rounded-ee-none',
-		message.role === 'assistant' && 'w-full bg-card border rounded-es-none',
+		message.role === 'assistant' && 'w-full ',
 		className
 	)}
 >
