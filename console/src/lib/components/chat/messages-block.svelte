@@ -5,7 +5,6 @@
 	import ChatInput from './chat-input.svelte';
 	import ChatConfigComponent from './chat-config.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent } from '$lib/components/ui/card';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import {
 		Sheet,
@@ -16,14 +15,16 @@
 	} from '$lib/components/ui/sheet';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Settings, Trash2, AlertCircle } from '@lucide/svelte';
+	import { cn } from '$lib/utils';
 
 	// Props
 	interface Props {
+		class?: string;
 		threadId?: string;
 		autoFocus?: boolean;
 	}
 
-	let { threadId, autoFocus = true }: Props = $props();
+	let { class: className, threadId, autoFocus = true }: Props = $props();
 
 	// 组件引用
 	let chatInputRef: { focus: () => void } | undefined;
@@ -37,12 +38,8 @@
 	const input = $derived(chatStore.getInput());
 	const config = $derived(chatStore.getConfig());
 
-	// 初始化聊天
+	// 自动聚焦
 	onMount(() => {
-		if (threadId) {
-			chatStore.initializeChat(threadId);
-		}
-
 		if (autoFocus) {
 			// 延迟聚焦，确保组件已渲染
 			setTimeout(() => {
@@ -117,7 +114,7 @@
 
 	// 处理切换研究报告
 	function handleToggleResearch() {
-		// 可以添加研究报告切换逻辑
+		// 研究报告切换逻辑已在 research-card 中处理
 		console.log('Toggle research report');
 	}
 
@@ -152,7 +149,7 @@
 	}
 </script>
 
-<div class="bg-base-200 flex-between h-content flex-col rounded-2xl border">
+<div class={cn('bg-base-200 flex-between h-full flex-col rounded-2xl border', className)}>
 	<!-- 头部工具栏 -->
 	<div class="flex-between w-full border-b p-1">
 		<div class="flex items-center gap-2 px-4">
@@ -214,9 +211,9 @@
 
 	<!-- 消息列表 -->
 	<div class="w-full flex-1 overflow-hidden">
-		<ScrollArea class=" h-full w-full ">
-			<div class="h-full w-full flex flex-center">
-			<div bind:this={messagesContainer} class="min-h-full min-w-3xl max-w-4xl space-y-4 p-4">
+		<ScrollArea class="h-full w-full">
+			<div bind:this={messagesContainer} class="min-h-full flex-center" >
+				<div class="max-w-4xl space-y-4 p-4">
 				<!-- 消息列表 -->
 				{#each messages as message (message.id)}
 					<MessageItem
@@ -232,61 +229,54 @@
 						onToggleResearch={handleToggleResearch}
 					/>
 				{/each}
-			</div>
 
+				</div>
 			</div>
 		</ScrollArea>
 	</div>
 
 	<!-- 输入区域 -->
-	<div class="flex-center w-full">
-		<div class="p-4">
-			<ChatInput
-				class="w-3xl"
-				bind:this={chatInputRef}
-				value={input}
-				{isStreaming}
-				onSubmit={handleSubmit}
-				onStop={handleStop}
-				onInput={handleInput}
-				placeholder="Type your message..."
-			/>
-		</div>
+	<div class="w-full max-w-4xl p-4">
+		<ChatInput
+			bind:this={chatInputRef}
+			value={input}
+			{isStreaming}
+			onSubmit={handleSubmit}
+			onStop={handleStop}
+			onInput={handleInput}
+			placeholder="Type your message..."
+		/>
 	</div>
 </div>
 
 <style>
 	@reference "../../../app.css";
 
-	.chat-container {
-		@apply bg-background rounded-2xl border;
-	}
-
 	/* 自定义滚动条样式 */
-	.chat-container :global(.scroll-area-viewport) {
+	:global(.scroll-area-viewport) {
 		scrollbar-width: thin;
 		scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
 	}
 
-	.chat-container :global(.scroll-area-viewport:hover) {
+	:global(.scroll-area-viewport:hover) {
 		scrollbar-color: hsl(var(--muted-foreground) / 0.4) transparent;
 	}
 
 	/* WebKit 浏览器滚动条样式 */
-	.chat-container :global(.scroll-area-viewport::-webkit-scrollbar) {
+	:global(.scroll-area-viewport::-webkit-scrollbar) {
 		width: 6px;
 	}
 
-	.chat-container :global(.scroll-area-viewport::-webkit-scrollbar-track) {
+	:global(.scroll-area-viewport::-webkit-scrollbar-track) {
 		background: transparent;
 	}
 
-	.chat-container :global(.scroll-area-viewport::-webkit-scrollbar-thumb) {
+	:global(.scroll-area-viewport::-webkit-scrollbar-thumb) {
 		background-color: hsl(var(--muted-foreground) / 0.2);
 		border-radius: 3px;
 	}
 
-	.chat-container :global(.scroll-area-viewport:hover::-webkit-scrollbar-thumb) {
+	:global(.scroll-area-viewport:hover::-webkit-scrollbar-thumb) {
 		background-color: hsl(var(--muted-foreground) / 0.4);
 	}
 </style>

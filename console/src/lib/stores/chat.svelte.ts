@@ -1,7 +1,71 @@
-import type { Message, Resource } from '$lib/types/message';
 import type { MCPServerMetadata } from '$lib/types/mcp';
 import { chatStream } from '$lib/services/chat';
 import { browser } from '$app/environment';
+import type { Message, Resource, ChatEvent } from '$lib/types/message';
+
+// 消息合并函数，参考 deer-flow 实现
+function mergeMessage(message: Message, event: ChatEvent): Message {
+	const { type, data } = event;
+	
+	switch (type) {
+		case 'message_chunk': {
+			const updatedMessage = { ...message };
+			
+			if (data.content) {
+				updatedMessage.content = (message.content || '') + data.content;
+				updatedMessage.contentChunks = [...(message.contentChunks || []), data.content];
+			}
+			
+			if (data.reasoning_content) {
+				updatedMessage.reasoningContent = (message.reasoningContent || '') + data.reasoning_content;
+				updatedMessage.reasoningContentChunks = [...(message.reasoningContentChunks || []), data.reasoning_content];
+			}
+			
+			if (data.finish_reason) {
+				updatedMessage.finishReason = data.finish_reason;
+				updatedMessage.isStreaming = false;
+			}
+			
+			return updatedMessage;
+		}
+		
+		case 'tool_calls': {
+			return {
+				...message,
+				toolCalls: data.tool_calls.map(tc => ({
+					id: tc.id,
+					name: tc.name,
+					args: tc.args
+				}))
+			};
+		}
+		
+		case 'tool_call_result': {
+			const toolCalls = [...(message.toolCalls || [])];
+			const toolCallIndex = toolCalls.findIndex(tc => tc.id === data.tool_call_id);
+			if (toolCallIndex !== -1) {
+				toolCalls[toolCallIndex] = {
+					...toolCalls[toolCallIndex],
+					result: data.content
+				};
+			}
+			return {
+				...message,
+				toolCalls
+			};
+		}
+		
+		case 'interrupt': {
+			return {
+				...message,
+				options: data.options
+			};
+		}
+		
+		default:
+			return message;
+	}
+}
 
 // 聊天配置接口
 export interface ChatConfig {
@@ -52,13 +116,18 @@ const DEFAULT_CONFIG: ChatConfig = {
 // 聊天状态管理类
 class ChatStore {
 	// 响应式状态
-	messages = $state<Message[]>([]);
+	messageIds = $state<string[]>([]);
+	messages = $state<Map<string, Message>>(new Map());
 	currentThreadId = $state<string | null>(null);
 	isStreaming = $state(false);
 	error = $state<string | null>(null);
 	input = $state('');
 	config = $state<ChatConfig>(DEFAULT_CONFIG);
 	abortController = $state<AbortController | null>(null);
+	// 研究相关状态
+	researchIds = $state<string[]>([]);
+	ongoingResearchId = $state<string | null>(null);
+	openResearchId = $state<string | null>(null);
 
 	// 生成存储键名
 	private getStorageKey(threadId: string): string {
@@ -71,7 +140,8 @@ class ChatStore {
 
 		try {
 			const chatData = {
-				messages: this.messages,
+				messageIds: this.messageIds,
+				messages: Array.from(this.messages.entries()),
 				timestamp: Date.now()
 			};
 			localStorage.setItem(this.getStorageKey(this.currentThreadId), JSON.stringify(chatData));
@@ -81,45 +151,113 @@ class ChatStore {
 	}
 
 	// 从本地存储加载聊天记录
-	private loadChatFromStorage(threadId: string): Message[] {
-		if (!browser) return [];
+	private loadChatFromStorage(threadId: string): { messageIds: string[], messages: Map<string, Message> } {
+		if (!browser) return { messageIds: [], messages: new Map() };
 
 		try {
 			const stored = localStorage.getItem(this.getStorageKey(threadId));
 			if (stored) {
 				const chatData = JSON.parse(stored);
-				return chatData.messages || [];
+				const messageIds = chatData.messageIds || [];
+				const messagesArray = chatData.messages || [];
+				const messages = new Map(messagesArray as [string, Message][]);
+				return { messageIds, messages };
 			}
 		} catch (error) {
 			console.error('Failed to load chat from storage:', error);
 		}
-		return [];
+		return { messageIds: [], messages: new Map() };
+	}
+	
+	// 研究相关辅助方法
+	private appendResearch(messageId: string) {
+		this.researchIds = [...this.researchIds, messageId];
+		this.ongoingResearchId = messageId;
+	}
+	
+	private appendResearchActivity(message: Message) {
+		// 这里可以添加研究活动的处理逻辑
+		console.log('Research activity:', message);
+	}
+	
+	private openResearch(messageId: string) {
+		this.openResearchId = messageId;
+	}
+	
+	private closeResearch() {
+		this.openResearchId = null;
+	}
+	
+	// 查找消息的辅助方法
+	private existsMessage(messageId: string): boolean {
+		return this.messages.has(messageId);
+	}
+	
+	private getMessage(messageId: string): Message | undefined {
+		return this.messages.get(messageId);
+	}
+	
+	private findMessageByToolCallId(toolCallId: string): Message | undefined {
+		for (const message of this.messages.values()) {
+			if (message.toolCalls?.some(tc => tc.id === toolCallId)) {
+				return message;
+			}
+		}
+		return undefined;
 	}
 
 	// 初始化聊天
 	initializeChat(threadId: string) {
 		this.currentThreadId = threadId;
-		this.messages = this.loadChatFromStorage(threadId);
+		const { messageIds, messages } = this.loadChatFromStorage(threadId);
+		this.messageIds = messageIds;
+		this.messages = messages;
 		this.error = null;
 	}
 
 	// 添加消息
-	addMessage(message: Omit<Message, 'id'>) {
+	addMessage(message: Omit<Message, 'id'> & { id?: string }) {
+		const id = message.id ||  crypto.randomUUID();
 		const newMessage: Message = {
-			id: crypto.randomUUID(),
+			id,
 			...message
 		};
-		this.messages = [...this.messages, newMessage];
+		
+		// 处理研究相关消息
+		if (
+			newMessage.agent === 'coder' ||
+			newMessage.agent === 'reporter' ||
+			newMessage.agent === 'researcher'
+		) {
+			if (!this.ongoingResearchId) {
+				this.appendResearch(id);
+				this.openResearch(id);
+			}
+			this.appendResearchActivity(newMessage);
+		}
+		
+		this.messageIds = [...this.messageIds, id];
+		this.messages.set(id, newMessage);
 		this.saveChatToStorage();
 		return newMessage;
 	}
 
 	// 更新消息
 	updateMessage(messageId: string, updates: Partial<Message>) {
-		const index = this.messages.findIndex((m) => m.id === messageId);
-		if (index !== -1) {
-			this.messages[index] = { ...this.messages[index], ...updates };
-			this.messages = [...this.messages]; // 触发响应式更新
+		const message = this.messages.get(messageId);
+		if (message) {
+			const updatedMessage = { ...message, ...updates };
+			
+			// 处理研究完成状态
+			if (
+				this.ongoingResearchId &&
+				updatedMessage.agent === 'reporter' &&
+				!updatedMessage.isStreaming
+			) {
+				this.ongoingResearchId = null;
+			}
+			
+			this.messages.set(messageId, updatedMessage);
 			this.saveChatToStorage();
 		}
 	}
@@ -135,15 +273,6 @@ class ChatStore {
 			content,
 			contentChunks: [content],
 			resources
-		});
-
-		// 创建助手消息占位符
-		const assistantMessage = this.addMessage({
-			threadId: this.currentThreadId,
-			role: 'assistant',
-			content: '',
-			contentChunks: [],
-			isStreaming: true
 		});
 
 		this.isStreaming = true;
@@ -170,81 +299,75 @@ class ChatStore {
 				}
 			);
 
+			let currentAssistantMessage: Message | null = null;
+
 			for await (const event of stream) {
 				switch (event.type) {
 					case 'message_chunk': {
-						const { content: chunkContent, reasoning_content } = event.data;
-
-						// 更新助手消息内容
-						if (chunkContent) {
-							this.updateMessage(assistantMessage.id, {
-								content: assistantMessage.content + chunkContent,
-								contentChunks: [...assistantMessage.contentChunks, chunkContent]
+						// 查找或创建助手消息
+						if (!currentAssistantMessage) {
+							currentAssistantMessage = this.addMessage({
+								threadId: this.currentThreadId,
+								role: 'assistant',
+								content: '',
+								contentChunks: [],
+								isStreaming: true
 							});
 						}
-
-						if (reasoning_content) {
-							this.updateMessage(assistantMessage.id, {
-								reasoningContent: (assistantMessage.reasoningContent || '') + reasoning_content,
-								reasoningContentChunks: [
-									...(assistantMessage.reasoningContentChunks || []),
-									reasoning_content
-								]
-							});
-						}
-
-						// 检查是否完成
-						if (event.data.finish_reason) {
-							this.updateMessage(assistantMessage.id, {
-								isStreaming: false,
-								finishReason: event.data.finish_reason
-							});
-						}
+						
+						const mergedMessage = mergeMessage(currentAssistantMessage, event);
+						this.messages.set(currentAssistantMessage.id, mergedMessage);
+						currentAssistantMessage = mergedMessage;
 						break;
 					}
 
-					case 'tool_calls':
-						// 处理工具调用
-						this.updateMessage(assistantMessage.id, {
-							toolCalls: event.data.tool_calls.map((tc) => ({
-								id: tc.id,
-								name: tc.name,
-								args: tc.args
-							}))
-						});
+					case 'tool_calls': {
+						// 查找或创建助手消息
+						if (!currentAssistantMessage) {
+							currentAssistantMessage = this.addMessage({
+								threadId: this.currentThreadId,
+								role: 'assistant',
+								content: '',
+								contentChunks: [],
+								isStreaming: true
+							});
+						}
+						
+						const mergedMessage = mergeMessage(currentAssistantMessage, event);
+						this.messages.set(currentAssistantMessage.id, mergedMessage);
+						currentAssistantMessage = mergedMessage;
 						break;
+					}
 
 					case 'tool_call_result': {
-						// 处理工具调用结果
-						const toolCalls = assistantMessage.toolCalls || [];
-						const toolCallIndex = toolCalls.findIndex((tc) => tc.id === event.data.tool_call_id);
-						if (toolCallIndex !== -1) {
-							toolCalls[toolCallIndex].result = event.data.content;
-							this.updateMessage(assistantMessage.id, { toolCalls: [...toolCalls] });
+						// 查找包含该工具调用的消息
+						const targetMessage = this.findMessageByToolCallId(event.data.tool_call_id);
+						if (targetMessage) {
+							const mergedMessage = mergeMessage(targetMessage, event);
+							this.messages.set(targetMessage.id, mergedMessage);
 						}
 						break;
 					}
 
-					case 'interrupt':
-						// 处理中断事件
-						this.updateMessage(assistantMessage.id, {
-							options: event.data.options
-						});
+					case 'interrupt': {
+						if (currentAssistantMessage) {
+							const mergedMessage = mergeMessage(currentAssistantMessage, event);
+							this.messages.set(currentAssistantMessage.id, mergedMessage);
+							currentAssistantMessage = mergedMessage;
+						}
 						break;
+					}
 				}
 			}
 		} catch (error: unknown) {
 			if ((error as Error).name !== 'AbortError') {
 				console.error('Chat error:', error);
 				this.error = (error as Error).message || 'An error occurred';
-				this.updateMessage(assistantMessage.id, {
-					content: 'Sorry, an error occurred while processing your request.',
-					isStreaming: false
-				});
 			}
 		} finally {
 			this.isStreaming = false;
 			this.abortController = null;
+			this.saveChatToStorage();
 		}
 	}
 
@@ -259,15 +382,27 @@ class ChatStore {
 
 	// 重新生成消息
 	async regenerateMessage(messageId: string) {
-		const messageIndex = this.messages.findIndex((m) => m.id === messageId);
-		if (messageIndex > 0) {
-			const userMessage = this.messages[messageIndex - 1];
-			if (userMessage.role === 'user') {
-				// 删除助手消息
-				this.messages = this.messages.slice(0, messageIndex);
-				// 重新发送用户消息
-				await this.sendMessage(userMessage.content, userMessage.resources);
-			}
+		const messageIndex = this.messageIds.findIndex((id) => id === messageId);
+		if (messageIndex === -1) return;
+
+		// 移除该消息及其后的所有消息
+		const messageIdsToKeep = this.messageIds.slice(0, messageIndex);
+		const messageIdsToRemove = this.messageIds.slice(messageIndex);
+		
+		// 从 Map 中删除被移除的消息
+		messageIdsToRemove.forEach(id => this.messages.delete(id));
+		
+		this.messageIds = messageIdsToKeep;
+
+		// 找到最后一条用户消息
+		const lastUserMessage = messageIdsToKeep
+			.slice()
+			.reverse()
+			.map(id => this.messages.get(id))
+			.find((m) => m && m.role === 'user');
+
+		if (lastUserMessage) {
+			await this.sendMessage(lastUserMessage.content);
 		}
 	}
 
@@ -280,7 +415,11 @@ class ChatStore {
 
 	// 清空聊天
 	clearChat() {
-		this.messages = [];
+		this.messageIds = [];
+		this.messages = new Map();
+		this.researchIds = [];
+		this.ongoingResearchId = null;
+		this.openResearchId = null;
 		this.error = null;
 		this.saveChatToStorage();
 	}
@@ -323,7 +462,7 @@ class ChatStore {
 
 	// 获取消息
 	getMessages(): Message[] {
-		return this.messages;
+		return this.messageIds.map(id => this.messages.get(id)).filter(Boolean) as Message[];
 	}
 
 	// 获取流式状态
@@ -349,6 +488,28 @@ class ChatStore {
 	// 清除错误
 	clearError() {
 		this.error = null;
+	}
+
+	// 获取研究 ID 列表
+	getResearchIds(): string[] {
+		return this.researchIds;
+	}
+
+	// 切换研究报告显示状态
+	toggleResearchReport(researchId: string) {
+		if (this.openResearchId === researchId) {
+			this.closeResearch();
+		} else {
+			this.openResearch(researchId);
+		}
+	}
+
+	// 获取研究报告状态
+	getResearchReport(researchId: string) {
+		return {
+			isOpen: this.openResearchId === researchId,
+			isGenerating: this.ongoingResearchId === researchId
+		};
 	}
 }
 

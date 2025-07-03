@@ -1,29 +1,46 @@
 <script lang="ts">
 	import type { Message } from '$lib/types/message';
+	import { cn } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Copy, RotateCcw, ThumbsUp, ThumbsDown, User, Bot } from '@lucide/svelte';
+	import { Copy, RotateCcw, ThumbsUp, ThumbsDown } from '@lucide/svelte';
 	import { marked } from 'marked';
+	import { fly } from 'svelte/transition';
+	import MessageBubble from './message-bubble.svelte';
+	import PlanCard from './plan-card.svelte';
+	import ResearchCard from './research-card.svelte';
+	import { chatStore } from '$lib/stores/chat.svelte';
 
 	// Props
 	interface Props {
 		message: Message;
+		waitForFeedback?: boolean;
+		interruptMessage?: Message | null;
 		onCopy?: (messageId: string) => void;
 		onRegenerate?: (messageId: string) => void;
 		onLike?: (messageId: string) => void;
 		onDislike?: (messageId: string) => void;
 		onOptionClick?: (option: { text: string; value: string }) => void;
+		onSendMessage?: (message: string, options?: { interruptFeedback?: string }) => void;
+		onToggleResearch?: () => void;
 	}
 
 	let {
 		message,
+		waitForFeedback = false,
+		interruptMessage,
 		onCopy,
 		onRegenerate,
 		onLike,
 		onDislike,
-		onOptionClick
+		onOptionClick,
+		onSendMessage,
+		onToggleResearch
 	}: Props = $props();
+
+	// 检查是否是研究开始
+	const researchIds = $derived(() => chatStore.getResearchIds());
+	const startOfResearch = $derived(() => researchIds().includes(message.id));
 
 	// 渲染 Markdown 内容
 	const renderedContent = $derived(() => {
@@ -62,134 +79,135 @@
 	}
 </script>
 
-<div class="message-item mb-4">
-	<Card class="{message.role === 'user' ? 'ml-8 bg-primary/5' : 'mr-8'}">
-		<CardContent class="p-4">
-			<!-- 消息头部 -->
-			<div class="flex items-center gap-2 mb-2">
-				{#if message.role === 'user'}
-					<User class="w-5 h-5 text-primary" />
-					<span class="font-medium text-primary">You</span>
-				{:else}
-					<Bot class="w-5 h-5 text-muted-foreground" />
-					<span class="font-medium text-muted-foreground">Assistant</span>
-				{/if}
-				
-				{#if message.isStreaming}
-					<Badge variant="secondary" class="text-xs">
-						<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1"></div>
-						Generating...
-					</Badge>
-				{/if}
+{#if message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast' || startOfResearch}
+	<div
+		class="mt-10"
+		in:fly={{ y: 24, duration: 200, delay: 0 }}
+	>
+		{#if message.agent === 'planner'}
+			<div class="w-full px-4">
+				<PlanCard
+				{message}
+				{waitForFeedback}
+				{interruptMessage}
+				onFeedback={(feedback) => onOptionClick?.(feedback.option)}
+				{onSendMessage}
+			/>
 			</div>
-
-			<!-- 消息内容 -->
-			{#if message.content}
-				<div class="prose prose-sm max-w-none dark:prose-invert">
-					{@html renderedContent()}
-				</div>
-			{/if}
-
-			<!-- 推理内容 -->
-			{#if message.reasoningContent}
-				<details class="mt-3">
-					<summary class="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-						Reasoning Process
-					</summary>
-					<div class="mt-2 p-3 bg-muted/50 rounded-md text-sm">
-						<div class="prose prose-sm max-w-none dark:prose-invert">
-							{@html marked(message.reasoningContent, { breaks: true })}
-						</div>
-					</div>
-				</details>
-			{/if}
-
-			<!-- 工具调用 -->
-			{#if message.toolCalls && message.toolCalls.length > 0}
-				<div class="mt-3 space-y-2">
-					{#each message.toolCalls as toolCall (toolCall.id)}
-						<div class="border rounded-md p-3 bg-muted/30">
-							<div class="flex items-center gap-2 mb-2">
-								<Badge variant="outline" class="text-xs">
-									{toolCall.name}
-								</Badge>
+		{:else if startOfResearch()}
+			<div class="w-full px-4">
+				<ResearchCard researchId={message.id} {onToggleResearch} />
+			</div>
+		{:else if message.content}
+			<div
+				class={cn(
+					'flex w-full px-4',
+					message.role === 'user' && 'justify-end'
+				)}
+			>
+				<MessageBubble {message}>
+					{#snippet children()}
+						<div class="flex w-full flex-col text-wrap break-words">
+							<div
+								class={cn(
+									'prose prose-sm max-w-none dark:prose-invert',
+									message.role === 'user' &&
+										'prose-invert not-dark:text-primary-foreground dark:text-inherit'
+								)}
+							>
+								{@html renderedContent()}
 							</div>
-							
-							{#if toolCall.args}
-								<pre class="text-xs bg-background p-2 rounded border overflow-x-auto">{JSON.stringify(toolCall.args, null, 2)}</pre>
+
+							<!-- 工具调用 -->
+							{#if message.toolCalls && message.toolCalls.length > 0}
+								<div class="mt-3 space-y-2">
+									{#each message.toolCalls as toolCall (toolCall.id)}
+										<div class="border rounded-md p-3 bg-muted/30">
+											<div class="flex items-center gap-2 mb-2">
+												<Badge variant="outline" class="text-xs">
+													{toolCall.name}
+												</Badge>
+											</div>
+											
+											{#if toolCall.args}
+												<pre class="text-xs bg-background p-2 rounded border overflow-x-auto">{JSON.stringify(toolCall.args, null, 2)}</pre>
+											{/if}
+											
+											{#if toolCall.result}
+												<div class="mt-2 text-sm">
+													<strong>Result:</strong>
+													<div class="mt-1 p-2 bg-background rounded border">
+														{toolCall.result}
+													</div>
+												</div>
+											{/if}
+										</div>
+									{/each}
+								</div>
 							{/if}
-							
-							{#if toolCall.result}
-								<div class="mt-2 text-sm">
-									<strong>Result:</strong>
-									<div class="mt-1 p-2 bg-background rounded border">
-										{toolCall.result}
-									</div>
+
+							<!-- 选项按钮（用于中断反馈） -->
+							{#if message.options && message.options.length > 0}
+								<div class="mt-3 flex flex-wrap gap-2">
+									{#each message.options as option (option.value)}
+										<Button 
+											variant="outline" 
+											size="sm"
+											onclick={() => handleOptionClick(option)}
+										>
+											{option.text}
+										</Button>
+									{/each}
+								</div>
+							{/if}
+
+							<!-- 操作按钮 -->
+							{#if message.role === 'assistant' && !message.isStreaming}
+								<div class="flex items-center gap-1 mt-3 pt-2 border-t border-border/50">
+									<Button 
+										variant="ghost" 
+										size="sm"
+										onclick={handleCopy}
+										title="Copy message"
+									>
+										<Copy class="w-4 h-4" />
+									</Button>
+									
+									<Button 
+										variant="ghost" 
+										size="sm"
+										onclick={handleRegenerate}
+										title="Regenerate response"
+									>
+										<RotateCcw class="w-4 h-4" />
+									</Button>
+									
+									<Button 
+										variant="ghost" 
+										size="sm"
+										onclick={handleLike}
+										title="Like this response"
+									>
+										<ThumbsUp class="w-4 h-4" />
+									</Button>
+									
+									<Button 
+										variant="ghost" 
+										size="sm"
+										onclick={handleDislike}
+										title="Dislike this response"
+									>
+										<ThumbsDown class="w-4 h-4" />
+									</Button>
 								</div>
 							{/if}
 						</div>
-					{/each}
-				</div>
-			{/if}
-
-			<!-- 选项按钮（用于中断反馈） -->
-			{#if message.options && message.options.length > 0}
-				<div class="mt-3 flex flex-wrap gap-2">
-					{#each message.options as option (option.value)}
-						<Button 
-							variant="outline" 
-							size="sm"
-							onclick={() => handleOptionClick(option)}
-						>
-							{option.text}
-						</Button>
-					{/each}
-				</div>
-			{/if}
-
-			<!-- 操作按钮 -->
-			{#if message.role === 'assistant' && !message.isStreaming}
-				<div class="flex items-center gap-1 mt-3 pt-2 border-t">
-					<Button 
-						variant="ghost" 
-						size="sm"
-						onclick={handleCopy}
-						title="Copy message"
-					>
-						<Copy class="w-4 h-4" />
-					</Button>
-					
-					<Button 
-						variant="ghost" 
-						size="sm"
-						onclick={handleRegenerate}
-						title="Regenerate response"
-					>
-						<RotateCcw class="w-4 h-4" />
-					</Button>
-					
-					<Button 
-						variant="ghost" 
-						size="sm"
-						onclick={handleLike}
-						title="Like this response"
-					>
-						<ThumbsUp class="w-4 h-4" />
-					</Button>
-					
-					<Button 
-						variant="ghost" 
-						size="sm"
-						onclick={handleDislike}
-						title="Dislike this response"
-					>
-						<ThumbsDown class="w-4 h-4" />
-					</Button>
-				</div>
-			{/if}
-		</CardContent>
-	</Card>
-</div>
+					{/snippet}
+				</MessageBubble>
+			</div>
+		{/if}
+	</div>
+{/if}
 
 <style>
 	@reference "../../../app.css";
