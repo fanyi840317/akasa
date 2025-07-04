@@ -52,7 +52,12 @@
 	$effect(() => {
 		if (messages.length > 0) {
 			messages.forEach((message) => {
-				if (message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast') {
+				console.log(message.agent);
+				// if (message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast') {
+				// 	// 滚动到消息底部
+				// 	console.log(message);
+				// }
+				if(message.agent === 'researcher') {
 					// 滚动到消息底部
 					console.log(message);
 				}

@@ -18,28 +18,27 @@
 	});
 </script>
 
-<div class="flex-1 w-full h-content overflow-hidden">
-	<div
+<div
+	class={cn(
+		'flex h-full w-full justify-center px-4 pt-12 pb-4',
+		doubleColumnMode && 'gap-8'
+	)}
+>
+	<MessagesBlock
 		class={cn(
-			'flex h-full w-full transition-all duration-300 ease-out',
-			!doubleColumnMode && 'justify-center',
-			doubleColumnMode && 'justify-center gap-2'
+			'shrink-0 transition-all duration-300 ease-out',
+			!doubleColumnMode && 'w-[768px]',
+			doubleColumnMode && 'w-[538px]'
 		)}
-	>
-		<MessagesBlock
-			class={cn(
-				'shrink-0 transition-all duration-300 ease-out',
-				!doubleColumnMode && 'h-full w-full',
-				doubleColumnMode && 'h-full w-[538px]'
-			)}
-			{threadId}
-			autoFocus={false}
-		/>
-		{#if doubleColumnMode}
-			<ResearchBlock
-				class="h-full w-full transition-all duration-300 ease-out"
-				researchId={openResearchId}
-			/>
-		{/if}
-	</div>
+		{threadId}
+		autoFocus={false}
+	/>
+	<ResearchBlock
+		class={cn(
+			'w-[min(max(calc((100vw-538px)*0.75),575px),960px)] pb-4 transition-all duration-300 ease-out',
+			!doubleColumnMode && 'scale-0',
+			doubleColumnMode && ''
+		)}
+		researchId={openResearchId}
+	/>
 </div>

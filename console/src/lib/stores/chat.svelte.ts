@@ -64,6 +64,9 @@ class ChatStore {
 	abortController = $state<AbortController | null>(null);
 	// 研究相关状态
 	researchIds = $state<string[]>([]);
+	researchPlanIds = $state<Map<string, string>>(new Map());
+	researchReportIds = $state<Map<string, string>>(new Map());
+	researchActivityIds = $state<Map<string, string[]>>(new Map());
 	ongoingResearchId = $state<string | null>(null);
 	openResearchId = $state<string | null>(null);
 
@@ -109,14 +112,40 @@ class ChatStore {
 	}
 	
 	// 研究相关辅助方法
-	private appendResearch(messageId: string) {
-		this.researchIds = [...this.researchIds, messageId];
-		this.ongoingResearchId = messageId;
+	private appendResearch(researchId: string) {
+		// 查找最近的 planner 消息
+		let planMessage: Message | undefined;
+		const reversedMessageIds = [...this.messageIds].reverse();
+		for (const messageId of reversedMessageIds) {
+			const message = this.getMessage(messageId);
+			if (message?.agent === 'planner') {
+				planMessage = message;
+				break;
+			}
+		}
+		
+		const messageIds = [researchId];
+		if (planMessage) {
+			messageIds.unshift(planMessage.id);
+			this.researchPlanIds.set(researchId, planMessage.id);
+		}
+		
+		this.researchIds = [...this.researchIds, researchId];
+		this.researchActivityIds.set(researchId, messageIds);
+		this.ongoingResearchId = researchId;
 	}
 	
 	private appendResearchActivity(message: Message) {
-		// 这里可以添加研究活动的处理逻辑
-		console.log('Research activity:', message);
+		const researchId = this.ongoingResearchId;
+		if (researchId) {
+			const current = this.researchActivityIds.get(researchId) || [];
+			if (!current.includes(message.id)) {
+				this.researchActivityIds.set(researchId, [...current, message.id]);
+			}
+			if (message.agent === 'reporter') {
+				this.researchReportIds.set(researchId, message.id);
+			}
+		}
 	}
 	
 	private openResearch(messageId: string) {
@@ -340,6 +369,9 @@ class ChatStore {
 		this.messageIds = [];
 		this.messages = new Map();
 		this.researchIds = [];
+		this.researchPlanIds = new Map();
+		this.researchReportIds = new Map();
+		this.researchActivityIds = new Map();
 		this.ongoingResearchId = null;
 		this.openResearchId = null;
 		this.error = null;
@@ -432,6 +464,31 @@ class ChatStore {
 			isOpen: this.openResearchId === researchId,
 			isGenerating: this.ongoingResearchId === researchId
 		};
+	}
+	
+	// 获取研究活动消息 IDs
+	getResearchActivityIds(researchId: string): string[] {
+		return this.researchActivityIds.get(researchId) || [];
+	}
+	
+	// 获取研究计划消息 ID
+	getResearchPlanId(researchId: string): string | undefined {
+		return this.researchPlanIds.get(researchId);
+	}
+	
+	// 获取研究报告消息 ID
+	getResearchReportId(researchId: string): string | undefined {
+		return this.researchReportIds.get(researchId);
+	}
+	
+	// 检查是否有报告
+	hasResearchReport(researchId: string): boolean {
+		return this.researchReportIds.has(researchId);
+	}
+	
+	// 获取正在进行的研究 ID
+	getOngoingResearchId(): string | null {
+		return this.ongoingResearchId;
 	}
 }
 

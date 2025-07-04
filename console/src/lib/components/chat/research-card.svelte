@@ -15,18 +15,11 @@
 	let { class: className, researchId, onToggleResearch }: Props = $props();
 
 	// 获取研究相关状态
-	const reportId = $derived.by(() => {
-		// 查找与研究ID相关的报告消息
-		const messages = chatStore.getMessages();
-		return messages.find(msg => 
-			msg.agent === 'reporter' && 
-			msg.content?.includes(researchId)
-		)?.id;
-	});
-	const hasReport = $derived(reportId !== undefined);
+	const reportId = $derived(chatStore.getResearchReportId(researchId));
+	const hasReport = $derived(chatStore.hasResearchReport(researchId));
 	const reportGenerating = $derived.by(() => {
 		if (!hasReport || !reportId) return false;
-		const reportMessage = chatStore.messages.get(reportId);
+		const reportMessage = chatStore.getMessage(reportId);
 		return reportMessage?.isStreaming ?? false;
 	});
 	const openResearchId = $derived( chatStore.openResearchId);
@@ -41,18 +34,40 @@
 
 	// 研究标题
 	const title = $derived(() => {
-		// 查找研究消息
-		const messages = chatStore.getMessages();
-		const msg = messages.find(m => 
-			m.id === researchId || 
-			(m.agent === 'researcher' && m.content?.includes(researchId))
-		);
-		if (msg) {
+		// 优先从计划消息获取标题
+		const planId = chatStore.getResearchPlanId(researchId);
+		if (planId) {
+			const planMessage = chatStore.getMessage(planId);
+			if (planMessage?.content) {
+				try {
+					const parsed = JSON.parse(planMessage.content);
+					if (parsed.title) {
+						return parsed.title;
+					}
+				} catch {
+					// 忽略JSON解析错误
+				}
+			}
+		}
+		
+		// 从研究消息获取标题
+		const researchMessage = chatStore.getMessage(researchId);
+		if (researchMessage?.content) {
 			try {
-				const parsed = JSON.parse(msg.content ?? '{}');
-				return parsed.title || 'Deep Research';
+				// 优先从 **Problem Statement**: 后提取标题
+				const problemMatch = researchMessage.content.match(/\*\*Problem Statement\*\*:\s*(.+?)(?:\n|$)/);
+				if (problemMatch) {
+					return problemMatch[1].trim();
+				}
+				// 向下兼容：尝试解析JSON格式
+				try {
+					const parsed = JSON.parse(researchMessage.content);
+					return parsed.title || 'Deep Research';
+				} catch {
+					// 忽略JSON解析错误
+				}
 			} catch {
-				return 'Deep Research';
+				// 忽略解析错误
 			}
 		}
 		return 'Deep Research';

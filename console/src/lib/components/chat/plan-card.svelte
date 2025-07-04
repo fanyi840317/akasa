@@ -31,7 +31,11 @@
 	// 解析计划内容
 	const plan = $derived.by(() => {
 		try {
-			return JSON.parse(message?.content ?? '{}');
+			// 如果 content 是 JSON 代码块格式，提取其中的 JSON
+			const content = message?.content ?? '{}';
+			const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+			const jsonStr = jsonMatch ? jsonMatch[1] : content;
+			return JSON.parse(jsonStr);
 		} catch {
 			return {};
 		}
@@ -72,7 +76,7 @@
 
 	{#if shouldShowPlan}
 		<div in:fly={{ y: 20, duration: 300 }}>
-			<Card class="w-full">
+			<Card class="w-full rounded-2xl">
 				<CardHeader>
 					<CardTitle>
 						<div class="prose prose-sm dark:prose-invert max-w-none">
@@ -91,7 +95,13 @@
 						</div>
 					{/if}
 
-					{#if plan.steps && Array.isArray(plan.steps)}
+					{#if plan.has_enough_context === true}
+						<div class="prose prose-sm dark:prose-invert max-w-none">
+							<p class="text-green-600 dark:text-green-400 font-medium">
+								✅ 已获得足够的上下文信息，无需进一步研究。
+							</p>
+						</div>
+					{:else if plan.steps && Array.isArray(plan.steps) && plan.steps.length > 0}
 						<ul class="border-border my-2 flex list-decimal flex-col gap-4 border-l-2 pl-8">
 							{#each plan.steps as step, i (i)}
 								<li>
@@ -112,10 +122,16 @@
 								</li>
 							{/each}
 						</ul>
+					{:else if plan.steps && Array.isArray(plan.steps) && plan.steps.length === 0}
+						<div class="prose prose-sm dark:prose-invert max-w-none">
+							<p class="text-muted-foreground italic">
+								暂无需要执行的研究步骤。
+							</p>
+						</div>
 					{/if}
 				</CardContent>
 				<CardFooter class="flex justify-end">
-					{#if !message?.isStreaming && interruptMessage?.options?.length}
+					{#if !message?.isStreaming && interruptMessage?.options?.length && plan.has_enough_context !== true}
 						<div class="flex gap-2" in:fly={{ y: 12, duration: 300, delay: 300 }}>
 							{#each interruptMessage.options as option (option.value)}
 								<Button
