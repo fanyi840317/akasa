@@ -10,6 +10,7 @@
 	import PlanCard from './plan-card.svelte';
 	import ResearchCard from './research-card.svelte';
 	import { chatStore } from '$lib/stores/chat.svelte';
+	import { onMount } from 'svelte';
 
 	// Props
 	interface Props {
@@ -77,9 +78,12 @@
 	function handleOptionClick(option: { text: string; value: string }) {
 		onOptionClick?.(option);
 	}
+	onMount(() => {
+		
+	})
 </script>
 
-{#if message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast' || startOfResearch}
+{#if message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast'}
 	<div
 		class="mt-10"
 		in:fly={{ y: 24, duration: 200, delay: 0 }}

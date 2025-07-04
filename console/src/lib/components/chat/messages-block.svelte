@@ -51,7 +51,14 @@
 	// 监听消息变化，自动滚动到底部
 	$effect(() => {
 		if (messages.length > 0) {
-			console.log('Chat messages:', messages);
+			messages.forEach((message) => {
+				if (message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast') {
+					// 滚动到消息底部
+					console.log(message);
+				}
+			});
+			// 延迟滚动，确保消息渲染完成
+
 			setTimeout(() => {
 				scrollToBottom();
 			}, 100);

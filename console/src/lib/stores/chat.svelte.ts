@@ -100,7 +100,6 @@ class ChatStore {
 				const messageIds = chatData.messageIds || [];
 				const messagesArray = chatData.messages || [];
 				const messages = new Map(messagesArray as [string, Message][]);
-				console.log("",chatData.messages);
 				return { messageIds, messages };
 			}
 		} catch (error) {
