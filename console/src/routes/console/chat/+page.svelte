@@ -74,10 +74,10 @@
 		<!-- 输入区域 -->
 		<div class="w-full max-w-2xl mx-auto">
 			<ChatInput
-				placeholder="Type your message to start a new conversation..."
-				onSubmit={handleSubmit}
-				autoFocus={true}
-			/>
+			placeholder="Type your message to start a new conversation..."
+			onSend={handleSubmit}
+			autoFocus={true}
+		/>
 		</div>
 
 		<!-- 建议卡片 -->

@@ -419,6 +419,11 @@ class ChatStore {
 		return this.messageIds.map(id => this.messages.get(id)).filter(Boolean) as Message[];
 	}
 
+	// 获取消息 ID 列表
+	getMessageIds(): string[] {
+		return this.messageIds;
+	}
+
 	// 获取流式状态
 	getIsStreaming(): boolean {
 		return this.isStreaming;
@@ -489,6 +494,36 @@ class ChatStore {
 	// 获取正在进行的研究 ID
 	getOngoingResearchId(): string | null {
 		return this.ongoingResearchId;
+	}
+
+	// 获取当前打开的研究 ID
+	getOpenResearchId(): string | null {
+		return this.openResearchId;
+	}
+
+	// 获取最后一个等待反馈的消息 ID
+	getLastFeedbackMessageId(): string | null {
+		// 从最新的消息开始查找，找到第一个有 options 的消息
+		for (let i = this.messageIds.length - 1; i >= 0; i--) {
+			const messageId = this.messageIds[i];
+			const message = this.messages.get(messageId);
+			if (message && message.options && message.options.length > 0) {
+				return messageId;
+			}
+		}
+		return null;
+	}
+
+	getLastInterruptMessage(): Message | null {
+		// 从最新的消息开始查找，找到第一个有 interruptFeedback 的消息
+		for (let i = this.messageIds.length - 1; i >= 0; i--) {
+			const messageId = this.messageIds[i];
+			const message = this.messages.get(messageId);
+			if (message && message.interruptFeedback) {
+				return message;
+			}
+		}
+		return null;
 	}
 }
 

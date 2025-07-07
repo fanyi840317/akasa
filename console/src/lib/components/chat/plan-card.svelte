@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
-	import type { Message } from '$lib/types/message';
+	import type { Message,Option } from '$lib/types/message';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import RainbowText from '$lib/components/ui/rainbow-text.svelte';
@@ -12,7 +12,7 @@
 		class?: string;
 		message?: Message;
 		interruptMessage?: Message | null;
-		onFeedback?: (feedback: { option: { text: string; value: string } }) => void;
+		onFeedback?: (feedback: Option) => void;
 		waitForFeedback?: boolean;
 		onSendMessage?: (message: string, options?: { interruptFeedback?: string }) => void;
 	}
@@ -64,7 +64,7 @@
 		if (option.value === 'accepted') {
 			handleAccept();
 		} else {
-			onFeedback?.({ option });
+			onFeedback?.( option );
 		}
 	}
 </script>

@@ -2,31 +2,36 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Send, Square, Loader2 } from '@lucide/svelte';
+	import { Send, Square, Loader2, X } from '@lucide/svelte';
+	import type { Resource,Option } from '$lib/types/message';
 
 	// Props
 	interface Props {
 		value?: string;
 		placeholder?: string;
 		disabled?: boolean;
-		isStreaming?: boolean;
+		responding?: boolean;
+		feedback?: Option;
 		autoFocus?: boolean;
 		class?: string;
-		onSubmit?: (text: string) => void;
-		onStop?: () => void;
+		onSend?: (text: string, options?: { interruptFeedback?: string; resources?: Array<Resource> }) => void;
+		onCancel?: () => void;
 		onInput?: (text: string) => void;
+		onRemoveFeedback?: () => void;
 	}
 
 	let {
 		value = '',
 		placeholder = 'Type your message...',
 		disabled = false,
-		isStreaming = false,
+		responding = false,
+		feedback = undefined,
 		autoFocus = false,
 		class: className = '',
-		onSubmit,
-		onStop,
-		onInput
+		onSend,
+		onCancel,
+		onInput,
+		onRemoveFeedback
 	}: Props = $props();
 
 	// 内部状态
@@ -70,16 +75,28 @@
 
 	// 处理提交
 	function handleSubmit() {
-		if (!inputValue.trim() || disabled || isStreaming) return;
+		if (!inputValue.trim() || disabled || responding) return;
 
 		const text = inputValue.trim();
+		const options: { interruptFeedback?: string; resources?: Array<Resource> } = {};
+
+		// 如果有反馈数据，添加到选项中
+		if (feedback) {
+			options.interruptFeedback = feedback.value;
+		}
+
 		inputValue = '';
-		onSubmit?.(text);
+		onSend?.(text, options);
 	}
 
-	// 处理停止
-	function handleStop() {
-		onStop?.();
+	// 处理取消
+	function handleCancel() {
+		onCancel?.();
+	}
+
+	// 处理移除反馈
+	function handleRemoveFeedback() {
+		onRemoveFeedback?.();
 	}
 
 	// 处理键盘事件
@@ -100,6 +117,23 @@
 </script>
 
 <div class="rounded-2xl p-2 bg-card border {className}">
+	<!-- 反馈显示区域 -->
+	{#if feedback}
+		<div class="mb-2 flex items-center justify-between rounded-lg bg-muted p-2">
+			<div class="flex items-center gap-2">
+				<Badge variant="secondary" class="text-xs">
+					{feedback.value === 'accept' ? '✓ Accepted' : '✗ Rejected'}
+				</Badge>
+				<span class="text-sm text-muted-foreground">
+					{feedback.text || 'Feedback provided'}
+				</span>
+			</div>
+			<Button size="sm" variant="ghost" onclick={handleRemoveFeedback} title="Remove feedback">
+				<X class="h-3 w-3" />
+			</Button>
+		</div>
+	{/if}
+
 	<div class="relative">
 		<!-- 文本输入区域 -->
 		<textarea
@@ -110,15 +144,15 @@
 			rows={rows}
 			class="w-full min-h-10 resize-none p-2 pr-12 
 			focus:outline-none bg-transparent border-none
-			{isStreaming ? 'opacity-75' : ''}"
+			{responding ? 'opacity-75' : ''}"
 			oninput={handleInput}
 			onkeydown={handleKeydown}
 		></textarea>
 
 		<!-- 提交/停止按钮 -->
 		<div class="absolute bottom-2 right-2">
-			{#if isStreaming}
-				<Button size="sm" variant="destructive" onclick={handleStop} title="Stop generation">
+			{#if responding}
+				<Button size="sm" variant="destructive" onclick={handleCancel} title="Cancel generation">
 					<Square class="h-4 w-4" />
 				</Button>
 			{:else}
@@ -137,10 +171,15 @@
 	<!-- 提示信息 -->
 	<div class="text-muted-foreground mt-2 flex items-center justify-between text-xs">
 		<div class="flex items-center gap-2">
-			{#if isStreaming}
+			{#if responding}
 				<Badge variant="secondary" class="text-xs">
 					<Loader2 class="mr-1 h-3 w-3 animate-spin" />
 					Generating...
+				</Badge>
+			{/if}
+			{#if feedback}
+				<Badge variant="outline" class="text-xs">
+					With feedback
 				</Badge>
 			{/if}
 		</div>

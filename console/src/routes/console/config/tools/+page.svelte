@@ -21,8 +21,8 @@
 	// 响应式状态
 	let loading = $state(false);
 	let searchQuery = $state('');
-	let tools = $state([]);
-	let filteredTools = $state([]);
+	let tools = $state<any[]>([]);
+	let filteredTools = $state<any[]>([]);
 	let enabledCount = $state(0);
 	let totalCount = $state(0);
 
@@ -69,7 +69,7 @@
 	};
 
 	// 切换工具启用状态
-	const toggleTool = async (toolName, currentEnabled) => {
+	const toggleTool = async (toolName: string, currentEnabled: boolean) => {
 		try {
 			// 这里应该调用后端 API 来切换工具状态
 			// 目前只是模拟操作
@@ -94,7 +94,7 @@
 	};
 
 	// 获取工具类型的显示样式
-	const getTypeVariant = (type) => {
+	const getTypeVariant = (type: string) => {
 		switch (type.toLowerCase()) {
 			case 'search':
 				return 'default';

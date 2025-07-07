@@ -32,12 +32,12 @@ export async function* chatStream(
 	},
 	options: { abortSignal?: AbortSignal } = {}
 ) {
-	// if (
-	// 	PUBLIC_STATIC_WEBSITE_ONLY ||
-	// 	location.search.includes("mock") ||
-	// 	location.search.includes("replay=")
-	// ) 
-	// 	return yield* chatReplayStream(userMessage, params, options);
+	if (
+		// PUBLIC_STATIC_WEBSITE_ONLY ||
+		location.search.includes("mock") ||
+		location.search.includes("replay=")
+	) 
+		return yield* chatReplayStream(userMessage, params, options);
 	try {
 		const stream = fetchStream('http://localhost:8000/api/chat/stream', {
 			body: JSON.stringify({

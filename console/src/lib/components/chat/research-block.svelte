@@ -214,10 +214,10 @@
 			<TabsContent value="report" class="h-full min-h-0 flex-grow px-8">
 				<div class="h-full overflow-y-auto px-5 pb-20 custom-scrollbar">
 					{#if reportMessages.length > 0}
-						{#each reportMessages as message (message.id)}
+						{#each reportMessages as message (message?.id)}
 							<div class="w-full pt-4 pb-8">
 								<MessageItem
-									{message}
+									message={message!}
 									waitForFeedback={false}
 									interruptMessage={null}
 									onCopy={handleCopy}
@@ -245,9 +245,9 @@
 				<div class="h-full overflow-y-auto custom-scrollbar">
 					{#if researchOnlyMessages.length > 0}
 						<div class="mt-4">
-							{#each researchOnlyMessages as message (message.id)}
+							{#each researchOnlyMessages as message (message?.id)}
 								<MessageItem
-									{message}
+									message={message!}
 									waitForFeedback={false}
 									interruptMessage={null}
 									onCopy={handleCopy}

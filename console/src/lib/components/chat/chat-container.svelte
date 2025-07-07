@@ -244,15 +244,15 @@
 	<div class="flex-center w-full">
 		<div class="p-4">
 			<ChatInput
-				class="w-3xl"
-				bind:this={chatInputRef}
-				value={input}
-				{isStreaming}
-				onSubmit={handleSubmit}
-				onStop={handleStop}
-				onInput={handleInput}
-				placeholder="Type your message..."
-			/>
+			class="w-3xl"
+			bind:this={chatInputRef}
+			value={input}
+			responding={isStreaming}
+			onSend={handleSubmit}
+			onCancel={handleStop}
+			onInput={handleInput}
+			placeholder="Type your message..."
+		/>
 		</div>
 	</div>
 </div>
