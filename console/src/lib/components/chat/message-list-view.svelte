@@ -36,6 +36,8 @@
 	// 自动滚动到底部
 	$effect(() => {
 		if (messageIds.length > 0) {
+			console.log(messageIds);
+			console.log(chatStore.messages);
 			setTimeout(() => {
 				scrollToBottom();
 			}, 100);

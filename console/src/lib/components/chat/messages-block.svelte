@@ -64,10 +64,10 @@
 		const abortController = new AbortController();
 		abortControllerRef = abortController;
 		try {
-			// await chatStore.sendMessage(message, {
-			// 	interruptFeedback: options?.interruptFeedback ?? feedback?.option.value,
-			// 	resources: options?.resources
-			// });
+			await chatStore.sendMessage(message, {
+				interruptFeedback: options?.interruptFeedback ?? feedback?.value,
+				resources: options?.resources
+			});
 		} catch (error) {
 			// 处理发送错误
 			console.error('Send message error:', error);
@@ -96,35 +96,6 @@
 		chatStore.setInput(text);
 	}
 
-	// 处理配置变化
-	function handleConfigChange(newConfig: Partial<ChatConfig>) {
-		chatStore.updateConfig(newConfig);
-	}
-
-	// 重置配置
-	function handleConfigReset() {
-		chatStore.updateConfig({
-			deepThinking: true,
-			backgroundInvestigation: false,
-			planIterations: 3,
-			temperature: 0.7,
-			maxTokens: 2000,
-			model: 'gpt-4-turbo',
-			streamResponse: true
-		});
-	}
-
-	// 清空聊天
-	function handleClearChat() {
-		if (confirm('Are you sure you want to clear this chat? This action cannot be undone.')) {
-			chatStore.clearChat();
-		}
-	}
-
-	// 关闭错误提示
-	function dismissError() {
-		chatStore.clearError();
-	}
 </script>
 
 <div class={cn('bg-base-200 flex-between h-full flex-col rounded-2xl border', className)}>

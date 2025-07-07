@@ -4,7 +4,6 @@ import { browser } from '$app/environment';
 import type { Message, Resource } from '$lib/types/message';
 import { mergeMessage } from './merge-message';
 
-
 // 聊天配置接口
 export interface ChatConfig {
 	deepThinking: boolean;
@@ -92,7 +91,10 @@ class ChatStore {
 	}
 
 	// 从本地存储加载聊天记录
-	private loadChatFromStorage(threadId: string): { messageIds: string[], messages: Map<string, Message> } {
+	private loadChatFromStorage(threadId: string): {
+		messageIds: string[];
+		messages: Map<string, Message>;
+	} {
 		if (!browser) return { messageIds: [], messages: new Map() };
 
 		try {
@@ -110,7 +112,7 @@ class ChatStore {
 		}
 		return { messageIds: [], messages: new Map() };
 	}
-	
+
 	// 研究相关辅助方法
 	private appendResearch(researchId: string) {
 		// 查找最近的 planner 消息
@@ -123,18 +125,18 @@ class ChatStore {
 				break;
 			}
 		}
-		
+
 		const messageIds = [researchId];
 		if (planMessage) {
 			messageIds.unshift(planMessage.id);
 			this.researchPlanIds.set(researchId, planMessage.id);
 		}
-		
+
 		this.researchIds = [...this.researchIds, researchId];
 		this.researchActivityIds.set(researchId, messageIds);
 		this.ongoingResearchId = researchId;
 	}
-	
+
 	private appendResearchActivity(message: Message) {
 		const researchId = this.ongoingResearchId;
 		if (researchId) {
@@ -147,27 +149,27 @@ class ChatStore {
 			}
 		}
 	}
-	
+
 	private openResearch(messageId: string) {
 		this.openResearchId = messageId;
 	}
-	
+
 	private closeResearch() {
 		this.openResearchId = null;
 	}
-	
+
 	// 查找消息的辅助方法
 	private existsMessage(messageId: string): boolean {
 		return this.messages.has(messageId);
 	}
-	
+
 	public getMessage(messageId: string): Message | undefined {
 		return this.messages.get(messageId);
 	}
-	
+
 	private findMessageByToolCallId(toolCallId: string): Message | undefined {
 		for (const message of this.messages.values()) {
-			if (message.toolCalls?.some(tc => tc.id === toolCallId)) {
+			if (message.toolCalls?.some((tc) => tc.id === toolCallId)) {
 				return message;
 			}
 		}
@@ -185,12 +187,12 @@ class ChatStore {
 
 	// 添加消息
 	addMessage(message: Omit<Message, 'id'> & { id?: string }) {
-		const id = message.id ||  crypto.randomUUID();
+		const id = message.id || crypto.randomUUID();
 		const newMessage: Message = {
 			id,
 			...message
 		};
-		
+
 		// 处理研究相关消息
 		if (
 			newMessage.agent === 'coder' ||
@@ -203,7 +205,7 @@ class ChatStore {
 			}
 			this.appendResearchActivity(newMessage);
 		}
-		
+
 		// 只有当消息不存在时才添加到 messageIds
 		if (!this.messageIds.includes(id)) {
 			this.messageIds = [...this.messageIds, id];
@@ -218,7 +220,7 @@ class ChatStore {
 		const message = this.messages.get(messageId);
 		if (message) {
 			const updatedMessage = { ...message, ...updates };
-			
+
 			// 处理研究完成状态
 			if (
 				this.ongoingResearchId &&
@@ -227,14 +229,23 @@ class ChatStore {
 			) {
 				this.ongoingResearchId = null;
 			}
-			
+
 			this.messages.set(messageId, updatedMessage);
 			this.saveChatToStorage();
 		}
 	}
 
 	// 发送消息
-	async sendMessage(content: string, resources?: Resource[]) {
+	async sendMessage(
+		content: string,
+		{
+			interruptFeedback,
+			resources
+		}: {
+			interruptFeedback?: string;
+			resources?: Array<Resource>;
+		} = {}
+	) {
 		if (!this.currentThreadId || this.isStreaming) return;
 
 		// 添加用户消息
@@ -257,6 +268,7 @@ class ChatStore {
 				content,
 				{
 					thread_id: this.currentThreadId,
+      				interrupt_feedback: interruptFeedback,
 					resources,
 					auto_accepted_plan: this.config.auto_accepted_plan ?? false,
 					max_plan_iterations: this.config.max_plan_iterations ?? 3,
@@ -339,17 +351,17 @@ class ChatStore {
 		// 移除该消息及其后的所有消息
 		const messageIdsToKeep = this.messageIds.slice(0, messageIndex);
 		const messageIdsToRemove = this.messageIds.slice(messageIndex);
-		
+
 		// 从 Map 中删除被移除的消息
-		messageIdsToRemove.forEach(id => this.messages.delete(id));
-		
+		messageIdsToRemove.forEach((id) => this.messages.delete(id));
+
 		this.messageIds = messageIdsToKeep;
 
 		// 找到最后一条用户消息
 		const lastUserMessage = messageIdsToKeep
 			.slice()
 			.reverse()
-			.map(id => this.messages.get(id))
+			.map((id) => this.messages.get(id))
 			.find((m) => m && m.role === 'user');
 
 		if (lastUserMessage) {
@@ -416,7 +428,7 @@ class ChatStore {
 
 	// 获取消息
 	getMessages(): Message[] {
-		return this.messageIds.map(id => this.messages.get(id)).filter(Boolean) as Message[];
+		return this.messageIds.map((id) => this.messages.get(id)).filter(Boolean) as Message[];
 	}
 
 	// 获取消息 ID 列表
@@ -470,27 +482,27 @@ class ChatStore {
 			isGenerating: this.ongoingResearchId === researchId
 		};
 	}
-	
+
 	// 获取研究活动消息 IDs
 	getResearchActivityIds(researchId: string): string[] {
 		return this.researchActivityIds.get(researchId) || [];
 	}
-	
+
 	// 获取研究计划消息 ID
 	getResearchPlanId(researchId: string): string | undefined {
 		return this.researchPlanIds.get(researchId);
 	}
-	
+
 	// 获取研究报告消息 ID
 	getResearchReportId(researchId: string): string | undefined {
 		return this.researchReportIds.get(researchId);
 	}
-	
+
 	// 检查是否有报告
 	hasResearchReport(researchId: string): boolean {
 		return this.researchReportIds.has(researchId);
 	}
-	
+
 	// 获取正在进行的研究 ID
 	getOngoingResearchId(): string | null {
 		return this.ongoingResearchId;
