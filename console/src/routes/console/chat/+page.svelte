@@ -5,6 +5,8 @@
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { MessageSquare, Sparkles, Brain, Search } from '@lucide/svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import { onMount } from 'svelte';
+	import { appStore } from '$lib/stores/app-state';
 
 	function createNewChat() {
 		const threadId = crypto.randomUUID();
@@ -18,7 +20,9 @@
 		chatStore.sendMessage(text);
 		goto(`/console/chat/${threadId}`);
 	}
-
+	onMount(() => {
+		appStore.setSidebarCollapsed(false);
+	});
 	// 示例提示
 	const suggestions = [
 		{

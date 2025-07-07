@@ -5,6 +5,7 @@
 	import MessagesBlock from '$lib/components/chat/messages-block.svelte';
 	import ResearchBlock from '$lib/components/chat/research-block.svelte';
 	import { onMount } from 'svelte';
+	import { appStore } from '$lib/stores/app-state';
 
 	const threadId = $derived($page.params.id);
 	const openResearchId = $derived(chatStore.openResearchId);
@@ -12,33 +13,35 @@
 
 	// 初始化聊天
 	onMount(() => {
+		appStore.setSidebarCollapsed(true);
 		if (threadId) {
 			chatStore.initializeChat(threadId);
 		}
 	});
 </script>
 
-<div
-	class={cn(
-		'flex h-full w-full justify-center px-4 pt-12 pb-4',
-		doubleColumnMode && 'gap-8'
-	)}
->
-	<MessagesBlock
+<div class="flex-1 w-full h-content overflow-hidden">
+	<div
 		class={cn(
-			'shrink-0 transition-all duration-300 ease-out',
-			!doubleColumnMode && 'w-[768px]',
-			doubleColumnMode && 'w-[538px]'
+			'flex h-full w-full transition-all duration-300 ease-out',
+			!doubleColumnMode && 'justify-center',
+			doubleColumnMode && 'justify-center gap-2'
 		)}
-		{threadId}
-		autoFocus={false}
-	/>
-	<ResearchBlock
-		class={cn(
-			'w-[min(max(calc((100vw-538px)*0.75),575px),960px)] pb-4 transition-all duration-300 ease-out',
-			!doubleColumnMode && 'scale-0',
-			doubleColumnMode && ''
-		)}
-		researchId={openResearchId}
-	/>
+	>
+		<MessagesBlock
+			class={cn(
+				'shrink-0 transition-all duration-300 ease-out',
+				!doubleColumnMode && 'h-full w-full',
+				doubleColumnMode && 'h-full w-[538px]'
+			)}
+			{threadId}
+			autoFocus={false}
+		/>
+		{#if doubleColumnMode}
+			<ResearchBlock
+				class="h-full w-full transition-all duration-300 ease-out"
+				researchId={openResearchId}
+			/>
+		{/if}
+	</div>
 </div>

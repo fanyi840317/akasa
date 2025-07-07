@@ -161,7 +161,7 @@ class ChatStore {
 		return this.messages.has(messageId);
 	}
 	
-	private getMessage(messageId: string): Message | undefined {
+	public getMessage(messageId: string): Message | undefined {
 		return this.messages.get(messageId);
 	}
 	

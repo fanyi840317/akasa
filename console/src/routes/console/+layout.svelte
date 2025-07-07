@@ -74,11 +74,16 @@
 		}
 	});
 	appStore.setSidebarCollapsed(true);
-	let open = $derived($appStore.sidebarCollapsed);
+	let open = $derived(!$appStore.sidebarCollapsed);
 	const handleUserMenuAction = (action: string) => {
 		console.log('Menu action:', action);
 		// 这里可以添加具体的路由跳转或功能处理
 	};
+	$effect(() => {
+		if(open){
+			alert(open);
+		}
+	})
 
 	const handleLogout = async () => {
 		console.log('User logout');
