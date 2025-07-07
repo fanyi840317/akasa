@@ -46,6 +46,7 @@
 	// 渲染 Markdown 内容
 	const renderedContent = $derived(() => {
 		if (message.content) {
+			console.log(message.content);
 			return marked(message.content, { breaks: true });
 		}
 		return '';
@@ -78,148 +79,125 @@
 	function handleOptionClick(option: { text: string; value: string }) {
 		onOptionClick?.(option);
 	}
-	onMount(() => {
-		
-	})
+	onMount(() => {});
 </script>
 
-{#if message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast'}
-	<div
-		class="mt-10"
-		in:fly={{ y: 24, duration: 200, delay: 0 }}
-	>
-		{#if message.agent === 'planner'}
-			<div class="w-full px-4">
-				<PlanCard
+<div class="mt-10" in:fly={{ y: 24, duration: 200, delay: 0 }}>
+	{#if message.agent === 'planner'}
+		<div class="w-full px-4">
+			<PlanCard
 				{message}
 				{waitForFeedback}
 				{interruptMessage}
-				onFeedback={(feedback) => onOptionClick?.(feedback.option)}
+				onFeedback={(feedback) => onOptionClick?.(feedback)}
 				{onSendMessage}
 			/>
-			</div>
-		{:else if startOfResearch()}
-			<div class="w-full px-4">
-				<ResearchCard researchId={message.id} {onToggleResearch} />
-			</div>
-		{:else if message.content}
-			<div
-				class={cn(
-					'flex w-full px-4',
-					message.role === 'user' && 'justify-end'
-				)}
-			>
-				<MessageBubble {message}>
-					{#snippet children()}
-						<div class="flex w-full flex-col text-wrap break-words">
-							<div
-								class={cn(
-									'prose prose-sm max-w-none dark:prose-invert',
-									message.role === 'user' &&
-										'prose-invert not-dark:text-primary-foreground dark:text-inherit'
-								)}
-							>
-								{@html renderedContent()}
-							</div>
+		</div>
+	{:else if startOfResearch()}
+		<div class="w-full px-4">
+			<ResearchCard researchId={message.id} {onToggleResearch} />
+		</div>
+	{:else if message.content}
+		<div class={cn('flex w-full px-4', message.role === 'user' && 'justify-end')}>
+			<MessageBubble {message}>
+				<div class="flex w-full flex-col text-wrap break-words">
+					<div
+						class={cn(
+							'prose prose-sm dark:prose-invert max-w-none',
+							message.role === 'user' &&
+								'prose-invert not-dark:text-primary-foreground dark:text-inherit'
+						)}
+					>
+						{@html renderedContent()}
+					</div>
 
-							<!-- 工具调用 -->
-							{#if message.toolCalls && message.toolCalls.length > 0}
-								<div class="mt-3 space-y-2">
-									{#each message.toolCalls as toolCall (toolCall.id)}
-										<div class="border rounded-md p-3 bg-muted/30">
-											<div class="flex items-center gap-2 mb-2">
-												<Badge variant="outline" class="text-xs">
-													{toolCall.name}
-												</Badge>
+					<!-- 工具调用 -->
+					{#if message.toolCalls && message.toolCalls.length > 0}
+						<div class="mt-3 space-y-2">
+							{#each message.toolCalls as toolCall (toolCall.id)}
+								<div class="bg-muted/30 rounded-md border p-3">
+									<div class="mb-2 flex items-center gap-2">
+										<Badge variant="outline" class="text-xs">
+											{toolCall.name}
+										</Badge>
+									</div>
+
+									{#if toolCall.args}
+										<pre
+											class="bg-background overflow-x-auto rounded border p-2 text-xs">{JSON.stringify(
+												toolCall.args,
+												null,
+												2
+											)}</pre>
+									{/if}
+
+									{#if toolCall.result}
+										<div class="mt-2 text-sm">
+											<strong>Result:</strong>
+											<div class="bg-background mt-1 rounded border p-2">
+												{toolCall.result}
 											</div>
-											
-											{#if toolCall.args}
-												<pre class="text-xs bg-background p-2 rounded border overflow-x-auto">{JSON.stringify(toolCall.args, null, 2)}</pre>
-											{/if}
-											
-											{#if toolCall.result}
-												<div class="mt-2 text-sm">
-													<strong>Result:</strong>
-													<div class="mt-1 p-2 bg-background rounded border">
-														{toolCall.result}
-													</div>
-												</div>
-											{/if}
 										</div>
-									{/each}
+									{/if}
 								</div>
-							{/if}
-
-							<!-- 选项按钮（用于中断反馈） -->
-							{#if message.options && message.options.length > 0}
-								<div class="mt-3 flex flex-wrap gap-2">
-									{#each message.options as option (option.value)}
-										<Button 
-											variant="outline" 
-											size="sm"
-											onclick={() => handleOptionClick(option)}
-										>
-											{option.text}
-										</Button>
-									{/each}
-								</div>
-							{/if}
-
-							<!-- 操作按钮 -->
-							{#if message.role === 'assistant' && !message.isStreaming}
-								<div class="flex items-center gap-1 mt-3 pt-2 border-t border-border/50">
-									<Button 
-										variant="ghost" 
-										size="sm"
-										onclick={handleCopy}
-										title="Copy message"
-									>
-										<Copy class="w-4 h-4" />
-									</Button>
-									
-									<Button 
-										variant="ghost" 
-										size="sm"
-										onclick={handleRegenerate}
-										title="Regenerate response"
-									>
-										<RotateCcw class="w-4 h-4" />
-									</Button>
-									
-									<Button 
-										variant="ghost" 
-										size="sm"
-										onclick={handleLike}
-										title="Like this response"
-									>
-										<ThumbsUp class="w-4 h-4" />
-									</Button>
-									
-									<Button 
-										variant="ghost" 
-										size="sm"
-										onclick={handleDislike}
-										title="Dislike this response"
-									>
-										<ThumbsDown class="w-4 h-4" />
-									</Button>
-								</div>
-							{/if}
+							{/each}
 						</div>
-					{/snippet}
-				</MessageBubble>
-			</div>
-		{/if}
-	</div>
-{/if}
+					{/if}
+
+					<!-- 选项按钮（用于中断反馈） -->
+					{#if message.options && message.options.length > 0}
+						<div class="mt-3 flex flex-wrap gap-2">
+							{#each message.options as option (option.value)}
+								<Button variant="outline" size="sm" onclick={() => handleOptionClick(option)}>
+									{option.text}
+								</Button>
+							{/each}
+						</div>
+					{/if}
+
+					<!-- 操作按钮 -->
+					{#if message.role === 'assistant' && !message.isStreaming}
+						<div class="border-border/50 mt-3 flex items-center gap-1 border-t pt-2">
+							<Button variant="ghost" size="sm" onclick={handleCopy} title="Copy message">
+								<Copy class="h-4 w-4" />
+							</Button>
+
+							<Button
+								variant="ghost"
+								size="sm"
+								onclick={handleRegenerate}
+								title="Regenerate response"
+							>
+								<RotateCcw class="h-4 w-4" />
+							</Button>
+
+							<Button variant="ghost" size="sm" onclick={handleLike} title="Like this response">
+								<ThumbsUp class="h-4 w-4" />
+							</Button>
+
+							<Button
+								variant="ghost"
+								size="sm"
+								onclick={handleDislike}
+								title="Dislike this response"
+							>
+								<ThumbsDown class="h-4 w-4" />
+							</Button>
+						</div>
+					{/if}
+				</div>
+			</MessageBubble>
+		</div>
+	{/if}
+</div>
 
 <style>
 	@reference "../../../app.css";
-	
+
 	.message-item :global(.prose) {
 		@apply text-foreground;
 	}
-	
+
 	.message-item :global(.prose h1),
 	.message-item :global(.prose h2),
 	.message-item :global(.prose h3),
@@ -228,23 +206,23 @@
 	.message-item :global(.prose h6) {
 		@apply text-foreground font-semibold;
 	}
-	
+
 	.message-item :global(.prose code) {
-		@apply bg-muted px-1 py-0.5 rounded text-sm;
+		@apply bg-muted rounded px-1 py-0.5 text-sm;
 	}
-	
+
 	.message-item :global(.prose pre) {
-		@apply bg-muted p-3 rounded-md overflow-x-auto;
+		@apply bg-muted overflow-x-auto rounded-md p-3;
 	}
-	
+
 	.message-item :global(.prose pre code) {
 		@apply bg-transparent p-0;
 	}
-	
+
 	.message-item :global(.prose blockquote) {
-		@apply border-l-4 border-muted-foreground/20 pl-4 italic;
+		@apply border-muted-foreground/20 border-l-4 pl-4 italic;
 	}
-	
+
 	.message-item :global(.prose a) {
 		@apply text-primary hover:underline;
 	}

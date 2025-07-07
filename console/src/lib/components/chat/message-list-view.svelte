@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { chatStore } from '$lib/stores/chat.svelte';
-    import { type Message, type Option } from '$lib/types/message';
+	import { type Message, type Option } from '$lib/types/message';
 	import MessageItem from './message-item.svelte';
 	import PlanCard from './plan-card.svelte';
 	import PodcastCard from './podcast-card.svelte';
@@ -36,8 +36,6 @@
 	// 自动滚动到底部
 	$effect(() => {
 		if (messageIds.length > 0) {
-			console.log(messageIds);
-			console.log(chatStore.messages);
 			setTimeout(() => {
 				scrollToBottom();
 			}, 100);
@@ -63,53 +61,21 @@
 		<ul class="flex flex-col">
 			{#each messageIds as messageId (messageId)}
 				{@const message = chatStore.getMessage(messageId)}
-				{@const startOfResearch = researchIds.includes(messageId)}
-				{#if message && (message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast' || startOfResearch)}
-					<li class="mt-10 opacity-0 animate-in fade-in-0 slide-in-from-bottom-6 duration-200">
-						{#if message.agent === 'planner'}
-							<div class="w-full px-4">
-								<PlanCard
-									{message}
-									waitForFeedback={waitingForFeedbackMessageId === messageId}
-									{interruptMessage}
-									{onFeedback}
-									{onSendMessage}
-								/>
-							</div>
-						{:else if message.agent === 'podcast'}
-							<div class="w-full px-4">
-								<PodcastCard {message} />
-							</div>
-						{:else if startOfResearch}
-							<div class="w-full px-4">
-								<ResearchCard researchId={message.id} onToggleResearch={handleToggleResearch} />
-							</div>
-						{:else if message.content}
-							<div class={cn('flex w-full px-4', message.role === 'user' && 'justify-end')}>
-								<div
-									class={cn(
-										'group flex w-fit max-w-[85%] flex-col rounded-2xl px-4 py-3 shadow',
-										message.role === 'user' && 'bg-primary text-primary-foreground rounded-ee-none',
-										message.role === 'assistant' && 'bg-card rounded-es-none'
-									)}
-								>
-									<div class="flex w-full flex-col text-wrap break-words">
-										<MessageItem
-											{message}
-											waitForFeedback={false}
-											interruptMessage={null}
-											onCopy={() => {}}
-											onRegenerate={() => {}}
-											onLike={() => {}}
-											onDislike={() => {}}
-											onOptionClick={() => {}}
-											onSendMessage={() => {}}
-											onToggleResearch={() => {}}
-										/>
-									</div>
-								</div>
-							</div>
-						{/if}
+				{#if message &&( message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast')}
+	
+					<li class="animate-in fade-in-0 slide-in-from-bottom-6 mt-10 opacity-0 duration-200">
+						<MessageItem
+							{message}
+							waitForFeedback={false}
+							interruptMessage={null}
+							onCopy={() => {}}
+							onRegenerate={() => {}}
+							onLike={() => {}}
+							onDislike={() => {}}
+							onOptionClick={() => {}}
+							onSendMessage={() => {}}
+							onToggleResearch={() => {}}
+						/>
 					</li>
 				{/if}
 			{/each}
