@@ -83,7 +83,7 @@
 	}
 </script>
 
-<ScrollArea class={cn('flex  h-full w-full flex-col py-4  overflow-hidden', className)}>
+<ScrollArea class={cn('flex  h-full w-full flex-col p-4  overflow-hidden', className)}>
 	<div bind:this={scrollContainer} class="flex-start h-full w-full flex-col overflow-y-auto">
 		<ul class="flex flex-col gap-2  max-w-3xl">
 			{#each messageIds as messageId (messageId)}

@@ -18,6 +18,18 @@
 		onSendMessage?: (message: string, options?: { interruptFeedback?: string }) => void;
 	}
 
+	interface PlanStep {
+		title?: string;
+		description?: string;
+	}
+
+	interface Plan {
+		title?: string;
+		thought?: string;
+		has_enough_context?: boolean;
+		steps?: PlanStep[];
+	}
+
 	let {
 		class: className,
 		message = $bindable(undefined),
@@ -30,7 +42,7 @@
 	const GREETINGS = ['Cool', 'Sounds great', 'Looks good', 'Great', 'Awesome'];
 
 	// 解析计划内容
-	const plan = $derived(parseJSON(message?.content,{}));
+	const plan = $derived(parseJSON(message?.content,{}) as Plan);
 
 	const reasoningContent = $derived(message?.reasoningContent);
 	const hasMainContent = $derived(Boolean(message?.content && message?.content.trim() !== ''));
@@ -72,17 +84,13 @@
 		/>
 	{/if}
 
-	{#if shouldShowPlan}
+	{#if shouldShowPlan }
 		<div in:fly={{ y: 20, duration: 300 }}>
 			<Card class="w-full rounded-2xl">
 				<CardHeader>
 					<CardTitle>
 						<div class="prose prose-sm dark:prose-invert max-w-none">
-							{@html marked(
-								`### ${
-									plan.title !== undefined && plan.title !== '' ? plan.title : 'Deep Research'
-								}`
-							)}
+							{@html marked(plan.title !== undefined && plan.title !== '' ? plan.title : 'Deep Research')}
 						</div>
 					</CardTitle>
 				</CardHeader>

@@ -112,10 +112,7 @@
 	<MessageListView class="flex flex-1 " onFeedback={handleFeedback} onSendMessage={handleSend} />
 
 	<!-- 输入区域 -->
-	<div class="min-h-32 relative flex shrink-0 pb-4 w-full max-w-3xl">
-		{#if !responding && messageCount === 0}
-			<ConversationStarter class="absolute left-0 top-[-218px]" onSend={handleSend} />
-		{/if}
+	<div class="min-h-32 relative flex shrink-0 pb-4 w-full max-w-3xl px-4">
 		<ChatInput
 			bind:this={chatInputRef}
 			class="h-full w-full"

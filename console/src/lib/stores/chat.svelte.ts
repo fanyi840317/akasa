@@ -318,7 +318,7 @@ class ChatStore {
 				if (message) {
 					const mergedMessage = mergeMessage(message, event);
 					// 使用重新赋值来触发响应式更新
-					this.messages = new Map(this.messages.set(message.id, mergedMessage));
+					this.updateMessage(messageId, mergedMessage);
 				}
 			}
 		} catch (error: unknown) {

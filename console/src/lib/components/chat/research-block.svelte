@@ -6,6 +6,7 @@
 	import { X, FileText, Copy, Check, RotateCcw } from '@lucide/svelte';
 	import { cn } from '$lib/utils';
 	import MessageItem from './message-item.svelte';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	// Props
 	interface Props {
@@ -185,7 +186,7 @@
 </script>
 
 {#if researchId}
-	<Card class="relative h-full w-full pt-4">
+	<Card class="relative h-full w-full pt-4 rounded-2xl bg-base-200 px-0">
 		<!-- 头部操作按钮 -->
 		<div class="absolute right-4 flex h-9 items-center justify-center">
 			<Button
@@ -211,8 +212,8 @@
 				</TabsList>
 			</div>
 
-			<TabsContent value="report" class="h-full min-h-0 flex-grow px-8">
-				<div class="h-full overflow-y-auto px-5 pb-20 custom-scrollbar">
+			<TabsContent value="report" class="h-full min-h-0 flex-grow ">
+				<div class="h-full overflow-y-auto pb-20 ">
 					{#if reportMessages.length > 0}
 						{#each reportMessages as message (message?.id)}
 							<div class="w-full pt-4 pb-8">
@@ -241,8 +242,8 @@
 				</div>
 			</TabsContent>
 
-			<TabsContent value="activities" class="h-full min-h-0 flex-grow px-8">
-				<div class="h-full overflow-y-auto custom-scrollbar">
+			<TabsContent value="activities" class="h-full min-h-0 flex-grow">
+				<ScrollArea class="h-full overflow-y-auto ">
 					{#if researchOnlyMessages.length > 0}
 						<div class="mt-4">
 							{#each researchOnlyMessages as message (message?.id)}
@@ -268,7 +269,7 @@
 							</div>
 						</div>
 					{/if}
-				</div>
+				</ScrollArea>
 			</TabsContent>
 		</Tabs>
 	</Card>
