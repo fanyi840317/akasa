@@ -129,11 +129,13 @@ class ChatStore {
 		const messageIds = [researchId];
 		if (planMessage) {
 			messageIds.unshift(planMessage.id);
-			this.researchPlanIds.set(researchId, planMessage.id);
+			// 使用重新赋值来触发响应式更新
+			this.researchPlanIds = new Map(this.researchPlanIds.set(researchId, planMessage.id));
 		}
 
 		this.researchIds = [...this.researchIds, researchId];
-		this.researchActivityIds.set(researchId, messageIds);
+		// 使用重新赋值来触发响应式更新
+		this.researchActivityIds = new Map(this.researchActivityIds.set(researchId, messageIds));
 		this.ongoingResearchId = researchId;
 	}
 
@@ -142,10 +144,12 @@ class ChatStore {
 		if (researchId) {
 			const current = this.researchActivityIds.get(researchId) || [];
 			if (!current.includes(message.id)) {
-				this.researchActivityIds.set(researchId, [...current, message.id]);
+				// 使用重新赋值来触发响应式更新
+				this.researchActivityIds = new Map(this.researchActivityIds.set(researchId, [...current, message.id]));
 			}
 			if (message.agent === 'reporter') {
-				this.researchReportIds.set(researchId, message.id);
+				// 使用重新赋值来触发响应式更新
+				this.researchReportIds = new Map(this.researchReportIds.set(researchId, message.id));
 			}
 		}
 	}
@@ -210,7 +214,8 @@ class ChatStore {
 		if (!this.messageIds.includes(id)) {
 			this.messageIds = [...this.messageIds, id];
 		}
-		this.messages.set(id, newMessage);
+		// 使用重新赋值来触发响应式更新
+		this.messages = new Map(this.messages.set(id, newMessage));
 		this.saveChatToStorage();
 		return newMessage;
 	}
@@ -230,7 +235,8 @@ class ChatStore {
 				this.ongoingResearchId = null;
 			}
 
-			this.messages.set(messageId, updatedMessage);
+			// 使用重新赋值来触发响应式更新
+			this.messages = new Map(this.messages.set(messageId, updatedMessage));
 			this.saveChatToStorage();
 		}
 	}
@@ -286,6 +292,7 @@ class ChatStore {
 
 			for await (const event of stream) {
 				const { type, data } = event;
+				console.log("server:",data,type);
 				messageId = data.id;
 				let message: Message | undefined;
 
@@ -310,7 +317,8 @@ class ChatStore {
 				message ??= this.getMessage(messageId);
 				if (message) {
 					const mergedMessage = mergeMessage(message, event);
-					this.messages.set(message.id, mergedMessage);
+					// 使用重新赋值来触发响应式更新
+					this.messages = new Map(this.messages.set(message.id, mergedMessage));
 				}
 			}
 		} catch (error: unknown) {
@@ -323,7 +331,8 @@ class ChatStore {
 				const message = this.getMessage(messageId);
 				if (message?.isStreaming) {
 					message.isStreaming = false;
-					this.messages.set(messageId, message);
+					// 使用重新赋值来触发响应式更新
+					this.messages = new Map(this.messages.set(messageId, message));
 				}
 			}
 			this.ongoingResearchId = null;
@@ -352,8 +361,10 @@ class ChatStore {
 		const messageIdsToKeep = this.messageIds.slice(0, messageIndex);
 		const messageIdsToRemove = this.messageIds.slice(messageIndex);
 
-		// 从 Map 中删除被移除的消息
-		messageIdsToRemove.forEach((id) => this.messages.delete(id));
+		// 从 Map 中删除被移除的消息，使用重新赋值来触发响应式更新
+		const newMessages = new Map(this.messages);
+		messageIdsToRemove.forEach((id) => newMessages.delete(id));
+		this.messages = newMessages;
 
 		this.messageIds = messageIdsToKeep;
 

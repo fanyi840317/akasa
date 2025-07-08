@@ -35,47 +35,81 @@
 
 	// 自动滚动到底部
 	$effect(() => {
+		if(chatStore.messages) {
+			console.log('正在自动滚动到底部');
+		}
 		if (messageIds.length > 0) {
-			setTimeout(() => {
+			// 使用 requestAnimationFrame 确保 DOM 更新完成后再滚动
+			requestAnimationFrame(() => {
+				scrollToBottom();
+			});
+		}
+	});
+
+	// 监听流式响应状态变化，确保新内容出现时滚动到底部
+	$effect(() => {
+		if (responding) {
+			console.log('正在流式响应');
+			const scrollInterval = setInterval(() => {
 				scrollToBottom();
 			}, 100);
+			
+			return () => clearInterval(scrollInterval);
 		}
 	});
 
 	function scrollToBottom() {
 		if (scrollContainer) {
-			scrollContainer.scrollTop = scrollContainer.scrollHeight;
+			// 使用更可靠的滚动方法
+			const scrollHeight = scrollContainer.scrollHeight;
+			const clientHeight = scrollContainer.clientHeight;
+			scrollContainer.scrollTop = scrollHeight - clientHeight;
+			
+			// 备用方法：使用 scrollIntoView
+			const lastChild = scrollContainer.lastElementChild;
+			if (lastChild) {
+				lastChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+			}
 		}
 	}
 
 	function handleToggleResearch() {
 		// 修复切换研究时自动滚动到底部偶尔失败的问题
-		setTimeout(() => {
-			scrollToBottom();
-		}, 500);
+		requestAnimationFrame(() => {
+			setTimeout(() => {
+				scrollToBottom();
+			}, 300);
+		});
 	}
 </script>
 
-<ScrollArea class={cn('flex h-full w-full flex-col overflow-hidden', className)}>
-	<div bind:this={scrollContainer} class="flex h-full w-full flex-col overflow-y-auto">
-		<ul class="flex flex-col">
+<ScrollArea class={cn('flex flex-center h-full w-full flex-col py-4  overflow-hidden', className)}>
+	<div bind:this={scrollContainer} class="flex-center h-full w-full flex-col overflow-y-auto">
+		<ul class="flex flex-col gap-2  max-w-3xl">
 			{#each messageIds as messageId (messageId)}
 				{@const message = chatStore.getMessage(messageId)}
-				{#if message &&( message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast')}
-	
-					<li class="animate-in fade-in-0 slide-in-from-bottom-6 mt-10 opacity-0 duration-200">
-						<MessageItem
-							{message}
-							waitForFeedback={false}
-							interruptMessage={null}
-							onCopy={() => {}}
-							onRegenerate={() => {}}
-							onLike={() => {}}
-							onDislike={() => {}}
-							onOptionClick={() => {}}
-							onSendMessage={() => {}}
-							onToggleResearch={() => {}}
-						/>
+				{#if message && (message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast')}
+					<li class="animate-in fade-in-0 slide-in-from-bottom-6  duration-200
+					{message.role === 'user' && 'flex items-center justify-end'}"
+					>
+						{#if message.agent === 'planner'}
+							<div class="w-full">
+								<PlanCard {message} {interruptMessage} {onSendMessage} />
+							</div>
+						{:else if message.content}
+							<MessageItem
+								{message} 
+								waitForFeedback={false}
+								interruptMessage={null}
+								onCopy={() => {}}
+								onRegenerate={() => {}}
+								onLike={() => {}}
+								onDislike={() => {}}
+								onOptionClick={() => {}}
+								onSendMessage={() => {}}
+								onToggleResearch={() => {}}
+							/>
+						{/if}
 					</li>
 				{/if}
 			{/each}

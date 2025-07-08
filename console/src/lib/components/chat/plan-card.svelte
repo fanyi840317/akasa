@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
-	import type { Message,Option } from '$lib/types/message';
+	import type { Message, Option } from '$lib/types/message';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import RainbowText from '$lib/components/ui/rainbow-text.svelte';
 	import ThoughtBlock from './thought-block.svelte';
 	import { marked } from 'marked';
 	import { fly } from 'svelte/transition';
+	import { parseJSON } from '$lib/tools';
 
 	interface Props {
 		class?: string;
@@ -29,17 +30,7 @@
 	const GREETINGS = ['Cool', 'Sounds great', 'Looks good', 'Great', 'Awesome'];
 
 	// 解析计划内容
-	const plan = $derived.by(() => {
-		try {
-			// 如果 content 是 JSON 代码块格式，提取其中的 JSON
-			const content = message?.content ?? '{}';
-			const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
-			const jsonStr = jsonMatch ? jsonMatch[1] : content;
-			return JSON.parse(jsonStr);
-		} catch {
-			return {};
-		}
-	});
+	const plan = $derived(parseJSON(message?.content,{}));
 
 	const reasoningContent = $derived(message?.reasoningContent);
 	const hasMainContent = $derived(Boolean(message?.content && message?.content.trim() !== ''));
@@ -49,7 +40,10 @@
 
 	// 判断是否应该显示计划：有主要内容就显示（无论是否还在流式传输）
 	const shouldShowPlan = $derived(hasMainContent);
-
+	$effect(() => {
+		console.log(shouldShowPlan);
+		console.log(plan);
+	});
 	function handleAccept() {
 		if (onSendMessage) {
 			const greeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
@@ -64,14 +58,18 @@
 		if (option.value === 'accepted') {
 			handleAccept();
 		} else {
-			onFeedback?.( option );
+			onFeedback?.(option);
 		}
 	}
 </script>
 
 <div class={cn('w-full', className)}>
 	{#if reasoningContent}
-		<ThoughtBlock content={reasoningContent||""} isStreaming={Boolean(isThinking)} {hasMainContent} />
+		<ThoughtBlock
+			content={reasoningContent || ''}
+			isStreaming={Boolean(isThinking)}
+			{hasMainContent}
+		/>
 	{/if}
 
 	{#if shouldShowPlan}
@@ -97,7 +95,7 @@
 
 					{#if plan.has_enough_context === true}
 						<div class="prose prose-sm dark:prose-invert max-w-none">
-							<p class="text-green-600 dark:text-green-400 font-medium">
+							<p class="font-medium text-green-600 dark:text-green-400">
 								✅ 已获得足够的上下文信息，无需进一步研究。
 							</p>
 						</div>
@@ -124,9 +122,7 @@
 						</ul>
 					{:else if plan.steps && Array.isArray(plan.steps) && plan.steps.length === 0}
 						<div class="prose prose-sm dark:prose-invert max-w-none">
-							<p class="text-muted-foreground italic">
-								暂无需要执行的研究步骤。
-							</p>
+							<p class="text-muted-foreground italic">暂无需要执行的研究步骤。</p>
 						</div>
 					{/if}
 				</CardContent>
