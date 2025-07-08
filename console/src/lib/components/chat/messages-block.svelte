@@ -109,7 +109,7 @@
 		</div>
 	</div>
 	<!-- MessageListView -->
-	<MessageListView class="flex flex-grow " onFeedback={handleFeedback} onSendMessage={handleSend} />
+	<MessageListView class="flex flex-1 " onFeedback={handleFeedback} onSendMessage={handleSend} />
 
 	<!-- 输入区域 -->
 	<div class="min-h-32 relative flex shrink-0 pb-4 w-full max-w-3xl">
