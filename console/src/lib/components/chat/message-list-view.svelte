@@ -33,6 +33,12 @@
 	);
 	const researchIds = $derived(chatStore.getResearchIds());
 
+	// 处理研究报告切换
+	function handleToggleResearch() {
+		// 可以在这里添加额外的逻辑
+		console.log('Research toggled');
+	}
+
 	// 自动滚动到底部
 	$effect(() => {
 		if(chatStore.messages) {
@@ -88,7 +94,8 @@
 		<ul class="flex flex-col gap-2  max-w-3xl">
 			{#each messageIds as messageId (messageId)}
 				{@const message = chatStore.getMessage(messageId)}
-				{#if message && (message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast')}
+				{@const startOfResearch = researchIds.includes(messageId)}
+				{#if message && (message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast' || startOfResearch)}
 					<li class="animate-in fade-in-0 slide-in-from-bottom-6  duration-200
 					{message.role === 'user' && 'flex items-center justify-end'}"
 					>
@@ -96,6 +103,10 @@
 							<div class="w-full">
 								<PlanCard {message} {interruptMessage} {onSendMessage} />
 							</div>
+						{:else if startOfResearch}
+					<div class="w-full px-4">
+						<ResearchCard researchId={message.id} onToggleResearch={handleToggleResearch} />
+					</div>
 						{:else if message.content}
 							<MessageItem
 								{message} 
