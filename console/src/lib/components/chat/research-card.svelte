@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
-	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import RainbowText from '$lib/components/ui/rainbow-text.svelte';
-	import RollingText from '$lib/components/ui/rolling-text.svelte';
-	import { chatStore } from '$lib/stores/chat.svelte';
+import { Button } from '$lib/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '$lib/components/ui/card';
+import RainbowText from '$lib/components/ui/rainbow-text.svelte';
+import RollingText from '$lib/components/ui/rolling-text.svelte';
+import { chatStore } from '$lib/stores/chat.svelte';
+import { parseJSON } from '$lib/tools';
 
 	interface Props {
 		class?: string;
@@ -39,13 +40,9 @@
 		if (planId) {
 			const planMessage = chatStore.getMessage(planId);
 			if (planMessage?.content) {
-				try {
-					const parsed = JSON.parse(planMessage.content);
-					if (parsed.title) {
-						return parsed.title;
-					}
-				} catch {
-					// 忽略JSON解析错误
+				const parsed = parseJSON(planMessage.content, { title: '' });
+				if (parsed.title) {
+					return parsed.title;
 				}
 			}
 		}
@@ -53,21 +50,15 @@
 		// 从研究消息获取标题
 		const researchMessage = chatStore.getMessage(researchId);
 		if (researchMessage?.content) {
-			try {
-				// 优先从 **Problem Statement**: 后提取标题
-				const problemMatch = researchMessage.content.match(/\*\*Problem Statement\*\*:\s*(.+?)(?:\n|$)/);
-				if (problemMatch) {
-					return problemMatch[1].trim();
-				}
-				// 向下兼容：尝试解析JSON格式
-				try {
-					const parsed = JSON.parse(researchMessage.content);
-					return parsed.title || 'Deep Research';
-				} catch {
-					// 忽略JSON解析错误
-				}
-			} catch {
-				// 忽略解析错误
+			// 优先从 **Problem Statement**: 后提取标题
+			const problemMatch = researchMessage.content.match(/\*\*Problem Statement\*\*:\s*(.+?)(?:\n|$)/);
+			if (problemMatch) {
+				return problemMatch[1].trim();
+			}
+			// 向下兼容：尝试解析JSON格式
+			const parsed = parseJSON(researchMessage.content, { title: '' });
+			if (parsed.title) {
+				return parsed.title;
 			}
 		}
 		return 'Deep Research';
@@ -83,7 +74,7 @@
 	}
 </script>
 
-<Card class={cn('w-full', className)}>
+<Card class={cn('w-full rounded-2xl', className)}>
 	<CardHeader>
 		<CardTitle>
 			<RainbowText animated={state() !== 'Report generated'}>

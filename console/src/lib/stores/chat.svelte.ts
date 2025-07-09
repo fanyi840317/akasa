@@ -81,6 +81,7 @@ class ChatStore {
 		try {
 			const chatData = {
 				messageIds: this.messageIds,
+				researchIds:this.researchIds,
 				messages: Array.from(this.messages.entries()),
 				timestamp: Date.now()
 			};
@@ -93,24 +94,27 @@ class ChatStore {
 	// 从本地存储加载聊天记录
 	private loadChatFromStorage(threadId: string): {
 		messageIds: string[];
+		researchIds: string[];
 		messages: Map<string, Message>;
 	} {
-		if (!browser) return { messageIds: [], messages: new Map() };
+		const defaultResult = { messageIds: [], researchIds: [], messages: new Map<string, Message>() };
+		
+		if (!browser) return defaultResult;
 
 		try {
 			const stored = localStorage.getItem(this.getStorageKey(threadId));
-			// console.log(this.getStorageKey(threadId),stored);
-			if (stored) {
-				const chatData = JSON.parse(stored);
-				const messageIds = chatData.messageIds || [];
-				const messagesArray = chatData.messages || [];
-				const messages = new Map(messagesArray as [string, Message][]);
-				return { messageIds, messages };
-			}
+			if (!stored) return defaultResult;
+
+			const { messageIds = [], researchIds = [], messages: messagesArray = [] } = JSON.parse(stored);
+			return {
+				messageIds,
+				researchIds,
+				messages: new Map(messagesArray as [string, Message][])
+			};
 		} catch (error) {
 			console.error('Failed to load chat from storage:', error);
+			return defaultResult;
 		}
-		return { messageIds: [], messages: new Map() };
 	}
 
 	// 研究相关辅助方法
@@ -183,8 +187,9 @@ class ChatStore {
 	// 初始化聊天
 	initializeChat(threadId: string) {
 		this.currentThreadId = threadId;
-		const { messageIds, messages } = this.loadChatFromStorage(threadId);
+		const { messageIds,researchIds, messages } = this.loadChatFromStorage(threadId);
 		this.messageIds = messageIds;
+		this.researchIds = researchIds;
 		this.messages = messages;
 		this.error = null;
 	}

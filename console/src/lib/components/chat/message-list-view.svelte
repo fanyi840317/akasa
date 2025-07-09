@@ -33,15 +33,9 @@
 	);
 	const researchIds = $derived(chatStore.getResearchIds());
 
-	// 处理研究报告切换
-	function handleToggleResearch() {
-		// 可以在这里添加额外的逻辑
-		console.log('Research toggled');
-	}
-
 	// 自动滚动到底部
 	$effect(() => {
-		if(chatStore.messages) {
+		if (chatStore.messages) {
 			console.log('正在自动滚动到底部');
 		}
 		if (messageIds.length > 0) {
@@ -59,7 +53,7 @@
 			const scrollInterval = setInterval(() => {
 				scrollToBottom();
 			}, 100);
-			
+
 			return () => clearInterval(scrollInterval);
 		}
 	});
@@ -70,7 +64,7 @@
 			const scrollHeight = scrollContainer.scrollHeight;
 			const clientHeight = scrollContainer.clientHeight;
 			scrollContainer.scrollTop = scrollHeight - clientHeight;
-			
+
 			// 备用方法：使用 scrollIntoView
 			const lastChild = scrollContainer.lastElementChild;
 			if (lastChild) {
@@ -89,27 +83,26 @@
 	}
 </script>
 
-<ScrollArea class={cn('flex  h-full w-full flex-col p-4  overflow-hidden', className)}>
+<ScrollArea class={cn('flex  h-full w-full flex-col overflow-hidden  p-4', className)}>
 	<div bind:this={scrollContainer} class="flex-start h-full w-full flex-col overflow-y-auto">
-		<ul class="flex flex-col gap-2  max-w-3xl">
+		<ul class="flex max-w-3xl flex-col gap-2">
 			{#each messageIds as messageId (messageId)}
 				{@const message = chatStore.getMessage(messageId)}
 				{@const startOfResearch = researchIds.includes(messageId)}
 				{#if message && (message.role === 'user' || message.agent === 'coordinator' || message.agent === 'planner' || message.agent === 'podcast' || startOfResearch)}
-					<li class="animate-in fade-in-0 slide-in-from-bottom-6  duration-200
-					{message.role === 'user' && 'flex items-center justify-end'}"
-					>
+					<li class="animate-in fade-in-0 slide-in-from-bottom-6 duration-200
+					{message.role === 'user' && 'flex items-center justify-end'}">
 						{#if message.agent === 'planner'}
 							<div class="w-full">
 								<PlanCard {message} {interruptMessage} {onSendMessage} />
 							</div>
 						{:else if startOfResearch}
-					<div class="w-full px-4">
-						<ResearchCard researchId={message.id} onToggleResearch={handleToggleResearch} />
-					</div>
+							<div class="w-full px-4">
+								<ResearchCard researchId={message.id} onToggleResearch={handleToggleResearch} />
+							</div>
 						{:else if message.content}
 							<MessageItem
-								{message} 
+								{message}
 								waitForFeedback={false}
 								interruptMessage={null}
 								onCopy={() => {}}
