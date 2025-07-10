@@ -26,7 +26,7 @@ import { parseJSON } from '$lib/tools';
 	const openResearchId = $derived( chatStore.openResearchId);
 
 	// 研究状态
-	const state = $derived(() => {
+	const state = $derived.by(() => {
 		if (hasReport) {
 			return reportGenerating ? 'Generating report...' : 'Report generated';
 		}
@@ -34,7 +34,7 @@ import { parseJSON } from '$lib/tools';
 	});
 
 	// 研究标题
-	const title = $derived(() => {
+	const title = $derived.by(() => {
 		// 优先从计划消息获取标题
 		const planId = chatStore.getResearchPlanId(researchId);
 		if (planId) {
@@ -77,7 +77,7 @@ import { parseJSON } from '$lib/tools';
 <Card class={cn('w-full rounded-2xl', className)}>
 	<CardHeader>
 		<CardTitle>
-			<RainbowText animated={state() !== 'Report generated'}>
+			<RainbowText animated={state !== 'Report generated'}>
 				{#snippet children()}
 					{title}
 				{/snippet}

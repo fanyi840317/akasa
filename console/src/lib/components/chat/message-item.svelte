@@ -178,11 +178,11 @@
 	}
 
 	.message-item :global(.prose code) {
-		@apply bg-muted rounded px-1 py-0.5 text-sm;
+		@apply bg-muted rounded-2xl px-1 py-0.5 text-sm;
 	}
 
 	.message-item :global(.prose pre) {
-		@apply bg-muted overflow-x-auto rounded-md p-3;
+		@apply bg-muted overflow-x-auto rounded-2xl p-3;
 	}
 
 	.message-item :global(.prose pre code) {

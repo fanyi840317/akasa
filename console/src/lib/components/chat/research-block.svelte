@@ -5,7 +5,8 @@
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
 	import { X, FileText, Copy, Check, RotateCcw } from '@lucide/svelte';
 	import { cn } from '$lib/utils';
-	import MessageItem from './message-item.svelte';
+	import ResearchActivitiesBlock from './research-activities-block.svelte';
+	import ResearchReportBlock from './research-report-block.svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	// Props
@@ -55,11 +56,7 @@
 		return activityIds.map(id => chatStore.getMessage(id)).filter(Boolean);
 	});
 
-	// 分离research和report消息
-	const researchOnlyMessages = $derived(
-		researchMessages.filter(msg => msg && msg.agent === 'researcher')
-	);
-	
+	// 获取报告消息
 	const reportMessages = $derived(
 		researchMessages.filter(msg => msg && msg.agent === 'reporter')
 	);
@@ -155,38 +152,11 @@
 		}
 	}
 
-	// 处理消息操作（简化版，研究报告中不需要完整的消息操作）
-	function handleCopy(messageId: string) {
-		console.log('Research message copied:', messageId);
-	}
 
-	function handleRegenerate(messageId: string) {
-		console.log('Research message regenerate:', messageId);
-	}
-
-	function handleLike(messageId: string) {
-		console.log('Research message liked:', messageId);
-	}
-
-	function handleDislike(messageId: string) {
-		console.log('Research message disliked:', messageId);
-	}
-
-	function handleOptionClick(option: { text: string; value: string }) {
-		console.log('Research option clicked:', option);
-	}
-
-	function handleSendMessage(message: string) {
-		console.log('Research send message:', message);
-	}
-
-	function handleToggleResearch() {
-		console.log('Toggle research from research block');
-	}
 </script>
 
 {#if researchId}
-	<Card class="relative h-full w-full pt-4 rounded-2xl bg-base-200 px-0">
+	<Card class="relative h-full w-full pt-2 rounded-2xl bg-base-200 px-0">
 		<!-- 头部操作按钮 -->
 		<div class="absolute right-4 flex h-9 items-center justify-center">
 			<Button
@@ -213,23 +183,14 @@
 			</div>
 
 			<TabsContent value="report" class="h-full min-h-0 flex-grow ">
-				<div class="h-full overflow-y-auto pb-20 ">
+				<ScrollArea class="h-full overflow-y-auto pb-20 ">
 					{#if reportMessages.length > 0}
 						{#each reportMessages as message (message?.id)}
-							<div class="w-full pt-4 pb-8">
-								<MessageItem
-									message={message!}
-									waitForFeedback={false}
-									interruptMessage={null}
-									onCopy={handleCopy}
-									onRegenerate={handleRegenerate}
-									onLike={handleLike}
-									onDislike={handleDislike}
-									onOptionClick={handleOptionClick}
-									onSendMessage={handleSendMessage}
-									onToggleResearch={handleToggleResearch}
-								/>
-							</div>
+							<ResearchReportBlock 
+								researchId={researchId!} 
+								messageId={message!.id}
+								editing={false}
+							/>
 						{/each}
 					{:else}
 						<div class="flex h-full items-center justify-center text-gray-500">
@@ -239,28 +200,13 @@
 							</div>
 						</div>
 					{/if}
-				</div>
+				</ScrollArea>
 			</TabsContent>
 
 			<TabsContent value="activities" class="h-full min-h-0 flex-grow">
 				<ScrollArea class="h-full overflow-y-auto ">
-					{#if researchOnlyMessages.length > 0}
-						<div class="mt-4">
-							{#each researchOnlyMessages as message (message?.id)}
-								<MessageItem
-									message={message!}
-									waitForFeedback={false}
-									interruptMessage={null}
-									onCopy={handleCopy}
-									onRegenerate={handleRegenerate}
-									onLike={handleLike}
-									onDislike={handleDislike}
-									onOptionClick={handleOptionClick}
-									onSendMessage={handleSendMessage}
-									onToggleResearch={handleToggleResearch}
-								/>
-							{/each}
-						</div>
+					{#if researchId}
+						<ResearchActivitiesBlock researchId={researchId} />
 					{:else}
 						<div class="flex h-full items-center justify-center text-gray-500">
 							<div class="text-center">
@@ -283,35 +229,3 @@
 		</div>
 	</div>
 {/if}
-
-<style>
-	@reference "../../../app.css";
-
-	/* 自定义滚动条样式 */
-	:global(.scroll-area-viewport) {
-		scrollbar-width: thin;
-		scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
-	}
-
-	:global(.scroll-area-viewport:hover) {
-		scrollbar-color: hsl(var(--muted-foreground) / 0.4) transparent;
-	}
-
-	/* WebKit 浏览器滚动条样式 */
-	:global(.scroll-area-viewport::-webkit-scrollbar) {
-		width: 6px;
-	}
-
-	:global(.scroll-area-viewport::-webkit-scrollbar-track) {
-		background: transparent;
-	}
-
-	:global(.scroll-area-viewport::-webkit-scrollbar-thumb) {
-		background-color: hsl(var(--muted-foreground) / 0.2);
-		border-radius: 3px;
-	}
-
-	:global(.scroll-area-viewport:hover::-webkit-scrollbar-thumb) {
-		background-color: hsl(var(--muted-foreground) / 0.4);
-	}
-</style>

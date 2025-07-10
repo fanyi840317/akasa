@@ -97,7 +97,7 @@
 								<PlanCard {message} {interruptMessage} {onSendMessage} />
 							</div>
 						{:else if startOfResearch}
-							<div class="w-full px-4">
+							<div class="w-full">
 								<ResearchCard researchId={message.id} onToggleResearch={handleToggleResearch} />
 							</div>
 						{:else if message.content}
