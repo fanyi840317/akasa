@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { chatStore, type ChatConfig } from '$lib/stores/chat.svelte';
+	import { appStore } from '$lib/stores/app-state';
 	import { type Option, type Resource } from '$lib/types/message';
 	import MessageListView from './message-list-view.svelte';
 	import ChatInput from './chat-input.svelte';
@@ -15,7 +16,7 @@
 		SheetTrigger
 	} from '$lib/components/ui/sheet';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
-	import { Settings, Trash2, AlertCircle } from '@lucide/svelte';
+	import { Settings, Trash2, AlertCircle, Menu } from '@lucide/svelte';
 	import { cn } from '$lib/utils';
 
 	// Props
@@ -101,7 +102,18 @@
 <div class={cn('bg-base-200 flex-between h-full flex-col rounded-2xl border', className)}>
 	<!-- 头部工具栏 -->
 	<div class="flex-between w-full border-b p-1">
-		<div class="flex items-center gap-2 px-4">
+		<div class="flex items-center gap-2 px-1">
+			<Button
+				variant="ghost"
+				size="sm"
+				class="p-2"
+				onclick={() => {
+					const currentState = appStore.get();
+					appStore.setSidebarCollapsed(!currentState.sidebarCollapsed);
+				}}
+			>
+				<Menu class="h-4 w-4" />
+			</Button>
 			<h2 class="text-lg font-semibold">Chat</h2>
 			{#if threadId}
 				<span class="text-muted-foreground text-sm">#{threadId.slice(0, 8)}</span>

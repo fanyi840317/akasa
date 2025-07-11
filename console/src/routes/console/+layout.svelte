@@ -53,11 +53,60 @@
 			: null
 	);
 	// 使用 eventStore 获取用户创建的事件
-	let userEvents = $state<Array<{ name: string; $id: string }>>([]);
+	// let userEvents = $state<Array<{ name: string; $id: string }>>([]);
+	// 获取本地聊天数据
+	let chatSessions = $state<Array<{ name: string; id: string; timestamp: number }>>([]);
+	
+	// 加载本地聊天会话
+	function loadLocalChats() {
+		if (!browser) return;
+		
+		try {
+			const chats: Array<{ name: string; id: string; timestamp: number }> = [];
+			
+			// 遍历 localStorage 查找聊天数据
+			for (let i = 0; i < localStorage.length; i++) {
+				const key = localStorage.key(i);
+				if (key && key.startsWith('akasa_chat_')) {
+					try {
+						const threadId = key.replace('akasa_chat_', '');
+						const chatData = JSON.parse(localStorage.getItem(key) || '{}');
+						
+						// 获取第一条用户消息作为聊天标题
+						let chatTitle = `Chat ${threadId.slice(0, 8)}`;
+						if (chatData.messages && Array.isArray(chatData.messages)) {
+							const firstUserMessage = chatData.messages.find(
+								([, message]: [string, any]) => message.role === 'user'
+							);
+							if (firstUserMessage && firstUserMessage[1].content) {
+								chatTitle = firstUserMessage[1].content.slice(0, 30) + 
+									(firstUserMessage[1].content.length > 30 ? '...' : '');
+							}
+						}
+						
+						chats.push({
+							name: chatTitle,
+							id: threadId,
+							timestamp: chatData.timestamp || 0
+						});
+					} catch (error) {
+						console.error('Error parsing chat data:', error);
+					}
+				}
+			}
+			
+			// 按时间戳排序，最新的在前
+			chats.sort((a, b) => b.timestamp - a.timestamp);
+			chatSessions = chats;
+		} catch (error) {
+			console.error('Error loading local chats:', error);
+		}
+	}
+	
 	let files = $derived([
-		...userEvents.map((event) => ({ name: `${event.name}`, id: event.$id, type: 'event' }))
+		// ...userEvents.map((event) => ({ name: `${event.name}`, id: event.$id, type: 'event' })),
+		...chatSessions.map((chat) => ({ name: chat.name, id: chat.id, type: 'chat' }))
 	]);
-
 	// 在组件挂载时检查认证状态并加载用户事件
 	onMount(async () => {
 		if (browser) {
@@ -72,6 +121,8 @@
 				return;
 			}
 		}
+		// 加载本地聊天数据
+		loadLocalChats();
 	});
 	appStore.setSidebarCollapsed(true);
 	let open = $derived(!$appStore.sidebarCollapsed);
@@ -79,11 +130,12 @@
 		console.log('Menu action:', action);
 		// 这里可以添加具体的路由跳转或功能处理
 	};
-	$effect(() => {
-		if(open){
-			alert(open);
-		}
-	})
+
+	// 处理聊天点击
+	const handleChatClick = (chatId: string) => {
+		// 导航到聊天页面
+		goto(`/console/chat/${chatId}`);
+	};
 
 	const handleLogout = async () => {
 		console.log('User logout');
@@ -103,7 +155,11 @@
 			appStore.setSidebarCollapsed(state);
 		}}
 	>
-		<AppSidebar {actions} {files} />
+		<AppSidebar 
+			{actions} 
+			{files} 
+			onChatClick={handleChatClick}
+		/>
 		<main class="size-full px-2">
 			<ConsoleHeader {open} {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout} />
 			{@render children()}

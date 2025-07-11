@@ -6,7 +6,8 @@
 		MoreHorizontalIcon,
 		EyeIcon,
 		TrashIcon,
-		EllipsisIcon
+		EllipsisIcon,
+		MessageSquareIcon
 	} from '@lucide/svelte';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -18,12 +19,14 @@
 		files,
 		onFileClick,
 		onEventView,
-		onEventDelete
+		onEventDelete,
+		onChatClick
 	}: {
 		files: [];
 		onFileClick?: (fileName: string) => void;
 		onEventView?: (eventId: string) => void;
 		onEventDelete?: (eventId: string) => void;
+		onChatClick?: (chatId: string) => void;
 	} = $props();
 
 	const handleFileClick = (fileName: string) => {
@@ -37,6 +40,10 @@
 	const handleEventDelete = (eventId: string) => {
 		onEventDelete?.(eventId);
 	};
+
+	const handleChatClick = (chatId: string) => {
+		onChatClick?.(chatId);
+	};
 </script>
 
 <Sidebar.Menu >
@@ -49,9 +56,16 @@
 	{@const isObject = typeof item === 'object' && !Array.isArray(item)}
 	{@const [name, ...items] = isObject ? [item.name] : Array.isArray(item) ? item : [item]}
 	{@const isEvent = isObject && item.type === 'event'}
+	{@const isChat = isObject && item.type === 'chat'}
 	{#if !items.length}
 		<Sidebar.MenuItem>
-			<Sidebar.MenuButton onclick={() => handleFileClick(name)} class="text-xs truncate line-clamp-1 ">
+			<Sidebar.MenuButton 
+				onclick={() => isChat ? handleChatClick(item.id) : handleFileClick(name)} 
+				class="text-xs truncate line-clamp-1 flex items-center gap-2"
+			>
+				{#if isChat}
+					<MessageSquareIcon class="h-4 w-4" />
+				{/if}
 				{name}
 				{#if isEvent}
 					<DropdownMenu.Root>

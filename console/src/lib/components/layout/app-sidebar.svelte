@@ -15,6 +15,7 @@
 		onFileClick,
 		onEventView,
 		onEventDelete,
+		onChatClick,
 		...restProps
 	}: ComponentProps<typeof Sidebar.Root> & {
 		actions?: any;
@@ -25,6 +26,7 @@
 		onFileClick?: (fileName: string) => void;
 		onEventView?: (eventId: string) => void;
 		onEventDelete?: (eventId: string) => void;
+		onChatClick?: (chatId: string) => void;
 	} = $props();
 
 	const handleCreateEvent = () => {
@@ -51,7 +53,7 @@
 					<PlusIcon class="w-4 h-4" />
 				</button>
 			</div>
-			<!-- <NavFiles {files} {onFileClick} {onEventView} {onEventDelete} /> -->
+			<NavFiles {files} {onFileClick} {onEventView} {onEventDelete} {onChatClick} />
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer />

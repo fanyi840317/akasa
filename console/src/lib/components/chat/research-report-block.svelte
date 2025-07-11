@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { chatStore } from '$lib/stores/chat.svelte';
 	import { cn } from '$lib/utils';
+	import { FileText, Edit3, Save, X } from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { Textarea } from '$lib/components/ui/textarea';
+	import { Card } from '$lib/components/ui/card';
 	import LoadingAnimation from '$lib/components/ui/loading-animation.svelte';
+	import AutoScrollContainer from '$lib/components/ui/auto-scroll-container.svelte';
 	import { marked } from 'marked';
 
 	interface Props {
@@ -26,35 +31,40 @@
 	}
 </script>
 
-<div class={cn('w-full pt-4 pb-8', className)}>
-	{#if editing && isCompleted}
-		<!-- 编辑模式 - 可以在这里添加富文本编辑器 -->
-		<div class="border rounded-md p-4">
-			<textarea 
-				class="w-full h-96 p-4 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-				value={message?.content || ''}
-				oninput={(e) => handleMarkdownChange(e.target.value)}
-				placeholder="编辑报告内容..."
-			></textarea>
-			<div class="mt-2 text-sm text-gray-500">
-				支持 Markdown 格式
+<AutoScrollContainer 
+	class={cn('w-full pt-4 pb-8', className)}
+	scrollTriggers={[message?.content]}
+	continuousScroll={false}
+>
+	{#snippet children()}
+		{#if editing && isCompleted}
+			<!-- 编辑模式 - 可以在这里添加富文本编辑器 -->
+			<div class="border rounded-md p-4">
+				<textarea 
+					class="w-full h-96 p-4 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+					value={message?.content || ''}
+					placeholder="编辑报告内容..."
+				></textarea>
+				<div class="mt-2 text-sm text-gray-500">
+					支持 Markdown 格式
+				</div>
 			</div>
-		</div>
-	{:else}
-		<!-- 显示模式 -->
-		<div class="prose prose-lg max-w-none">
-			{#if message?.content}
-				{@html marked(message.content)}
-			{:else}
-				<div class="text-gray-500 italic">报告内容为空</div>
+		{:else}
+			<!-- 显示模式 -->
+			<div class="prose prose-lg max-w-none">
+				{#if message?.content}
+					{@html marked(message.content)}
+				{:else}
+					<div class="text-gray-500 italic">报告内容为空</div>
+				{/if}
+			</div>
+			
+			{#if message?.isStreaming}
+				<LoadingAnimation class="my-12" />
 			{/if}
-		</div>
-		
-		{#if message?.isStreaming}
-			<LoadingAnimation class="my-12" />
 		{/if}
-	{/if}
-</div>
+	{/snippet}
+</AutoScrollContainer>
 
 <style>
 	/* 自定义 prose 样式以适应主题 */

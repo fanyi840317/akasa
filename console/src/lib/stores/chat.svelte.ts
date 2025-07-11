@@ -81,8 +81,14 @@ class ChatStore {
 		try {
 			const chatData = {
 				messageIds: this.messageIds,
-				researchIds:this.researchIds,
+				researchIds: this.researchIds,
 				messages: Array.from(this.messages.entries()),
+				researchPlanIds: Array.from(this.researchPlanIds.entries()),
+				researchReportIds: Array.from(this.researchReportIds.entries()),
+				researchActivityIds: Array.from(this.researchActivityIds.entries()),
+				ongoingResearchId: this.ongoingResearchId,
+				openResearchId: this.openResearchId,
+				config: this.config,
 				timestamp: Date.now()
 			};
 			localStorage.setItem(this.getStorageKey(this.currentThreadId), JSON.stringify(chatData));
@@ -96,8 +102,24 @@ class ChatStore {
 		messageIds: string[];
 		researchIds: string[];
 		messages: Map<string, Message>;
+		researchPlanIds?: Map<string, string>;
+		researchReportIds?: Map<string, string>;
+		researchActivityIds?: Map<string, string[]>;
+		ongoingResearchId?: string | null;
+		openResearchId?: string | null;
+		config?: ChatConfig;
 	} {
-		const defaultResult = { messageIds: [], researchIds: [], messages: new Map<string, Message>() };
+		const defaultResult = { 
+			messageIds: [], 
+			researchIds: [], 
+			messages: new Map<string, Message>(),
+			researchPlanIds: new Map<string, string>(),
+			researchReportIds: new Map<string, string>(),
+			researchActivityIds: new Map<string, string[]>(),
+			ongoingResearchId: null,
+			openResearchId: null,
+			config: { ...DEFAULT_CONFIG }
+		};
 		
 		if (!browser) return defaultResult;
 
@@ -105,11 +127,28 @@ class ChatStore {
 			const stored = localStorage.getItem(this.getStorageKey(threadId));
 			if (!stored) return defaultResult;
 
-			const { messageIds = [], researchIds = [], messages: messagesArray = [] } = JSON.parse(stored);
+			const { 
+				messageIds = [], 
+				researchIds = [], 
+				messages: messagesArray = [],
+				researchPlanIds: researchPlanIdsArray = [],
+				researchReportIds: researchReportIdsArray = [],
+				researchActivityIds: researchActivityIdsArray = [],
+				ongoingResearchId = null,
+				openResearchId = null,
+				config = DEFAULT_CONFIG
+			} = JSON.parse(stored);
+			
 			return {
 				messageIds,
 				researchIds,
-				messages: new Map(messagesArray as [string, Message][])
+				messages: new Map(messagesArray as [string, Message][]),
+				researchPlanIds: new Map(researchPlanIdsArray as [string, string][]),
+				researchReportIds: new Map(researchReportIdsArray as [string, string][]),
+				researchActivityIds: new Map(researchActivityIdsArray as [string, string[]][]),
+				ongoingResearchId,
+				openResearchId,
+				config
 			};
 		} catch (error) {
 			console.error('Failed to load chat from storage:', error);
@@ -187,10 +226,29 @@ class ChatStore {
 	// 初始化聊天
 	initializeChat(threadId: string) {
 		this.currentThreadId = threadId;
-		const { messageIds,researchIds, messages } = this.loadChatFromStorage(threadId);
+		const { 
+			messageIds, 
+			researchIds, 
+			messages, 
+			researchPlanIds, 
+			researchReportIds, 
+			researchActivityIds, 
+			ongoingResearchId, 
+			openResearchId, 
+			config 
+		} = this.loadChatFromStorage(threadId);
+		
 		this.messageIds = messageIds;
 		this.researchIds = researchIds;
 		this.messages = messages;
+		this.researchPlanIds = researchPlanIds || new Map();
+		this.researchReportIds = researchReportIds || new Map();
+		this.researchActivityIds = researchActivityIds || new Map();
+		this.ongoingResearchId = ongoingResearchId || null;
+		this.openResearchId = openResearchId || null;
+		if (config) {
+			this.config = { ...this.config, ...config };
+		}
 		this.error = null;
 	}
 
@@ -402,7 +460,10 @@ class ChatStore {
 		this.researchActivityIds = new Map();
 		this.ongoingResearchId = null;
 		this.openResearchId = null;
+		this.isStreaming = false;
 		this.error = null;
+		this.input = '';
+		this.abortController = null;
 		this.saveChatToStorage();
 	}
 
