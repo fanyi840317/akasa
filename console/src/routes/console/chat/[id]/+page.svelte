@@ -4,18 +4,30 @@
 	import { cn } from '$lib/utils';
 	import MessagesBlock from '$lib/components/chat/messages-block.svelte';
 	import ResearchBlock from '$lib/components/chat/research-block.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { appStore } from '$lib/stores/app-state';
 
 	const threadId = $derived($page.params.id);
 	const openResearchId = $derived(chatStore.openResearchId);
 	const doubleColumnMode = $derived(openResearchId !== null);
 
-	// 初始化聊天
+	// 初始化侧边栏状态
 	onMount(() => {
 		appStore.setSidebarCollapsed(true);
-		if (threadId) {
-			chatStore.initializeChat(threadId);
+	});
+
+	// 监听 threadId 变化，重新加载聊天
+	// 使用 untrack 避免不必要的响应式依赖
+	let lastThreadId = $state<string | undefined>(undefined);
+	
+	$effect(() => {
+		// 只有当 threadId 真正变化时才重新初始化
+		if (threadId && threadId !== lastThreadId) {
+			lastThreadId = threadId;
+			// 使用 untrack 避免 initializeChat 内部的状态变化触发新的 effect
+			untrack(() => {
+				chatStore.initializeChat(threadId);
+			});
 		}
 	});
 </script>

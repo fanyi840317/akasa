@@ -10,23 +10,29 @@
 		actions,
 		files,
 		chats,
+		selectedChatId,
 		isOpen = $bindable(true),
 		onCreateEvent,
 		onFileClick,
 		onEventView,
 		onEventDelete,
 		onChatClick,
+		onChatDelete,
+		onChatRename,
 		...restProps
 	}: ComponentProps<typeof Sidebar.Root> & {
 		actions?: any;
 		isOpen?: boolean;
 		chats?:string[];
 		files?: any;
+		selectedChatId?: string;
 		onCreateEvent?: () => void;
 		onFileClick?: (fileName: string) => void;
 		onEventView?: (eventId: string) => void;
 		onEventDelete?: (eventId: string) => void;
 		onChatClick?: (chatId: string) => void;
+		onChatDelete?: (chatId: string) => void;
+		onChatRename?: (chatId: string, newName: string) => void;
 	} = $props();
 
 	const handleCreateEvent = () => {
@@ -44,7 +50,7 @@
 		</Sidebar.Group>
 		<Sidebar.Group class="px-2">
 			<div class="flex items-center justify-between py-1">
-				<Sidebar.GroupLabel>My Files</Sidebar.GroupLabel>
+				<Sidebar.GroupLabel>Chats</Sidebar.GroupLabel>
 				<button 
 					class="p-1 rounded-md hover:bg-accent transition-colors" 
 					onclick={handleCreateEvent}
@@ -53,7 +59,7 @@
 					<PlusIcon class="w-4 h-4" />
 				</button>
 			</div>
-			<NavFiles {files} {onFileClick} {onEventView} {onEventDelete} {onChatClick} />
+			<NavFiles chats={files} {onChatClick}/>
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer />

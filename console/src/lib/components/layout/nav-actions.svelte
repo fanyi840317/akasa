@@ -9,7 +9,7 @@
 <Sidebar.Menu>
 	{#each items as item (item.title)}
 		<Sidebar.MenuItem>
-			<Sidebar.MenuButton class="p-5 rounded-full" isActive={item.isActive}>
+			<Sidebar.MenuButton class="rounded-full p-5" isActive={item.isActive}>
 				{#snippet child({ props })}
 					<a href={item.url} {...props}>
 						<item.icon />

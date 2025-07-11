@@ -21,7 +21,7 @@
 <header class="flex h-12 w-full items-center justify-between pr-2">
 	{#if !open}
 		<div class="flex items-center justify-center gap-2">
-			<LogoIcon isOpen={false} />
+			<LogoIcon isOpen={true} />
 		</div>
 	{:else}
 		<div></div>
