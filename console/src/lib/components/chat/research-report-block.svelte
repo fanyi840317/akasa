@@ -7,7 +7,7 @@
 	import { Card } from '$lib/components/ui/card';
 	import LoadingAnimation from '$lib/components/ui/loading-animation.svelte';
 	import AutoScrollContainer from '$lib/components/ui/auto-scroll-container.svelte';
-	import { marked } from 'marked';
+	import Markdown from '$lib/components/ui/markdown.svelte';
 
 	interface Props {
 		class?: string;
@@ -51,9 +51,9 @@
 			</div>
 		{:else}
 			<!-- 显示模式 -->
-			<div class="prose prose-lg max-w-none">
+			<div class="max-w-none">
 				{#if message?.content}
-					{@html marked(message.content)}
+					<Markdown content={message.content} animated={message.isStreaming} />
 				{:else}
 					<div class="text-gray-500 italic">报告内容为空</div>
 				{/if}

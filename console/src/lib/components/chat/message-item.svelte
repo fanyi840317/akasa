@@ -4,7 +4,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Copy, RotateCcw, ThumbsUp, ThumbsDown } from '@lucide/svelte';
-	import { marked } from 'marked';
+	import Markdown from '$lib/components/ui/markdown.svelte';
 	import { fly } from 'svelte/transition';
 	import PlanCard from './plan-card.svelte';
 	import ResearchCard from './research-card.svelte';
@@ -45,13 +45,7 @@
 	const researchIds = $derived(() => chatStore.getResearchIds());
 	const startOfResearch = $derived(() => researchIds().includes(message.id));
 
-	// 渲染 Markdown 内容
-	const renderedContent = $derived(() => {
-		if (message.content) {
-			return marked(message.content, { breaks: true });
-		}
-		return '';
-	});
+
 
 	// 处理复制
 	function handleCopy() {
@@ -93,7 +87,9 @@
 	)}
 >
 	<div class="flex w-full flex-col text-wrap break-words">
-		{@html renderedContent()}
+		{#if message.content}
+			<Markdown class={message.role==='user'?'text-primary-foreground':''} content={message.content} animated={message.isStreaming} />
+		{/if}
 
 		<!-- 工具调用 -->
 		{#if message.toolCalls && message.toolCalls.length > 0}

@@ -90,6 +90,7 @@ function mergeToolCallResultMessage(
   const toolCall = message.toolCalls?.find(
     (toolCall) => toolCall.id === event.data.tool_call_id,
   );
+  console.log('toolCall', toolCall);
   if (toolCall) {
     toolCall.result = event.data.content;
   }

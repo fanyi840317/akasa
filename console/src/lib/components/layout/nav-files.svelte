@@ -32,9 +32,10 @@
 				<Sidebar.MenuButton
 					onclick={() => handleChatClick(chat.id)}
 					isActive={chat.isActive}
-					class="line-clamp-1 flex flex-1 items-center gap-2 truncate text-xs"
+					class="line-clamp-1 px-3 flex flex-1 items-center gap-2 truncate text-xs
+					{chat.isActive?'text-foreground':'text-foreground/50'}"
 				>
-					<MessageSquareIcon class="h-4 w-4" />
+					<!-- <MessageSquareIcon class="h-4 w-4" /> -->
 					{chat.name}
 				</Sidebar.MenuButton>
 			</div>

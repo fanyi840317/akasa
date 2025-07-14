@@ -102,7 +102,7 @@
 <div class={cn('bg-base-200 flex-between h-full flex-col rounded-2xl border', className)}>
 	<!-- 头部工具栏 -->
 	<div class="flex-between w-full border-b p-1">
-		<div class="flex items-center gap-2 px-1">
+		<div class="flex items-center gap-2 p-1">
 			<Button
 				variant="ghost"
 				size="sm"

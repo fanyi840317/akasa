@@ -5,7 +5,7 @@
 	import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import RainbowText from '$lib/components/ui/rainbow-text.svelte';
 	import ThoughtBlock from './thought-block.svelte';
-	import { marked } from 'marked';
+	import Markdown from '$lib/components/ui/markdown.svelte';
 	import { fly } from 'svelte/transition';
 	import { parseJSON } from '$lib/tools';
 
@@ -89,15 +89,15 @@
 			<Card class="w-full rounded-2xl">
 				<CardHeader>
 					<CardTitle>
-						<div class="prose prose-sm dark:prose-invert max-w-none">
-							{@html marked(plan.title !== undefined && plan.title !== '' ? plan.title : 'Deep Research')}
-						</div>
-					</CardTitle>
+					<div class="max-w-none">
+						<Markdown class="prose-sm" content={plan.title !== undefined && plan.title !== '' ? plan.title : 'Deep Research'} />
+					</div>
+				</CardTitle>
 				</CardHeader>
 				<CardContent>
 					{#if plan.thought}
-						<div class="prose prose-sm dark:prose-invert mb-4 max-w-none opacity-80">
-							{@html marked(plan.thought)}
+						<div class="mb-4 max-w-none opacity-80">
+							<Markdown class="prose-sm" content={plan.thought} />
 						</div>
 					{/if}
 
@@ -113,15 +113,15 @@
 								<li>
 									{#if step.title}
 										<h3 class="mb-1 text-lg font-medium">
-											<div class="prose prose-sm dark:prose-invert max-w-none">
-												{@html marked(step.title)}
+											<div class="max-w-none">
+												<Markdown class="prose-sm" content={step.title} />
 											</div>
 										</h3>
 									{/if}
 									{#if step.description}
 										<div class="text-muted-foreground text-sm">
-											<div class="prose prose-sm dark:prose-invert max-w-none">
-												{@html marked(step.description)}
+											<div class="max-w-none">
+												<Markdown class="prose-sm" content={step.description} />
 											</div>
 										</div>
 									{/if}

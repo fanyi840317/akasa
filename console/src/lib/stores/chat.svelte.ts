@@ -379,33 +379,38 @@ class ChatStore {
 
 			for await (const event of stream) {
 				const { type, data } = event;
-				console.log("server:",data,type);
+				// console.log("server:",data,type);
 				messageId = data.id;
 				let message: Message | undefined;
+				let targetMessageId: string;
 
 				if (type === 'tool_call_result') {
 					message = this.findMessageByToolCallId(data.tool_call_id);
-				} else if (!this.existsMessage(messageId)) {
-					// 基于事件 ID 创建新消息
-					message = {
-						id: messageId,
-						threadId: data.thread_id,
-						agent: data.agent,
-						role: data.role,
-						content: '',
-						contentChunks: [],
-						reasoningContent: '',
-						reasoningContentChunks: [],
-						isStreaming: true
-					};
-					this.addMessage(message);
+					targetMessageId = message?.id || messageId;
+				} else {
+					targetMessageId = messageId;
+					if (!this.existsMessage(messageId)) {
+						// 基于事件 ID 创建新消息
+						message = {
+							id: messageId,
+							threadId: data.thread_id,
+							agent: data.agent,
+							role: data.role,
+							content: '',
+							contentChunks: [],
+							reasoningContent: '',
+							reasoningContentChunks: [],
+							isStreaming: true
+						};
+						this.addMessage(message);
+					}
 				}
 
-				message ??= this.getMessage(messageId);
+				message ??= this.getMessage(targetMessageId);
 				if (message) {
 					const mergedMessage = mergeMessage(message, event);
 					// 使用重新赋值来触发响应式更新
-					this.updateMessage(messageId, mergedMessage);
+					this.updateMessage(targetMessageId, mergedMessage);
 				}
 			}
 		} catch (error: unknown) {

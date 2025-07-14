@@ -10,7 +10,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import LoadingAnimation from '$lib/components/ui/loading-animation.svelte';
 	import { ChevronDown, ChevronRight, Lightbulb } from '@lucide/svelte';
-	import { marked } from 'marked';
+	import Markdown from '$lib/components/ui/markdown.svelte';
 
 	interface Props {
 		class?: string;
@@ -32,13 +32,7 @@
 		}
 	});
 
-	// 渲染 Markdown 内容
-	const renderedContent = $derived.by(() => {
-		if (content) {
-			return marked(content, { breaks: true });
-		}
-		return '';
-	});
+
 
 	function toggleOpen() {
 		isOpen = !isOpen;
@@ -100,8 +94,8 @@
 				>
 					<CardContent class="p-4">
 						<ScrollArea class="h-40 w-full">
-							<div class="prose prose-sm dark:prose-invert max-w-none opacity-80">
-								{@html renderedContent}
+							<div class="max-w-none opacity-80">
+								<Markdown class="prose-sm" content={content} animated={isStreaming} />
 							</div>
 						</ScrollArea>
 					</CardContent>

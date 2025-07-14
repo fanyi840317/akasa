@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { chatStore } from '$lib/stores/chat.svelte';
+	import { eventStore } from '$lib/stores/event.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Card } from '$lib/components/ui/card';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
-	import { X, FileText, Copy, Check, RotateCcw } from '@lucide/svelte';
+	import { X, FileText, Copy, Check, RotateCcw, Save } from '@lucide/svelte';
 	import { cn } from '$lib/utils';
 	import ResearchActivitiesBlock from './research-activities-block.svelte';
 	import ResearchReportBlock from './research-report-block.svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import { toast } from 'svelte-sonner';
 
 	// Props
 	interface Props {
@@ -53,6 +55,37 @@
 		chatStore.openResearchId = null;
 	}
 
+	// 保存报告为事件
+	async function handleSaveReport() {
+		if (!researchId) return;
+		const reportId = chatStore.getResearchReportId(researchId);
+		if (!reportId) return;
+		const reportMessage = chatStore.getMessage(reportId);
+		if (!reportMessage) return;
+
+		try {
+			// 创建事件数据
+			const eventData = {
+				name: `Research Report - ${researchId.slice(0, 8)}`,
+				content: reportMessage.content,
+				summary: reportMessage.content.slice(0, 200) + '...',
+				categories: ['research', 'report'],
+				tags: ['ai-generated', 'research'],
+				date: new Date().toISOString(),
+				privacy: "private" as const,
+				user_id: 'current-user', // TODO: 获取当前用户ID
+				status: "draft" as const,
+			};
+
+			await eventStore.createEvent(eventData);
+			toast.success('研究报告已保存为事件');
+			chatStore.openResearchId = null; // 保存后关闭
+		} catch (error) {
+			console.error('保存报告失败:', error);
+			toast.error('保存报告失败，请重试');
+		}
+	}
+
 	function handleCopyReport() {
 		if (!researchId) return;
 		const reportId = chatStore.getResearchReportId(researchId);
@@ -79,8 +112,23 @@
 {#if researchId}
 	<Card class="bg-base-200 relative h-full w-full rounded-2xl px-0 pt-2">
 		<!-- 头部操作按钮 -->
-		<div class="absolute right-4 flex h-9 items-center justify-center">
-			<Button variant="ghost" size="sm" class="text-gray-400" onclick={handleClose}>
+		<div class="absolute right-2 flex h-9 items-center justify-center">
+			{#if hasReport}
+				<Button 
+					variant="ghost" 
+					size="sm" 
+					onclick={handleSaveReport}
+					title="保存报告为事件"
+				>
+					<Save class="h-4 w-4" />
+				</Button>
+			{/if}
+			<Button 
+				variant="ghost" 
+				size="sm" 
+				onclick={handleClose}
+				title="关闭"
+			>
 				<X class="h-4 w-4" />
 			</Button>
 		</div>

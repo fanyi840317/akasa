@@ -124,7 +124,41 @@ export function formatSystemDate(dateStr: string) {
         day: "2-digit",
     });
 }
-
+// 格式化函数
+export function formatDate(date: string | Date | undefined, options?: {
+	includeTime?: boolean;
+	includeYear?: boolean;
+	includeWeekday?: boolean;
+}): string {
+	if (!date) return 'No date';
+	
+	try {
+		const d = typeof date === 'string' ? new Date(date) : date;
+		if (isNaN(d.getTime())) return 'Invalid date';
+		
+		const formatOptions: Intl.DateTimeFormatOptions = {
+			month: options?.includeYear ? 'long' : 'short',
+			day: 'numeric'
+		};
+		
+		if (options?.includeYear) {
+			formatOptions.year = 'numeric';
+		}
+		
+		if (options?.includeWeekday) {
+			formatOptions.weekday = 'long';
+		}
+		
+		if (options?.includeTime) {
+			formatOptions.hour = '2-digit';
+			formatOptions.minute = '2-digit';
+		}
+		
+		return d.toLocaleDateString('zh-CN', formatOptions);
+	} catch {
+		return 'Invalid date';
+	}
+}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, "child"> : T;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
