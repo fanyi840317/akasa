@@ -14,6 +14,7 @@ import { deepClone } from "../tools/deep-clone";
 import type { Message } from "../types/message";
 
 export function mergeMessage(message: Message, event: ChatEvent) {
+  console.log('event', event.type);
   if (event.type === "message_chunk") {
     mergeTextMessage(message, event);
   } else if (event.type === "tool_calls" || event.type === "tool_call_chunks") {

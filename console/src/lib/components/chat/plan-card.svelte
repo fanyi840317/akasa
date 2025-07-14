@@ -53,8 +53,8 @@
 	// 判断是否应该显示计划：有主要内容就显示（无论是否还在流式传输）
 	const shouldShowPlan = $derived(hasMainContent);
 	$effect(() => {
-		console.log(shouldShowPlan);
-		console.log(plan);
+		// console.log(shouldShowPlan);
+		// console.log(plan);
 	});
 	function handleAccept() {
 		if (onSendMessage) {
