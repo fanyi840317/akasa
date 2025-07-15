@@ -159,6 +159,27 @@ export function formatDate(date: string | Date | undefined, options?: {
 		return 'Invalid date';
 	}
 }
+export function formatLocation(locationData: { address?: string; name?: string } | string | null | undefined): string {
+	if (!locationData) return 'No location';
+	
+	if (typeof locationData === 'string') {
+		try {
+			locationData = JSON.parse(locationData);
+		} catch {
+			return 'Invalid location data';
+		}
+	}
+	
+	// 确保解析后的数据不为null且是对象
+	if (!locationData || typeof locationData !== 'object') {
+		return 'No location';
+	}
+	
+	// 安全地访问属性
+	if (locationData.address) return locationData.address;
+	if (locationData.name) return locationData.name;
+	return 'Unknown location';
+}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, "child"> : T;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

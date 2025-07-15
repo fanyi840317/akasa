@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
-	import { LayoutDashboard, Bot, Calendar, Settings, MessageSquare } from '@lucide/svelte';
+	import { LayoutDashboard, Bot, Calendar, Settings, MessageSquare, MapPin } from '@lucide/svelte';
 	import UserAvatar from '$lib/components/user';
 	import UserMenu from '$lib/components/user/user-menu.svelte';
 	import { page } from '$app/state';
@@ -14,7 +14,7 @@
 	import LogoIcon from '$lib/components/layout/logo-icon.svelte';
 	import ConsoleHeader from '$lib/components/layout/console-header.svelte';
 	import { appStore } from '$lib/stores/app-state';
-import { chatStore } from '$lib/stores/chat.svelte';
+	import { chatStore } from '$lib/stores/chat.svelte';
 
 	let { children } = $props();
 	const currentPath = $derived(page.url.pathname);
@@ -38,10 +38,10 @@ import { chatStore } from '$lib/stores/chat.svelte';
 			isActive: currentPath.startsWith('/console/events')
 		},
 		{
-			title: 'Config',
-			url: '/console/config',
-			icon: Settings,
-			isActive: currentPath.startsWith('/console/config')
+			title: 'Map',
+			url: '/console/map',
+			icon: MapPin,
+			isActive: currentPath.startsWith('/console/map')
 		}
 	]);
 	// 使用真实的认证用户信息
@@ -107,7 +107,6 @@ import { chatStore } from '$lib/stores/chat.svelte';
 		goto(`/console/chat/${chatId}`);
 	};
 
-
 	// 处理聊天删除
 	const handleChatDelete = (chatId: string) => {
 		if (chatStore.deleteChatSession(chatId)) {
@@ -157,6 +156,7 @@ import { chatStore } from '$lib/stores/chat.svelte';
 		/>
 		<main class="size-full px-2">
 			<ConsoleHeader {open} {user} onMenuAction={handleUserMenuAction} onLogout={handleLogout} />
+
 			{@render children()}
 		</main>
 	</Sidebar.Provider>
