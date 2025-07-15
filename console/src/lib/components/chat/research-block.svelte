@@ -79,7 +79,7 @@
 
 			await eventStore.createEvent(eventData);
 			toast.success('研究报告已保存为事件');
-			chatStore.openResearchId = null; // 保存后关闭
+			// chatStore.openResearchId = null; // 保存后关闭
 		} catch (error) {
 			console.error('保存报告失败:', error);
 			toast.error('保存报告失败，请重试');
@@ -134,15 +134,15 @@
 		</div>
 
 		<!-- 内容区域 -->
-		<Tabs class="flex h-full w-full flex-col" bind:value={activeTab}>
-			<div class="flex w-full justify-center">
-				<TabsList>
-					<TabsTrigger value="report" class="px-8" disabled={!hasReport}>Report</TabsTrigger>
-					<TabsTrigger value="activities" class="px-8">Activities</TabsTrigger>
+		<Tabs class="flex h-full w-full flex-col py-0" bind:value={activeTab}>
+			<div class="flex w-full justify-start px-2 border-b pb-1">
+				<TabsList class="bg-transparent">
+					<TabsTrigger value="report" class="px-4" disabled={!hasReport}>Report</TabsTrigger>
+					<TabsTrigger value="activities" class="px-4">Activities</TabsTrigger>
 				</TabsList>
 			</div>
 
-			<TabsContent value="report" class="h-full min-h-0 flex-grow ">
+			<TabsContent value="report" class="h-full min-h-0 flex-grow py-2">
 				<ScrollArea class="h-full overflow-y-auto px-4 pb-20">
 					{#if reportMessages.length > 0}
 						{#each reportMessages as message (message?.id)}

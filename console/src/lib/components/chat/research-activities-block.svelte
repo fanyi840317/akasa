@@ -14,6 +14,8 @@
 	import LoadingAnimation from '$lib/components/ui/loading-animation.svelte';
 	import AutoScrollContainer from '$lib/components/ui/auto-scroll-container.svelte';
 	import Markdown from '$lib/components/ui/markdown.svelte';
+	import ScrollArea from '../ui/scroll-area/scroll-area.svelte';
+	import FavIcon from '$lib/components/ui/fav-icon.svelte';
 
 	interface Props {
 		class?: string;
@@ -73,10 +75,7 @@
 			<div class="px-4 py-2">
 				<!-- 消息内容 -->
 				{#if message.content}
-					<Markdown
-						class="prose-sm"
-						content={message.content}
-						animated={message.isStreaming}
+					<Markdown class="prose-sm" content={message.content} animated={message.isStreaming}
 					></Markdown>
 				{/if}
 
@@ -107,8 +106,17 @@
 													<li
 														class="bg-accent text-muted-foreground flex max-w-40 gap-2 rounded-md px-2 py-1 text-sm"
 													>
-														<div class="mt-1 h-4 w-4 flex-shrink-0 rounded-sm bg-blue-500"></div>
-														<a href={result.url} target="_blank" class="hover:underline">
+														<FavIcon
+															class="mt-1 flex-shrink-0"
+															url={result.url}
+															title={result.title}
+														/>
+														<a
+															href={result.url}
+															target="_blank"
+															class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap hover:underline"
+															title={result.title}
+														>
 															{result.title}
 														</a>
 													</li>
@@ -160,7 +168,7 @@
 									<li
 										class="bg-accent text-muted-foreground flex h-40 w-40 gap-2 rounded-md px-2 py-1 text-sm"
 									>
-										<div class="mt-1 h-4 w-4 flex-shrink-0 rounded-sm bg-green-500"></div>
+										<FavIcon class="mt-1 flex-shrink-0" url={toolCall.args?.url as string} />
 										<a
 											href={toolCall.args?.url as string}
 											target="_blank"
@@ -237,11 +245,11 @@
 											</AccordionTrigger>
 											<AccordionContent>
 												{#if toolCall.result}
-													<div
+													<ScrollArea
 														class="bg-accent max-h-[400px] max-w-[560px] overflow-y-auto rounded-md text-sm"
 													>
 														<pre class="whitespace-pre-wrap p-4">{toolCall.result.trim()}</pre>
-													</div>
+													</ScrollArea>
 												{/if}
 											</AccordionContent>
 										</AccordionItem>

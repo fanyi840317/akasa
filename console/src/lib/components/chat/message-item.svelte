@@ -79,7 +79,7 @@
 
 <div
 	class={cn(
-		'group flex w-fit  flex-col rounded-2xl px-4 py-3 shadow-sm',
+		'group flex w-fit  flex-col rounded-2xl px-4 py-2 shadow-sm',
 		message.role === 'user' &&
 			'bg-primary text-primary-foreground max-w-[85%]  rounded-ee-none',
 		message.role === 'assistant' && 'w-full ',

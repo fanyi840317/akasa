@@ -120,9 +120,9 @@ class ChatStore {
 		openResearchId?: string | null;
 		config?: ChatConfig;
 	} {
-		const defaultResult = { 
-			messageIds: [], 
-			researchIds: [], 
+		const defaultResult = {
+			messageIds: [],
+			researchIds: [],
 			messages: new Map<string, Message>(),
 			researchPlanIds: new Map<string, string>(),
 			researchReportIds: new Map<string, string>(),
@@ -131,16 +131,16 @@ class ChatStore {
 			openResearchId: null,
 			config: { ...DEFAULT_CONFIG }
 		};
-		
+
 		if (!browser) return defaultResult;
 
 		try {
 			const stored = localStorage.getItem(this.getStorageKey(threadId));
 			if (!stored) return defaultResult;
 
-			const { 
-				messageIds = [], 
-				researchIds = [], 
+			const {
+				messageIds = [],
+				researchIds = [],
 				messages: messagesArray = [],
 				researchPlanIds: researchPlanIdsArray = [],
 				researchReportIds: researchReportIdsArray = [],
@@ -149,7 +149,7 @@ class ChatStore {
 				openResearchId = null,
 				config = DEFAULT_CONFIG
 			} = JSON.parse(stored);
-			
+
 			return {
 				messageIds,
 				researchIds,
@@ -172,24 +172,31 @@ class ChatStore {
 		// 查找最近的 planner 消息
 		const planMessage = this.findLatestPlannerMessage();
 		const messageIds = [researchId];
-		
+
 		if (planMessage) {
 			messageIds.unshift(planMessage.id);
 			this.researchPlanIds = this.updateMapState(this.researchPlanIds, researchId, planMessage.id);
 		}
 
 		this.researchIds = [...this.researchIds, researchId];
-		this.researchActivityIds = this.updateMapState(this.researchActivityIds, researchId, messageIds);
+		this.researchActivityIds = this.updateMapState(
+			this.researchActivityIds,
+			researchId,
+			messageIds
+		);
 		this.ongoingResearchId = researchId;
 	}
 
 	private appendResearchActivity(message: Message) {
 		const researchId = this.ongoingResearchId;
 		if (!researchId) return;
-		
+
 		const current = this.researchActivityIds.get(researchId) || [];
 		if (!current.includes(message.id)) {
-			this.researchActivityIds = this.updateMapState(this.researchActivityIds, researchId, [...current, message.id]);
+			this.researchActivityIds = this.updateMapState(this.researchActivityIds, researchId, [
+				...current,
+				message.id
+			]);
 		}
 		if (message.agent === 'reporter') {
 			this.researchReportIds = this.updateMapState(this.researchReportIds, researchId, message.id);
@@ -225,12 +232,20 @@ class ChatStore {
 	}
 
 	private findMessageByToolCallId(toolCallId: string): Message | undefined {
-		for (const message of this.messages.values()) {
-			if (message.toolCalls?.some((tc) => tc.id === toolCallId)) {
-				return message;
-			}
-		}
-		return undefined;
+		// for (const message of this.messages.values()) {
+		// 	if (message.toolCalls?.some((tc) => tc.id === toolCallId)) {
+		// 		return message;
+		// 	}
+		// }
+		// return undefined;
+		return Array.from(this.messages.values())
+			.reverse()
+			.find((message) => {
+				if (message.toolCalls) {
+					return message.toolCalls.some((toolCall) => toolCall.id === toolCallId);
+				}
+				return undefined;
+			});
 	}
 
 	// 初始化聊天
@@ -239,20 +254,20 @@ class ChatStore {
 		if (this.currentThreadId === threadId) {
 			return;
 		}
-		
+
 		this.currentThreadId = threadId;
-		const { 
-			messageIds, 
-			researchIds, 
-			messages, 
-			researchPlanIds, 
-			researchReportIds, 
-			researchActivityIds, 
-			ongoingResearchId, 
-			openResearchId, 
-			config 
+		const {
+			messageIds,
+			researchIds,
+			messages,
+			researchPlanIds,
+			researchReportIds,
+			researchActivityIds,
+			ongoingResearchId,
+			openResearchId,
+			config
 		} = this.loadChatFromStorage(threadId);
-		
+
 		this.messageIds = messageIds;
 		this.researchIds = researchIds;
 		this.messages = messages;
@@ -288,7 +303,7 @@ class ChatStore {
 	updateMessage(messageId: string, updates: Partial<Message>) {
 		const message = this.messages.get(messageId);
 		if (!message) return;
-		
+
 		const updatedMessage = { ...message, ...updates };
 
 		// 处理研究完成状态
@@ -306,10 +321,8 @@ class ChatStore {
 
 	// 处理研究相关消息的辅助方法
 	private handleResearchMessage(newMessage: Message, id: string) {
-		const isResearchAgent = [
-			'coder', 'reporter', 'researcher'
-		].includes(newMessage.agent || '');
-		
+		const isResearchAgent = ['coder', 'reporter', 'researcher'].includes(newMessage.agent || '');
+
 		if (isResearchAgent) {
 			if (!this.ongoingResearchId) {
 				this.appendResearch(id);
@@ -361,7 +374,7 @@ class ChatStore {
 				content,
 				{
 					thread_id: this.currentThreadId,
-      				interrupt_feedback: interruptFeedback,
+					interrupt_feedback: interruptFeedback,
 					resources,
 					auto_accepted_plan: this.config.auto_accepted_plan ?? false,
 					max_plan_iterations: this.config.max_plan_iterations ?? 3,
@@ -386,6 +399,9 @@ class ChatStore {
 
 				if (type === 'tool_call_result') {
 					message = this.findMessageByToolCallId(data.tool_call_id);
+					console.log('==============================');
+					console.log('tool_call_result', data);
+					console.log('message', message);
 					targetMessageId = message?.id || messageId;
 				} else {
 					targetMessageId = messageId;
