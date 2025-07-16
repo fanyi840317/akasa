@@ -108,8 +108,7 @@
 				size="sm"
 				class="p-2"
 				onclick={() => {
-					const currentState = appStore.get();
-					appStore.setSidebarCollapsed(!currentState.sidebarCollapsed);
+					appStore.toggleSidebar();
 				}}
 			>
 				<Menu class="h-4 w-4" />

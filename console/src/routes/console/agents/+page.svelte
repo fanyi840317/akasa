@@ -9,6 +9,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Plus } from '@lucide/svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import PageHeader from '$lib/components/ui/page-header.svelte';
 
 	// State for form modal
 	let showForm = $state(false);
@@ -116,30 +117,28 @@
 	<title>Agents - Akasa Console</title>
 	<meta name="description" content="Manage your AI agents and their configurations" />
 </svelte:head>
-<ScrollArea orientation="vertical" class=" rounded-input bg-base-200 h-content border ">
-	<div class="container mx-auto space-y-6 p-6">
-		<!-- Header -->
-		<div class="flex items-center justify-between">
-			<div>
-				<h1 class="text-3xl font-bold tracking-tight">浏览代理</h1>
-				<p class="text-muted-foreground mt-2">
-					发现并创建适合您的代理，将概念、统计和知识的任何任务组合在一起。
-				</p>
-			</div>
+<div class="h-content bg-base-200 flex flex-col rounded-2xl border">
+	<PageHeader
+		title="浏览代理"
+		description="发现并创建适合您的代理，将概念、统计和知识的任何任务组合在一起。"
+	>
+		{#snippet rightContent()}
 			<Button>
 				<Plus class="mr-2 h-4 w-4" />
 				创建
 			</Button>
-		</div>
-		<AgentList oncreate={handleCreate} onview={handleView} />
+		{/snippet}
+	</PageHeader>
 
-		<!-- Agent Form Modal -->
-		<AgentForm
-			open={showForm}
-			agent={editingAgent}
-			loading={formLoading}
-			on:save={handleFormSave}
-			on:close={handleFormClose}
-		/>
-	</div>
-</ScrollArea>
+	<ScrollArea class="flex-center h-full flex-col gap-10 p-10">
+		<AgentList oncreate={handleCreate} onview={handleView} />
+	</ScrollArea>
+</div>
+<!-- Agent Form Modal -->
+<AgentForm
+	open={showForm}
+	agent={editingAgent}
+	loading={formLoading}
+	on:save={handleFormSave}
+	on:close={handleFormClose}
+/>

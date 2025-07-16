@@ -127,6 +127,13 @@ const createAppStore = () => {
             }));
         },
         
+        toggleSidebar: () => {
+            store.update(state => ({
+                ...state,
+                sidebarCollapsed: !state.sidebarCollapsed
+            }));
+        },
+        
         // 模板相关方法
         setTemplate: (template: unknown | null) => {
             store.update(state => ({

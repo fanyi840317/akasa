@@ -7,6 +7,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { onMount } from 'svelte';
 	import { appStore } from '$lib/stores/app-state';
+	import PageHeader from '$lib/components/ui/page-header.svelte';
 
 	function createNewChat() {
 		const threadId = crypto.randomUUID();
@@ -58,7 +59,9 @@
 	}
 </script>
 
-<ScrollArea class="flex flex-col items-center justify-center h-content p-8 border rounded-2xl bg-base-200">
+<div class="h-content bg-base-200 flex flex-col rounded-2xl border overflow-hidden">
+	<PageHeader title="Events"  class="p-2"/>
+	<ScrollArea class="flex-center flex-col gap-10 p-10 h-full">
 	<div class="w-full space-y-8 m">
 		<!-- 标题区域 -->
 		<div class="text-center space-y-4 mt-20">
@@ -115,3 +118,4 @@
 		</div>
 	</div>
 </ScrollArea>
+</div>
