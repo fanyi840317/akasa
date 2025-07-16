@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
-	import { LayoutDashboard, Bot, Calendar, Settings, MessageSquare, MapPin } from '@lucide/svelte';
+	import { LayoutDashboard, Bot, Calendar, Settings, MessageSquare, MapPin, Search } from '@lucide/svelte';
 	import UserAvatar from '$lib/components/user';
 	import UserMenu from '$lib/components/user/user-menu.svelte';
 	import { page } from '$app/state';
@@ -42,7 +42,14 @@
 			url: '/console/map',
 			icon: MapPin,
 			isActive: currentPath.startsWith('/console/map')
+		},
+		{
+			title: 'Research',
+			url: '/console/research',
+			icon: Search,
+			isActive: currentPath.startsWith('/console/research')
 		}
+		//{...actions}
 	]);
 	// 使用真实的认证用户信息
 	let user = $derived(
