@@ -2,7 +2,7 @@
 	import { MessageSquareIcon, MoreHorizontalIcon, TrashIcon, EditIcon } from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import Button from '../ui/button/button.svelte';
+	// import Button from '../ui/button/button.svelte';
 
 	type ChatItem = {
 		id: string;

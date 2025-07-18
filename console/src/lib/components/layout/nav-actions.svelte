@@ -10,7 +10,7 @@
 	{#each items as item (item.title)}
 		<Sidebar.MenuItem>
 			<Sidebar.MenuButton class="rounded-full p-5" isActive={item.isActive}>
-				{#snippet child({ props })}
+				{#snippet child({ props }: { props: Record<string, any> })}
 					<a href={item.url} {...props}>
 						<item.icon />
 						<span>{item.title}</span>

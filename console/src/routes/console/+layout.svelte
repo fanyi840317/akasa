@@ -3,7 +3,7 @@
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
 	import { LayoutDashboard, Bot, Calendar, Settings, MessageSquare, MapPin, Search } from '@lucide/svelte';
 	import UserAvatar from '$lib/components/user';
-	import UserMenu from '$lib/components/user/user-menu.svelte';
+	// import UserMenu from '$lib/components/user/user-menu.svelte';
 	import { page } from '$app/state';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { onMount } from 'svelte';
@@ -48,6 +48,12 @@
 			url: '/console/research',
 			icon: Search,
 			isActive: currentPath.startsWith('/console/research')
+		},
+		{
+			title: 'Config',
+			url: '/console/config',
+			icon: Settings,
+			isActive: currentPath.startsWith('/console/config')
 		}
 		//{...actions}
 	]);

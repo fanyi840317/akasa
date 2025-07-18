@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Separator } from '$lib/components/ui/separator';
 	import { toast } from 'svelte-sonner';
 	import { Settings, Save, RotateCcw, CheckCircle, AlertCircle } from '@lucide/svelte';
@@ -30,7 +30,7 @@
 		try {
 			const result = await configStore.loadConfig();
 			if (result.success) {
-				config = result.data;
+				config = result.data as { system: Record<string, unknown>; components: Record<string, unknown>; llm: Record<string, unknown> } ?? { system: {}, components: {}, llm: {} };
 			} else {
 				toast.error('加载配置失败', {
 					description: result.error
@@ -296,6 +296,35 @@
 						>
 							<Settings class="h-4 w-4 mr-2" />
 							管理工具
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
+
+			<!-- API测试快速访问 -->
+			<Card class="border-green-200 bg-green-50">
+				<CardHeader>
+					<CardTitle class="flex items-center space-x-2">
+						<CheckCircle class="h-5 w-5 text-green-600" />
+						<span class="text-green-800">API测试</span>
+					</CardTitle>
+					<CardDescription class="text-green-700">
+						测试和验证搜索API接口的连通性和功能
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div class="flex items-center justify-between">
+						<p class="text-sm text-green-600">
+							配置API端点，测试各种搜索功能，验证系统集成状态
+						</p>
+						<Button 
+							variant="outline" 
+							size="sm"
+							class="border-green-300 text-green-700 hover:bg-green-100"
+							onclick={() => window.location.href = '/console/config/api-test'}
+						>
+							<CheckCircle class="h-4 w-4 mr-2" />
+							API测试
 						</Button>
 					</div>
 				</CardContent>

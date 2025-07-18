@@ -1,7 +1,4 @@
-/**
- * Configuration store for managing system configuration
- */
-
+// 配置管理模块
 interface ConfigResponse {
 	success: boolean;
 	data?: Record<string, unknown>;

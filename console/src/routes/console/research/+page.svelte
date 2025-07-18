@@ -486,7 +486,7 @@
 						bind:value={searchQuery}
 						placeholder="Search for research papers, documentation, articles..."
 						class="pl-10"
-						onkeydown={(e) => {
+						onkeydown={(e: KeyboardEvent) => {
 							if (e.key === 'Enter') {
 								handleSearch();
 							}

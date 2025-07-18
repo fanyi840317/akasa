@@ -29,7 +29,7 @@
 		return path.split('.').reduce((current: unknown, key) => {
 			return current && typeof current === 'object' && current !== null && key in current
 				? (current as Record<string, unknown>)[key]
-				: '';
+				: undefined;
 		}, obj);
 	};
 
@@ -69,8 +69,6 @@
 		}
 		
 		setValue(data, field.key, value);
-		// 触发响应式更新
-		data = { ...data };
 	};
 </script>
 
@@ -90,7 +88,7 @@
 						<input
 							id={`${title}-${field.key}`}
 							type="checkbox"
-							checked={getValue(data, field.key) || false}
+							checked={Boolean(getValue(data, field.key))}
 							onchange={(e) => handleInputChange(field, e)}
 							class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 						/>
@@ -102,9 +100,9 @@
 					<Input
 						id={`${title}-${field.key}`}
 						type={field.type}
-						value={getValue(data, field.key) || ''}
+						value={getValue(data, field.key) ?? ''}
 						placeholder={field.placeholder}
-						oninput={(e) => handleInputChange(field, e)}
+						oninput={(e: Event) => handleInputChange(field, e)}
 						class="w-full"
 					/>
 				{/if}
