@@ -24,7 +24,7 @@
 	<Button variant="ghost" size="icon" onclick={toggleSidebar}>
 		<Menu class="h-5 w-5" />
 	</Button>
-	<div class=" flex flex-1 flex-row gap-4">
+	<div class=" flex flex-1 flex-row gap-5 items-center">
 		<div class="flex flex-col">
 			<h1 class="text-xl font-semibold">{title}</h1>
 			{#if description}
