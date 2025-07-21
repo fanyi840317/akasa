@@ -16,7 +16,7 @@
 	}>('select');
 
 	// 计算显示的标签
-	const displayValue = $derived(() => {
+	const displayValue = $derived.by(() => {
 		if (!selectContext?.value) return placeholder;
 		
 		// 如果是数组（多选）

@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import routers
-from server.routes import audio, chat, config, generation, mcp, research
+from server.routes import audio, chat, config, generation, mcp, research, tools, users
 
 logger = logging.getLogger(__name__)
 
@@ -33,3 +33,5 @@ app.include_router(generation.router)
 app.include_router(mcp.router)
 app.include_router(config.router)
 app.include_router(research.router)
+app.include_router(tools.router)
+app.include_router(users.router)
