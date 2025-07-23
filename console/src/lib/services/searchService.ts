@@ -52,6 +52,13 @@ export interface ToolConfigResponse {
 	message?: string;
 }
 
+export interface SearchResult {
+	title: string;
+	url?: string;
+	content?: string;
+	index: number;
+}
+
 // API基础配置
 const API_BASE = 'http://localhost:8000/api/tools';
 
@@ -188,12 +195,7 @@ export const SearchResultUtils = {
 	},
 
 	// 格式化搜索结果
-	formatSearchResult(result: any, index: number): {
-		title: string;
-		url?: string;
-		content?: string;
-		index: number;
-	} {
+	formatSearchResult(result: any, index: number): SearchResult {
 		return {
 			title: result.title || `结果 ${index + 1}`,
 			url: result.url,

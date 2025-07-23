@@ -23,6 +23,9 @@
 	import { configStore } from '$lib/stores/config.svelte';
 	import PageHeader from '$lib/components/ui/page-header.svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import GeneralSettings from '$lib/components/settings/general-settings.svelte';
+import SearchSettings from '$lib/components/settings/search-settings.svelte';
+	import ContentContainer from '$lib/components/ui/content-container.svelte';
 
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 
@@ -151,249 +154,31 @@
 </script>
 
 <div class="h-content bg-base-200 flex flex-col overflow-hidden rounded-2xl border">
-	<Tabs.Root value="account">
-		<PageHeader title="Settings" class="p-2">
+	<Tabs.Root value="account" class="flex flex-col h-full">
+		<PageHeader title="Settings" class="p-2 flex-shrink-0">
 			{#snippet leftContent()}
 				<Tabs.List class="bg-transparent">
 					<Tabs.Trigger value="account">General</Tabs.Trigger>
 					<Tabs.Trigger value="password">Search</Tabs.Trigger>
+					<Tabs.Trigger value="mcp">MCP</Tabs.Trigger>
 				</Tabs.List>
 			{/snippet}
 		</PageHeader>
-		<ScrollArea class="flex-center h-full flex-col gap-10 p-10">
-			<div class="container mx-auto space-y-6 p-6">
-				<!-- 页面标题 -->
-				<div class="flex items-center justify-between">
-					<div class="flex items-center space-x-2">
-						<Settings class="h-6 w-6" />
-						<h1 class="text-2xl font-bold">系统配置</h1>
-					</div>
-					<div class="flex items-center space-x-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onclick={validateConfig}
-							disabled={validating || loading}
-						>
-							{#if validating}
-								<div
-									class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-								></div>
-							{:else}
-								<CheckCircle class="mr-2 h-4 w-4" />
-							{/if}
-							验证配置
-						</Button>
-						<Button variant="outline" size="sm" onclick={resetConfig} disabled={loading || saving}>
-							<RotateCcw class="mr-2 h-4 w-4" />
-							重置
-						</Button>
-						<Button size="sm" onclick={saveConfig} disabled={loading || saving}>
-							{#if saving}
-								<div
-									class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-								></div>
-							{:else}
-								<Save class="mr-2 h-4 w-4" />
-							{/if}
-							保存配置
-						</Button>
-					</div>
-				</div>
-
-				<!-- 验证结果 -->
-				{#if validationResults.length > 0}
-					<Card class={isValid ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-						<CardHeader>
-							<CardTitle class="flex items-center space-x-2">
-								{#if isValid}
-									<CheckCircle class="h-5 w-5 text-green-600" />
-									<span class="text-green-800">配置验证通过</span>
-								{:else}
-									<AlertCircle class="h-5 w-5 text-red-600" />
-									<span class="text-red-800">配置验证失败</span>
-								{/if}
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div class="space-y-2">
-								{#each validationResults as result, index (index)}
-									<div class="flex items-center space-x-2">
-										{#if result.valid}
-											<CheckCircle class="h-4 w-4 text-green-600" />
-										{:else}
-											<AlertCircle class="h-4 w-4 text-red-600" />
-										{/if}
-										<span class="font-medium">{result.section}:</span>
-										<span class={result.valid ? 'text-green-700' : 'text-red-700'}>
-											{result.message}
-										</span>
-									</div>
-								{/each}
-							</div>
-						</CardContent>
-					</Card>
-				{/if}
-
-				{#if loading}
-					<div class="flex items-center justify-center py-12">
-						<div
-							class="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent"
-						></div>
-						<span class="ml-2">加载配置中...</span>
-					</div>
-				{:else}
-					<!-- 配置表单 -->
-					<div class="grid gap-6">
-						<!-- 系统配置 -->
-						<ConfigSection
-							title="系统配置"
-							description="基础系统设置和环境配置"
-							bind:data={config.system}
-							fields={[
-								{ key: 'name', label: '系统名称', type: 'text', placeholder: '输入系统名称' },
-								{ key: 'version', label: '版本', type: 'text', placeholder: '输入版本号' },
-								{ key: 'description', label: '描述', type: 'text', placeholder: '输入系统描述' },
-								{ key: 'locale', label: '语言', type: 'text', placeholder: 'zh-CN' },
-								{ key: 'timezone', label: '时区', type: 'text', placeholder: 'Asia/Shanghai' },
-								{ key: 'debug', label: '调试模式', type: 'checkbox' },
-								{ key: 'verbose', label: '详细日志', type: 'checkbox' },
-								{ key: 'environment', label: '环境', type: 'text', placeholder: 'development' }
-							]}
-						/>
-
-						<Separator />
-
-						<!-- AI 配置 -->
-						<ConfigSection
-							title="AI 模型配置"
-							description="配置各种 AI 模型的 API 密钥和参数"
-							bind:data={config.llm}
-							fields={[
-								{
-									key: 'openai.api_key',
-									label: 'OpenAI API Key',
-									type: 'password',
-									placeholder: '输入 OpenAI API Key'
-								},
-								{
-									key: 'openai.base_url',
-									label: 'OpenAI Base URL',
-									type: 'text',
-									placeholder: 'https://api.openai.com/v1'
-								},
-								{
-									key: 'openai.organization',
-									label: 'OpenAI Organization',
-									type: 'text',
-									placeholder: '输入组织 ID'
-								},
-								{
-									key: 'anthropic.api_key',
-									label: 'Anthropic API Key',
-									type: 'password',
-									placeholder: '输入 Anthropic API Key'
-								},
-								{
-									key: 'anthropic.base_url',
-									label: 'Anthropic Base URL',
-									type: 'text',
-									placeholder: 'https://api.anthropic.com'
-								},
-								{
-									key: 'google.api_key',
-									label: 'Google API Key',
-									type: 'password',
-									placeholder: '输入 Google API Key'
-								},
-								{
-									key: 'qwen.api_key',
-									label: 'Qwen API Key',
-									type: 'password',
-									placeholder: '输入 Qwen API Key'
-								},
-								{
-									key: 'qwen.base_url',
-									label: 'Qwen Base URL',
-									type: 'text',
-									placeholder: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
-								},
-								{
-									key: 'ollama.base_url',
-									label: 'Ollama Base URL',
-									type: 'text',
-									placeholder: 'http://localhost:11434'
-								}
-							]}
-						/>
-
-						<Separator />
-
-						<!-- 组件配置 -->
-						<ConfigSection
-							title="组件配置"
-							description="配置系统各个组件的参数"
-							bind:data={config.components}
-							fields={[
-								{ key: 'search.enabled', label: '启用搜索', type: 'checkbox' },
-								{
-									key: 'search.engine',
-									label: '搜索引擎',
-									type: 'text',
-									placeholder: 'duckduckgo'
-								},
-								{ key: 'crawler.enabled', label: '启用爬虫', type: 'checkbox' },
-								{
-									key: 'crawler.max_pages',
-									label: '最大页面数',
-									type: 'number',
-									placeholder: '10'
-								},
-								{ key: 'database.enabled', label: '启用数据库', type: 'checkbox' },
-								{ key: 'cache.enabled', label: '启用缓存', type: 'checkbox' },
-								{ key: 'cache.ttl', label: '缓存过期时间(秒)', type: 'number', placeholder: '3600' }
-							]}
-						/>
-
-						<Separator />
-
-						<!-- 快速导航 -->
-						<Card>
-							<CardHeader>
-								<CardTitle>快速配置</CardTitle>
-								<CardDescription>快速访问常用的配置和管理功能</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-									<Button
-										variant="outline"
-										href="/console/config/search"
-										class="flex h-auto flex-col items-start space-y-2 p-4"
-									>
-										<div class="flex items-center space-x-2">
-											<Search class="h-5 w-5" />
-											<span class="font-medium">搜索工具配置</span>
-										</div>
-										<p class="text-left text-sm text-gray-600">配置搜索引擎和测试搜索功能</p>
-									</Button>
-
-									<Button
-										variant="outline"
-										href="/console/config/tools"
-										class="flex h-auto flex-col items-start space-y-2 p-4"
-									>
-										<div class="flex items-center space-x-2">
-											<Wrench class="h-5 w-5" />
-											<span class="font-medium">工具管理</span>
-										</div>
-										<p class="text-left text-sm text-gray-600">启用或禁用系统工具</p>
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					</div>
-				{/if}
-			</div>
-		</ScrollArea>
+		
+		<!-- General Tab Content -->
+		<Tabs.Content value="account" class="flex-1 min-h-0">
+			<ContentContainer>
+				{#snippet children()}
+					<GeneralSettings />
+				{/snippet}
+			</ContentContainer>
+		</Tabs.Content>
+		
+		<!-- Search Tab Content -->
+		<Tabs.Content value="password" class="flex-1 min-h-0">
+			<ScrollArea class="h-full">
+				<SearchSettings />
+			</ScrollArea>
+		</Tabs.Content>
 	</Tabs.Root>
 </div>
